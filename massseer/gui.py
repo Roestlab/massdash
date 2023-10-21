@@ -12,7 +12,7 @@ from typing import List
 from data_loader import process_many_files
 from SqlDataAccess import OSWDataAccess
 from plotter import Plotter
-from chromatogram_data_handling import get_chrom_data_limits, pad_data, get_max_rt_array_length, compute_consensus_chromatogram
+from chromatogram_data_handling import get_chrom_data_limits, get_chrom_data_global, compute_consensus_chromatogram
 from peak_picking import get_peak_boundariers_for_single_chromatogram, merge_and_calculate_consensus_peak_boundaries
 
 @st.cache_data
@@ -179,7 +179,6 @@ if osw_file_path!="*.osw":
         do_peak_picking = st.sidebar.selectbox("Peak Picking", ['none', 'PeakPickerMRM'])
 
         ## Make a consensus chromatogram
-        # do_consensus_chrom = st.sidebar.checkbox("Generate Consensus Chromatogram", value=False)
         do_consensus_chrom = st.sidebar.selectbox("Generate Consensus Chromatogram", ['none', 'run-specific', 'global'])
         scale_intensity = st.sidebar.checkbox("Scale Intensity", value=False)
 
@@ -202,7 +201,6 @@ if osw_file_path!="*.osw":
                 percentile_start = None
                 auto_threshold = None
                 
-    
 
         ### Processing / Plotting
 
@@ -221,36 +219,14 @@ if osw_file_path!="*.osw":
             transition_id_list = []
             trace_annotation = []
 
-
+        # Get chromatogram data for all sqMass files
         chrom_data = process_many_files(sqmass_file_path_list, include_ms1=include_ms1, include_ms2=include_ms2, precursor_id=precursor_id, transition_id_list=transition_id_list, trace_annotation=trace_annotation,  thread_count=threads)
 
         # Get min RT start point and max RT end point
-
-        # print(chrom_data)
-        
-        
-        
         x_range, y_range = get_chrom_data_limits(chrom_data, 'dict', set_x_range, set_y_range)
 
-        # min_rt_start = min([min(x[0]) for x in chrom_data[sqmass_file_path_list[0]]['ms1'][0] + chrom_data[sqmass_file_path_list[0]]['ms2'][0]])
-        # max_rt_end = max([max(x[0]) for x in chrom_data[sqmass_file_path_list[0]]['ms1'][0] + chrom_data[sqmass_file_path_list[0]]['ms2'][0]])
-
-        # print(f"Info: min_rt_start: {min_rt_start} -> max_rt_end: {max_rt_end}")
-
         if do_consensus_chrom == 'global':
-            chrom_data_global = []
-            max_rt_array = get_max_rt_array_length(chrom_data, include_ms1, include_ms2)
-
-            for sqmass_file_data in chrom_data.keys():
-                if include_ms1:
-                    ms1_chrom_data = chrom_data[sqmass_file_data]['ms1'][0]
-                    chrom_data_global = chrom_data_global + [pad_data(chrom, max_rt_array) for chrom in ms1_chrom_data]
-
-                if include_ms2:
-                    ms2_chrom_data = chrom_data[sqmass_file_data]['ms2'][0]
-                    chrom_data_global = chrom_data_global + [pad_data(chrom, max_rt_array) for chrom in chrom_data[sqmass_file_data]['ms2'][0]]
-
-            print(f"len chrom_data_global: {len(chrom_data_global)}")
+            chrom_data_global = get_chrom_data_global(chrom_data, include_ms1, include_ms2)
 
         for sqmass_file_path in sqmass_file_path_list:
             chrom_data_all, trace_annotation_all = [], []
@@ -310,9 +286,7 @@ if osw_file_path!="*.osw":
                         peak_picker_params.setValue(b'remove_overlapping_peaks', 'true')
                         rt_peak_picker.setParameters(peak_picker_params)
                         peak_features = get_peak_boundariers_for_single_chromatogram(averaged_chrom_data[0], rt_peak_picker)
-                        
-                        
-                        
+                            
                         if peak_features is not None:
                             y_bottom = [0] * len(peak_features['leftWidth'])
                             averaged_plot_obj.vbar(x=peak_features['leftWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")

@@ -111,6 +111,34 @@ def get_max_rt_array_length(chrom_data, include_ms1=True, include_ms2=True):
 
     return max_rt_array
 
+@st.cache_data(show_spinner=False)
+def get_chrom_data_global(chrom_data, include_ms1, include_ms2):
+    """
+    Returns a list of chromatogram data for all sqMass files, padded with zeros to have the same length.
+
+    Parameters:
+    chrom_data (dict): A dictionary containing chromatogram data for all sqMass files.
+    include_ms1 (bool): A boolean indicating whether to include MS1 data.
+    include_ms2 (bool): A boolean indicating whether to include MS2 data.
+
+    Returns:
+    chrom_data_global (list): A list of chromatogram data for all sqMass files, padded with zeros to have the same length.
+    """
+
+    chrom_data_global = []
+    max_rt_array = get_max_rt_array_length(chrom_data, include_ms1, include_ms2)
+
+    for sqmass_file_data in chrom_data.keys():
+        if include_ms1:
+            ms1_chrom_data = chrom_data[sqmass_file_data]['ms1'][0]
+            chrom_data_global = chrom_data_global + [pad_data(chrom, max_rt_array) for chrom in ms1_chrom_data]
+
+        if include_ms2:
+            ms2_chrom_data = chrom_data[sqmass_file_data]['ms2'][0]
+            chrom_data_global = chrom_data_global + [pad_data(chrom, max_rt_array) for chrom in chrom_data[sqmass_file_data]['ms2'][0]]
+
+    return chrom_data_global
+
 def normalize(intensity):
     """
     Normalize the input intensity array using min-max scaling.
@@ -290,7 +318,7 @@ def compute_threshold(chrom_data, percentile_threshold=10):
     print(f"auto-thresholds: {np.median(thresholds)}")
     return np.median(thresholds)
 
-# @st.cache_data
+@st.cache_data(show_spinner=False)
 def compute_consensus_chromatogram(consensus_chrom_mode, chrom_data_all, scale_intensity, percentile_start, percentile_end, auto_threshold=False):
     """
     Compute a consensus chromatogram based on the specified mode.
