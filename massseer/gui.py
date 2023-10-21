@@ -66,27 +66,28 @@ if sqmass_file_path_input!="*.sqMass":
     if os.path.isfile(sqmass_file_path_input):
         sqmass_file_path_list = [sqmass_file_path_input]
     else:
-        # 1. Get the list of files in the directory
-        files_in_directory = os.listdir(sqmass_file_path_input)
-        
-        #2. Filter the files based on the *.sqMass file extension (case-insensitive)
-        files_in_directory = [filename for filename in files_in_directory if fnmatch.fnmatch(filename.lower(), '*.sqmass')]
+        with st.sidebar.expander("Advanced Settings"):
+            # 1. Get the list of files in the directory
+            files_in_directory = os.listdir(sqmass_file_path_input)
+            
+            #2. Filter the files based on the *.sqMass file extension (case-insensitive)
+            files_in_directory = [filename for filename in files_in_directory if fnmatch.fnmatch(filename.lower(), '*.sqmass')]
 
-        # 3. Sort the filenames alphabetically
-        sorted_filenames = sorted(files_in_directory, reverse=True)
+            # 3. Sort the filenames alphabetically
+            sorted_filenames = sorted(files_in_directory, reverse=True)
 
-        # Create a selection box in the sidebar
-        selected_sorted_filenames = st.sidebar.multiselect("sqMass files", sorted_filenames, sorted_filenames)    
+            # Create a selection box in the sidebar
+            selected_sorted_filenames = st.multiselect("sqMass files", sorted_filenames, sorted_filenames)    
 
-        # Create a list of full file paths
-        sqmass_file_path_list = [os.path.join(sqmass_file_path_input, file) for file in selected_sorted_filenames]
+            # Create a list of full file paths
+            sqmass_file_path_list = [os.path.join(sqmass_file_path_input, file) for file in selected_sorted_filenames]
 
-    if len(sqmass_file_path_list) > 1:
-            # Add Threads slider
-            st.sidebar.title("Threads")
-            threads = st.sidebar.slider("Number of threads", 1, os.cpu_count(), os.cpu_count())
-    else:
-        threads = 1
+            if len(sqmass_file_path_list) > 1:
+                    # Add Threads slider
+                    st.title("Threads")
+                    threads = st.slider("Number of threads", 1, os.cpu_count(), os.cpu_count())
+            else:
+                threads = 1
 
 if osw_file_path!="*.osw":
 
@@ -151,17 +152,17 @@ if osw_file_path!="*.osw":
         include_ms1 = st.sidebar.checkbox("Include MS1 Traces", value=True)
         include_ms2 = st.sidebar.checkbox("Include MS2 Traces", value=True)
 
-        # Add Checkboxes for setting x-range and y-range
-        set_x_range = st.sidebar.checkbox("Set x-range", value=False)
-        set_y_range = st.sidebar.checkbox("Set y-range", value=False)
+        with st.sidebar.expander("Advanced Settings"):
 
-        # Perform Smoothing of the chromatograms
-        do_smoothing = st.sidebar.selectbox("Smoothing", ['sgolay', 'none'])
-        smoothing_dict = {}
-        smoothing_dict['type'] = do_smoothing
-        if do_smoothing == 'sgolay':
-            
-            with st.sidebar:
+            # Add Checkboxes for setting x-range and y-range
+            set_x_range = st.checkbox("Set x-range", value=False)
+            set_y_range = st.checkbox("Set y-range", value=False)
+
+            # Perform Smoothing of the chromatograms
+            do_smoothing = st.selectbox("Smoothing", ['sgolay', 'none'])
+            smoothing_dict = {}
+            smoothing_dict['type'] = do_smoothing
+            if do_smoothing == 'sgolay':
                 # Create two columns for side-by-side widgets
                 col1, col2 = st.columns(2)
 
@@ -171,8 +172,8 @@ if osw_file_path!="*.osw":
                 # Add widget for sgolay_frame_length in the second column
                 sgolay_frame_length = col2.number_input("Frame Length", min_value=1, max_value=50, value=11, step=1)
 
-            smoothing_dict['sgolay_polynomial_order'] = sgolay_polynomial_order
-            smoothing_dict['sgolay_frame_length'] = sgolay_frame_length
+                smoothing_dict['sgolay_polynomial_order'] = sgolay_polynomial_order
+                smoothing_dict['sgolay_frame_length'] = sgolay_frame_length
 
         # Perform Peak Picking
         do_peak_picking = st.sidebar.selectbox("Peak Picking", ['none', 'PeakPickerMRM'])
