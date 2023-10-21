@@ -122,9 +122,11 @@ class Plotter:
 
         # Limit axes ranges
         if self.x_range is not None:
+            print(f"Info: Setting x-axis range to: {self.x_range}")
             p.x_range = Range1d(self.x_range[0], self.x_range[1])
 
         if self.y_range is not None:
+            print(f"Info: Setting y-axis range to: {self.y_range}")
             p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
         p.sizing_mode = 'scale_width'

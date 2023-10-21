@@ -229,17 +229,7 @@ if osw_file_path!="*.osw":
         
         
         
-        min_rt, max_rt, max_int = get_chrom_data_limits(chrom_data)
-
-        if set_x_range:
-            x_range = [min_rt, max_rt]
-        else:
-            x_range = None
-
-        if set_y_range:
-            y_range = [0, max_int]
-        else:
-            y_range = None
+        x_range, y_range = get_chrom_data_limits(chrom_data, 'dict', set_x_range, set_y_range)
 
         # min_rt_start = min([min(x[0]) for x in chrom_data[sqmass_file_path_list[0]]['ms1'][0] + chrom_data[sqmass_file_path_list[0]]['ms2'][0]])
         # max_rt_end = max([max(x[0]) for x in chrom_data[sqmass_file_path_list[0]]['ms1'][0] + chrom_data[sqmass_file_path_list[0]]['ms2'][0]])
@@ -305,8 +295,7 @@ if osw_file_path!="*.osw":
                         averaged_chrom_data = compute_consensus_chromatogram(consensus_chrom_mode, chrom_data_global, scale_intensity, percentile_start, percentile_end, auto_threshold)
                         plot_title = 'Global Across-Run Consensus Chromatogram'
 
-                    # print(averaged_chrom_data)
-                    averaged_plotter = Plotter(averaged_chrom_data, peptide_transition_list=None, trace_annotation=[consensus_chrom_mode], title=plot_title, subtitle=f"{selected_peptide}_{selected_precursor_charge}", smoothing_dict=smoothing_dict,  plot_type='bokeh')
+                    averaged_plotter = Plotter(averaged_chrom_data, peptide_transition_list=None, trace_annotation=[consensus_chrom_mode], title=plot_title, subtitle=f"{selected_peptide}_{selected_precursor_charge}", smoothing_dict=smoothing_dict,  plot_type='bokeh', x_range=x_range, y_range=y_range)
                     averaged_plot_obj  = averaged_plotter.plot()
 
                     if do_peak_picking == 'PeakPickerMRM':
