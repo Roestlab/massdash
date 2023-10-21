@@ -1,0 +1,7 @@
+streamlit
+pandas
+numpy
+cython==0.29.32
+pyopenms
+PyMSNumpress==0.2.2
+bokeh==2.4.3
