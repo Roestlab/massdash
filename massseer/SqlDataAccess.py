@@ -190,6 +190,25 @@ class OSWDataAccess(object):
         self.conn = sqlite3.connect(filename)
         self.c = self.conn.cursor()
 
+    def getProteinTable(self, include_decoys=False):
+        """
+        Retrieves the protein table from the database.
+
+        Args:
+            include_decoys (bool): Whether to include decoy proteins in the table.
+
+        Returns:
+            pandas.DataFrame: The protein table.
+        """
+        if include_decoys:
+            stmt = "SELECT PROTEIN_ID, PEPTIDE_ID, PROTEIN_ACCESSION, PROTEIN.DECOY FROM PROTEIN INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID = PROTEIN.ID INNER JOIN PEPTIDE ON PEPTIDE.ID = PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID"
+        else:
+            stmt = "SELECT PROTEIN_ID, PEPTIDE_ID, PROTEIN_ACCESSION, PROTEIN.DECOY FROM PROTEIN INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID = PROTEIN.ID INNER JOIN PEPTIDE ON PEPTIDE.ID = PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID WHERE PROTEIN.DECOY = 0"
+
+        data = pd.read_sql(stmt, self.conn)
+
+        return data
+
     def getPeptideTable(self, remove_ipf_peptides=True):
         """
         Retrieves the peptide table from the database.
@@ -210,7 +229,35 @@ class OSWDataAccess(object):
         data = pd.read_sql(stmt, self.conn)
 
         return data
-      
+
+    # Method to get peptide table from protein_id
+    def getPeptideTableFromProteinID(self, protein_id, remove_ipf_peptide=True):
+        """
+        Retrieves the peptide table from the database for a given protein ID.
+
+        Args:
+            protein_id (int): The protein ID.
+            remove_ipf_peptides (bool): Whether to remove IPF peptides from the table.
+
+        Returns:
+            pandas.DataFrame: The peptide table.
+        """
+        if remove_ipf_peptide:
+            stmt = f"""SELECT PEPTIDE.*
+                        FROM PEPTIDE
+                        INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                        INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                        WHERE PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID = {protein_id}"""
+        else:
+            stmt = f"""SELECT PEPTIDE.*
+                        FROM PEPTIDE
+                        INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                        WHERE PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID = {protein_id}"""
+
+        data = pd.read_sql(stmt, self.conn)
+
+        return data
+
     def getPrecursorCharges(self, fullpeptidename):
         """
         Retrieves the precursor charges for a given peptide.
