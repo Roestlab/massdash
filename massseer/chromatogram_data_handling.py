@@ -2,6 +2,32 @@ import statistics
 import numpy as np
 import streamlit as st
 
+def get_chrom_data_limits(chrom_data):
+    """
+    Given a dictionary of chromatogram data, returns the minimum and maximum retention times and maximum intensity.
+    
+    Args:
+    chrom_data (dict): A dictionary of chromatogram data for multiple files, that should contain the keys 'rt_start', 'rt_end', and 'max_int'.
+    
+    Returns:
+    tuple: A tuple containing the minimum retention time, maximum retention time, and maximum intensity.
+    """
+    min_rt = np.inf
+    max_rt = -np.inf
+    max_int = -np.inf
+    for key in chrom_data.keys():
+        for keykey in chrom_data[key].keys():
+            if keykey=="rt_start":
+                if chrom_data[key][keykey] < min_rt:
+                    min_rt = chrom_data[key][keykey]
+            if keykey=="rt_end":
+                if chrom_data[key][keykey] > max_rt:
+                    max_rt = chrom_data[key][keykey]
+            if keykey=="max_int":
+                if chrom_data[key][keykey] > max_int:
+                    max_int = chrom_data[key][keykey]
+    return min_rt, max_rt, max_int
+
 def pad_data(data, max_length):
     """
     Pad the input data to a specified maximum length with zeros and a linear ramp.

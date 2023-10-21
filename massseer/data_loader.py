@@ -1,4 +1,5 @@
 import streamlit as st
+import numpy as np
 import multiprocessing
 from SqlDataAccess import SqMassDataAccess
 
@@ -111,12 +112,31 @@ def process_file(file_path, include_ms1, include_ms2, precursor_id, transition_i
     """
     # print(f"Info: Processing file: {file_path}")
     trace_processor = TraceDataLoader(file_path)
+    min_rt = np.inf
+    max_rt = -np.inf
+    max_int = -np.inf
     if include_ms1:
         precursor_chrom_data, precursor_trace_annotation = trace_processor.get_precursor_trace(precursor_id)
+        rt_list = np.array([chrom[0] for chrom in precursor_chrom_data])
+        if min_rt > np.min(rt_list):
+            min_rt = np.min(rt_list)
+        if max_rt < np.max(rt_list):
+            max_rt = np.max(rt_list)
+        int_list = np.array([chrom[1] for chrom in precursor_chrom_data])
+        if max_int < np.max(int_list):
+            max_int = np.max(int_list)
     else:
         precursor_chrom_data, precursor_trace_annotation = [[[]]], []
     if include_ms2:
         chrom_data, trace_annotation = trace_processor.get_transitions_trace(transition_id_list, trace_annotation)
+        rt_list = np.array([chrom[0] for chrom in chrom_data])
+        if min_rt > np.min(rt_list):
+            min_rt = np.min(rt_list)
+        if max_rt < np.max(rt_list):
+            max_rt = np.max(rt_list)
+        int_list = np.array([chrom[1] for chrom in chrom_data])
+        if max_int < np.max(int_list):
+            max_int = np.max(int_list)
     else:
         chrom_data, trace_annotation = [[[]]], []
 
@@ -130,7 +150,9 @@ def process_file(file_path, include_ms1, include_ms2, precursor_id, transition_i
         pad_data_to_match_length(chrom_data, max_len)
 
     print(f"Returning data for file: {file_path} with ms1 rt len: {[len(x[0]) for x in precursor_chrom_data]} int len: {[len(x[0]) if len(x[0])!=0 else 0 for x in precursor_chrom_data]} and ms2 rt len: {[len(x[0]) for x in chrom_data]} int len: {[len(x[0]) if len(x[0])!=0 else 0 for x in chrom_data]}" )
-    return {'ms1':[precursor_chrom_data, precursor_trace_annotation], 'ms2':[chrom_data, trace_annotation]}
+
+
+    return {'ms1':[precursor_chrom_data, precursor_trace_annotation], 'ms2':[chrom_data, trace_annotation], 'rt_start':min_rt, 'rt_end':max_rt, 'max_int':max_int}
 
 @st.cache_data(show_spinner="Fetching extracted ion chromatograms...")
 def process_many_files(file_path_list, include_ms1, include_ms2, precursor_id, transition_id_list, trace_annotation, thread_count=-1):

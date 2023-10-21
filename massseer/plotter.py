@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from bokeh.plotting import figure, show
 from bokeh.layouts import column
-from bokeh.models import ColumnDataSource, Legend,Title
+from bokeh.models import ColumnDataSource, Legend, Title, Range1d
 from bokeh.palettes import Category20, Viridis256
 from scipy.signal import savgol_filter
 import numpy as np
@@ -41,7 +41,7 @@ class Plotter:
     plot()
         Creates a static or interactive plot of the chromatographic data depending on the plot_type attribute.
     """
-    def __init__(self, data, peptide_transition_list, trace_annotation, title, subtitle, x_axis_label="Retention Time", y_axis_label="Intensity", smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, plot_type='matplotlib'):
+    def __init__(self, data, peptide_transition_list, trace_annotation, title, subtitle, x_axis_label="Retention Time", y_axis_label="Intensity", smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, plot_type='matplotlib', x_range=None, y_range=None):
         
         self.data = data
         self.peptide_transition_list = peptide_transition_list
@@ -52,6 +52,8 @@ class Plotter:
         self.y_axis_label = y_axis_label
         self.smoothing_dict = smoothing_dict
         self.plot_type = plot_type
+        self.x_range = x_range
+        self.y_range = y_range
 
     def create_static_plot(self):
         """
@@ -117,6 +119,14 @@ class Plotter:
 
         # Create a Bokeh figure
         p = figure(title=self.title, x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+
+        # Limit axes ranges
+        if self.x_range is not None:
+            p.x_range = Range1d(self.x_range[0], self.x_range[1])
+
+        if self.y_range is not None:
+            p.y_range = Range1d(self.y_range[0], self.y_range[1])
+
         p.sizing_mode = 'scale_width'
         # Add a main title
         p.title.text_font_size = "16pt"
