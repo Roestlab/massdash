@@ -12,7 +12,7 @@ from typing import List
 from data_loader import process_many_files
 from SqlDataAccess import OSWDataAccess
 from plotter import Plotter
-from chromatogram_data_handling import pad_data, get_max_rt_array_length, compute_consensus_chromatogram
+from chromatogram_data_handling import get_chrom_data_limits, pad_data, get_max_rt_array_length, compute_consensus_chromatogram
 from peak_picking import get_peak_boundariers_for_single_chromatogram, merge_and_calculate_consensus_peak_boundaries
 
 @st.cache_data
@@ -151,6 +151,10 @@ if osw_file_path!="*.osw":
         include_ms1 = st.sidebar.checkbox("Include MS1 Traces", value=True)
         include_ms2 = st.sidebar.checkbox("Include MS2 Traces", value=True)
 
+        # Add Checkboxes for setting x-range and y-range
+        set_x_range = st.sidebar.checkbox("Set x-range", value=False)
+        set_y_range = st.sidebar.checkbox("Set y-range", value=False)
+
         # Perform Smoothing of the chromatograms
         do_smoothing = st.sidebar.selectbox("Smoothing", ['sgolay', 'none'])
         smoothing_dict = {}
@@ -219,6 +223,19 @@ if osw_file_path!="*.osw":
 
         chrom_data = process_many_files(sqmass_file_path_list, include_ms1=include_ms1, include_ms2=include_ms2, precursor_id=precursor_id, transition_id_list=transition_id_list, trace_annotation=trace_annotation,  thread_count=threads)
 
+        # Get min RT start point and max RT end point
+
+        # print(chrom_data)
+        
+        
+        
+        x_range, y_range = get_chrom_data_limits(chrom_data, 'dict', set_x_range, set_y_range)
+
+        # min_rt_start = min([min(x[0]) for x in chrom_data[sqmass_file_path_list[0]]['ms1'][0] + chrom_data[sqmass_file_path_list[0]]['ms2'][0]])
+        # max_rt_end = max([max(x[0]) for x in chrom_data[sqmass_file_path_list[0]]['ms1'][0] + chrom_data[sqmass_file_path_list[0]]['ms2'][0]])
+
+        # print(f"Info: min_rt_start: {min_rt_start} -> max_rt_end: {max_rt_end}")
+
         if do_consensus_chrom == 'global':
             chrom_data_global = []
             max_rt_array = get_max_rt_array_length(chrom_data, include_ms1, include_ms2)
@@ -247,7 +264,7 @@ if osw_file_path!="*.osw":
 
             ## Get Bokeh plot object
             if len(chrom_data_all) != 0 and len(trace_annotation_all)!=0:
-                plotter = Plotter(chrom_data_all, peptide_transition_list=peptide_transition_list[peptide_transition_list.PRODUCT_DETECTING==1], trace_annotation=trace_annotation_all, title=os.path.basename(sqmass_file_path), subtitle=f"{selected_peptide}_{selected_precursor_charge}", smoothing_dict=smoothing_dict,  plot_type='bokeh')
+                plotter = Plotter(chrom_data_all, peptide_transition_list=peptide_transition_list[peptide_transition_list.PRODUCT_DETECTING==1], trace_annotation=trace_annotation_all, title=os.path.basename(sqmass_file_path), subtitle=f"{selected_peptide}_{selected_precursor_charge}", smoothing_dict=smoothing_dict,  plot_type='bokeh', x_range=x_range, y_range=y_range)
                 
                 ## Generate the plot
                 plot_obj  = plotter.plot()
@@ -278,8 +295,7 @@ if osw_file_path!="*.osw":
                         averaged_chrom_data = compute_consensus_chromatogram(consensus_chrom_mode, chrom_data_global, scale_intensity, percentile_start, percentile_end, auto_threshold)
                         plot_title = 'Global Across-Run Consensus Chromatogram'
 
-                    # print(averaged_chrom_data)
-                    averaged_plotter = Plotter(averaged_chrom_data, peptide_transition_list=None, trace_annotation=[consensus_chrom_mode], title=plot_title, subtitle=f"{selected_peptide}_{selected_precursor_charge}", smoothing_dict=smoothing_dict,  plot_type='bokeh')
+                    averaged_plotter = Plotter(averaged_chrom_data, peptide_transition_list=None, trace_annotation=[consensus_chrom_mode], title=plot_title, subtitle=f"{selected_peptide}_{selected_precursor_charge}", smoothing_dict=smoothing_dict,  plot_type='bokeh', x_range=x_range, y_range=y_range)
                     averaged_plot_obj  = averaged_plotter.plot()
 
                     if do_peak_picking == 'PeakPickerMRM':

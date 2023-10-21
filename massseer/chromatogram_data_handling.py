@@ -2,6 +2,56 @@ import statistics
 import numpy as np
 import streamlit as st
 
+import numpy as np
+
+def get_chrom_data_limits(chrom_data, data_type='dict', set_x_range=True, set_y_range=False):
+    """
+    Given a dictionary of chromatogram data, returns the minimum and maximum retention times and maximum intensity.
+    
+    Args:
+    chrom_data (dict): A dictionary of chromatogram data for multiple files, that should contain the keys 'rt_start', 'rt_end', and 'max_int'.
+    data_type (str): The type of chromatogram data. Can be 'dict' or 'list'. Default is 'dict'.
+    set_x_range (bool): If True, sets the x-axis range to the minimum and maximum retention times. Default is True.
+    set_y_range (bool): If True, sets the y-axis range to 0 and the maximum intensity. Default is True.
+    
+    Returns:
+    tuple: A tuple containing the minimum retention time, maximum retention time, and maximum intensity.
+    """
+    min_rt = np.inf
+    max_rt = -np.inf
+    max_int = -np.inf
+    if data_type=='dict':
+        for key in chrom_data.keys():
+            for keykey in chrom_data[key].keys():
+                if keykey=="rt_start":
+                    if chrom_data[key][keykey] < min_rt:
+                        min_rt = chrom_data[key][keykey]
+                if keykey=="rt_end":
+                    if chrom_data[key][keykey] > max_rt:
+                        max_rt = chrom_data[key][keykey]
+                if keykey=="max_int":
+                    if chrom_data[key][keykey] > max_int:
+                        max_int = chrom_data[key][keykey]
+    elif data_type=='list':
+        for chrom in chrom_data:
+            if np.min(chrom[0]) < min_rt:
+                min_rt = np.min(chrom[0])
+            if np.max(chrom[0]) > max_rt:
+                max_rt = np.max(chrom[0])
+            if np.max(chrom[1]) > max_int:
+                max_int = np.max(chrom[1])
+    
+    if set_x_range:
+        x_range = [min_rt, max_rt]
+    else:
+        x_range = None
+
+    if set_y_range:
+        y_range = [0, max_int]
+    else:
+        y_range = None
+    return x_range, y_range
+
 def pad_data(data, max_length):
     """
     Pad the input data to a specified maximum length with zeros and a linear ramp.
