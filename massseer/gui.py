@@ -16,6 +16,19 @@ from chromatogram_data_handling import pad_data, get_max_rt_array_length, comput
 from peak_picking import get_peak_boundariers_for_single_chromatogram, merge_and_calculate_consensus_peak_boundaries
 
 @st.cache_data
+def get_protein_options(protein_table):
+    """
+    Get a list of protein options from the provided data frame.
+
+    Parameters:
+        protein_table (pandas.DataFrame): A DataFrame containing protein data.
+
+    Returns:
+        list: A list of protein options.
+    """
+    return list(np.unique(protein_table.PROTEIN_ACCESSION.to_list()))
+
+@st.cache_data
 def get_peptide_options(peptide_table):
     """
     Get a list of peptide options from the provided data frame.
@@ -77,11 +90,35 @@ if sqmass_file_path_input!="*.sqMass":
 
 if osw_file_path!="*.osw":
 
-    st.sidebar.title("Peptide Selection")
+    st.sidebar.title("Protein Selection")
+
+    # Button to include decoys, default is False
+    include_decoys = st.sidebar.checkbox("Include decoys", value=False)
 
     osw = OSWDataAccess(osw_file_path)
 
-    peptide_table = osw.getPeptideTable()
+    protein_table = osw.getProteinTable(include_decoys)
+
+    # Add a button to the sidebar for random protein selection
+    pick_random_protein = st.sidebar.button('Random Protein Selection')
+    if pick_random_protein:
+        unique_protein_list = get_protein_options(protein_table)
+        selected_protein = np.random.choice(unique_protein_list)
+        selected_protein_index = int(np.where( [True if selected_protein==protein else False for protein in unique_protein_list] )[0][0])
+        # print(f"Selected protein: {selected_protein} with index {selected_protein_index}")
+        selected_protein_ = st.sidebar.selectbox("Select protein", get_protein_options(protein_table), index=selected_protein_index)
+    else:
+        # Add a searchable dropdown list to the sidebar
+        selected_protein = st.sidebar.selectbox("Select protein", get_protein_options(protein_table))
+
+    print(f"Selected protein: {selected_protein}")
+
+    st.sidebar.title("Peptide Selection")
+
+    # Get selected protein id from protein table based on selected protein
+    selected_protein_id = protein_table[protein_table.PROTEIN_ACCESSION==selected_protein].PROTEIN_ID.to_list()[0]
+
+    peptide_table = osw.getPeptideTableFromProteinID(selected_protein_id)
 
     # Add a button to the sidebar for random peptide selection
     pick_random_peptide = st.sidebar.button('Random Peptide Selection')
