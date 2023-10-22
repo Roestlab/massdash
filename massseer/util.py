@@ -31,5 +31,47 @@ def get_base64_of_bin_file(png_file):
     return base64.b64encode(data).decode()
 
 
+def check_sqlite_table(con, table):
+    """
+    Check if a table exists in a SQLite database.
 
+    Args:
+        con (sqlite3.Connection): Connection object to the SQLite database.
+        table (str): Name of the table to check.
 
+    Returns:
+        bool: True if the table exists, False otherwise.
+    """
+    table_present = False
+    c = con.cursor()
+    c.execute('SELECT count(name) FROM sqlite_master WHERE type="table" AND name="%s"' % table)
+    if c.fetchone()[0] == 1:
+        table_present = True
+    else:
+        table_present = False
+    c.fetchall()
+
+    return(table_present)
+
+def check_sqlite_column_in_table(con, table, column):
+    """
+    Check if a column exists in a SQLite table.
+
+    Args:
+        con (sqlite3.Connection): Connection object to the SQLite database.
+        table (str): Name of the table to check.
+        column (str): Name of the column to check.
+
+    Returns:
+        bool: True if the column exists, False otherwise.
+    """
+    column_present = False
+    c = con.cursor()
+    c.execute('SELECT count(name) FROM pragma_table_info("%s") WHERE name="%s"' % (table, column))
+    if c.fetchone()[0] == 1:
+        column_present = True
+    else:
+        column_present = False
+    c.fetchall()
+
+    return(column_present)
