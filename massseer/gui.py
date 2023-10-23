@@ -75,7 +75,7 @@ if sqmass_file_path_input!="*.sqMass":
             files_in_directory = [filename for filename in files_in_directory if fnmatch.fnmatch(filename.lower(), '*.sqmass')]
 
             # 3. Sort the filenames alphabetically
-            sorted_filenames = sorted(files_in_directory, reverse=True)
+            sorted_filenames = sorted(files_in_directory, reverse=False)
 
             # Create a selection box in the sidebar
             selected_sorted_filenames = st.multiselect("sqMass files", sorted_filenames, sorted_filenames)    
