@@ -24,15 +24,43 @@ This tool empowers researchers to take control of their mass spectrometry data, 
 
 ![image](https://github.com/Roestlab/massseer/assets/32938975/215db9e9-0322-4cd4-8472-ad7897290daa)
 
-# Installing Dependencies
+# Installing MassSeer
+
+## Installing from cloned directory
+
+Run git clone
+
+```
+git clone https://github.com/Roestlab/massseer.git
+```
+
+Change into massseer directory
+
+```
+cd massseer
+```
+
+Pip install using *setup.py*
+
+```
+pip install -e .
+```
+
+## Installing from PyPi (...Still to Come)
+
+```
+pip install MassSeer
+```
+
+## Installing dependencies
 
 ```
 pip install -r requirements.txt
 ```
 
-# Running MassSeer
+# Running MassSeer GUI
 
 ```
-streamlit run massseer/gui.py
+MassSeer gui
 ```
 
