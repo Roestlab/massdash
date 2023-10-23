@@ -9,11 +9,11 @@ import pyopenms as po
 from typing import List
 
 # Internal modules
-from data_loader import process_many_files
-from SqlDataAccess import OSWDataAccess
-from plotter import Plotter
-from chromatogram_data_handling import get_chrom_data_limits, get_chrom_data_global, compute_consensus_chromatogram
-from peak_picking import get_peak_boundariers_for_single_chromatogram, merge_and_calculate_consensus_peak_boundaries
+from massseer.data_loader import process_many_files
+from massseer.SqlDataAccess import OSWDataAccess
+from massseer.plotter import Plotter
+from massseer.chromatogram_data_handling import get_chrom_data_limits, get_chrom_data_global, compute_consensus_chromatogram
+from massseer.peak_picking import get_peak_boundariers_for_single_chromatogram, merge_and_calculate_consensus_peak_boundaries
 
 @st.cache_data
 def get_protein_options(protein_table):
@@ -44,8 +44,9 @@ def get_peptide_options(peptide_table):
 # Confit
 st.set_page_config(page_title='MassSeer', page_icon=':bar_chart:', layout='wide')
 
-MASSSEER_LOGO = 'massseer/assets/img/MassSeer_Logo_Full.png'
-OPENMS_LOGO = 'massseer/assets/img/OpenMS.png'
+dirname = os.path.dirname(__file__)
+MASSSEER_LOGO = os.path.join(dirname, 'assets/img/MassSeer_Logo_Full.png')
+OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
 
 # MassSeer Sidebar Top Logo
 st.sidebar.image(MASSSEER_LOGO)

@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import multiprocessing
-from SqlDataAccess import SqMassDataAccess
+from massseer.SqlDataAccess import SqMassDataAccess
 
 class TraceDataLoader:
     """
@@ -94,7 +94,7 @@ def pad_data_to_match_length(data_list, max_len):
             data_list[i][0].append(data_list[i][0][-1] + 1)  # Pad rt with next value
             data_list[i][1].append(0)  # Pad int with 0
 
-@st.cache_data(show_spinner=False)
+
 def process_file(file_path, include_ms1, include_ms2, precursor_id, transition_id_list, trace_annotation):
     """
     Process a file and return the data for ms1 and ms2.
@@ -154,6 +154,21 @@ def process_file(file_path, include_ms1, include_ms2, precursor_id, transition_i
 
     return {'ms1':[precursor_chrom_data, precursor_trace_annotation], 'ms2':[chrom_data, trace_annotation], 'rt_start':min_rt, 'rt_end':max_rt, 'max_int':max_int}
 
+# Wrapper for process file for streamlit context use
+@st.cache_data(show_spinner=False)
+def process_file_wrapper(*args, **kwargs):
+    """
+    A wrapper function that caches the output of process_file function to improve performance.
+    
+    Args:
+        *args: Variable length argument list.
+        **kwargs: Arbitrary keyword arguments.
+        
+    Returns:
+        The output of process_file function.
+    """
+    return process_file(*args, **kwargs)
+
 @st.cache_data(show_spinner="Fetching extracted ion chromatograms...")
 def process_many_files(file_path_list, include_ms1, include_ms2, precursor_id, transition_id_list, trace_annotation, thread_count=-1):
     """
@@ -181,7 +196,7 @@ def process_many_files(file_path_list, include_ms1, include_ms2, precursor_id, t
     print(f"Info: Processing {len(file_path_list)} files with {thread_count} threads for ms1: {include_ms1} and ms2: {include_ms2} with precursor_id: {precursor_id} and transition_id_list: {transition_id_list}")
 
     # Process each file in parallel
-    results = [pool.apply_async(process_file, args=(file_path, include_ms1, include_ms2, precursor_id, transition_id_list, trace_annotation)) for file_path in file_path_list]
+    results = [pool.apply_async(process_file_wrapper, args=(file_path, include_ms1, include_ms2, precursor_id, transition_id_list, trace_annotation)) for file_path in file_path_list]
 
     output = {}
     # Wait for all processes to finish

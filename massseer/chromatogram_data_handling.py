@@ -2,8 +2,6 @@ import statistics
 import numpy as np
 import streamlit as st
 
-import numpy as np
-
 def get_chrom_data_limits(chrom_data, data_type='dict', set_x_range=True, set_y_range=False):
     """
     Given a dictionary of chromatogram data, returns the minimum and maximum retention times and maximum intensity.
