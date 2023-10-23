@@ -37,7 +37,7 @@ $Authors: Hannes Roest, Justin Sing$
 from __future__ import print_function
 import pandas as pd
 
-from util import check_sqlite_column_in_table
+from massseer.util import check_sqlite_column_in_table
 
 class SqMassDataAccess(object):
 
@@ -288,6 +288,11 @@ class OSWDataAccess(object):
             pandas.DataFrame: The transition information.
         """
         # Older OSW files (<v2.4) do not have the ANNOTATION column in the TRANSITION table
+        if check_sqlite_column_in_table(self.conn, "PRECURSOR", "LIBRARY_DRIFT_TIME"):
+            prec_lib_drift_time_query = "PRECURSOR.LIBRARY_DRIFT_TIME AS PRECURSOR_LIBRARY_DRIFT_TIME,"
+        else:
+            prec_lib_drift_time_query = "-1 AS PRECURSOR_LIBRARY_DRIFT_TIME,"
+
         if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"):
             stmt = f"""SELECT 
                 PEPTIDE.ID AS PEPTIDE_ID,
@@ -299,7 +304,7 @@ class OSWDataAccess(object):
                 PRECURSOR.CHARGE AS PRECURSOR_CHARGE,
                 PRECURSOR.LIBRARY_INTENSITY AS PRECURSOR_LIBRARY_INTENSITY,
                 PRECURSOR.LIBRARY_RT AS PRECURSOR_LIBRARY_RT,
-                PRECURSOR.LIBRARY_DRIFT_TIME AS PRECURSOR_LIBRARY_DRIFT_TIME,
+                {prec_lib_drift_time_query}
                 TRANSITION.PRODUCT_MZ,
                 TRANSITION.CHARGE AS PRODUCT_CHARGE,
                 TRANSITION.TYPE AS PRODUCT_TYPE,
@@ -326,7 +331,7 @@ class OSWDataAccess(object):
                 PRECURSOR.CHARGE AS PRECURSOR_CHARGE,
                 PRECURSOR.LIBRARY_INTENSITY AS PRECURSOR_LIBRARY_INTENSITY,
                 PRECURSOR.LIBRARY_RT AS PRECURSOR_LIBRARY_RT,
-                PRECURSOR.LIBRARY_DRIFT_TIME AS PRECURSOR_LIBRARY_DRIFT_TIME,
+                {prec_lib_drift_time_query}
                 TRANSITION.PRODUCT_MZ,
                 TRANSITION.CHARGE AS PRODUCT_CHARGE,
                 TRANSITION.TYPE AS PRODUCT_TYPE,
