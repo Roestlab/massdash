@@ -82,12 +82,21 @@ if st.session_state.clicked['load_toy_dataset']:
     # Remove welcome message container if dataset is loaded
     welcome_container.empty()
     del welcome_container
-    
+
+if osw_file_path!="*.osw" and sqmass_file_path_input!="*.sqMass":
+    # Remove welcome message container if dataset is loaded
+    welcome_container.empty()
+    del welcome_container
 
 if sqmass_file_path_input!="*.sqMass":
     if os.path.isfile(sqmass_file_path_input):
         sqmass_file_path_list = [sqmass_file_path_input]
     else:
+        # Check to ensure directory exists otherwise throw error
+        if not os.path.isdir(sqmass_file_path_input):
+            raise ValueError(f"Error: Directory {sqmass_file_path_input} does not exist!")
+        
+        st.sidebar.subheader("sqMass file(s)")
         with st.sidebar.expander("Advanced Settings"):
             # 1. Get the list of files in the directory
             files_in_directory = os.listdir(sqmass_file_path_input)
@@ -112,6 +121,10 @@ if sqmass_file_path_input!="*.sqMass":
                 threads = 1
 
 if osw_file_path!="*.osw":
+
+    # Check to ensure file exists otherwise throw error
+    if not os.path.isfile(osw_file_path):
+        raise ValueError(f"Error: File {osw_file_path} does not exist!")
 
     st.sidebar.title("Protein Selection")
 
