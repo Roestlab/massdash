@@ -46,7 +46,10 @@ def get_peptide_options(peptide_table):
     return list(np.unique(peptide_table.MODIFIED_SEQUENCE.to_list()))
 
 # Confit
-massseer_icon = Image.open(os.path.join(os.path.dirname(__file__), 'assets/img/MassSeer.ico'))
+# There currently is warning with the icon size for some reason, not sure why
+# /home/justincsing/anaconda3/envs/py39/lib/python3.9/site-packages/PIL/IcoImagePlugin.py:316: UserWarning: Image was not the expected size
+#   warnings.warn("Image was not the expected size")
+massseer_icon = Image.open(os.path.join(os.path.dirname(__file__), 'assets/img/massseer.ico'))
 st.set_page_config(page_title='MassSeer', page_icon=massseer_icon, layout='wide')
 
 dirname = os.path.dirname(__file__)
