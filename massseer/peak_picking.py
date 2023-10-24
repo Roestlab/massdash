@@ -83,7 +83,6 @@ def calculate_highest_intensity(chrom_data, boundary):
 
     return highest_intensity
 
-
 def find_peak_boundaries(rt_arr, rt_acc_im, peak_picker):
       """
       Find peak boundaries using the PeakPickerMRM algorithm.
@@ -261,3 +260,41 @@ def merge_and_calculate_consensus_peak_boundaries(chrom_data, rt_peak_picker, to
     # print(f"Top Consensus Peaks: {consensus_dict}")
     return consensus_dict
 
+def perform_chromatogram_peak_picking(chrom_data_all, do_smoothing, sgolay_frame_length, sgolay_polynomial_order, merged_peak_picking=False):
+    """
+    Perform peak picking on a chromatogram using the specified parameters.
+
+    Args:
+        chrom_data_all (list): The chromatogram data.
+        do_smoothing (bool): Whether to perform smoothingggg
+        sgolay_frame_length (int): The frame length to use for Savitzky-Golay smoothing.
+        sgolay_polynomial_order (int): The polynomial order to use for Savitzky-Golay smoothing.
+        merged_peak_picking (bool, optional): Whether to perform merged peak picking. Defaults to False.
+
+    Returns:
+        dict: The peak features.
+    """
+    if merged_peak_picking:
+        # Create a PeakPickerMRM object and use it to pick the peaks in the chromatogram
+        rt_peak_picker = po.PeakPickerMRM()
+        peak_picker_params = rt_peak_picker.getParameters()
+        peak_picker_params.setValue(b'gauss_width', 30.0)
+        peak_picker_params.setValue(b'use_gauss', 'false')
+        peak_picker_params.setValue(b'sgolay_frame_length', sgolay_frame_length if do_smoothing == 'sgolay' else 11)
+        peak_picker_params.setValue(b'sgolay_polynomial_order', sgolay_polynomial_order if do_smoothing == 'sgolay' else 3)
+        peak_picker_params.setValue(b'remove_overlapping_peaks', 'true')
+        rt_peak_picker.setParameters(peak_picker_params)
+        peak_features = merge_and_calculate_consensus_peak_boundaries(chrom_data_all, rt_peak_picker)
+    else:
+        # Create a PeakPickerMRM object and use it to pick the peaks in the chromatogram
+        rt_peak_picker = po.PeakPickerMRM()
+        peak_picker_params = rt_peak_picker.getParameters()
+        peak_picker_params.setValue(b'gauss_width', 30.0)
+        peak_picker_params.setValue(b'use_gauss', 'false')
+        peak_picker_params.setValue(b'sgolay_frame_length', sgolay_frame_length if do_smoothing == 'sgolay' else 11)
+        peak_picker_params.setValue(b'sgolay_polynomial_order', sgolay_polynomial_order if do_smoothing == 'sgolay' else 3)
+        peak_picker_params.setValue(b'remove_overlapping_peaks', 'true')
+        rt_peak_picker.setParameters(peak_picker_params)
+        peak_features = get_peak_boundariers_for_single_chromatogram(chrom_data_all, rt_peak_picker)
+
+    return peak_features

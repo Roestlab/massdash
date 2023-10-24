@@ -317,7 +317,7 @@ def compute_threshold(chrom_data, percentile_threshold=10):
     return np.median(thresholds)
 
 @st.cache_data(show_spinner=False)
-def compute_consensus_chromatogram(consensus_chrom_mode, chrom_data_all, scale_intensity, percentile_start, percentile_end, auto_threshold=False):
+def compute_consensus_chromatogram(consensus_chrom_mode, chrom_data_all, scale_intensity, percentile_start, percentile_end, threshold=0, auto_threshold=False):
     """
     Compute a consensus chromatogram based on the specified mode.
 
@@ -339,8 +339,6 @@ def compute_consensus_chromatogram(consensus_chrom_mode, chrom_data_all, scale_i
     elif consensus_chrom_mode == 'percentile_average':
         if auto_threshold:
             threshold = compute_threshold(chrom_data_all, percentile_start)
-        else:
-            threshold = None
         averaged_chrom_data = percentile_average_chromatograms(chrom_data_all, percentile_start, percentile_end, threshold, scale_intensity)
     print(f"Info: returning consensus chromatogram: len(rt) : {len(averaged_chrom_data[0][0])} and len(ints): {len(averaged_chrom_data[0][1])}")
     return averaged_chrom_data
