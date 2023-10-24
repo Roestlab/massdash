@@ -2,13 +2,17 @@ import streamlit as st
 
 import os
 import fnmatch
+from PIL import Image
 import numpy as np
 import pyopenms as po
 
 # Type hinting
 from typing import List
 
-# Internal modules
+# Internal UI modules
+from massseer.util_ui import show_welcome_message
+
+# Internal server modules
 from massseer.data_loader import process_many_files
 from massseer.SqlDataAccess import OSWDataAccess
 from massseer.plotter import Plotter
@@ -42,26 +46,40 @@ def get_peptide_options(peptide_table):
     return list(np.unique(peptide_table.MODIFIED_SEQUENCE.to_list()))
 
 # Confit
-st.set_page_config(page_title='MassSeer', page_icon=':bar_chart:', layout='wide')
+massseer_icon = Image.open(os.path.join(os.path.dirname(__file__), 'assets/img/MassSeer.ico'))
+st.set_page_config(page_title='MassSeer', page_icon=massseer_icon, layout='wide')
 
 dirname = os.path.dirname(__file__)
 MASSSEER_LOGO = os.path.join(dirname, 'assets/img/MassSeer_Logo_Full.png')
 OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
+
+###########################
+## Main Container Window
+
+welcome_container, load_toy_dataset, osw_file_path, sqmass_file_path_input = show_welcome_message()
+
+# initialize load_toy_dataset key in clicked session state
+# This is needed because streamlit buttons return True when clicked and then default back to False.
+# See: https://discuss.streamlit.io/t/how-to-make-st-button-content-stick-persist-in-its-own-section/45694/2
+if 'clicked' not in st.session_state:
+    st.session_state.clicked  = {'load_toy_dataset':False}
+
+###########################
+## Sidebar Window
 
 # MassSeer Sidebar Top Logo
 st.sidebar.image(MASSSEER_LOGO)
 
 st.sidebar.divider()
 
-# Define the main area
-st.sidebar.title("Input OSW file")
-# Add a text input component
-osw_file_path = st.sidebar.text_input("Enter file path", "*.osw")
+if st.session_state.clicked['load_toy_dataset']:
+    sqmass_file_path_input = os.path.join(dirname, '..', 'tests', 'test_data', 'xics')
+    osw_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
 
-# Define the main area
-st.sidebar.title("Input sqMass file")
-# Add a text input component
-sqmass_file_path_input = st.sidebar.text_input("Enter file path", "*.sqMass")
+    # Remove welcome message container if dataset is loaded
+    welcome_container.empty()
+    del welcome_container
+    
 
 if sqmass_file_path_input!="*.sqMass":
     if os.path.isfile(sqmass_file_path_input):
