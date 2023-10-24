@@ -36,6 +36,7 @@ $Authors: Hannes Roest, Justin Sing$
 """
 from __future__ import print_function
 import pandas as pd
+import sqlite3
 
 from massseer.util import check_sqlite_column_in_table
 
@@ -170,8 +171,6 @@ class SqMassDataAccess(object):
 
         return res
 
-import sqlite3
-import pandas as pd
 
 class OSWDataAccess(object):
     """
