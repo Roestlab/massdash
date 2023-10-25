@@ -3,10 +3,11 @@
 - [ ] Implement plotting PyProphet boundaries and scores
 - [ ] Add peak picking using pyopenms 
 - [ ] Add colors for different peak boundaries
-- [ ] Make available on PyPi closer to time of publication
+- [ ] Add grid plot layout if multiple files are loaded
 - [ ] raw mzML data loading
 - [ ] raw .d data loading using alphatims api
 - [ ] DIA-NN results inspection on the raw data
+- [ ] Make available on PyPi closer to time of publication
 
 # Completed
 
