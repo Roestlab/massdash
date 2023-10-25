@@ -94,14 +94,13 @@ def get_max_rt_array_length(chrom_data, include_ms1=True, include_ms2=True):
         int: The maximum length of RT arrays in the chromatogram data.
     """
     max_rt_array = 0
-
     for sqmass_file_data in chrom_data.values():
-        if include_ms1:
+        if include_ms1 and 'ms1' in list(sqmass_file_data.keys()):
             ms1_data = sqmass_file_data.get('ms1')
             if ms1_data:
                 max_rt_array = max(max_rt_array, len(ms1_data[0]))
 
-        if include_ms2:
+        if include_ms2 and 'ms2' in list(sqmass_file_data.keys()):
             ms2_data = sqmass_file_data.get('ms2')
             if ms2_data:
                 for chrom in ms2_data[0]:
@@ -127,11 +126,11 @@ def get_chrom_data_global(chrom_data, include_ms1, include_ms2):
     max_rt_array = get_max_rt_array_length(chrom_data, include_ms1, include_ms2)
 
     for sqmass_file_data in chrom_data.keys():
-        if include_ms1:
+        if include_ms1 and 'ms1' in list(chrom_data[sqmass_file_data].keys()):
             ms1_chrom_data = chrom_data[sqmass_file_data]['ms1'][0]
             chrom_data_global = chrom_data_global + [pad_data(chrom, max_rt_array) for chrom in ms1_chrom_data]
 
-        if include_ms2:
+        if include_ms2 and 'ms2' in list(chrom_data[sqmass_file_data].keys()):
             ms2_chrom_data = chrom_data[sqmass_file_data]['ms2'][0]
             chrom_data_global = chrom_data_global + [pad_data(chrom, max_rt_array) for chrom in chrom_data[sqmass_file_data]['ms2'][0]]
 
