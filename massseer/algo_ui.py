@@ -42,4 +42,10 @@ def algo_ui_widgets():
             percentile_start = None
             threshold= 0
             auto_threshold = None
+    else: 
+        consensus_chrom_mode = None
+        percentile_end = None
+        percentile_start = None
+        threshold= 0
+        auto_threshold = None
     return do_peak_picking, do_consensus_chrom, scale_intensity, consensus_chrom_mode, percentile_start, percentile_end, threshold, auto_threshold
