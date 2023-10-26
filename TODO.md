@@ -2,6 +2,7 @@
 
 - [ ] Implement plotting PyProphet boundaries and scores
 - [ ] Add peak picking using pyopenms 
+- [ ] Add public base conformer model
 - [ ] Add colors for different peak boundaries
 - [ ] Add grid plot layout if multiple files are loaded
 - [ ] Generate concensus chrom traces per transition
