@@ -102,10 +102,6 @@ def process_osw_file(osw_file_path):
     peptide_transition_list = osw.getPeptideTransitionInfo(selected_peptide, selected_precursor_charge)
     return selected_peptide, selected_precursor_charge, peptide_transition_list
 
-import os
-import fnmatch
-import streamlit as st
-
 def get_sqmass_files(sqmass_file_path_input, threads=1):
     """
     Given a path to a directory or a file, returns a list of full file paths to *.sqMass files in the directory or the file itself.
