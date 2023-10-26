@@ -106,7 +106,7 @@ import os
 import fnmatch
 import streamlit as st
 
-def get_sqmass_files(sqmass_file_path_input):
+def get_sqmass_files(sqmass_file_path_input, threads=1):
     """
     Given a path to a directory or a file, returns a list of full file paths to *.sqMass files in the directory or the file itself.
     If the input path is a directory, the function displays a selection box in the sidebar to select the *.sqMass files.
