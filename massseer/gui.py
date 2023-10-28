@@ -14,7 +14,7 @@ from massseer.algo_ui import algo_ui_widgets
 
 # Internal server modules
 from massseer.data_loader import process_many_files
-from massseer.plotter import Plotter
+from massseer.plotter import Plotter, draw_many_chrom_data, draw_many_consensus_chrom
 from massseer.chromatogram_data_handling import get_chrom_data_limits, get_chrom_data_global, compute_consensus_chromatogram
 from massseer.peak_picking import perform_chromatogram_peak_picking
 
@@ -73,7 +73,7 @@ if osw_file_path!="*.osw":
     if sqmass_file_path_input!="*.sqMass":
 
         # UI plotting settings
-        include_ms1, include_ms2, set_x_range, set_y_range, do_smoothing, sgolay_polynomial_order, sgolay_frame_length, smoothing_dict = chromatogram_plotting_settings()
+        include_ms1, include_ms2, set_x_range, set_y_range, do_smoothing, smoothing_dict = chromatogram_plotting_settings()
 
         do_peak_picking, do_consensus_chrom, scale_intensity, consensus_chrom_mode, percentile_start, percentile_end, threshold, auto_threshold = algo_ui_widgets()
                 
@@ -102,52 +102,20 @@ if osw_file_path!="*.osw":
 
         if do_consensus_chrom == 'global':
             chrom_data_global = get_chrom_data_global(chrom_data, include_ms1, include_ms2)
+        else:
+            chrom_data_global = []
+
+        chrom_plot_objs = draw_many_chrom_data(sqmass_file_path_list, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing, threads )
+
+        if do_consensus_chrom != 'none':
+
+            consensus_chrom_plot_objs = draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, chrom_plot_objs, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing, threads)
 
         for sqmass_file_path in sqmass_file_path_list:
-            chrom_data_all, trace_annotation_all = [], []
-
-            if include_ms1:
-                chrom_data_all = chrom_data_all + chrom_data[sqmass_file_path]['ms1'][0]
-                trace_annotation_all = trace_annotation_all + chrom_data[sqmass_file_path]['ms1'][1]
-            
-            if include_ms2:
-                chrom_data_all = chrom_data_all + chrom_data[sqmass_file_path]['ms2'][0]
-                trace_annotation_all = trace_annotation_all + chrom_data[sqmass_file_path]['ms2'][1]
-
-            ## Get Bokeh plot object
-            if len(chrom_data_all) != 0 and len(trace_annotation_all)!=0:
-                plotter = Plotter(chrom_data_all, peptide_transition_list=peptide_transition_list[peptide_transition_list.PRODUCT_DETECTING==1], trace_annotation=trace_annotation_all, title=os.path.basename(sqmass_file_path), subtitle=f"{selected_peptide}_{selected_precursor_charge}", smoothing_dict=smoothing_dict,  plot_type='bokeh', x_range=x_range, y_range=y_range)
+                plot_obj = chrom_plot_objs[sqmass_file_path].plot_obj
                 
-                ## Generate the plot
-                plot_obj  = plotter.plot()
-
-                if do_peak_picking == 'PeakPickerMRM':
-                    peak_features = perform_chromatogram_peak_picking(chrom_data_all, do_smoothing, sgolay_frame_length, sgolay_polynomial_order, merged_peak_picking=True)
-                    
-                    y_bottom = [0] * len(peak_features['leftWidth'])
-                    plot_obj.vbar(x=peak_features['leftWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")
-                    plot_obj.vbar(x=peak_features['rightWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")
-
                 if do_consensus_chrom != 'none':
-
-                    ## Generate consensus chromatogram
-                    if do_consensus_chrom == 'run-specific':
-                        averaged_chrom_data = compute_consensus_chromatogram(consensus_chrom_mode, chrom_data_all, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold)
-                        plot_title = os.path.basename(sqmass_file_path)
-                    elif do_consensus_chrom == 'global':
-                        averaged_chrom_data = compute_consensus_chromatogram(consensus_chrom_mode, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold)
-                        plot_title = 'Global Across-Run Consensus Chromatogram'
-
-                    averaged_plotter = Plotter(averaged_chrom_data, peptide_transition_list=None, trace_annotation=[consensus_chrom_mode], title=plot_title, subtitle=f"{selected_peptide}_{selected_precursor_charge}", smoothing_dict=smoothing_dict,  plot_type='bokeh', x_range=x_range, y_range=y_range)
-                    averaged_plot_obj  = averaged_plotter.plot()
-
-                    if do_peak_picking == 'PeakPickerMRM':
-                        peak_features = perform_chromatogram_peak_picking(averaged_chrom_data[0], do_smoothing, sgolay_frame_length, sgolay_polynomial_order, merged_peak_picking=False)
-
-                        if peak_features is not None:
-                            y_bottom = [0] * len(peak_features['leftWidth'])
-                            averaged_plot_obj.vbar(x=peak_features['leftWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")
-                            averaged_plot_obj.vbar(x=peak_features['rightWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")
+                    averaged_plot_obj = consensus_chrom_plot_objs[sqmass_file_path].plot_obj
 
                     # Create a Streamlit layout with two columns
                     col1, col2 = st.columns(2)

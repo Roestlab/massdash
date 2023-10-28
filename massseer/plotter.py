@@ -1,10 +1,21 @@
+import os
+import multiprocessing
+import streamlit as st
+
+import numpy as np
+from scipy.signal import savgol_filter
+
+
 import matplotlib.pyplot as plt
 from bokeh.plotting import figure, show
 from bokeh.layouts import column
 from bokeh.models import ColumnDataSource, Legend, Title, Range1d
 from bokeh.palettes import Category20, Viridis256
-from scipy.signal import savgol_filter
-import numpy as np
+
+# Internal
+from massseer.util import PEAK_PICKING_ALGORITHMS
+from massseer.peak_picking import perform_chromatogram_peak_picking
+from massseer.chromatogram_data_handling import compute_consensus_chromatogram
 
 
 class Plotter:
@@ -227,3 +238,265 @@ class Plotter:
                 return self.create_interactive_plot()
             else:
                 print("Invalid plot type. Use 'matplotlib' or 'bokeh'.")
+
+class ChromDataDrawer:
+    def __init__(self):
+        """
+        Initializes a ChromDataDrawer object with empty lists for chrom_data_all and trace_annotation_all, and a None value for plot_obj.
+        """
+        self.chrom_data_all = []
+        self.trace_annotation_all = []
+        self.plot_obj = None
+
+    def draw_chrom_data(self, sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, x_range=None, y_range=None):
+        """
+        Adds chromatogram data to the ChromDataDrawer object's chrom_data_all and trace_annotation_all lists, and generates a plot using the Plotter class.
+
+        Parameters:
+        sqmass_file_path (str): The file path of the sqmass file.
+        chrom_data (dict): A dictionary containing the chromatogram data.
+        include_ms1 (bool): Whether to include MS1 data in the plot.
+        include_ms2 (bool): Whether to include MS2 data in the plot.
+        peptide_transition_list (pandas.DataFrame): A pandas DataFrame containing information about peptide transitions.
+        selected_peptide (str): The selected peptide.
+        selected_precursor_charge (int): The charge of the selected precursor.
+        smoothing_dict (dict): A dictionary containing parameters for smoothing the data.
+        x_range (tuple): A tuple containing the x-axis range for the plot.
+        y_range (tuple): A tuple containing the y-axis range for the plot.
+
+        Returns:
+        self (ChromDataDrawer): The ChromDataDrawer object.
+        """
+        if include_ms1:
+            self.chrom_data_all = self.chrom_data_all + chrom_data[sqmass_file_path]['ms1'][0]
+            self.trace_annotation_all = self.trace_annotation_all + chrom_data[sqmass_file_path]['ms1'][1]
+
+        if include_ms2:
+            self.chrom_data_all = self.chrom_data_all + chrom_data[sqmass_file_path]['ms2'][0]
+            self.trace_annotation_all = self.trace_annotation_all + chrom_data[sqmass_file_path]['ms2'][1]
+
+        if len(self.chrom_data_all) != 0 and len(self.trace_annotation_all) != 0:
+            plotter = Plotter(
+                self.chrom_data_all,
+                peptide_transition_list=peptide_transition_list[peptide_transition_list.PRODUCT_DETECTING == 1],
+                trace_annotation=self.trace_annotation_all,
+                title=os.path.basename(sqmass_file_path),
+                subtitle=f"{selected_peptide}_{selected_precursor_charge}",
+                smoothing_dict=smoothing_dict,
+                plot_type='bokeh',
+                x_range=x_range,
+                y_range=y_range
+            )
+
+            # Generate the plot
+            self.plot_obj = plotter.plot()
+
+        return self
+
+    def draw_consensus_chrom_data(self, consensus_chrom_mode, averaged_chrom_data, plot_title, selected_peptide, selected_precursor_charge, smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, x_range=None, y_range=None):
+        """
+        Draws consensus chromatogram data for a selected peptide and precursor charge.
+
+        Args:
+            consensus_chrom_mode (str): The consensus chromatogram mode.
+            averaged_chrom_data (dict): The averaged chromatogram data.
+            smoothing_dict (dict): The smoothing dictionary.
+            plot_title (str): The title of the plot.
+            selected_peptide (str): The selected peptide.
+            selected_precursor_charge (int): The selected precursor charge.
+            x_range (tuple): The x-axis range of the plot.
+            y_range (tuple): The y-axis range of the plot.
+
+        Returns:
+            self: The updated object.
+        """
+        self.chrom_data_all = averaged_chrom_data
+        self.trace_annotation_all = [consensus_chrom_mode]  
+
+        averaged_plotter = Plotter(self.chrom_data_all, peptide_transition_list=None, trace_annotation=self.trace_annotation_all, title=plot_title, subtitle=f"{selected_peptide}_{selected_precursor_charge}", smoothing_dict=smoothing_dict,  plot_type='bokeh', x_range=x_range, y_range=y_range)
+
+        averaged_plot_obj  = averaged_plotter.plot()
+
+        self.plot_obj = averaged_plot_obj
+
+        return self
+
+
+    def draw_peak_boundaries(self, do_peak_picking, do_smoothing, smoothing_dict):
+        """
+        Draws peak boundaries on the plot using the ChromDataDrawer object's plot_obj and the perform_chromatogram_peak_picking function.
+
+        Parameters:
+        do_peak_picking (str): The type of peak picking to perform.
+        do_smoothing (bool): Whether to perform smoothing on the data.
+        smoothing_dict (dict): A dictionary containing parameters for smoothing the data.
+
+        Returns:
+        self (ChromDataDrawer): The ChromDataDrawer object.
+        """
+        if do_peak_picking == 'PeakPickerMRM':
+            peak_features = perform_chromatogram_peak_picking(self.chrom_data_all, do_smoothing, smoothing_dict, merged_peak_picking=True)
+            
+            y_bottom = [0] * len(peak_features['leftWidth'])
+            self.plot_obj.vbar(x=peak_features['leftWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")
+            self.plot_obj.vbar(x=peak_features['rightWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")
+
+        return self
+
+def draw_single_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing):
+    """
+    Draws a single chromatogram plot with optional peak picking and smoothing.
+
+    Args:
+        sqmass_file_path (str): The path to the SqMass file.
+        chrom_data (dict): A dictionary containing the chromatogram data.
+        include_ms1 (bool): Whether or not to include MS1 data in the plot.
+        include_ms2 (bool): Whether or not to include MS2 data in the plot.
+        peptide_transition_list (list): A list of peptide transitions to include in the plot.
+        selected_peptide (str): The selected peptide to highlight in the plot.
+        selected_precursor_charge (int): The charge state of the selected precursor.
+        smoothing_dict (dict): A dictionary containing the smoothing parameters.
+        x_range (tuple): A tuple containing the x-axis range for the plot.
+        y_range (tuple): A tuple containing the y-axis range for the plot.
+        do_peak_picking (str): The peak picking algorithm to use (if any).
+        do_smoothing (bool): Whether or not to apply smoothing to the data.
+
+    Returns:
+        ChromDataDrawer: An instance of the ChromDataDrawer class containing the plot data.
+    """
+    chrom_data_drawer = ChromDataDrawer()
+    chrom_data_drawer.draw_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range)
+
+    if do_peak_picking in PEAK_PICKING_ALGORITHMS:
+        chrom_data_drawer.draw_peak_boundaries(do_peak_picking, do_smoothing, smoothing_dict)
+    
+    return chrom_data_drawer
+
+
+@st.cache_resource(show_spinner="Drawing chromatograms...")
+def draw_many_chrom_data(sqmass_file_path_list, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing, threads ):
+    """
+    Draws chromatograms for multiple files and returns a dictionary with the results.
+
+    Parameters:
+    -----------
+    sqmass_file_path_list : list of str
+        List of paths to the SqMass files to be processed.
+    chrom_data : dict
+        Dictionary containing the chromatogram data for each file.
+    include_ms1 : bool
+        Whether to include MS1 data in the plot.
+    include_ms2 : bool
+        Whether to include MS2 data in the plot.
+    peptide_transition_list : list of str
+        List of peptide transitions to be plotted.
+    selected_peptide : str
+        Peptide sequence to be highlighted in the plot.
+    selected_precursor_charge : int
+        Precursor charge state to be highlighted in the plot.
+    smoothing_dict : dict
+        Dictionary containing the smoothing parameters for each transition.
+    x_range : tuple of float
+        Tuple containing the x-axis range for the plot.
+    y_range : tuple of float
+        Tuple containing the y-axis range for the plot.
+    do_peak_picking : bool
+        Whether to perform peak picking on the data.
+    do_smoothing : bool
+        Whether to perform smoothing on the data.
+    threads : int
+        Number of threads to use for processing.
+
+    Returns:
+    --------
+    output : dict
+        Dictionary containing the Bokeh plot objects for each file.
+    """
+
+    # Unfortunately we cannot perform mulltiprocessing because the bokeh object is not serializble
+    output = {}
+    for sqmass_file_path in sqmass_file_path_list:
+        res = draw_single_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing)
+        output[sqmass_file_path] = res
+
+
+    return output
+
+def draw_single_consensus_chrom(sqmass_file_path, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, chrom_data_all, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing):
+    """
+    Draw a single consensus chromatogram.
+
+    Args:
+        sqmass_file_path (str): The path to the sqmass file.
+        selected_peptide (str): The selected peptide.
+        selected_precursor_charge (int): The selected precursor charge.
+        do_consensus_chrom (str): The type of consensus chromatogram to generate.
+        consensus_chrom_mode (str): The mode to use for generating the consensus chromatogram.
+        chrom_data_all (list): The chromatogram data for all runs.
+        chrom_data_global (list): The chromatogram data for all runs combined.
+        scale_intensity (bool): Whether to scale the intensity of the chromatogram.
+        percentile_start (float): The percentile to start scaling the intensity from.
+        percentile_end (float): The percentile to end scaling the intensity at.
+        threshold (float): The threshold for peak detection.
+        auto_threshold (bool): Whether to automatically determine the threshold for peak detection.
+        smoothing_dict (dict): The smoothing parameters to use for peak detection.
+        x_range (tuple): The x-axis range to plot.
+        y_range (tuple): The y-axis range to plot.
+        do_peak_picking (str): The peak picking algorithm to use.
+        do_smoothing (bool): Whether to smooth the chromatogram data.
+
+    Returns:
+        ChromDataDrawer: The object used to draw the consensus chromatogram.
+    """
+    ## Generate consensus chromatogram
+    if do_consensus_chrom == 'run-specific':
+        averaged_chrom_data = compute_consensus_chromatogram(consensus_chrom_mode, chrom_data_all, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold)
+        plot_title = os.path.basename(sqmass_file_path)
+    elif do_consensus_chrom == 'global':
+        averaged_chrom_data = compute_consensus_chromatogram(consensus_chrom_mode, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold)
+        plot_title = 'Global Across-Run Consensus Chromatogram'
+
+    chrom_data_drawer = ChromDataDrawer()
+    chrom_data_drawer.draw_consensus_chrom_data(consensus_chrom_mode, averaged_chrom_data, plot_title, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range)    
+
+    if do_peak_picking in PEAK_PICKING_ALGORITHMS:
+        chrom_data_drawer.draw_peak_boundaries(do_peak_picking, do_smoothing, smoothing_dict)
+    
+    return chrom_data_drawer
+
+@st.cache_resource(show_spinner="Drawing consensus chromatograms...")
+def draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, _chrom_plot_objs, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing, threads):
+    """
+    Draws consensus chromatograms for multiple input files.
+
+    Args:
+        sqmass_file_path_list (list): List of file paths to sqMass files.
+        selected_peptide (str): Sequence of the selected peptide.
+        selected_precursor_charge (int): Charge state of the selected peptide.
+        do_consensus_chrom (bool): Whether to draw consensus chromatograms.
+        consensus_chrom_mode (str): Mode for drawing consensus chromatograms.
+        _chrom_plot_objs (dict): Dictionary of ChromPlot objects.
+        chrom_data_global (dict): Dictionary of global chromatogram data.
+        scale_intensity (bool): Whether to scale the intensity of the chromatograms.
+        percentile_start (float): Start percentile for scaling the intensity.
+        percentile_end (float): End percentile for scaling the intensity.
+        threshold (float): Threshold for peak detection.
+        auto_threshold (bool): Whether to use automatic threshold for peak detection.
+        smoothing_dict (dict): Dictionary of smoothing parameters.
+        x_range (tuple): Tuple of x-axis range for the plot.
+        y_range (tuple): Tuple of y-axis range for the plot.
+        do_peak_picking (bool): Whether to perform peak picking.
+        do_smoothing (bool): Whether to perform smoothing.
+        threads (int): Number of threads to use for processing.
+
+    Returns:
+        dict: Dictionary of output data for each input file.
+    """
+
+    # Unfortunately we cannot perform mulltiprocessing because the bokeh object is not serializble
+    output = {}
+    for sqmass_file_path in sqmass_file_path_list:
+        res = draw_single_consensus_chrom(sqmass_file_path, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, _chrom_plot_objs[sqmass_file_path].chrom_data_all, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing)
+        output[sqmass_file_path] = res
+
+    return output
