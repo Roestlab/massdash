@@ -9,11 +9,11 @@ def chromatogram_plotting_settings():
     include_ms2 (bool): Whether to include MS2 traces in the plot.
     set_x_range (bool): Whether to set a custom x-range for the plot.
     set_y_range (bool): Whether to set a custom y-range for the plot.
-    do_smoothing (str): The type of smoothing to perform on the chromatograms ('sgolay' or 'none').
-    sgolay_polynomial_order (int): The polynomial order for sgolay smoothing (if selected).
-    sgolay_frame_length (int): The frame length for sgolay smoothing (if selected).
+    do_smoothing (str): The type of smoothing to perform on the chromatograms ('sgolay' or 'none').s
     smoothing_dict (dict): A dictionary with the smoothing settings.
     """
+    smoothing_dict = {}
+
     st.sidebar.title("Plotting Settings")
     # Add checkboxes in the sidebar to include MS1 and/or MS2 traces
     include_ms1 = st.sidebar.checkbox("Include MS1 Traces", value=True)
@@ -27,7 +27,7 @@ def chromatogram_plotting_settings():
 
         # Perform Smoothing of the chromatograms
         do_smoothing = st.selectbox("Smoothing", ['sgolay', 'none'])
-        smoothing_dict = {}
+        
         smoothing_dict['type'] = do_smoothing
         if do_smoothing == 'sgolay':
             # Create two columns for side-by-side widgets
@@ -41,5 +41,5 @@ def chromatogram_plotting_settings():
 
             smoothing_dict['sgolay_polynomial_order'] = sgolay_polynomial_order
             smoothing_dict['sgolay_frame_length'] = sgolay_frame_length
-    return include_ms1, include_ms2, set_x_range, set_y_range, do_smoothing, sgolay_polynomial_order, sgolay_frame_length, smoothing_dict
+    return include_ms1, include_ms2, set_x_range, set_y_range, do_smoothing,  smoothing_dict
 
