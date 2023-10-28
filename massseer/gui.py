@@ -9,7 +9,7 @@ from typing import List
 # Internal UI modules
 from massseer.util_ui import show_welcome_message
 from massseer.file_handling_ui import process_osw_file, get_sqmass_files
-from massseer.plotting_ui import chromatogram_plotting_settings
+from massseer.plotting_ui import ChromatogramPlotSettings
 from massseer.algo_ui import algo_ui_widgets
 
 # Internal server modules
@@ -73,20 +73,21 @@ if osw_file_path!="*.osw":
     if sqmass_file_path_input!="*.sqMass":
 
         # UI plotting settings
-        include_ms1, include_ms2, set_x_range, set_y_range, do_smoothing, smoothing_dict = chromatogram_plotting_settings()
+        plot_settings = ChromatogramPlotSettings()
+        plot_settings.create_sidebar()
 
         do_peak_picking, do_consensus_chrom, scale_intensity, consensus_chrom_mode, percentile_start, percentile_end, threshold, auto_threshold = algo_ui_widgets()
                 
         ### Processing / Plotting
 
         ## Get Precursor trace
-        if include_ms1:
+        if plot_settings.include_ms1:
             precursor_id = peptide_transition_list.PRECURSOR_ID[0]
         else:
             precursor_id = []
 
         ## Get Transition XIC data
-        if include_ms2:
+        if plot_settings.include_ms2:
             # TODO: For regular proteomics DETECTING is always 1, but for IPF there are theoretical transitions that are appened that are set to 0. Need to add an option later on to make a selection if user also wants identifying transitions
             transition_id_list = peptide_transition_list.TRANSITION_ID[peptide_transition_list.PRODUCT_DETECTING==1].tolist()
             trace_annotation = peptide_transition_list.PRODUCT_ANNOTATION[peptide_transition_list.PRODUCT_DETECTING==1].tolist()
@@ -95,21 +96,21 @@ if osw_file_path!="*.osw":
             trace_annotation = []
 
         # Get chromatogram data for all sqMass files
-        chrom_data = process_many_files(sqmass_file_path_list, include_ms1=include_ms1, include_ms2=include_ms2, precursor_id=precursor_id, transition_id_list=transition_id_list, trace_annotation=trace_annotation,  thread_count=threads)
+        chrom_data = process_many_files(sqmass_file_path_list, include_ms1=plot_settings.include_ms1, include_ms2=plot_settings.include_ms2, precursor_id=precursor_id, transition_id_list=transition_id_list, trace_annotation=trace_annotation,  thread_count=threads)
 
         # Get min RT start point and max RT end point
-        x_range, y_range = get_chrom_data_limits(chrom_data, 'dict', set_x_range, set_y_range)
+        x_range, y_range = get_chrom_data_limits(chrom_data, 'dict', plot_settings.set_x_range, plot_settings.set_y_range)
 
         if do_consensus_chrom == 'global':
-            chrom_data_global = get_chrom_data_global(chrom_data, include_ms1, include_ms2)
+            chrom_data_global = get_chrom_data_global(chrom_data, plot_settings.include_ms1, plot_settings.include_ms2)
         else:
             chrom_data_global = []
 
-        chrom_plot_objs = draw_many_chrom_data(sqmass_file_path_list, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing, threads )
+        chrom_plot_objs = draw_many_chrom_data(sqmass_file_path_list, chrom_data, plot_settings.include_ms1, plot_settings.include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, plot_settings.smoothing_dict, x_range, y_range, do_peak_picking, plot_settings.do_smoothing, threads )
 
         if do_consensus_chrom != 'none':
 
-            consensus_chrom_plot_objs = draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, chrom_plot_objs, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing, threads)
+            consensus_chrom_plot_objs = draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, chrom_plot_objs, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, plot_settings.smoothing_dict, x_range, y_range, do_peak_picking, plot_settings.do_smoothing, threads)
 
         for sqmass_file_path in sqmass_file_path_list:
                 plot_obj = chrom_plot_objs[sqmass_file_path].plot_obj

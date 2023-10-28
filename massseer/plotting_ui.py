@@ -1,45 +1,79 @@
 import streamlit as st
 
-def chromatogram_plotting_settings():
+class ChromatogramPlotSettings:
     """
-    This function creates a sidebar with plotting settings for chromatograms. It includes checkboxes to include MS1 and/or MS2 traces, and an expander with advanced settings. The advanced settings include checkboxes for setting x-range and y-range, and a selectbox for smoothing the chromatograms. If sgolay smoothing is selected, it creates two columns for side-by-side widgets to set the polynomial order and frame length.
-    
-    Returns:
-    include_ms1 (bool): Whether to include MS1 traces in the plot.
-    include_ms2 (bool): Whether to include MS2 traces in the plot.
-    set_x_range (bool): Whether to set a custom x-range for the plot.
-    set_y_range (bool): Whether to set a custom y-range for the plot.
-    do_smoothing (str): The type of smoothing to perform on the chromatograms ('sgolay' or 'none').s
-    smoothing_dict (dict): A dictionary with the smoothing settings.
+    A class for managing the settings for a chromatogram plot.
+
+    Attributes:
+        include_ms1 (bool): Whether to include MS1 traces in the plot.
+        include_ms2 (bool): Whether to include MS2 traces in the plot.
+        num_plot_columns (int): The number of columns to display the plots in.
+        set_x_range (bool): Whether to set a custom x-axis range for the plot.
+        set_y_range (bool): Whether to set a custom y-axis range for the plot.
+        do_smoothing (str): The type of smoothing to apply to the chromatograms.
+        smoothing_dict (dict): A dictionary of additional settings for the smoothing.
+
+    Methods:
+        create_sidebar(): Creates a sidebar in Streamlit for adjusting the plot settings.
+        get_settings(): Returns a dictionary of the current plot settings.
     """
-    smoothing_dict = {}
+    def __init__(self):
+        self.include_ms1 = True
+        self.include_ms2 = True
+        self.num_plot_columns = 2
+        self.set_x_range = False
+        self.set_y_range = False
+        self.do_smoothing = 'none'
+        self.smoothing_dict = {}
 
-    st.sidebar.title("Plotting Settings")
-    # Add checkboxes in the sidebar to include MS1 and/or MS2 traces
-    include_ms1 = st.sidebar.checkbox("Include MS1 Traces", value=True)
-    include_ms2 = st.sidebar.checkbox("Include MS2 Traces", value=True)
+    def create_sidebar(self):
+        """
+        Creates a sidebar in Streamlit for adjusting the plot settings.
 
-    with st.sidebar.expander("Advanced Settings"):
+        Returns:
+            self (ChromatogramPlotSettings): The current instance of the ChromatogramPlotSettings class.
+        """
+        st.sidebar.title("Plotting Settings")
+        # Add checkboxes in the sidebar to include MS1 and/or MS2 traces
+        self.include_ms1 = st.sidebar.checkbox("Include MS1 Traces", value=self.include_ms1)
+        self.include_ms2 = st.sidebar.checkbox("Include MS2 Traces", value=self.include_ms2)
 
-        # Add Checkboxes for setting x-range and y-range
-        set_x_range = st.checkbox("Set x-range", value=False)
-        set_y_range = st.checkbox("Set y-range", value=False)
+        with st.sidebar.expander("Advanced Settings"):
+            # Display plots in N columns
+            self.num_plot_columns = st.number_input("Number of Columns", min_value=1, value=self.num_plot_columns)
 
-        # Perform Smoothing of the chromatograms
-        do_smoothing = st.selectbox("Smoothing", ['sgolay', 'none'])
-        
-        smoothing_dict['type'] = do_smoothing
-        if do_smoothing == 'sgolay':
-            # Create two columns for side-by-side widgets
-            col1, col2 = st.columns(2)
+            # Add Checkboxes for setting x-range and y-range
+            self.set_x_range = st.checkbox("Set x-range", value=self.set_x_range)
+            self.set_y_range = st.checkbox("Set y-range", value=self.set_y_range)
 
-            # Add widget for sgolay_polynomial_order in the first column
-            sgolay_polynomial_order = col1.number_input("Polynomial Order", min_value=1, max_value=10, value=3, step=1)
+            # Perform Smoothing of the chromatograms
+            self.do_smoothing = st.selectbox("Smoothing", ['sgolay', 'none'])
 
-            # Add widget for sgolay_frame_length in the second column
-            sgolay_frame_length = col2.number_input("Frame Length", min_value=1, max_value=50, value=11, step=1)
+            self.smoothing_dict['type'] = self.do_smoothing
+            if self.do_smoothing == 'sgolay':
+                # Create two columns for side-by-side widgets
+                col1, col2 = st.columns(2)
 
-            smoothing_dict['sgolay_polynomial_order'] = sgolay_polynomial_order
-            smoothing_dict['sgolay_frame_length'] = sgolay_frame_length
-    return include_ms1, include_ms2, set_x_range, set_y_range, do_smoothing,  smoothing_dict
+                # Add widget for sgolay_polynomial_order in the first column
+                self.smoothing_dict['sgolay_polynomial_order'] = col1.number_input("Polynomial Order", min_value=1, max_value=10, value=3, step=1)
 
+                # Add widget for sgolay_frame_length in the second column
+                self.smoothing_dict['sgolay_frame_length'] = col2.number_input("Frame Length", min_value=1, max_value=50, value=11, step=1)
+        return self  # Return self for method chaining
+
+    def get_settings(self):
+        """
+        Returns a dictionary of the current plot settings.
+
+        Returns:
+            settings (dict): A dictionary of the current plot settings.
+        """
+        return {
+            "include_ms1": self.include_ms1,
+            "include_ms2": self.include_ms2,
+            "num_plot_columns": self.num_plot_columns,
+            "set_x_range": self.set_x_range,
+            "set_y_range": self.set_y_range,
+            "do_smoothing": self.do_smoothing,
+            "smoothing_dict": self.smoothing_dict,
+        }
