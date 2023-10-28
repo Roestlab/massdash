@@ -10,7 +10,7 @@ from typing import List
 from massseer.util_ui import show_welcome_message
 from massseer.file_handling_ui import process_osw_file, get_sqmass_files
 from massseer.plotting_ui import ChromatogramPlotSettings
-from massseer.algo_ui import algo_ui_widgets
+from massseer.algo_ui import AlgorithmUISettings
 
 # Internal server modules
 from massseer.data_loader import process_many_files
@@ -76,7 +76,9 @@ if osw_file_path!="*.osw":
         plot_settings = ChromatogramPlotSettings()
         plot_settings.create_sidebar()
 
-        do_peak_picking, do_consensus_chrom, scale_intensity, consensus_chrom_mode, percentile_start, percentile_end, threshold, auto_threshold = algo_ui_widgets()
+        # UI Algo settings
+        algo_settings = AlgorithmUISettings()
+        algo_settings.create_ui()
                 
         ### Processing / Plotting
 
@@ -101,21 +103,21 @@ if osw_file_path!="*.osw":
         # Get min RT start point and max RT end point
         x_range, y_range = get_chrom_data_limits(chrom_data, 'dict', plot_settings.set_x_range, plot_settings.set_y_range)
 
-        if do_consensus_chrom == 'global':
+        if algo_settings.do_consensus_chrom == 'global':
             chrom_data_global = get_chrom_data_global(chrom_data, plot_settings.include_ms1, plot_settings.include_ms2)
         else:
             chrom_data_global = []
 
-        chrom_plot_objs = draw_many_chrom_data(sqmass_file_path_list, chrom_data, plot_settings.include_ms1, plot_settings.include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, plot_settings.smoothing_dict, x_range, y_range, do_peak_picking, plot_settings.do_smoothing, threads )
+        chrom_plot_objs = draw_many_chrom_data(sqmass_file_path_list, chrom_data, plot_settings.include_ms1, plot_settings.include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, plot_settings.smoothing_dict, x_range, y_range, algo_settings.do_peak_picking, plot_settings.do_smoothing, threads )
 
-        if do_consensus_chrom != 'none':
+        if algo_settings.do_consensus_chrom != 'none':
 
-            consensus_chrom_plot_objs = draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, chrom_plot_objs, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, plot_settings.smoothing_dict, x_range, y_range, do_peak_picking, plot_settings.do_smoothing, threads)
+            consensus_chrom_plot_objs = draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, algo_settings.do_consensus_chrom, algo_settings.consensus_chrom_mode, chrom_plot_objs, chrom_data_global, algo_settings.scale_intensity, algo_settings.percentile_start, algo_settings.percentile_end, algo_settings.threshold, algo_settings.auto_threshold, plot_settings.smoothing_dict, x_range, y_range, algo_settings.do_peak_picking, plot_settings.do_smoothing, threads)
 
         for sqmass_file_path in sqmass_file_path_list:
                 plot_obj = chrom_plot_objs[sqmass_file_path].plot_obj
                 
-                if do_consensus_chrom != 'none':
+                if algo_settings.do_consensus_chrom != 'none':
                     averaged_plot_obj = consensus_chrom_plot_objs[sqmass_file_path].plot_obj
 
                     # Create a Streamlit layout with two columns
