@@ -78,8 +78,8 @@ if osw_file_path!="*.osw":
 
         # UI Algo settings
         algo_settings = AlgorithmUISettings()
-        algo_settings.create_ui()
-                
+        algo_settings.create_ui(plot_settings)
+    
         ### Processing / Plotting
 
         ## Get Precursor trace
@@ -108,11 +108,11 @@ if osw_file_path!="*.osw":
         else:
             chrom_data_global = []
 
-        chrom_plot_objs = draw_many_chrom_data(sqmass_file_path_list, chrom_data, plot_settings.include_ms1, plot_settings.include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, plot_settings.smoothing_dict, x_range, y_range, algo_settings.do_peak_picking, plot_settings.do_smoothing, threads )
+        chrom_plot_objs = draw_many_chrom_data(sqmass_file_path_list, chrom_data, plot_settings.include_ms1, plot_settings.include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, plot_settings.smoothing_dict, x_range, y_range, algo_settings, threads )
 
         if algo_settings.do_consensus_chrom != 'none':
 
-            consensus_chrom_plot_objs = draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, algo_settings.do_consensus_chrom, algo_settings.consensus_chrom_mode, chrom_plot_objs, chrom_data_global, algo_settings.scale_intensity, algo_settings.percentile_start, algo_settings.percentile_end, algo_settings.threshold, algo_settings.auto_threshold, plot_settings.smoothing_dict, x_range, y_range, algo_settings.do_peak_picking, plot_settings.do_smoothing, threads)
+            consensus_chrom_plot_objs = draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, algo_settings.do_consensus_chrom, algo_settings.consensus_chrom_mode, chrom_plot_objs, chrom_data_global, algo_settings.scale_intensity, algo_settings.percentile_start, algo_settings.percentile_end, algo_settings.threshold, algo_settings.auto_threshold, plot_settings.smoothing_dict, x_range, y_range, algo_settings, threads)
 
         for sqmass_file_path in sqmass_file_path_list:
                 plot_obj = chrom_plot_objs[sqmass_file_path].plot_obj

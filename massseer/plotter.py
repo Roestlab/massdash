@@ -322,7 +322,7 @@ class ChromDataDrawer:
         return self
 
 
-    def draw_peak_boundaries(self, do_peak_picking, do_smoothing, smoothing_dict):
+    def draw_peak_boundaries(self, do_peak_picking, peak_picker):
         """
         Draws peak boundaries on the plot using the ChromDataDrawer object's plot_obj and the perform_chromatogram_peak_picking function.
 
@@ -335,15 +335,17 @@ class ChromDataDrawer:
         self (ChromDataDrawer): The ChromDataDrawer object.
         """
         if do_peak_picking == 'PeakPickerMRM':
-            peak_features = perform_chromatogram_peak_picking(self.chrom_data_all, do_smoothing, smoothing_dict, merged_peak_picking=True)
+            peak_features = perform_chromatogram_peak_picking(self.chrom_data_all, peak_picker, merged_peak_picking=True)
             
-            y_bottom = [0] * len(peak_features['leftWidth'])
-            self.plot_obj.vbar(x=peak_features['leftWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")
-            self.plot_obj.vbar(x=peak_features['rightWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")
+            dark2_palette = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666']
+            for i in range(len(peak_features['leftWidth'])):
+                y_bottom = [0] 
+                self.plot_obj.vbar(x=peak_features['leftWidth'][i], bottom=y_bottom, top=peak_features['IntegratedIntensity'][i], width=0.1, color="red", line_color=dark2_palette[i])
+                self.plot_obj.vbar(x=peak_features['rightWidth'][i], bottom=y_bottom, top=peak_features['IntegratedIntensity'][i], width=0.1, color="red", line_color=dark2_palette[i])
 
         return self
 
-def draw_single_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing):
+def draw_single_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, algo_settings):
     """
     Draws a single chromatogram plot with optional peak picking and smoothing.
 
@@ -367,14 +369,15 @@ def draw_single_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms
     chrom_data_drawer = ChromDataDrawer()
     chrom_data_drawer.draw_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range)
 
-    if do_peak_picking in PEAK_PICKING_ALGORITHMS:
-        chrom_data_drawer.draw_peak_boundaries(do_peak_picking, do_smoothing, smoothing_dict)
+    if algo_settings.do_peak_picking in PEAK_PICKING_ALGORITHMS:
+        print(f"Peak Picking: {algo_settings.do_peak_picking}")
+        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, algo_settings.PeakPickerMRMParams.peak_picker)
     
     return chrom_data_drawer
 
 
-@st.cache_resource(show_spinner="Drawing chromatograms...")
-def draw_many_chrom_data(sqmass_file_path_list, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing, threads ):
+# @st.cache_resource(show_spinner="Drawing chromatograms...")
+def draw_many_chrom_data(sqmass_file_path_list, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, _algo_settings, threads ):
     """
     Draws chromatograms for multiple files and returns a dictionary with the results.
 
@@ -412,17 +415,17 @@ def draw_many_chrom_data(sqmass_file_path_list, chrom_data, include_ms1, include
     output : dict
         Dictionary containing the Bokeh plot objects for each file.
     """
-
+    print(f"Peak Picking: {_algo_settings.do_peak_picking}")
     # Unfortunately we cannot perform mulltiprocessing because the bokeh object is not serializble
     output = {}
     for sqmass_file_path in sqmass_file_path_list:
-        res = draw_single_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing)
+        res = draw_single_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, _algo_settings)
         output[sqmass_file_path] = res
 
 
     return output
 
-def draw_single_consensus_chrom(sqmass_file_path, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, chrom_data_all, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing):
+def draw_single_consensus_chrom(sqmass_file_path, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, chrom_data_all, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, algo_settings):
     """
     Draw a single consensus chromatogram.
 
@@ -459,13 +462,13 @@ def draw_single_consensus_chrom(sqmass_file_path, selected_peptide, selected_pre
     chrom_data_drawer = ChromDataDrawer()
     chrom_data_drawer.draw_consensus_chrom_data(consensus_chrom_mode, averaged_chrom_data, plot_title, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range)    
 
-    if do_peak_picking in PEAK_PICKING_ALGORITHMS:
-        chrom_data_drawer.draw_peak_boundaries(do_peak_picking, do_smoothing, smoothing_dict)
+    if algo_settings.do_peak_picking in PEAK_PICKING_ALGORITHMS:
+        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, algo_settings.PeakPickerMRMParams.peak_picker)
     
     return chrom_data_drawer
 
-@st.cache_resource(show_spinner="Drawing consensus chromatograms...")
-def draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, _chrom_plot_objs, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing, threads):
+# @st.cache_resource(show_spinner="Drawing consensus chromatograms...")
+def draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, _chrom_plot_objs, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, _algo_settings, threads):
     """
     Draws consensus chromatograms for multiple input files.
 
@@ -496,7 +499,7 @@ def draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_
     # Unfortunately we cannot perform mulltiprocessing because the bokeh object is not serializble
     output = {}
     for sqmass_file_path in sqmass_file_path_list:
-        res = draw_single_consensus_chrom(sqmass_file_path, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, _chrom_plot_objs[sqmass_file_path].chrom_data_all, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, do_peak_picking, do_smoothing)
+        res = draw_single_consensus_chrom(sqmass_file_path, selected_peptide, selected_precursor_charge, do_consensus_chrom, consensus_chrom_mode, _chrom_plot_objs[sqmass_file_path].chrom_data_all, chrom_data_global, scale_intensity, percentile_start, percentile_end, threshold, auto_threshold, smoothing_dict, x_range, y_range, _algo_settings)
         output[sqmass_file_path] = res
 
     return output
