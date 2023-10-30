@@ -75,45 +75,61 @@ class AlgorithmUISettings:
         self.threshold = 0
         self.auto_threshold = True
     
-    def create_ui(self):
+    def create_ui(self, plot_settings):
         """
         Creates the user interface for setting the algorithm parameters.
         """
         ## Perform Peak Picking
         self.do_peak_picking = st.sidebar.selectbox("Peak Picking", ['none', 'PeakPickerMRM'])
+        if self.do_peak_picking != 'none':
+            ## Perform peak picking on displayed chromatogram, or adjust smoothing separately for peak picking?
+            self.peak_pick_on_displayed_chrom = st.sidebar.checkbox("Peak Pick with Displayed Chromatogram", value=True) 
 
         if self.do_peak_picking == "PeakPickerMRM":
-            with st.sidebar.expander("Advanced Settings"):
+            if not self.peak_pick_on_displayed_chrom:
+                with st.sidebar.expander("Advanced Settings"):
+                    self.PeakPickerMRMParams = PeakPickerMRM_UI()
+                    # Check to use Gaussian smoothing
+                    self.PeakPickerMRMParams.use_gauss = st.checkbox("Use Gaussian Smoothing", value=False) 
+                    if self.PeakPickerMRMParams.use_gauss:      
+                        # Gaussian Width
+                        self.PeakPickerMRMParams.gauss_width = st.number_input("Width of the Gaussian smoothing", min_value=0.0, value=30.0)
+                    else:
+                        # Widget for sgolay_frame_length
+                        self.PeakPickerMRMParams.sgolay_frame_length = st.number_input("Savitzky-Golay Frame Length", value=11, step=2, min_value=1)
+
+                        # Widget for sgolay_polynomial_order
+                        self.PeakPickerMRMParams.sgolay_polynomial_order = st.number_input("Savitzky-Golay Polynomial Order", value=3, min_value=1)
+
+                    # Widget for peak_width
+                    self.PeakPickerMRMParams.peak_width = st.number_input("Minimum Peak Width (seconds)", value=-1.0, step=1.0)
+
+                    # Widget for signal_to_noise
+                    self.PeakPickerMRMParams.signal_to_noise = st.number_input("Signal-to-Noise Threshold", value=1.0, step=0.1, min_value=0.0)
+
+                    # Widget for sn_win_len
+                    self.PeakPickerMRMParams.sn_win_len = st.number_input("Signal-to-Noise Window Length", value=1000.0, step=10.0)
+
+                    # Widget for sn_bin_count
+                    self.PeakPickerMRMParams.sn_bin_count = st.number_input("Signal-to-Noise Bin Count", value=30, step=1, min_value=1)
+
+                    # Widget for remove_overlapping_peaks
+                    self.PeakPickerMRMParams.remove_overlapping_peaks = st.selectbox("Remove Overlapping Peaks", ['true', 'false'])
+
+                    # Widget for method
+                    self.PeakPickerMRMParams.method = st.selectbox("Peak Picking Method", ['legacy', 'corrected'], index=1)
+            else:
                 self.PeakPickerMRMParams = PeakPickerMRM_UI()
-                # Check to use Gaussian smoothing
-                self.PeakPickerMRMParams.use_gauss = st.checkbox("Use Gaussian Smoothing", value=False) 
-                if self.PeakPickerMRMParams.use_gauss:      
+
+                if plot_settings.do_smoothing == "gauss":      
                     # Gaussian Width
                     self.PeakPickerMRMParams.gauss_width = st.number_input("Width of the Gaussian smoothing", min_value=0.0, value=30.0)
-                else:
+                elif plot_settings.do_smoothing == "sgolay":
                     # Widget for sgolay_frame_length
-                    self.PeakPickerMRMParams.sgolay_frame_length = st.number_input("Savitzky-Golay Frame Length", value=11, step=2, min_value=1)
+                    self.PeakPickerMRMParams.sgolay_frame_length = plot_settings.smoothing_dict['sgolay_frame_length']
 
                     # Widget for sgolay_polynomial_order
-                    self.PeakPickerMRMParams.sgolay_polynomial_order = st.number_input("Savitzky-Golay Polynomial Order", value=3, min_value=1)
-
-                # Widget for peak_width
-                self.PeakPickerMRMParams.peak_width = st.number_input("Minimum Peak Width (seconds)", value=-1.0, step=1.0)
-
-                # Widget for signal_to_noise
-                self.PeakPickerMRMParams.signal_to_noise = st.number_input("Signal-to-Noise Threshold", value=1.0, step=0.1, min_value=0.0)
-
-                # Widget for sn_win_len
-                self.PeakPickerMRMParams.sn_win_len = st.number_input("Signal-to-Noise Window Length", value=1000.0, step=10.0)
-
-                # Widget for sn_bin_count
-                self.PeakPickerMRMParams.sn_bin_count = st.number_input("Signal-to-Noise Bin Count", value=30, step=1, min_value=1)
-
-                # Widget for remove_overlapping_peaks
-                self.PeakPickerMRMParams.remove_overlapping_peaks = st.selectbox("Remove Overlapping Peaks", ['true', 'false'])
-
-                # Widget for method
-                self.PeakPickerMRMParams.method = st.selectbox("Peak Picking Method", ['legacy', 'corrected', 'crawdad'], index=1)
+                    self.PeakPickerMRMParams.sgolay_polynomial_order = plot_settings.smoothing_dict['sgolay_polynomial_order']
 
                 # Set/Update PeakPickerMRM paramters
                 self.PeakPickerMRMParams.set_peak_picker_params()

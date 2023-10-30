@@ -78,7 +78,7 @@ if osw_file_path!="*.osw":
 
         # UI Algo settings
         algo_settings = AlgorithmUISettings()
-        algo_settings.create_ui()
+        algo_settings.create_ui(plot_settings)
     
         ### Processing / Plotting
 

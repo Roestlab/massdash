@@ -337,9 +337,11 @@ class ChromDataDrawer:
         if do_peak_picking == 'PeakPickerMRM':
             peak_features = perform_chromatogram_peak_picking(self.chrom_data_all, peak_picker, merged_peak_picking=True)
             
-            y_bottom = [0] * len(peak_features['leftWidth'])
-            self.plot_obj.vbar(x=peak_features['leftWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")
-            self.plot_obj.vbar(x=peak_features['rightWidth'], bottom=y_bottom, top=peak_features['IntegratedIntensity'], width=0.1, color="red", line_color="black")
+            dark2_palette = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666']
+            for i in range(len(peak_features['leftWidth'])):
+                y_bottom = [0] 
+                self.plot_obj.vbar(x=peak_features['leftWidth'][i], bottom=y_bottom, top=peak_features['IntegratedIntensity'][i], width=0.1, color="red", line_color=dark2_palette[i])
+                self.plot_obj.vbar(x=peak_features['rightWidth'][i], bottom=y_bottom, top=peak_features['IntegratedIntensity'][i], width=0.1, color="red", line_color=dark2_palette[i])
 
         return self
 
