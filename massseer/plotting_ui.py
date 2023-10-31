@@ -17,7 +17,9 @@ class ChromatogramPlotSettings:
         create_sidebar(): Creates a sidebar in Streamlit for adjusting the plot settings.
         get_settings(): Returns a dictionary of the current plot settings.
     """
-    def __init__(self):
+    def __init__(self, massseer_gui):
+        self.massseer_gui = massseer_gui
+
         self.include_ms1 = True
         self.include_ms2 = True
         self.num_plot_columns = 2
