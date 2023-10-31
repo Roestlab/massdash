@@ -13,7 +13,7 @@ PROJECT_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."
 WORKING_FOLDER = os.getcwd()
 MASSPEC_FILE_FORMATS = ["mzML", "mzXML", "raw", "wiff", "d"]
 
-PEAK_PICKING_ALGORITHMS = ["PeakPickerMRM"]
+PEAK_PICKING_ALGORITHMS = ["OSW-PyProphet","PeakPickerMRM"]
 
 # Common methods
 def get_data_folder():

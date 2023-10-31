@@ -65,7 +65,9 @@ class AlgorithmUISettings:
         Whether to automatically compute the percentile threshold for the percentile average aggregation method.
     """
 
-    def __init__(self):
+    def __init__(self, massseer_gui):
+        self.massseer_gui = massseer_gui
+
         self.do_peak_picking = 'none'
         self.do_consensus_chrom = 'none'
         self.scale_intensity = False
@@ -80,7 +82,7 @@ class AlgorithmUISettings:
         Creates the user interface for setting the algorithm parameters.
         """
         ## Perform Peak Picking
-        self.do_peak_picking = st.sidebar.selectbox("Peak Picking", ['none', 'PeakPickerMRM'])
+        self.do_peak_picking = st.sidebar.selectbox("Peak Picking", ['none', 'OSW-PyProphet', 'PeakPickerMRM'])
         if self.do_peak_picking != 'none':
             ## Perform peak picking on displayed chromatogram, or adjust smoothing separately for peak picking?
             self.peak_pick_on_displayed_chrom = st.sidebar.checkbox("Peak Pick with Displayed Chromatogram", value=True) 
@@ -133,6 +135,9 @@ class AlgorithmUISettings:
 
                 # Set/Update PeakPickerMRM paramters
                 self.PeakPickerMRMParams.set_peak_picker_params()
+        elif self.do_peak_picking == "OSW-PyProphet":
+            print(self.massseer_gui.osw_file_path)
+
 
         ## Make a consensus chromatogram
         self.do_consensus_chrom = st.sidebar.selectbox("Generate Consensus Chromatogram", ['none', 'run-specific', 'global'])
