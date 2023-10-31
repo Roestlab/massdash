@@ -15,7 +15,7 @@ from bokeh.palettes import Category20, Viridis256
 # Internal
 from massseer.util import PEAK_PICKING_ALGORITHMS
 from massseer.peak_picking import perform_chromatogram_peak_picking
-from massseer.chromatogram_data_handling import compute_consensus_chromatogram
+from massseer.chromatogram_data_handling import compute_consensus_chromatogram, normalize
 from massseer.SqlDataAccess import OSWDataAccess
 
 
@@ -53,7 +53,7 @@ class Plotter:
     plot()
         Creates a static or interactive plot of the chromatographic data depending on the plot_type attribute.
     """
-    def __init__(self, data, peptide_transition_list, trace_annotation, title, subtitle, x_axis_label="Retention Time", y_axis_label="Intensity", smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, plot_type='matplotlib', x_range=None, y_range=None):
+    def __init__(self, data, peptide_transition_list, trace_annotation, title, subtitle, x_axis_label="Retention Time", y_axis_label="Intensity", smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, plot_type='matplotlib', x_range=None, y_range=None, scale_intensity=False):
         
         self.data = data
         self.peptide_transition_list = peptide_transition_list
@@ -66,6 +66,7 @@ class Plotter:
         self.plot_type = plot_type
         self.x_range = x_range
         self.y_range = y_range
+        self.scale_intensity = scale_intensity
 
     def create_static_plot(self):
         """
@@ -170,6 +171,9 @@ class Plotter:
                 smoothed_intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
             else:
                 smoothed_intensity = np.array(intensity)
+            
+            if self.scale_intensity:
+                smoothed_intensity = np.array(normalize(smoothed_intensity.tolist()))
 
             # Set negative values in smoothed_intensity to 0
             smoothed_intensity = np.where(smoothed_intensity < 0, 0, smoothed_intensity)
@@ -249,7 +253,7 @@ class ChromDataDrawer:
         self.trace_annotation_all = []
         self.plot_obj = None
 
-    def draw_chrom_data(self, sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, x_range=None, y_range=None):
+    def draw_chrom_data(self, sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, x_range=None, y_range=None, scale_intensity=False):
         """
         Adds chromatogram data to the ChromDataDrawer object's chrom_data_all and trace_annotation_all lists, and generates a plot using the Plotter class.
 
@@ -286,7 +290,8 @@ class ChromDataDrawer:
                 smoothing_dict=smoothing_dict,
                 plot_type='bokeh',
                 x_range=x_range,
-                y_range=y_range
+                y_range=y_range,
+                scale_intensity=scale_intensity
             )
 
             # Generate the plot
@@ -316,7 +321,7 @@ class ChromDataDrawer:
 
         averaged_plotter = Plotter(self.chrom_data_all, peptide_transition_list=None, trace_annotation=self.trace_annotation_all, title=plot_title, subtitle=f"{selected_peptide}_{selected_precursor_charge}", smoothing_dict=smoothing_dict,  plot_type='bokeh', x_range=x_range, y_range=y_range)
 
-        averaged_plot_obj  = averaged_plotter.plot()
+        averaged_plot_obj = averaged_plotter.plot()
 
         self.plot_obj = averaged_plot_obj
 
@@ -386,7 +391,7 @@ class ChromDataDrawer:
 
         return self
 
-def draw_single_chrom_data(sqmass_file_path, massseer_gui, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, algo_settings):
+def draw_single_chrom_data(sqmass_file_path, massseer_gui, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, scale_intensity, algo_settings):
     """
     Draws a single chromatogram plot with optional peak picking and smoothing.
 
@@ -408,7 +413,7 @@ def draw_single_chrom_data(sqmass_file_path, massseer_gui, chrom_data, include_m
         ChromDataDrawer: An instance of the ChromDataDrawer class containing the plot data.
     """
     chrom_data_drawer = ChromDataDrawer()
-    chrom_data_drawer.draw_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range)
+    chrom_data_drawer.draw_chrom_data(sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, scale_intensity)
 
     if algo_settings.do_peak_picking == "OSW-PyProphet":
         print(f"Peak Picking: {algo_settings.do_peak_picking}")
@@ -421,7 +426,7 @@ def draw_single_chrom_data(sqmass_file_path, massseer_gui, chrom_data, include_m
 
 
 # @st.cache_resource(show_spinner="Drawing chromatograms...")
-def draw_many_chrom_data(sqmass_file_path_list, massseer_gui,  chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, _algo_settings, threads ):
+def draw_many_chrom_data(sqmass_file_path_list, massseer_gui,  chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, scale_intensity, _algo_settings, threads ):
     """
     Draws chromatograms for multiple files and returns a dictionary with the results.
 
@@ -463,7 +468,7 @@ def draw_many_chrom_data(sqmass_file_path_list, massseer_gui,  chrom_data, inclu
     # Unfortunately we cannot perform mulltiprocessing because the bokeh object is not serializble
     output = {}
     for sqmass_file_path in sqmass_file_path_list:
-        res = draw_single_chrom_data(sqmass_file_path, massseer_gui, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, _algo_settings)
+        res = draw_single_chrom_data(sqmass_file_path, massseer_gui, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range, scale_intensity, _algo_settings)
         output[sqmass_file_path] = res
 
 

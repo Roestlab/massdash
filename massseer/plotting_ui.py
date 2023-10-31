@@ -61,6 +61,8 @@ class ChromatogramPlotSettings:
 
                 # Add widget for sgolay_frame_length in the second column
                 self.smoothing_dict['sgolay_frame_length'] = col2.number_input("Frame Length", min_value=1, max_value=50, value=11, step=1)
+            
+            self.scale_intensity = st.checkbox("Scale Intensity", value=False, key='plotting_settings_scale_intensity')
         return self  # Return self for method chaining
 
     def get_settings(self):

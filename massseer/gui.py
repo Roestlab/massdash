@@ -18,8 +18,6 @@ from massseer.plotter import Plotter, draw_many_chrom_data, draw_many_consensus_
 from massseer.chromatogram_data_handling import get_chrom_data_limits, get_chrom_data_global, compute_consensus_chromatogram
 from massseer.peak_picking import perform_chromatogram_peak_picking
 
-
-
 # Confit
 # There currently is warning with the icon size for some reason, not sure why
 # /home/justincsing/anaconda3/envs/py39/lib/python3.9/site-packages/PIL/IcoImagePlugin.py:316: UserWarning: Image was not the expected size
@@ -112,7 +110,7 @@ if massseer_gui.osw_file_path!="*.osw":
         else:
             chrom_data_global = []
 
-        chrom_plot_objs = draw_many_chrom_data(sqmass_file_path_list, massseer_gui, chrom_data, massseer_gui.chromatogram_plot_settings.include_ms1, massseer_gui.chromatogram_plot_settings.include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, massseer_gui.chromatogram_plot_settings.smoothing_dict, x_range, y_range, massseer_gui.alogrithm_settings, threads )
+        chrom_plot_objs = draw_many_chrom_data(sqmass_file_path_list, massseer_gui, chrom_data, massseer_gui.chromatogram_plot_settings.include_ms1, massseer_gui.chromatogram_plot_settings.include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, massseer_gui.chromatogram_plot_settings.smoothing_dict, x_range, y_range, massseer_gui.chromatogram_plot_settings.scale_intensity, massseer_gui.alogrithm_settings, threads )
 
         if massseer_gui.alogrithm_settings.do_consensus_chrom != 'none':
 
