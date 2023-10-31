@@ -38,7 +38,7 @@ from __future__ import print_function
 import pandas as pd
 import sqlite3
 
-from massseer.util import check_sqlite_column_in_table
+from massseer.util import check_sqlite_column_in_table, check_sqlite_table
 
 class SqMassDataAccess(object):
 
@@ -346,6 +346,45 @@ class OSWDataAccess(object):
                 INNER JOIN (SELECT * FROM PEPTIDE WHERE PEPTIDE.MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
                 INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
                 INNER JOIN TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID"""
+
+        data = pd.read_sql(stmt, self.conn)
+
+        return data
+
+    def getRunPrecursorPeakBoundaries(self, run_basename_wo_ext, fullpeptidename, charge):
+
+        if check_sqlite_table(self.conn, "SCORE_MS2"):
+            join_score_ms2 = "INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID"
+            select_score_ms2 = """SCORE_MS2.SCORE AS ms2_dscore,
+                SCORE_MS2.RANK AS peakgroup_rank,
+                SCORE_MS2.QVALUE AS ms2_mscore,"""
+        else:
+            join_score_ms2 = ""
+            select_score_ms2 = ""
+        
+        if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
+            select_feature_exp_im = "SELECT FEATURE.EXP_IM AS IM,"
+        else:
+            select_feature_exp_im = "-1 AS IM,"
+        
+        stmt = f"""SELECT 
+                PEPTIDE.MODIFIED_SEQUENCE AS FullPeptideName,
+                PRECURSOR.CHARGE AS Charge,
+                FEATURE.ID AS feature_id,
+                FEATURE_MS2.APEX_INTENSITY AS Intensity,
+                FEATURE.EXP_RT AS RT,
+                FEATURE.LEFT_WIDTH AS leftWidth,
+                FEATURE.RIGHT_WIDTH AS rightWidth,
+                {select_feature_exp_im}
+                {select_score_ms2}
+                PRECURSOR.DECOY AS decoy
+                FROM (SELECT * FROM PRECURSOR WHERE CHARGE = {charge}) AS PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN (SELECT * FROM PEPTIDE WHERE MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN (SELECT * FROM RUN WHERE FILENAME LIKE '%{run_basename_wo_ext}%') AS RUN ON RUN.ID = FEATURE.RUN_ID
+                {join_score_ms2}"""
 
         data = pd.read_sql(stmt, self.conn)
 
