@@ -1,6 +1,6 @@
 # TODOs
 
-- [ ] Implement plotting PyProphet boundaries and scores
+
 - [ ] Add peak picking using pyopenms 
 - [ ] Add public base conformer model
 - [ ] Add grid plot layout if multiple files are loaded
@@ -20,4 +20,5 @@
 - [x] ~~Add unit tests~~
 - [x] ~~Small dataset for testing~~
 - [x] ~~Add colors for different peak boundaries~~
+- [x] ~~Implement plotting PyProphet boundaries and scores~~
 
