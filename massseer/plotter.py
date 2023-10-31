@@ -328,7 +328,7 @@ class ChromDataDrawer:
         return self
 
 
-    def draw_peak_boundaries(self, do_peak_picking, chromatogram_type='regular', peak_picker=None, osw_file_path=None, sqmass_file_path=None, selected_peptide=None, selected_precursor_charge=None):
+    def draw_peak_boundaries(self, do_peak_picking, chromatogram_type='regular', peak_picker=None, osw_file_path=None, sqmass_file_path=None, selected_peptide=None, selected_precursor_charge=None, scale_intensity=False):
         """
         Draws peak boundaries on the plot using the ChromDataDrawer object's plot_obj and the perform_chromatogram_peak_picking function.
 
@@ -348,8 +348,12 @@ class ChromDataDrawer:
             
             for i in range(len(peak_features['leftWidth'])):
                 y_bottom = [0] 
-                self.plot_obj.vbar(x=peak_features['leftWidth'][i], bottom=y_bottom, top=peak_features['IntegratedIntensity'][i], width=0.1, color=dark2_palette[i], line_color=dark2_palette[i])
-                self.plot_obj.vbar(x=peak_features['rightWidth'][i], bottom=y_bottom, top=peak_features['IntegratedIntensity'][i], width=0.1, color=dark2_palette[i], line_color=dark2_palette[i])
+                if scale_intensity:
+                    y_top = 1
+                else: 
+                    y_top = peak_features['IntegratedIntensity'][i]
+                self.plot_obj.vbar(x=peak_features['leftWidth'][i], bottom=y_bottom, top=y_top, width=0.1, color=dark2_palette[i], line_color=dark2_palette[i])
+                self.plot_obj.vbar(x=peak_features['rightWidth'][i], bottom=y_bottom, top=y_top, width=0.1, color=dark2_palette[i], line_color=dark2_palette[i])
         elif do_peak_picking == "OSW-PyProphet" and chromatogram_type=='regular':
             print("Info: Getting OSW boundaries")
             print(osw_file_path)
@@ -357,10 +361,18 @@ class ChromDataDrawer:
             osw_features = osw.getRunPrecursorPeakBoundaries(os.path.splitext(os.path.basename(sqmass_file_path))[0], selected_peptide, 
             selected_precursor_charge)
 
-            
-
             for i in range(osw_features.shape[0]):
-                source = ColumnDataSource(data = {
+                
+                if scale_intensity:
+                    source = ColumnDataSource(data = {
+                    'Intensity' : [1],
+                    'leftWidth'   : [osw_features['leftWidth'][i]],
+                    'rightWidth'   : [osw_features['rightWidth'][i]],
+                    'peakgroup_rank' : [osw_features['peakgroup_rank'][i]],
+                    'ms2_mscore' : [osw_features['ms2_mscore'][i]],
+                    'bottom_int'    : [0]})
+                else:
+                    source = ColumnDataSource(data = {
                     'Intensity' : [osw_features['Intensity'][i]],
                     'leftWidth'   : [osw_features['leftWidth'][i]],
                     'rightWidth'   : [osw_features['rightWidth'][i]],
@@ -417,10 +429,10 @@ def draw_single_chrom_data(sqmass_file_path, massseer_gui, chrom_data, include_m
 
     if algo_settings.do_peak_picking == "OSW-PyProphet":
         print(f"Peak Picking: {algo_settings.do_peak_picking}")
-        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, 'regular', None, massseer_gui.osw_file_path, sqmass_file_path, selected_peptide, selected_precursor_charge)
+        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, 'regular', None, massseer_gui.osw_file_path, sqmass_file_path, selected_peptide, selected_precursor_charge, scale_intensity)
     elif algo_settings.do_peak_picking in PEAK_PICKING_ALGORITHMS:
         print(f"Peak Picking: {algo_settings.do_peak_picking}")
-        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, 'regular', algo_settings.PeakPickerMRMParams.peak_picker)
+        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, 'regular', algo_settings.PeakPickerMRMParams.peak_picker, None, None, None, None, scale_intensity)
     
     return chrom_data_drawer
 
