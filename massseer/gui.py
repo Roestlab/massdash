@@ -118,6 +118,8 @@ if massseer_gui.osw_file_path!="*.osw":
 
             consensus_chrom_plot_objs = draw_many_consensus_chrom(sqmass_file_path_list, selected_peptide, selected_precursor_charge, massseer_gui.alogrithm_settings.do_consensus_chrom, massseer_gui.alogrithm_settings.consensus_chrom_mode, chrom_plot_objs, chrom_data_global, massseer_gui.alogrithm_settings.scale_intensity, massseer_gui.alogrithm_settings.percentile_start, massseer_gui.alogrithm_settings.percentile_end, massseer_gui.alogrithm_settings.threshold, massseer_gui.alogrithm_settings.auto_threshold, massseer_gui.chromatogram_plot_settings.smoothing_dict, x_range, y_range, massseer_gui.alogrithm_settings, threads)
 
+        plot_cols = st.columns(massseer_gui.chromatogram_plot_settings.num_plot_columns)
+        col_counter = 0 
         for sqmass_file_path in sqmass_file_path_list:
                 plot_obj = chrom_plot_objs[sqmass_file_path].plot_obj
                 
@@ -134,7 +136,11 @@ if massseer_gui.osw_file_path!="*.osw":
                     with col2:
                         st.bokeh_chart(averaged_plot_obj)
                 else:
-                    st.bokeh_chart(plot_obj)
+                    with plot_cols[col_counter]:
+                        st.bokeh_chart(plot_obj)
+                        col_counter+=1
+                        if col_counter >= len(plot_cols):
+                            col_counter = 0
 
 # OpenMS Siderbar Bottom Logo
 st.sidebar.image(OPENMS_LOGO)
