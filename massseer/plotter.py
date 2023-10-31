@@ -323,12 +323,13 @@ class ChromDataDrawer:
         return self
 
 
-    def draw_peak_boundaries(self, do_peak_picking, peak_picker=None, osw_file_path=None, sqmass_file_path=None, selected_peptide=None, selected_precursor_charge=None):
+    def draw_peak_boundaries(self, do_peak_picking, chromatogram_type='regular', peak_picker=None, osw_file_path=None, sqmass_file_path=None, selected_peptide=None, selected_precursor_charge=None):
         """
         Draws peak boundaries on the plot using the ChromDataDrawer object's plot_obj and the perform_chromatogram_peak_picking function.
 
         Parameters:
         do_peak_picking (str): The type of peak picking to perform.
+        chromatogram_type (str): One of 'regular' of 'consensus'
         do_smoothing (bool): Whether to perform smoothing on the data.
         smoothing_dict (dict): A dictionary containing parameters for smoothing the data.
 
@@ -344,7 +345,7 @@ class ChromDataDrawer:
                 y_bottom = [0] 
                 self.plot_obj.vbar(x=peak_features['leftWidth'][i], bottom=y_bottom, top=peak_features['IntegratedIntensity'][i], width=0.1, color=dark2_palette[i], line_color=dark2_palette[i])
                 self.plot_obj.vbar(x=peak_features['rightWidth'][i], bottom=y_bottom, top=peak_features['IntegratedIntensity'][i], width=0.1, color=dark2_palette[i], line_color=dark2_palette[i])
-        elif do_peak_picking == "OSW-PyProphet":
+        elif do_peak_picking == "OSW-PyProphet" and chromatogram_type=='regular':
             print("Info: Getting OSW boundaries")
             print(osw_file_path)
             osw = OSWDataAccess(osw_file_path)
@@ -411,10 +412,10 @@ def draw_single_chrom_data(sqmass_file_path, massseer_gui, chrom_data, include_m
 
     if algo_settings.do_peak_picking == "OSW-PyProphet":
         print(f"Peak Picking: {algo_settings.do_peak_picking}")
-        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, None, massseer_gui.osw_file_path, sqmass_file_path, selected_peptide, selected_precursor_charge)
+        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, 'regular', None, massseer_gui.osw_file_path, sqmass_file_path, selected_peptide, selected_precursor_charge)
     elif algo_settings.do_peak_picking in PEAK_PICKING_ALGORITHMS:
         print(f"Peak Picking: {algo_settings.do_peak_picking}")
-        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, algo_settings.PeakPickerMRMParams.peak_picker)
+        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, 'regular', algo_settings.PeakPickerMRMParams.peak_picker)
     
     return chrom_data_drawer
 
@@ -505,8 +506,8 @@ def draw_single_consensus_chrom(sqmass_file_path, selected_peptide, selected_pre
     chrom_data_drawer = ChromDataDrawer()
     chrom_data_drawer.draw_consensus_chrom_data(consensus_chrom_mode, averaged_chrom_data, plot_title, selected_peptide, selected_precursor_charge, smoothing_dict, x_range, y_range)    
 
-    if algo_settings.do_peak_picking in PEAK_PICKING_ALGORITHMS:
-        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, algo_settings.PeakPickerMRMParams.peak_picker)
+    if algo_settings.do_peak_picking in PEAK_PICKING_ALGORITHMS and algo_settings.do_peak_picking != "OSW-PyProphet":
+        chrom_data_drawer.draw_peak_boundaries(algo_settings.do_peak_picking, 'consensus', algo_settings.PeakPickerMRMParams.peak_picker)
     
     return chrom_data_drawer
 
