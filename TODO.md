@@ -2,6 +2,7 @@
 
 - [ ] Add peak picking using pyopenms 
 - [ ] Add public base conformer model
+- [ ] scale intensities of individual traces for chromatograms 
 - [ ] Add grid plot layout if multiple files are loaded
 - [ ] Generate concensus chrom traces per transition
 - [ ] Docker / or just ssh port
