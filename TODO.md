@@ -1,6 +1,5 @@
 # TODOs
 
-
 - [ ] Add peak picking using pyopenms 
 - [ ] Add public base conformer model
 - [ ] Add grid plot layout if multiple files are loaded
