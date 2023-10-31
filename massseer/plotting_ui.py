@@ -45,8 +45,8 @@ class ChromatogramPlotSettings:
             self.num_plot_columns = st.number_input("Number of Columns", min_value=1, value=self.num_plot_columns)
 
             # Add Checkboxes for setting x-range and y-range
-            self.set_x_range = st.checkbox("Set x-range", value=self.set_x_range)
-            self.set_y_range = st.checkbox("Set y-range", value=self.set_y_range)
+            self.set_x_range = st.checkbox("Link x-range", value=self.set_x_range)
+            self.set_y_range = st.checkbox("Link y-range", value=self.set_y_range)
 
             # Perform Smoothing of the chromatograms
             self.do_smoothing = st.selectbox("Smoothing", ['sgolay', 'none'])
