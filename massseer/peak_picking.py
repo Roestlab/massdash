@@ -1,6 +1,8 @@
 import pyopenms as po
 import numpy as np
 
+# Internal modules
+from massseer.SqlDataAccess import OSWDataAccess
 
 def calculate_integrated_intensity(chrom_data, boundary):
     """
@@ -96,7 +98,7 @@ def find_peak_boundaries(rt_arr, rt_acc_im, peak_picker):
           dict: A dictionary containing the FWHM, integrated intensity, left width, and right width for each peak,
               with keys corresponding to the names of the data arrays.
       """
-    #   print(f"len(rt_arr): {len(rt_arr)} and len(rt_acc_im): {len(rt_acc_im)}")
+    # #   print(f"len(rt_arr): {len(rt_arr)} and len(rt_acc_im): {len(rt_acc_im)}")
     #   print(rt_arr)
     #   print(rt_acc_im)
       # Create an MSChromatogram object
@@ -124,6 +126,7 @@ def find_peak_boundaries(rt_arr, rt_acc_im, peak_picker):
 
           return peak_boundaries
       else:
+          print("Info: Couldn't find peak boundaries with PeakPickerMRM, returning None")
           return None
 
 def get_peak_boundariers_for_single_chromatogram(chrom_data, rt_peak_picker, top_n_features=5):
@@ -184,16 +187,22 @@ def merge_and_calculate_consensus_peak_boundaries(chrom_data, rt_peak_picker, to
         dict: A dictionary containing the consensus peak boundaries and integrated intensity.
     """
     trace_peaks_list = []
-
+    # print(chrom_data[0][1])
     # Iterate through chrom_data to find peak boundaries
+    min_rt, max_rt = None, None
     for i in range(len(chrom_data)):
         # print(f" i = {i} and len(chrom_data[i][0]) = {len(chrom_data[i][0])} and len (chrom_data[i][0]) = {len(chrom_data[i][0])}")
         # print(f"chrom_data[i][0]: {chrom_data[i][0]}")
         # print(f"chrom_data[i][1]: {chrom_data[i][1]}")
+        if min_rt is None or min_rt > min(chrom_data[i][0]):
+            min_rt = min(chrom_data[i][0])
+        if max_rt is None or max_rt > max(chrom_data[i][0]):
+            max_rt = max(chrom_data[i][0])
         peak_features = find_peak_boundaries(chrom_data[i][0], chrom_data[i][1], rt_peak_picker)
         if peak_features is not None:
             trace_peaks_list.append(peak_features)
-
+    if len(trace_peaks_list)==0:
+        return {'leftWidth': [min_rt], 'rightWidth': [max_rt],'IntegratedIntensity': [0] } 
     # Initialize empty lists to store boundaries and intensities
     boundaries = []
     integrated_intensities = []
@@ -280,3 +289,4 @@ def perform_chromatogram_peak_picking(chrom_data_all, peak_picker, merged_peak_p
         peak_features = get_peak_boundariers_for_single_chromatogram(chrom_data_all, peak_picker)
 
     return peak_features
+
