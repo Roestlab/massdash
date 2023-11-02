@@ -4,8 +4,7 @@ import streamlit as st
 import numpy as np
 
 # Internal modules
-from massseer.SqlDataAccess import OSWDataAccess
-
+from massseer.loaders.OSWDataAccess import OSWDataAccess
 ######################################
 ### OpenSwath File Handling
 
