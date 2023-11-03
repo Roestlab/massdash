@@ -1,9 +1,11 @@
 import streamlit as st
+import numpy as np
 
 # UI imports
 from massseer.file_handling_ui import TransitionListUI
 
 # Server side imports
+from massseer.util import setup_logger
 from massseer.transition_list import TransitionList
 from massseer.targeted_data_extraction import TargeteddiaPASEFExperiment
 
@@ -44,7 +46,7 @@ class TargetedExperimentUI(TransitionListUI):
             # UI for MS2 MZ tolerance in ppm
             self.ms2_mz_tolerance = st.number_input("MS2 m/z tolerance (ppm)", value=20)
             # UI for RT extraction window in seconds
-            self.rt_window = st.number_input("RT window (seconds)", value=600)
+            self.rt_window = st.number_input("RT window (seconds)", value=150)
             # UI for IM extraction window in 1/K0
             self.im_window = st.number_input("IM window (1/K0)", value=0.06)
     
@@ -75,14 +77,14 @@ class TargetedExperimentUI(TransitionListUI):
         peptide_dict[self.transition_settings.selected_peptide + "_" + str(self.transition_settings.selected_charge)] = {
             'peptide': self.transition_settings.selected_peptide, 'precursor_mz': self.transition_list.get_peptide_precursor_mz(self.transition_settings.selected_peptide, self.transition_settings.selected_charge), 
             'charge': self.transition_settings.selected_charge, 
-            'rt_apex': self.transition_list.get_peptide_retention_time(self.transition_settings.selected_peptide, self.transition_settings.selected_charge),
+            'rt_apex': self.transition_list.get_peptide_retention_time(self.transition_settings.selected_peptide, self.transition_settings.selected_charge)*60,
             'im_apex': self.transition_list.get_peptide_ion_mobility(self.transition_settings.selected_peptide, self.transition_settings.selected_charge),
             'qvalue': None, 
             'product_mz': self.transition_list.get_peptide_product_mz_list(self.transition_settings.selected_peptide, self.transition_settings.selected_charge),
             'product_charge': self.transition_list.get_peptide_product_charge_list(self.transition_settings.selected_peptide, self.transition_settings.selected_charge),
             'product_annotation': self.transition_list.get_peptide_fragment_annotation_list(self.transition_settings.selected_peptide, self.transition_settings.selected_charge),
             'product_detecting': [], 
-            'rt_boundaries': ''}
+            'rt_boundaries': [0, 8000]}
         return peptide_dict
 
     # @st.cache_resource(show_spinner="Loading data...")
@@ -90,9 +92,39 @@ class TargetedExperimentUI(TransitionListUI):
 
         print(_self.get_peptide_dict())
 
-        _self.targeted_exp = TargeteddiaPASEFExperiment(mzml_file_path, _self.ms1_mz_tolerance, _self.ms2_mz_tolerance, _self.rt_window, _self.im_window, _self.get_mslevel_list(), "ondisk")
+        _self.targeted_exp = TargeteddiaPASEFExperiment(mzml_file_path, _self.ms1_mz_tolerance, _self.ms2_mz_tolerance, _self.rt_window, _self.im_window, _self.get_mslevel_list(), "ondisk", 10, None)
         _self.targeted_exp.load_data()
+        return _self.targeted_exp
 
-    def targeted_extraction(self) -> None:
-        self.targeted_exp.reduce_spectra(self.get_peptide_dict())
-        print(self.targeted_exp.filtered.get_df())
+    def targeted_extraction(self, targeted_exp) -> None:
+        targeted_exp.reduce_spectra(self.get_peptide_dict())
+
+    def find_closest_reference_mz(self, given_mz: np.array, reference_mz_values: np.array) -> np.array:
+        """
+        Find the closest reference m/z value in the given list to provided m/z values.
+
+        Parameters:
+            given_mz (np.array): An array of m/z values for which to find the closest reference m/z values.
+            reference_mz_values (np.array): An array of reference m/z values to compare against.
+
+        Returns:
+            np.array: An array of the closest reference m/z values from the provided list.
+        """
+        closest_mz = reference_mz_values[np.argmin(np.abs(reference_mz_values - given_mz[:, None]), axis=1)]
+        return closest_mz
+
+    def apply_mz_mapping(self, row):
+        if row['ms_level'] == 2:
+            return self.find_closest_reference_mz(np.array([row['mz']]), np.array(self.transition_list.get_peptide_product_mz_list(self.transition_settings.selected_peptide, self.transition_settings.selected_charge)))[0]
+        elif row['ms_level'] == 1:
+            return row['precursor_mz']
+        else:
+            return np.nan
+
+    # @st.cache_data(show_spinner="Returning data as dataframe...")  
+    def get_targeted_data(_self, _targeted_exp):
+        targeted_data = _targeted_exp.get_df(_self.get_mslevel_list())
+        # Add a new column 'product_mz' with the mapped m/z values
+        targeted_data['product_mz'] = targeted_data.apply(_self.apply_mz_mapping, axis=1)
+
+        return targeted_data

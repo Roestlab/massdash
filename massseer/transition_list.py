@@ -78,7 +78,7 @@ class TransitionList:
         return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['ProductCharge'].tolist()
     
     def get_peptide_retention_time(self, peptide: str, charge: int) -> float:
-        return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['NormalizedRetentionTime'].iloc[0]
+        return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['NormalizedRetentionTime'].iloc[0] 
     
     def get_peptide_ion_mobility(self, peptide: str, charge: int) -> float:
         return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['PrecursorIonMobility'].iloc[0]
