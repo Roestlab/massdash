@@ -5,7 +5,7 @@ import numpy as np
 from massseer.file_handling_ui import TransitionListUI
 
 # Server side imports
-from massseer.util import setup_logger
+from massseer.util import get_logger
 from massseer.transition_list import TransitionList
 from massseer.targeted_data_extraction import TargeteddiaPASEFExperiment
 
