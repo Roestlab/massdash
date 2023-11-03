@@ -9,6 +9,11 @@ from massseer.SqlDataAccess import OSWDataAccess
 ######################################
 ### OpenSwath File Handling
 
+class ReadOSWFile:
+    def __init__(self, osw_file_path) -> None:
+        self.osw_file_path = osw_file_path
+        self.osw = OSWDataAccess(osw_file_path)
+
 @st.cache_data
 def get_protein_options(protein_table):
     """
@@ -150,3 +155,19 @@ def get_sqmass_files(sqmass_file_path_input, threads=1):
     return sqmass_file_path_list, threads
 
 # def process_sqmass_files():
+
+class TransitionListUI:
+    def __init__(self) -> None:
+        self.transition_list = ""
+
+    def show_protein_selection(self, protein_list):
+        self.selected_protein = st.sidebar.selectbox("Select protein", protein_list)
+        return self
+
+    def show_peptide_selection(self, peptide_list):
+        self.selected_peptide = st.sidebar.selectbox("Select peptide", peptide_list)
+        return self
+    
+    def show_charge_selection(self, charge_list):
+        self.selected_charge = st.sidebar.selectbox("Select charge", charge_list)
+        return self
