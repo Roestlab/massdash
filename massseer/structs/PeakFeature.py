@@ -12,4 +12,4 @@ class PeakFeature:
         self.qvalue = qvalue
 
     def __str__(self):
-        return f"PeakFeature\nApex: {self.apex}\nLeftWidth: {self.leftWidth}\nRightWidth: {self.rightWidth}\nArea: {self.area_intensity}\nQvalue: {self.qvalue}"
+        return f"{'-'*8} PeakFeature {'-'*8}\nApex: {self.apex}\nLeftWidth: {self.leftWidth}\nRightWidth: {self.rightWidth}\nArea: {self.area_intensity}\nQvalue: {self.qvalue}"
