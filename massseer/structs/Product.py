@@ -25,6 +25,17 @@ class Product:
         self.annotation = annotation
         self._library_intensity = None
 
+    def __str__(self) -> str:
+        """
+        Returns a string representation of the product.
+
+        Returns:
+            str: A string representation of the product.
+        """
+        product_info = "\n".join([f"  {product}" for product in self.products])
+        return f"Precursor: {self.mz}\nCharge: {self.charge}\nProducts:\n{product_info}\nLibrary intensity: {self.library_intensity}\nLibrary RT: {self.library_rt}\nLibrary IM: {self.library_ion_mobility}"
+
+
     @property
     def library_intensity(self) -> float:
         """

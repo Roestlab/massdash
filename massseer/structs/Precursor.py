@@ -27,6 +27,13 @@ class Precursor:
         self._library_rt = None
         self._library_ion_mobility = None
 
+    def __str__(self) -> str:
+        """
+        Returns a string representation of the Precursor object, including its m/z value, charge state, product ions,
+        library intensity, library retention time, and library ion mobility.
+        """
+        return f"Precursor: {self.mz}\nCharge: {self.charge}\nProducts: {self.products}\nLibrary intensity: {self.library_intensity}\nLibrary RT: {self.library_rt}\nLibrary IM: {self.library_ion_mobility}"
+
     @property
     def library_intensity(self):
         """
