@@ -22,7 +22,7 @@ class Protein:
         Returns:
             str: A string representation of the protein.
         '''
-        return f"Protein: {self.accession}\n" + ", ".join(str(peptide) for peptide in self.peptides)
+        return f"{'-'*8} Protein {'-'*8}\nAccession: {self.accession}\n" + ", ".join(str(peptide) for peptide in self.peptides)
 
 
     def add_peptide(self, peptide: Peptide) -> None:
