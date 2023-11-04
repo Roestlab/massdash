@@ -165,6 +165,8 @@ def get_logger(logger_name):
    logger.propagate = False
    return logger
 
+LOGGER = get_logger('MassSeer')
+
 def check_im_array(im_array):
     '''
     Check Ion Mobility Array to make sure values are valid
