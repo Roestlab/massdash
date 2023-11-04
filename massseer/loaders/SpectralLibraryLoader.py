@@ -75,6 +75,9 @@ class TransitionList:
     def get_peptide_ion_mobility(self, peptide: str, charge: int) -> float:
         return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['PrecursorIonMobility'].iloc[0]
 
+    def get_peptide_library_intensity(self, peptide: str, charge: int) -> float:
+        return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['LibraryIntensity'].iloc[0]
+
     def get_peptide_fragment_annotation_list(self, peptide: str, charge: int) -> List[str]:
         return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['Annotation'].tolist()
     
