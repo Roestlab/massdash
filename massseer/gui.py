@@ -152,7 +152,7 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
     # Create a UI for targeted experiment
     targeted_experiment_ui = TargetedExperimentUI(transition_list)
     targeted_experiment_ui.show_transition_information()
-    targeted_experiment_ui.show_extraction_parameters()
+    
     # print(transition_list.data.columns)
 
     diann_data = DiaNNLoader(massseer_gui.diann_report_file_path_input, massseer_gui.transition_list_file_path)
@@ -160,10 +160,11 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
     # Add Dia-NN chromatogram peak feature and mobilogram peak feature to precursor
     targeted_experiment_ui.transition_settings.protein.peptides[0] = diann_data.load_report_for_precursor(targeted_experiment_ui.transition_settings.protein.peptides[0])
 
-    print(targeted_experiment_ui.transition_settings.protein)
+    targeted_experiment_ui.show_search_results_information()
 
     if massseer_gui.raw_file_path_input != "*.mzML":
-
+        # Create a UI for extraction parameters for targeted experiment
+        targeted_experiment_ui.show_extraction_parameters()
         if st.sidebar.button("Extract"):
             print(massseer_gui.raw_file_path_input) 
 
@@ -179,6 +180,12 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
                 print(targeted_data.columns)
                 status.update(label="Targeted extraction complete!", state="complete", expanded=False)
 
+            from massseer.structs.FeatureMap import FeatureMap
+            from massseer.structs.TransitionGroup import TransitionGroup
+
+            transition_group = TransitionGroup.from_feature_map(FeatureMap(targeted_data))
+            transition_group.protein = targeted_experiment_ui.transition_settings.protein
+            print(transition_group)
             st.dataframe(targeted_data, hide_index=True, column_order =('ms_level', 'precursor_mz', 'product_mz', 'mz', 'rt', 'im', 'int', 'rt_apex', 'im_apex'))
 
 # OpenMS Siderbar Bottom Logo
