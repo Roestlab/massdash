@@ -10,3 +10,6 @@ class PeakFeature:
         self.rightWidth = rightWidth
         self.area_intensity = area_intensity
         self.qvalue = qvalue
+
+    def __str__(self):
+        return f"PeakFeature\nApex: {self.apex}\nLeftWidth: {self.leftWidth}\nRightWidth: {self.rightWidth}\nArea: {self.area_intensity}\nQvalue: {self.qvalue}"
