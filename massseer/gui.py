@@ -157,8 +157,8 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
 
     diann_data = DiaNNLoader(massseer_gui.diann_report_file_path_input, massseer_gui.transition_list_file_path)
     
-    diann_precursor_results = diann_data.load_report_for_precursor(targeted_experiment_ui.transition_settings.protein.peptides[0])
-    print(diann_precursor_results)
+    # Add Dia-NN chromatogram peak feature and mobilogram peak feature to precursor
+    targeted_experiment_ui.transition_settings.protein.peptides[0] = diann_data.load_report_for_precursor(targeted_experiment_ui.transition_settings.protein.peptides[0])
 
     print(targeted_experiment_ui.transition_settings.protein)
 
