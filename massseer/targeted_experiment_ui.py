@@ -29,7 +29,9 @@ class TargetedExperimentUI(TransitionListUI):
         # Show peptides for selected protein
         self.transition_settings.show_peptide_selection(self.transition_list.get_unique_peptides_per_protein(self.transition_settings.selected_protein))
         # Show charge states for selected peptide
-        self.transition_settings.show_charge_selection(self.transition_list.get_unique_charge_states_per_peptide(self.transition_settings.selected_peptide))
+        self.transition_settings.show_charge_selection(self.transition_list.get_unique_charge_states_per_peptide(self.transition_settings.selected_peptide), self.transition_list)
+        # Show library features
+        self.transition_settings.show_library_features(self.transition_list)
 
     def show_extraction_parameters(self) -> None:
         st.sidebar.subheader("Extraction parameters")

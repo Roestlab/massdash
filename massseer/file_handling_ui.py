@@ -155,18 +155,39 @@ def get_sqmass_files(sqmass_file_path_input, threads=1):
 
 # def process_sqmass_files():
 
+from massseer.structs.Protein import Protein
+from massseer.structs.Peptide import Peptide
+from massseer.structs.Precursor import Precursor
+
 class TransitionListUI:
     def __init__(self) -> None:
         self.transition_list = ""
 
     def show_protein_selection(self, protein_list):
         self.selected_protein = st.sidebar.selectbox("Select protein", protein_list)
+        self.protein = Protein(self.selected_protein)
         return self
 
     def show_peptide_selection(self, peptide_list):
         self.selected_peptide = st.sidebar.selectbox("Select peptide", peptide_list)
+        self.protein.add_peptide(Peptide(self.selected_peptide))
         return self
     
-    def show_charge_selection(self, charge_list):
-        self.selected_charge = st.sidebar.selectbox("Select charge", charge_list)
+    def show_charge_selection(self, charge_list, transition_list):
+        col1, col2 = st.sidebar.columns(2)
+        with col1:
+            self.selected_charge = st.selectbox("Select charge", charge_list)
+        with col2:
+            precursor_mz = transition_list.get_peptide_precursor_mz(self.selected_peptide, self.selected_charge)
+            st.code(f"Precursor m/z\n{precursor_mz}", language="markdown")
+        self.protein.peptides[0].add_precursor(Precursor(precursor_mz, self.selected_charge))
+        return self
+
+    def show_library_features(self, transition_list):
+        library_int = transition_list.get_peptide_library_intensity(self.selected_peptide, self.selected_charge)
+        library_rt = transition_list.get_peptide_retention_time(self.selected_peptide, self.selected_charge)
+        library_ion_mobility = transition_list.get_peptide_ion_mobility(self.selected_peptide, self.selected_charge)
+        st.sidebar.code(f"Library intensity: {library_int}\nLibrary RT: {library_rt}\nLibrary IM: {library_ion_mobility}", language="markdown")
+        # Add library features to precursor
+        
         return self
