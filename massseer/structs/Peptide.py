@@ -76,3 +76,10 @@ class Peptide:
         Returns a list of annotations for each product in the peptide.
         """
         return [product.annotation for product in self.precursor.products]
+
+    def get_sequence_wo_terminal_period(self) -> str:
+        """
+        Returns the peptide sequence without the terminal period.
+        Example: Convert .(UniMod:1)SEGDSVGESVHGKPSVVYR to (UniMod:1)SEGDSVGESVHGKPSVVYR
+        """
+        return self.sequence.replace('.', '')
