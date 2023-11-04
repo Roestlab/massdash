@@ -34,7 +34,7 @@ class Precursor:
         Returns a string representation of the Precursor object, including its m/z value, charge state, product ions,
         library intensity, library retention time, and library ion mobility.
         """
-        return f"{'-'*8} Precursor {'-'*8}\nm/z: {self.mz}\nCharge: {self.charge}\nProducts: {self.products}\nLibrary intensity: {self.library_intensity}\nLibrary RT: {self.library_rt}\nLibrary IM: {self.library_ion_mobility}\nChromatogram peak feature: {self.chromatogram_peak_feature}\nMobilogram peak feature: {self.mobilogram_peak_feature}"
+        return f"{'-'*8} Precursor {'-'*8}\nm/z: {self.mz}\nCharge: {self.charge}\nLibrary intensity: {self.library_intensity}\nLibrary RT: {self.library_rt}\nLibrary IM: {self.library_ion_mobility}\n{'-'*8} Chromatogram -{self.chromatogram_peak_feature}\n{'-'*8}Mobilogram -{self.mobilogram_peak_feature}\n" + "\n".join(str(products) for products in self.products)
 
     @property
     def library_intensity(self):
