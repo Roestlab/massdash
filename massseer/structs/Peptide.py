@@ -24,7 +24,7 @@ class Peptide:
         Returns:
             str: A string representation of the peptide.
         """
-        return f"Peptide: {self.sequence}\n{self.precursor}\n"
+        return f"{'-'*8} Peptide {'-'*8}\nSequence: {self.sequence}\n{self.precursor}\n"
 
     def add_precursor(self, precursor: Precursor) -> None:
         """

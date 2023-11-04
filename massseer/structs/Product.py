@@ -33,7 +33,7 @@ class Product:
             str: A string representation of the product.
         """
         product_info = "\n".join([f"  {product}" for product in self.products])
-        return f"Precursor: {self.mz}\nCharge: {self.charge}\nProducts:\n{product_info}\nLibrary intensity: {self.library_intensity}\nLibrary RT: {self.library_rt}\nLibrary IM: {self.library_ion_mobility}"
+        return f"{'-'*8} Precursor {'-'*8}\nm/z: {self.mz}\nCharge: {self.charge}\nProducts:\n{product_info}\nLibrary intensity: {self.library_intensity}\nLibrary RT: {self.library_rt}\nLibrary IM: {self.library_ion_mobility}"
 
 
     @property
