@@ -33,7 +33,33 @@ class TargetedExperimentUI(TransitionListUI):
         # Show library features
         self.transition_settings.show_library_features(self.transition_list)
 
+    def show_search_results_information(self) -> None:
+        st.sidebar.divider()
+        st.sidebar.subheader("Search results")
+        # Check to see if chromatogram peak feature apex is not none and mobilogram peak feature apex is not none to enable the use search results checkbox otherwise disable it
+        enable_use_search_results_checkbox = self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.apex is not None and self.transition_settings.protein.peptides[0].precursor.mobilogram_peak_feature.apex is not None
+        # Checkbox to use search results RT apex and IM apex for extraction parameters
+        self.use_search_results_in_extraction = st.sidebar.checkbox("Use search result coordinates for extraction", value=True, disabled=not enable_use_search_results_checkbox)
+        with st.sidebar.expander("Expand for search results", expanded=False):
+            # Get chromatogram peak feature RT and boundaries from search results
+            chrom_rt_apex = self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.apex
+            chrom_rt_start = self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.leftWidth
+            chrom_rt_end = self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.rightWidth
+            # Get chromatogram intensity and qvalue from search results
+            chrom_intensity = self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.area_intensity
+            chrom_qvalue = self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.qvalue
+
+            # Get mobilogram peak feature Im apex from search results
+            mobilogram_im_apex = self.transition_settings.protein.peptides[0].precursor.mobilogram_peak_feature.apex
+
+            # Display in sidebar
+            st.markdown("**Chromatogram peak feature**")
+            st.code(f"RT: {chrom_rt_apex}\nRT start: {chrom_rt_start}\nRT end: {chrom_rt_end}\nIntensity: {chrom_intensity}\nQvalue: {chrom_qvalue}", language="markdown")
+            st.markdown("**Mobilogram peak feature**")
+            st.code(f"IM: {mobilogram_im_apex}", language="markdown")
+
     def show_extraction_parameters(self) -> None:
+        st.sidebar.divider()
         st.sidebar.subheader("Extraction parameters")
         # UI for two column checkbox to include MS1 and/or MS2
         col1, col2 = st.sidebar.columns(2)
@@ -75,21 +101,51 @@ class TargetedExperimentUI(TransitionListUI):
         #         'product_annotation': ['y4^1', 'y7^1', 'y8^1', 'y9^1', 'y10^1', 'y11^1'], 
         #         'product_detecting': [1, 1, 1, 1, 1, 1], 
         #         'rt_boundaries': [1718.036865234375, 1751.983642578125]}}
+        
+        # Use search results RT and IM apexs if available
+        if self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.apex is not None:
+            use_rt_apex = self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.apex
+        else:
+            use_rt_apex = self.transition_list.get_peptide_retention_time(self.transition_settings.selected_peptide, self.transition_settings.selected_charge)
+
+        if self.transition_settings.protein.peptides[0].precursor.mobilogram_peak_feature.apex is not None:
+            use_im_apex = self.transition_settings.protein.peptides[0].precursor.mobilogram_peak_feature.apex
+        else:
+            use_im_apex = self.transition_list.get_peptide_ion_mobility(self.transition_settings.selected_peptide, self.transition_settings.selected_charge)
+
+        # Use search results RT boundaries if available and search results qvalue and intensity
+        if self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.leftWidth is not None and self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.rightWidth is not None:
+            use_rt_boundaries = [self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.leftWidth, self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.rightWidth]
+        else:
+            # TODO: Need to figure a better way of dealing with this. Downstream code expects a list of two values
+            use_rt_boundaries = [0, 8000]
+
+        if self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.qvalue is not None:
+            use_qvalue = self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.qvalue
+        else:
+            use_qvalue = None
+
+        if self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.area_intensity is not None:
+            use_area_intensity = self.transition_settings.protein.peptides[0].precursor.chromatogram_peak_feature.area_intensity
+        else:
+            use_area_intensity = None
+
         peptide_dict = {}
         peptide_dict[self.transition_settings.selected_peptide + "_" + str(self.transition_settings.selected_charge)] = {
             'peptide': self.transition_settings.selected_peptide, 'precursor_mz': self.transition_list.get_peptide_precursor_mz(self.transition_settings.selected_peptide, self.transition_settings.selected_charge), 
             'charge': self.transition_settings.selected_charge, 
-            'rt_apex': self.transition_list.get_peptide_retention_time(self.transition_settings.selected_peptide, self.transition_settings.selected_charge)*60,
-            'im_apex': self.transition_list.get_peptide_ion_mobility(self.transition_settings.selected_peptide, self.transition_settings.selected_charge),
-            'qvalue': None, 
+            'rt_apex': use_rt_apex,
+            'im_apex': use_im_apex,
+            'qvalue': use_qvalue, 
             'product_mz': self.transition_list.get_peptide_product_mz_list(self.transition_settings.selected_peptide, self.transition_settings.selected_charge),
             'product_charge': self.transition_list.get_peptide_product_charge_list(self.transition_settings.selected_peptide, self.transition_settings.selected_charge),
             'product_annotation': self.transition_list.get_peptide_fragment_annotation_list(self.transition_settings.selected_peptide, self.transition_settings.selected_charge),
             'product_detecting': [], 
-            'rt_boundaries': [0, 8000]}
+            'rt_boundaries': use_rt_boundaries,
+            'area_intensity': use_area_intensity}
         return peptide_dict
 
-    # @st.cache_resource(show_spinner="Loading data...")
+    @st.cache_resource(show_spinner="Loading data...")
     def load_targeted_experiment(_self, mzml_file_path: str) -> None:
 
         print(_self.get_peptide_dict())
