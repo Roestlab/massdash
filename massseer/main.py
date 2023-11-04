@@ -16,6 +16,7 @@ def gui():
     """
     GUI for MassSeer.
     """
+
     click.echo("Starting MassSeer GUI...")
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, 'gui.py')

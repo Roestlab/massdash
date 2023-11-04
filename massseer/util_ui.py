@@ -39,7 +39,7 @@ class MassSeerGUI:
                 st.write("This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.")
 
                 # Tabs for different data workflows
-                self.tab1, self.tab2 = st.tabs(["OpenSwath", "DIA-NN"])
+                self.tab1, self.tab2 = st.tabs(["sqMass Data", "Raw Data"])
                 with self.tab1:
                     st.subheader("OpenSwath")
 
@@ -50,6 +50,34 @@ class MassSeerGUI:
 
                     st.title("Input sqMass file")
                     self.sqmass_file_path_input = st.text_input("Enter file path", "*.sqMass", key='sqmass_file_path_input_tmp')
+
+                with self.tab2:
+                    st.subheader("Raw Targeted Data Extraction")
+
+                    # /media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/josh/diann/K562-Library-Default_osw_6Frags_diann.tsv
+                    # /media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/josh/90min-SP-30cm-2um-K562-100nL-25ng_DIA_Slot1-5_1_550_3-7-2021.mzML
+                    # /media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/josh/diann/jsc718.5808924.0/report.tsv
+                    # Test protein: O15258
+                    # Test peptide: (UniMod:1)SEGDSVGESVHGKPSVVYR
+                    # >>> d.loc[(d['Q.Value'] <= 0.000001) & (d['PG.Q.Value'] <= 0.001) & (d['Protein.Ids']=='O15258')][['RT', 'RT.Start', 'RT.Stop', 'iRT']]
+                    #             RT   RT.Start    RT.Stop        iRT
+                    # 518  51.864735  51.715942  52.043346  41.704933
+                    st.title("Input Transition List")
+                    self.transition_list_file_path = st.text_input("Enter file path", "*.pqp / *.tsv", key='raw_data_transition_list')
+
+                    st.title("Input Raw file")
+                    self.raw_file_path_input = st.text_input("Enter file path", "*.mzML", key='raw_data_file_path')
+
+                    # Tabs for different data workflows
+                    st.title("Input Search Results")
+                    self.raw_data_osw, self.raw_data_diann = st.tabs(["OSW", "DIA-NN"])
+                    with self.raw_data_osw:
+                        st.subheader("OpenSwath")
+                        self.osw_file_path = st.text_input("Enter file path", "*.osw", key='raw_data_osw_file_pat')
+
+                    with self.raw_data_diann:
+                        st.subheader("DIA-NN")
+                        self.diann_report_file_path_input = st.text_input("Enter file path", "*.tsv", key='diann_report_file_path')
 
         return self
 

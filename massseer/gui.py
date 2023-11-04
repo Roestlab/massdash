@@ -8,15 +8,19 @@ from typing import List
 
 # Internal UI modules
 from massseer.util_ui import MassSeerGUI
-from massseer.file_handling_ui import process_osw_file, get_sqmass_files
+from massseer.file_handling_ui import process_osw_file, get_sqmass_files, TransitionListUI
 from massseer.plotting_ui import ChromatogramPlotSettings
 from massseer.algo_ui import AlgorithmUISettings
 
 # Internal server modules
+from massseer.loaders.SpectralLibraryLoader import TransitionList
+from massseer.targeted_experiment_ui import TargetedExperimentUI
 from massseer.data_loader import process_many_files
 from massseer.plotter import Plotter, draw_many_chrom_data, draw_many_consensus_chrom
 from massseer.chromatogram_data_handling import get_chrom_data_limits, get_chrom_data_global, compute_consensus_chromatogram
 from massseer.peak_picking import perform_chromatogram_peak_picking
+
+from massseer.loaders.DiaNNLoader import DiaNNLoader
 
 # Confit
 # There currently is warning with the icon size for some reason, not sure why
@@ -139,6 +143,41 @@ if massseer_gui.osw_file_path!="*.osw":
                         col_counter+=1
                         if col_counter >= len(plot_cols):
                             col_counter = 0
+
+if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
+    # Load data from a TSV file
+    transition_list = TransitionList(massseer_gui.transition_list_file_path)
+    transition_list.load()
+    print(transition_list.data)
+    # Create a UI for targeted experiment
+    targeted_experiment_ui = TargetedExperimentUI(transition_list)
+    targeted_experiment_ui.show_transition_information()
+    targeted_experiment_ui.show_extraction_parameters()
+    # print(transition_list.data.columns)
+
+    diann_data = DiaNNLoader(massseer_gui.diann_report_file_path_input, massseer_gui.transition_list_file_path)
+    
+    diann_precursor_results = diann_data.load_report_for_precursor(targeted_experiment_ui.transition_settings.selected_peptide, targeted_experiment_ui.transition_settings.selected_charge)
+    print(diann_precursor_results)
+
+    if massseer_gui.raw_file_path_input != "*.mzML":
+
+        if st.sidebar.button("Extract"):
+            print(massseer_gui.raw_file_path_input) 
+
+            with st.status("Performing targeted extraction...", expanded=True) as status:
+                st.write("Loading raw file...")
+                targeted_exp = targeted_experiment_ui.load_targeted_experiment(massseer_gui.raw_file_path_input)
+                st.write("Extracting data...")
+                targeted_experiment_ui.targeted_extraction(targeted_exp)
+                st.write('Getting data as a pandas dataframe...')
+                targeted_data = targeted_experiment_ui.get_targeted_data(targeted_exp)
+                targeted_data.sort_values(by=['ms_level', 'precursor_mz', 'product_mz', 'mz'], inplace=True)
+                print(targeted_data[['ms_level', 'precursor_mz', 'product_mz', 'mz', 'rt', 'im', 'int', 'rt_apex', 'im_apex']])
+                print(targeted_data.columns)
+                status.update(label="Targeted extraction complete!", state="complete", expanded=False)
+
+            st.dataframe(targeted_data, hide_index=True, column_order =('ms_level', 'precursor_mz', 'product_mz', 'mz', 'rt', 'im', 'int', 'rt_apex', 'im_apex'))
 
 # OpenMS Siderbar Bottom Logo
 st.sidebar.image(OPENMS_LOGO)
