@@ -1,5 +1,5 @@
-from massseer.structs.Precursor
-from massseer.structs.Product
+from massseer.structs.Precursor import Precursor
+from massseer.structs.Product import Product
 
 from typing import List
 
