@@ -1,27 +1,83 @@
 from massseer.structs.Precursor
 from massseer.structs.Product
+
 from typing import List
 
 class Peptide:
-    '''
-    Class to represent a peptide
-    '''
-    def __init__(self, sequence: str, precursor: Precursor, products: List[Product]):
+    """
+    A class representing a peptide sequence.
+
+    Attributes:
+    -----------
+    sequence : str
+        The amino acid sequence of the peptide.
+    products : list
+        A list of product ions associated with the peptide.
+    """
+
+    def __init__(self, sequence: str):
         self.sequence = sequence
+        self.products = []
+
+    def add_precursor(self, precursor: Precursor) -> None:
+        """
+        Adds a precursor to the peptide.
+
+        Args:
+            precursor (Precursor): The precursor to add.
+
+        Returns:
+            None
+        """
         self.precursor = precursor
-        self.products = products
+
+    def add_product(self, product: Product) -> None:
+        """
+        Adds a product to the list of products associated with this peptide.
+
+        Args:
+            product (Product): The product to add.
+
+        Returns:
+            None
+        """
+        self.products.append(product)
 
     def get_precursor_mz(self) -> float:
+        """
+        Returns the precursor m/z value of the peptide.
+        
+        Returns:
+        float: The precursor m/z value of the peptide.
+        """
         return self.precursor.mz
 
     def get_precursor_charge(self) -> int:
+        """
+        Returns the charge of the precursor ion associated with this peptide.
+        
+        Returns:
+            int: The charge of the precursor ion.
+        """
         return self.precursor.charge
 
     def get_product_mzs(self) -> List[float]:
+        """
+        Returns a list of the m/z values for all products associated with this peptide.
+        
+        Returns:
+            List[float]: A list of the m/z values for all products associated with this peptide.
+        """
         return [product.mz for product in self.products]
     
     def get_product_charges(self) -> List[int]:
+        """
+        Returns a list of charges for all products in the peptide.
+        """
         return [product.charge for product in self.products]
 
     def get_product_annotations(self) -> List[str]:
+        """
+        Returns a list of annotations for each product in the peptide.
+        """
         return [product.annotation for product in self.products]
