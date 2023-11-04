@@ -158,6 +158,7 @@ def get_sqmass_files(sqmass_file_path_input, threads=1):
 from massseer.structs.Protein import Protein
 from massseer.structs.Peptide import Peptide
 from massseer.structs.Precursor import Precursor
+from massseer.structs.Product import Product
 
 class TransitionListUI:
     def __init__(self) -> None:
@@ -181,6 +182,12 @@ class TransitionListUI:
             precursor_mz = transition_list.get_peptide_precursor_mz(self.selected_peptide, self.selected_charge)
             st.code(f"Precursor m/z\n{precursor_mz}", language="markdown")
         self.protein.peptides[0].add_precursor(Precursor(precursor_mz, self.selected_charge))
+        # Add product ions to precursor
+        product_mz = transition_list.get_peptide_product_mz_list(self.selected_peptide, self.selected_charge)
+        product_charge = transition_list.get_peptide_product_charge_list(self.selected_peptide, self.selected_charge)
+        product_annotation = transition_list.get_peptide_fragment_annotation_list(self.selected_peptide, self.selected_charge)
+        for mz, charge, annotation in zip(product_mz, product_charge, product_annotation):
+            self.protein.peptides[0].precursor.add_product(Product(mz, charge, annotation))
         return self
 
     def show_library_features(self, transition_list):
