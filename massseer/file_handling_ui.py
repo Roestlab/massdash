@@ -188,6 +188,9 @@ class TransitionListUI:
         library_rt = transition_list.get_peptide_retention_time(self.selected_peptide, self.selected_charge)
         library_ion_mobility = transition_list.get_peptide_ion_mobility(self.selected_peptide, self.selected_charge)
         st.sidebar.code(f"Library intensity: {library_int}\nLibrary RT: {library_rt}\nLibrary IM: {library_ion_mobility}", language="markdown")
-        # Add library features to precursor
         
+        # Add library features to precursor
+        self.protein.peptides[0].precursor.library_intensity = library_int
+        self.protein.peptides[0].precursor.library_rt = library_rt
+        self.protein.peptides[0].precursor.library_ion_mobility = library_ion_mobility
         return self

@@ -160,6 +160,8 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
     diann_precursor_results = diann_data.load_report_for_precursor(targeted_experiment_ui.transition_settings.selected_peptide, targeted_experiment_ui.transition_settings.selected_charge)
     print(diann_precursor_results)
 
+    print(targeted_experiment_ui.transition_settings.protein)
+
     if massseer_gui.raw_file_path_input != "*.mzML":
 
         if st.sidebar.button("Extract"):
