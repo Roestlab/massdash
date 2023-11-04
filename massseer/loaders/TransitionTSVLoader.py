@@ -31,6 +31,8 @@ class TransitionTSVLoader:
         '''
         LOGGER.debug(f"Loading transition TSV file {_self.in_file}")
         _self.data = pd.read_csv(_self.in_file, sep='\t')
+        # Multiply the retention time by 60 to convert from minutes to seconds
+        _self.data['NormalizedRetentionTime'] = _self.data['NormalizedRetentionTime'] * 60
         if _self._validate_columns():
             return _self.data
         else:
