@@ -15,6 +15,16 @@ class Protein:
         self.accession = accession
         self.peptides = []
 
+    def __str__(self) -> str:
+        '''
+        Returns a string representation of the protein.
+
+        Returns:
+            str: A string representation of the protein.
+        '''
+        return f"Protein: {self.accession}\n" + ", ".join(str(peptide) for peptide in self.peptides)
+
+
     def add_peptide(self, peptide: Peptide) -> None:
             """
             Adds a peptide to the protein's list of peptides.

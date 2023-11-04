@@ -17,6 +17,15 @@ class Peptide:
     def __init__(self, sequence: str):
         self.sequence = sequence
 
+    def __str__(self) -> str:
+        """
+        Returns a string representation of the peptide.
+
+        Returns:
+            str: A string representation of the peptide.
+        """
+        return f"Peptide: {self.sequence}\n{self.precursor}\n"
+
     def add_precursor(self, precursor: Precursor) -> None:
         """
         Adds a precursor to the peptide.
