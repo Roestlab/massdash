@@ -8,3 +8,6 @@ class Chromatogram:
         self.intensity = np.array(intensity)
         self.rt = np.array(rt)
         self.label = label
+
+    def __str__(self):
+        return f"{'-'*8} Chromatogram {'-'*8}\nlabel: {self.label}\nlength of chromatogram: {len(self.rt)}"
