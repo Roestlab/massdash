@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.PeakFeature import PeakFeature
 from massseer.loaders.GenericLoader import GenericLoader
+from massseer.loaders.SqMassDataAccess import SqlDataAccess
+
 class SqMassLoader(GenericLoader):
     ''' 
     Class for loading Chromatograms and peak features
