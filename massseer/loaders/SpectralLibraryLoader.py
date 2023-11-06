@@ -12,7 +12,7 @@ from massseer.util import get_logger
 # # single const instance of logger
 LOGGER = get_logger(__name__)
 
-class TransitionList:
+class SpectralLibraryLoader:
 
     def __init__(self, in_file) -> None:
         self.in_file = in_file
