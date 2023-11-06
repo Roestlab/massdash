@@ -108,7 +108,3 @@ class TransitionTSVLoader:
         Validate the TSV file has the required columns
         '''
         return all(col in self.data.columns for col in TransitionTSVLoader.REQUIRED_TSV_COLUMNS)
-
-
-t = TransitionTSVLoader("/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/josh/diann/tmp.tsv")
-t._load()
