@@ -13,3 +13,6 @@ class PeakFeature:
 
     def __str__(self):
         return f"{'-'*8} PeakFeature {'-'*8}\nApex: {self.apex}\nLeftWidth: {self.leftWidth}\nRightWidth: {self.rightWidth}\nArea: {self.area_intensity}\nQvalue: {self.qvalue}"
+
+    def __repr__(self):
+        return f"PeakFeature Apex: {self.apex} LeftWidth: {self.leftWidth} RightWidth: {self.rightWidth} Area: {self.area_intensity} Qvalue: {self.qvalue}"
