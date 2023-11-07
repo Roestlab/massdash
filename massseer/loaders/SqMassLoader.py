@@ -6,6 +6,7 @@ from massseer.loaders.GenericLoader import GenericLoader
 from massseer.loaders.SqMassDataAccess import SqMassDataAccess
 from massseer.loaders.OSWDataAccess import OSWDataAccess
 from typing import List, Dict
+from os.path import basename
 
 class SqMassLoader(GenericLoader):
 
@@ -32,6 +33,8 @@ class SqMassLoader(GenericLoader):
         '''
 
         metaInfo = self.rsltsFile.getPeptideTransitionInfo(pep_id, charge)
+        if metaInfo.empty:
+            return None
         out = {}
         for t in self.transitionFiles:
             ### Get Transition chromatogram IDs
@@ -55,7 +58,7 @@ class SqMassLoader(GenericLoader):
         '''
         out = {}
         for t in self.transitionFiles_str:
-            runname = t[:-8]
+            runname = basename(t).split('.')[0]
             features = self.rsltsFile.getRunPrecursorPeakBoundaries(runname, pep_id, charge)
             tmp = []
             for _, i in features.iterrows():

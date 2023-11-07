@@ -86,7 +86,6 @@ class SqMassDataAccess:
         ### match ids with labels
         c = []
         for l, val in zip(labels, res.values()):
-            print(l)
             c.append(Chromatogram(val[0], val[1], l))
 
         return c
