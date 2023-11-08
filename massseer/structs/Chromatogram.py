@@ -13,7 +13,7 @@ class Chromatogram:
     def __str__(self):
         return f"{'-'*8} Chromatogram {'-'*8}\nlabel: {self.label}\nlength of chromatogram: {len(self.rt)}"
     
-    def topyopenms(self, id: Optional[str] = None):
+    def to_pyopenms(self, id: Optional[str] = None):
         '''
         Converts the Chromatogram to an OpenMS Chromatogram
         id (str): The nativeID of the chromatogram
@@ -24,7 +24,7 @@ class Chromatogram:
             chrom.setNativeID(id)
         return chrom
     
-    def max(self, boundary: Optional(Tuple(float, float)) = None) -> float:
+    def max(self, boundary: Optional[Tuple[float,float]] = None) -> float:
         """
         Calculate the highest intensity within a given boundary.
 
@@ -56,7 +56,7 @@ class Chromatogram:
         else:
             raise ValueError("Boundary must be a tuple.")   
 
-    def sum(self, boundary: Optional(Tuple(float, float)) = None) -> float:
+    def sum(self, boundary: Optional[Tuple[float,float]] = None) -> float:
         """
         Calculates the integrated intensity of a chromatogram within a given boundary.
 
@@ -71,7 +71,7 @@ class Chromatogram:
         else:
             return np.sum(self.intensity)
 
-    def median(self, boundary: Optional(Tuple(float, float)) = None) -> float:
+    def median(self, boundary: Optional[Tuple[float, float]] = None) -> float:
         """
         Calculate the median intensity of a given boundary in the chromatogram data.
 

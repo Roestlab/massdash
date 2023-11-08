@@ -1,7 +1,6 @@
 from massseer.structs.Chromatogram import Chromatogram
 from typing import List, Tuple, Optional
 import pyopenms as po
-import numpy as np
 
 
 class TransitionGroup:
@@ -33,7 +32,7 @@ class TransitionGroup:
                 transitionGroup.addTransition(transition, transition.getNativeID())
         return transitionGroup
     
-    def max(self, boundary: Tuple(float, float), level: Optional(str) = 'ms1ms2') -> float:
+    def max(self, boundary: Tuple[float, float], level: Optional[str] = 'ms1ms2') -> float:
         """
         Calculate the highest intensity within a given boundary.
 
@@ -64,7 +63,7 @@ class TransitionGroup:
         else:
             raise ValueError("Level must be one of ['ms1', 'ms2', 'ms1ms2']")
 
-    def sum(self, boundary: Tuple(float, float), level: str = 'ms2') -> float:
+    def sum(self, boundary: Tuple[float, float], level: str = 'ms2') -> float:
         """
         Calculates the integrated intensity of a chromatogram within a given boundary.
 
@@ -93,7 +92,7 @@ class TransitionGroup:
             intensity.extend(c.intensity)
         return Chromatogram(rt, intensity)
 
-    def median(self, boundary: Optional(Tuple(float, float)) = None, level: str = 'ms2') -> float:
+    def median(self, boundary: Optional[Tuple[float, float]] = None, level: Optional[str] = 'ms2') -> float:
         """
         Calculate the median intensity of a given boundary in the chromatogram data.
 

@@ -1,7 +1,7 @@
 
 from abc import ABC, abstractmethod
 from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.PeakFeature import PeakFeature
+from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.loaders.GenericLoader import GenericLoader
 from massseer.loaders.SqMassDataAccess import SqMassDataAccess
 from massseer.loaders.OSWDataAccess import OSWDataAccess
@@ -47,7 +47,7 @@ class SqMassLoader(GenericLoader):
             out[t] = TransitionGroup(precursorChroms = precursor_chroms, transitionChroms=transition_chroms)
         return out
 
-    def loadPeakFeature(self, pep_id: str, charge: int) -> List[PeakFeature]:
+    def loadTransitionGroupFeature(self, pep_id: str, charge: int) -> List[TransitionGroupFeature]:
         '''
         Loads a PeakFeature object from the results file
         Args:
@@ -62,7 +62,7 @@ class SqMassLoader(GenericLoader):
             features = self.rsltsFile.getRunPrecursorPeakBoundaries(runname, pep_id, charge)
             tmp = []
             for _, i in features.iterrows():
-                tmp.append(PeakFeature(area_intensity=i['Intensity'], leftWidth=i['leftWidth'], rightWidth=i['rightWidth'], qvalue=i['ms2_mscore'])) 
+                tmp.append(TransitionGroupFeature(i['leftWidth'], i['rightWidth'], areaIntensity=i['Intensity'], qvalue=i['ms2_mscore'])) 
                 out[t] = tmp
         return out
 
