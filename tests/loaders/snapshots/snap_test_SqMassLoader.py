@@ -7,7 +7,7 @@ from snapshottest import GenericRepr, Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestSqMassLoader::test_loadPeakFeature 1'] = {
+snapshots['TestSqMassLoader::test_loadTransitionGroupFeature 1'] = {
     '../test_data/xics/test_chrom_1.sqMass': [
         GenericRepr('PeakFeature Apex: None LeftWidth: 818.476013183594 RightWidth: 847.557983398438 Area: 15781.0 Qvalue: 0.00027720520546038556'),
         GenericRepr('PeakFeature Apex: None LeftWidth: 843.921997070312 RightWidth: 916.620971679688 Area: 40030.0 Qvalue: 0.00027720520546038556'),
@@ -24,7 +24,7 @@ snapshots['TestSqMassLoader::test_loadPeakFeature 1'] = {
     ]
 }
 
-snapshots['TestSqMassLoader::test_loadPeakFeature 2'] = 0
+snapshots['TestSqMassLoader::test_loadTransitionGroupFeature 2'] = 0
 
 snapshots['TestSqMassLoader::test_loadTransitionGroups 1'] = {
     GenericRepr('SqMassDataAccess(filename=../test_data/xics/test_chrom_1.sqMass)'): GenericRepr('<massseer.structs.TransitionGroup.TransitionGroup object at 0x100000000>'),
