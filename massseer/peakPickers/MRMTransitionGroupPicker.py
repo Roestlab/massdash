@@ -1,4 +1,7 @@
 import pyopenms as po
+from massseer.structs.TransitionGroup import TransitionGroup
+from massseer.structs.PeakFeature import PeakFeature
+from typing import List
 
 class MRMTransitionGroupPicker:
     ''' python wrapper of the pyopenms MRMTransitionGroupPicker '''
@@ -76,26 +79,18 @@ class MRMTransitionGroupPicker:
             self.params.setValue(bytes(param), value)
             self.picker.setParameters(self.params)
 
-    def run(self, chroms):
-        pass
+    def pick(self, transitionGroup: TransitionGroup) -> List[PeakFeature]:
+        ''' Performs Peak Picking, Should return a PeakFeatureList object '''
+        pyopenmsTransitionGroup = transitionGroup.to_pyopenms()
+        pyopenmsFeatures = self.picker.pickTransitionGroup(pyopenmsTransitionGroup).getFeatures()
+        return self._convertPyopenMSFeaturesToPeakFeatures(pyopenmsFeatures)
 
-
-    def computeFeature(my_chroms, params):
-        transitionGroupPicker = po.MRMTransitionGroupPicker()
-        transitionGroupPicker.setParameters(params)
-
-        transitionGroup = po.MRMTransitionGroupCP()
-
-        for i in range(len(my_chroms.transitionChroms)):
-            transition = po.ReactionMonitoringTransition()
-            transition.setNativeID(str(i))
-            chrom = po.MSChromatogram()
-            chrom.set_peaks((my_chroms.transitionChroms[i].rt, my_chroms.transitionChroms[i].intensity))
-            chrom.setNativeID(str(i))
-            transitionGroup.addChromatogram(chrom, chrom.getNativeID())
-            transitionGroup.addTransition(transition, transition.getNativeID())
-
-        transitionGroupPicker.pickTransitionGroup(transitionGroup)
-
-        return transitionGroup.getFeatures()
-
+    def _convertPyopenMSFeaturesToPeakFeatures(self, pyopenmsFeatures) -> List[PeakFeature]:
+        ''' Convert pyopenms features to PeakFeatures '''
+        peakFeatures = []
+        for f in pyopenmsFeatures:
+            peakFeatures.append(PeakFeature(leftWidth=f.getMetaValue(b'leftWidth'), 
+                                            rightWidth=f.getMetaValue(b'rightWidth'),
+                                            area_intensity=f.getIntensity(),
+                                            apex=f.getRT()))
+        return peakFeatures
