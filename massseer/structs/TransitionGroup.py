@@ -104,9 +104,8 @@ class TransitionGroup:
             float: The median intensity value of the data points within the given boundary.
         """
 
-        chroms = self._resolveLevel(level)
-        
+        chrom_flattened = self.flatten(level)
         if boundary is not None:
-            chroms =  chroms.filterChromatogram(boundary).median()
+            chrom_flattened = chrom_flattened.filterChromatogram(boundary)
 
-        chroms.flatten.median()
+        return chrom_flattened.median()

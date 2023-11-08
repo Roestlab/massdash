@@ -6,7 +6,7 @@ class Chromatogram:
     ''' 
     This is a single chromatogram object. Holds the data and metadata of a chromatogram
     '''
-    def __init__(self, rt, intensity, label):
+    def __init__(self, rt, intensity, label = 'None'):
         self.intensity = np.array(intensity)
         self.rt = np.array(rt)
         self.label = label
@@ -35,7 +35,7 @@ class Chromatogram:
             float: The highest intensity within the given boundary.
         """
         if boundary is not None:
-            return filterChromatogram(boundary).max()
+            return self.filterChromatogram(boundary).max()
         else:
             return np.max(self.intensity)
         
@@ -67,7 +67,7 @@ class Chromatogram:
             float: The integrated intensity of the chromatogram within the given boundary.
         """
         if boundary is not None:
-            return filterChromatogram(boundary).sum()
+            return self.filterChromatogram(boundary).sum()
         else:
             return np.sum(self.intensity)
 
@@ -83,6 +83,6 @@ class Chromatogram:
             float: The median intensity value of the data points within the given boundary.
         """
         if boundary is not None:
-            return filterChromatogram(boundary).median()
+            return self.filterChromatogram(boundary).median()
         else:
             return np.median(self.intensity)
