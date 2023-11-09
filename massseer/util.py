@@ -173,6 +173,6 @@ def get_logger(logger_name):
    logger.propagate = False
    return logger
 
+
 # Logger needs to initiated once
 LOGGER = get_logger('MassSeer')
-
