@@ -228,7 +228,7 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
         plot_obj = plotter.plot(transition_group)
 
         st.bokeh_chart(plot_obj)
-        st.write(f"Time elapsed: {timedelta(seconds=elapsed)}")
+        st.write(f"Total elapsed time of extraction: {timedelta(seconds=elapsed)}")
 
     for df in targeted_data.values():
         print(df.columns)
