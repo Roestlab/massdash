@@ -24,6 +24,7 @@ class pyMRMTransitionGroupPicker:
         params.setValue(b'sgolay_polynomial_order', sgolay_polynomial_order)
         params.setValue(b'use_gauss', 'false')
         params.setValue(b'method', 'corrected')
+        params.setValue(b'remove_overlapping_peaks', 'true')
         self.peak_picker.setParameters(params)
 
     def _resolveLevel(self, transitionGroup):
