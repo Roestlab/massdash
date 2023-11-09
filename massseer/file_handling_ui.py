@@ -5,13 +5,6 @@ import numpy as np
 
 # Internal modules
 from massseer.loaders.OSWDataAccess import OSWDataAccess
-######################################
-### OpenSwath File Handling
-
-class ReadOSWFile:
-    def __init__(self, osw_file_path) -> None:
-        self.osw_file_path = osw_file_path
-        self.osw = OSWDataAccess(osw_file_path)
 
 @st.cache_data
 def get_protein_options(protein_table):
@@ -129,7 +122,7 @@ def get_sqmass_files(sqmass_file_path_input, threads=1):
             raise ValueError(f"Error: Directory {sqmass_file_path_input} does not exist!")
         
         st.sidebar.subheader("sqMass file(s)")
-        with st.sidebar.expander("Advanced Settings"):
+        with st.sidebar.expander("File list"):
             # 1. Get the list of files in the directory
             files_in_directory = os.listdir(sqmass_file_path_input)
             
@@ -153,26 +146,73 @@ def get_sqmass_files(sqmass_file_path_input, threads=1):
                 threads = 1
     return sqmass_file_path_list, threads
 
-# def process_sqmass_files():
+def get_mzml_files(raw_file_path_input, threads=1):
+    """
+    Given a path to a directory or a file, returns a list of full file paths to *.mzML files in the directory or the file itself.
+    If the input path is a directory, the function displays a selection box in the sidebar to select the *.mzML files.
+    If the input path is a file, the function returns a list containing only the input file path.
+    The function also displays a slider to select the number of threads to use for processing the files.
+    
+    Parameters:
+    raw_file_path_input (str): Path to a directory or a file
+    
+    Returns:
+    raw_file_path_list (list): List of full file paths to *.mzML files in the directory or the file itself.
+    threads (int): Number of threads to use for processing the files.
+    """
+    
+    if os.path.isfile(raw_file_path_input):
+        raw_file_path_list = [raw_file_path_input]
+    else:
+        # Check to ensure directory exists otherwise throw error
+        if not os.path.isdir(raw_file_path_input):
+            raise ValueError(f"Error: Directory {raw_file_path_input} does not exist!")
+        
+        st.sidebar.subheader("Raw file(s)")
+        with st.sidebar.expander("File list"):
+            # 1. Get the list of files in the directory
+            files_in_directory = os.listdir(raw_file_path_input)
+            
+            #2. Filter the files based on the *.mzML file extension (case-insensitive)
+            files_in_directory = [filename for filename in files_in_directory if fnmatch.fnmatch(filename.lower(), '*.mzml')]
 
-from massseer.structs.Protein import Protein
-from massseer.structs.Peptide import Peptide
-from massseer.structs.Precursor import Precursor
-from massseer.structs.Product import Product
+            # 3. Sort the filenames alphabetically
+            sorted_filenames = sorted(files_in_directory, reverse=False)
+
+            # Create a selection box in the sidebar
+            selected_sorted_filenames = st.multiselect("Raw files", sorted_filenames, sorted_filenames)
+
+            # Create a list of full file paths
+            raw_file_path_list = [os.path.join(raw_file_path_input, file) for file in selected_sorted_filenames]
+
+            if len(raw_file_path_list) > 1:
+                    # Add Threads slider
+                    st.title("Threads")
+                    threads = st.slider("Number of threads", 1, os.cpu_count(), os.cpu_count())
+            else:
+                threads = 1
+
+    return raw_file_path_list, threads
+
+
+
 
 class TransitionListUI:
     def __init__(self) -> None:
         self.transition_list = ""
-
+        self.selected_protein = ""
+        self.selected_peptide = ""
+        self.selected_charge = ""
+        if 'protein_list' not in st.session_state:   
+            st.session_state['protein_list'] = []
+        
     def show_protein_selection(self, protein_list):
-        self.selected_protein = st.sidebar.selectbox("Select protein", protein_list)
-        self.protein = Protein(self.selected_protein)
-        return self
+        st.session_state['protein_list'] = protein_list
+        self.selected_protein = st.sidebar.selectbox(f"Select protein (of {len(st.session_state['protein_list'])} proteins)", st.session_state['protein_list'])
+        print(f"show protein selection | len = {len(st.session_state['protein_list'])}")
 
     def show_peptide_selection(self, peptide_list):
-        self.selected_peptide = st.sidebar.selectbox("Select peptide", peptide_list)
-        self.protein.add_peptide(Peptide(self.selected_peptide))
-        return self
+        self.selected_peptide = st.sidebar.selectbox(f"Select peptide (of {len(peptide_list)} peptides)", peptide_list)
     
     def show_charge_selection(self, charge_list, transition_list):
         col1, col2 = st.sidebar.columns(2)
@@ -181,14 +221,6 @@ class TransitionListUI:
         with col2:
             precursor_mz = transition_list.get_peptide_precursor_mz(self.selected_peptide, self.selected_charge)
             st.code(f"Precursor m/z\n{precursor_mz}", language="markdown")
-        self.protein.peptides[0].add_precursor(Precursor(precursor_mz, self.selected_charge))
-        # Add product ions to precursor
-        product_mz = transition_list.get_peptide_product_mz_list(self.selected_peptide, self.selected_charge)
-        product_charge = transition_list.get_peptide_product_charge_list(self.selected_peptide, self.selected_charge)
-        product_annotation = transition_list.get_peptide_fragment_annotation_list(self.selected_peptide, self.selected_charge)
-        for mz, charge, annotation in zip(product_mz, product_charge, product_annotation):
-            self.protein.peptides[0].precursor.add_product(Product(mz, charge, annotation))
-        return self
 
     def show_library_features(self, transition_list):
         library_int = transition_list.get_peptide_library_intensity(self.selected_peptide, self.selected_charge)
@@ -196,9 +228,11 @@ class TransitionListUI:
         library_ion_mobility = transition_list.get_peptide_ion_mobility(self.selected_peptide, self.selected_charge)
         with st.sidebar.expander("Library features", expanded=False):
             st.code(f"Library intensity: {library_int}\nLibrary RT: {library_rt}\nLibrary IM: {library_ion_mobility}", language="markdown")
+
+    def update_protein_selection(self, new_protein_list):
+        # Update the available protein options
+        print(len(st.session_state['protein_list']))
+        st.session_state['protein_list'] = new_protein_list
+        print(len(st.session_state['protein_list']))
+
         
-        # Add library features to precursor
-        self.protein.peptides[0].precursor.library_intensity = library_int
-        self.protein.peptides[0].precursor.library_rt = library_rt
-        self.protein.peptides[0].precursor.library_ion_mobility = library_ion_mobility
-        return self

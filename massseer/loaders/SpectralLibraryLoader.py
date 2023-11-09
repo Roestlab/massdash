@@ -81,3 +81,5 @@ class SpectralLibraryLoader:
     def get_peptide_fragment_annotation_list(self, peptide: str, charge: int) -> List[str]:
         return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['Annotation'].tolist()
     
+    def filter_for_target_transition_list(self, protein:str, peptide: str, charge: int) -> pd.DataFrame:
+        return self.data[( self.data['ProteinId'] == protein) & (self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]

@@ -62,6 +62,19 @@ class MassSeerGUI:
                     # >>> d.loc[(d['Q.Value'] <= 0.000001) & (d['PG.Q.Value'] <= 0.001) & (d['Protein.Ids']=='O15258')][['RT', 'RT.Start', 'RT.Stop', 'iRT']]
                     #             RT   RT.Start    RT.Stop        iRT
                     # 518  51.864735  51.715942  52.043346  41.704933
+                    # OSW
+                    # Test protein: P28482
+                    # Test peptide: .(UniMod:1)AAAAAAGAGPEM(UniMod:35)VR
+                    # EXP_RT    EXP_IM    LEFT_WIDTH    RIGHT_WIDTH
+                    # 3451.43	1.0257943970575	3445.74365234375	3461.81396484375
+                    # SCORE_MS2 QValue: 1.90126796378053e-05
+                    # OSW Highets intensity and lowest pvalue
+                    # Test protein: P0C0S5
+                    # Test peptide: AGLQFPVGR
+                    # EXP_RT    EXP_IM    LEFT_WIDTH    RIGHT_WIDTH
+                    # 4566.88   0.822054
+                    # SCORE_MS2 QValue: 0.000019
+                    # APEX Intensity: 791382.719254
                     st.title("Input Transition List")
                     self.transition_list_file_path = st.text_input("Enter file path", "*.pqp / *.tsv", key='raw_data_transition_list')
 
