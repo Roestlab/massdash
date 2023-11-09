@@ -1,6 +1,6 @@
 class PeakFeature:
     '''
-    This is a generic PeakFeature Object. All Peak Picking algorithms should an object of this class 
+    This is a generic PeakFeature Object. All Peak Picking algorithms should output an object of this class 
     '''
 
     def __init__(self, area_intensity=None, apex=None, leftWidth=None, rightWidth=None, qvalue=None):

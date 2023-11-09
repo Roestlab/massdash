@@ -1,1 +1,4 @@
-*__pycache__
+MassSeer.egg-info
+__pycache__
+*~
+tmp
