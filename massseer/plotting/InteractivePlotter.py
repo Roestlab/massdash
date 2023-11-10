@@ -20,7 +20,7 @@ class InteractivePlotter(GenericPlotter):
         super().__init__(config)
         
 
-    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram'):
+    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram') -> figure:
         if plot_type == 'chromatogram':
             return self.plot_chromatogram(transitionGroup)
         elif plot_type == 'mobilogram':
