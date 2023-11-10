@@ -125,8 +125,6 @@ class InteractivePlotter(GenericPlotter):
                 rt = transitionChrom.rt
                 intensity = transitionChrom.intensity
 
-                # print(f"rt: {rt}\nint: {intensity}")
-
                 # Smooth the intensity values
                 if self.smoothing_dict['type'] == 'sgolay':
                     intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
@@ -150,9 +148,6 @@ class InteractivePlotter(GenericPlotter):
 
                 # Get product mz
                 # get prdouct_mz from the targeted_transition_list where Annotation = label
-                print(label)
-                print(transitionGroup.targeted_transition_list)
-                print(transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]['ProductMz'])
                 product_mz = np.unique(transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]['ProductMz'].values)[0]
 
                 # Get product charge
