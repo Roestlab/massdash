@@ -2,7 +2,7 @@ from massseer.plotting.GenericPlotter import GenericPlotter, PlotConfig
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.PeakFeature import PeakFeature
 from massseer.chromatogram_data_handling import normalize
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 import os
 import multiprocessing
@@ -24,15 +24,15 @@ class InteractivePlotter(GenericPlotter):
         super().__init__(config)
         
 
-    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, type='chromatogram'):
-        if type == 'chromatogram':
+    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram'):
+        if plot_type == 'chromatogram':
             return self.plot_chromatogram(transitionGroup)
-        elif type == 'mobilogram':
+        elif plot_type == 'mobilogram':
             return self.plot_mobilogram(transitionGroup)
-        elif type == 'spectra':
+        elif plot_type == 'spectra':
             return self.plot_spectra(transitionGroup)
         else:
-            raise ValueError("Unsupported plot type")
+            raise ValueError("Unsupported plot plot_type")
 
     def plot_chromatogram(self, transitionGroup: TransitionGroup):
         # Extract chromatogram data from the transitionGroup
