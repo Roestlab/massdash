@@ -188,7 +188,6 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
             
             with time_block() as elapsed_time:
                 targeted_exp = targeted_experiment_ui.load_targeted_experiment(mzml_file_path_list)
-            print(f"HERE: {elapsed_time}")
             st.write(f"Loading raw file... Elapsed time: {elapsed_time()}") 
             with time_block() as elapsed_time:
                 targeted_experiment_ui.targeted_data_access(targeted_exp)

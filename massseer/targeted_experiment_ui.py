@@ -11,7 +11,7 @@ from massseer.util import get_logger
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.loaders.TargeteddiaPASEFLoader import TargeteddiaPASEFLoader
 from massseer.loaders.TargeteddiaPASEFDataAccess import TargeteddiaPASEFConfig
-from massseer.targeted_data_extraction import TargeteddiaPASEFExperiment
+# from massseer.targeted_data_extraction import TargeteddiaPASEFExperiment
 
 class TargetedExperimentUI(TransitionListUI):
     def __init__(self, transition_list: SpectralLibraryLoader) -> None:
@@ -98,7 +98,7 @@ class TargetedExperimentUI(TransitionListUI):
             # UI for MS2 MZ tolerance in ppm
             self.targeted_exp_params.mz_tol = st.number_input("MS2 m/z tolerance (ppm)", value=20)
             # UI for RT extraction window in seconds
-            self.targeted_exp_params.rt_window = st.number_input("RT window (seconds)", value=50)
+            self.targeted_exp_params.rt_window = st.number_input("RT window (seconds)", value=35)
             # UI for IM extraction window in 1/K0
             self.targeted_exp_params.im_window = st.number_input("IM window (1/K0)", value=0.06)
 
