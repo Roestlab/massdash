@@ -1,22 +1,18 @@
+import numpy as np
+from scipy.signal import savgol_filter
+
+import matplotlib.pyplot as plt
+from bokeh.plotting import figure
+from bokeh.models import ColumnDataSource, Legend, Title, Range1d, HoverTool, Label
+from bokeh.palettes import Category20, Viridis256
+
 from massseer.plotting.GenericPlotter import GenericPlotter, PlotConfig
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.PeakFeature import PeakFeature
 from massseer.chromatogram_data_handling import normalize
 from typing import List, Optional, Literal
 
-import os
-import multiprocessing
-import streamlit as st
 
-import numpy as np
-from scipy.signal import savgol_filter
-
-
-import matplotlib.pyplot as plt
-from bokeh.plotting import figure, show
-from bokeh.layouts import column
-from bokeh.models import ColumnDataSource, Legend, Title, Range1d, HoverTool, Label
-from bokeh.palettes import Category20, Viridis256
 
 class InteractivePlotter(GenericPlotter):
     
