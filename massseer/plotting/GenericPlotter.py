@@ -1,6 +1,6 @@
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Literal
 from massseer.structs.PeakFeature import PeakFeature
 from massseer.structs.TransitionGroup import TransitionGroup
 
@@ -71,7 +71,7 @@ class GenericPlotter(ABC):
         self.scale_intensity = config.scale_intensity
 
     @abstractmethod
-    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, type='chromatogram'):
+    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram'):
         pass
 
 

@@ -1,22 +1,18 @@
+import numpy as np
+from scipy.signal import savgol_filter
+
+import matplotlib.pyplot as plt
+from bokeh.plotting import figure
+from bokeh.models import ColumnDataSource, Legend, Title, Range1d, HoverTool, Label
+from bokeh.palettes import Category20, Viridis256
+
 from massseer.plotting.GenericPlotter import GenericPlotter, PlotConfig
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.PeakFeature import PeakFeature
 from massseer.chromatogram_data_handling import normalize
-from typing import List, Optional
-
-import os
-import multiprocessing
-import streamlit as st
-
-import numpy as np
-from scipy.signal import savgol_filter
+from typing import List, Optional, Literal
 
 
-import matplotlib.pyplot as plt
-from bokeh.plotting import figure, show
-from bokeh.layouts import column
-from bokeh.models import ColumnDataSource, Legend, Title, Range1d, HoverTool, Label
-from bokeh.palettes import Category20, Viridis256
 
 class InteractivePlotter(GenericPlotter):
     
@@ -24,15 +20,15 @@ class InteractivePlotter(GenericPlotter):
         super().__init__(config)
         
 
-    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, type='chromatogram'):
-        if type == 'chromatogram':
+    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram') -> figure:
+        if plot_type == 'chromatogram':
             return self.plot_chromatogram(transitionGroup)
-        elif type == 'mobilogram':
+        elif plot_type == 'mobilogram':
             return self.plot_mobilogram(transitionGroup)
-        elif type == 'spectra':
+        elif plot_type == 'spectra':
             return self.plot_spectra(transitionGroup)
         else:
-            raise ValueError("Unsupported plot type")
+            raise ValueError("Unsupported plot plot_type")
 
     def plot_chromatogram(self, transitionGroup: TransitionGroup):
         # Extract chromatogram data from the transitionGroup
@@ -129,8 +125,6 @@ class InteractivePlotter(GenericPlotter):
                 rt = transitionChrom.rt
                 intensity = transitionChrom.intensity
 
-                # print(f"rt: {rt}\nint: {intensity}")
-
                 # Smooth the intensity values
                 if self.smoothing_dict['type'] == 'sgolay':
                     intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
@@ -154,9 +148,6 @@ class InteractivePlotter(GenericPlotter):
 
                 # Get product mz
                 # get prdouct_mz from the targeted_transition_list where Annotation = label
-                print(label)
-                print(transitionGroup.targeted_transition_list)
-                print(transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]['ProductMz'])
                 product_mz = np.unique(transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]['ProductMz'].values)[0]
 
                 # Get product charge
