@@ -24,7 +24,7 @@ class InteractivePlotter(GenericPlotter):
     def __init__(self, config: PlotConfig):
         super().__init__(config)
 
-    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram') -> figure:
+    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectra'] = 'chromatogram') -> figure:
         """
         Plots the given transitionGroup using the specified plot type.
 
@@ -381,7 +381,7 @@ class InteractivePlotter(GenericPlotter):
         source_data = {'x': mz, 'y0':[0]*len(mz), 'y': intensity, 'precursor_mz': [precursor_mz] * len(mz), 'product_mz': [product_mz] * len(mz), 'product_charge': [product_charge] * len(mz)}
 
         source = ColumnDataSource(data=source_data)
-        line = p.vbar('x', bottom='y0', top='y', source=source, width=0.1, line_width=2, line_color=color, line_alpha=0.5, line_dash=line_type)
+        line = p.vbar('x', bottom='y0', top='y', source=source, width=0.1, line_width=2, line_color=color, color=color, line_alpha=0.5, line_dash=line_type)
 
         return line
     
