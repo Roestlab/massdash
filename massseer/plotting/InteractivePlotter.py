@@ -11,6 +11,8 @@ from massseer.plotting.GenericPlotter import GenericPlotter, PlotConfig
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.PeakFeature import PeakFeature
 from massseer.structs.Chromatogram import Chromatogram
+from massseer.structs.Mobilogram import Mobilogram
+from massseer.structs.Spectrum import Spectrum
 from massseer.chromatogram_data_handling import normalize
 from massseer.util import check_streamlit
 from typing import List, Optional, Literal
@@ -193,6 +195,65 @@ class InteractivePlotter(GenericPlotter):
 
             return p
 
+    def process_mobilo(self, p: figure, mobilo: Mobilogram, label: str, color: str='black', line_type: str="dashed", is_precursor: bool=True, transitionGroup: TransitionGroup=None) -> Line:
+        """
+        Process a mobilogram and add it to a Bokeh figure.
+
+        Args:
+            p (figure): Bokeh figure to add the mobilogram to.
+            mobilo (Mobilogram): Mobilogram object to process.
+            label (str): Label for the mobilogram.
+            color (str, optional): Color for the mobilogram line. Defaults to 'black'.
+            line_type (str, optional): Line type for the mobilogram line. Defaults to "dashed".
+            is_precursor (bool, optional): Whether the mobilogram is for the precursor ion. Defaults to True.
+            transitionGroup (TransitionGroup, optional): TransitionGroup object containing precursor and product ion information. Defaults to None.
+
+        Returns:
+            Line: Bokeh line object representing the mobilogram.
+        """
+        im = mobilo.im
+        intensity = mobilo.intensity
+
+        if self.smoothing_dict['type'] == 'sgolay':
+            try:
+                intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
+            except ValueError as ve:
+                if 'window_length must be less than or equal to the size of x' in str(ve):
+                    error_message = f"Error: The specified window length for sgolay smoothing is too large for transition = {label}. Try adjusting it to a smaller value."
+                else:
+                    error_message = f"Error: {ve}"
+
+                if check_streamlit():
+                    st.error(error_message)
+                else:
+                    raise ValueError(error_message)
+        elif self.smoothing_dict['type'] == 'none':
+            pass
+        else:
+            raise ValueError("Unsupported smoothing type")
+
+        if self.scale_intensity:
+            intensity = np.array(normalize(intensity.tolist()))
+
+        intensity = np.where(intensity < 0, 0, intensity)
+
+        # Get precursor and product info
+        precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
+        product_mz = None
+        product_charge = None
+
+        if not is_precursor:
+            label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
+            product_mz = np.unique(label_info['ProductMz'].values)[0]
+            product_charge = np.unique(label_info['ProductCharge'].values)[0]
+
+        source_data = {'x': im, 'y': intensity, 'precursor_mz': [precursor_mz] * len(im), 'product_mz': [product_mz] * len(im), 'product_charge': [product_charge] * len(im)}
+
+        source = ColumnDataSource(data=source_data)
+        line = p.line('x', 'y', source=source, line_width=2, line_color=color, line_alpha=0.5, line_dash=line_type)
+
+        return line
+
     def plot_mobilogram(self, transitionGroup: TransitionGroup) -> figure:
         """
         Plots the mobilogram for a given TransitionGroup.
@@ -207,8 +268,123 @@ class InteractivePlotter(GenericPlotter):
         precursorMobilos = transitionGroup.precursorMobilos
         transitionMobilos = transitionGroup.transitionMobilos
 
-        # Create and display mobilogram plots
-        # Implement the mobilogram plotting logic here
+        n_transitions = len(transitionMobilos)
+
+        # Define a list of distinct colors
+        if n_transitions <=20 and n_transitions > 2:
+            colors = Category20[len(transitionMobilos)]
+        elif n_transitions <=2 and n_transitions > 0:
+            colors = Category20[3]
+        elif n_transitions == 1:
+            colors = ['black']
+        else:
+            colors = Viridis256[len(transitionMobilos)]
+
+        # Tooltips for interactive information
+        TOOLTIPS = [
+                ("index", "$index"),
+                ("(im,int)", "(@x{0.00}, @y)"),
+                ("precursor_mz", "@precursor_mz"),
+                ("product_mz", "@product_mz"),
+                ("product_charge", "@product_charge")
+            ]
+        
+        # Create a Bokeh figure
+        p = figure(title=self.title, x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+
+        # Limit axes ranges
+        if self.x_range is not None:
+            print(f"Info: Setting x-axis range to: {self.x_range}")
+            p.x_range = Range1d(self.x_range[0], self.x_range[1])
+        
+        if self.y_range is not None:
+            print(f"Info: Setting y-axis range to: {self.y_range}")
+            p.y_range = Range1d(self.y_range[0], self.y_range[1])
+
+        p.sizing_mode = 'scale_width'
+        # Add a main title
+        p.title.text_font_size = "16pt"
+        p.title.align = "center"
+
+        # Create a subtitle
+        p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
+
+        # Create a legend
+        legend = Legend()
+
+        # Create a list to store legend items
+        legend_items = []
+
+        if self.include_ms1:
+            for precursorMobilo in precursorMobilos:
+                label = precursorMobilo.label
+                line = self.process_mobilo(p, precursorMobilo, label, transitionGroup=transitionGroup)
+                legend_items.append((label, [line]))
+
+        if self.include_ms2:
+            for i, transitionMobilo in enumerate(transitionMobilos):
+                label = transitionMobilo.label
+                line = self.process_mobilo(p, transitionMobilo, label, color=colors[i], line_type='solid', is_precursor=False, transitionGroup=transitionGroup)
+                legend_items.append((label, [line]))
+
+        # Add legend items to the legend
+        legend.items = legend_items
+
+        # Add the legend to the plot
+        p.add_layout(legend, 'right')
+
+        p.legend.location = "top_left"
+        # p.legend.click_policy="hide"
+        p.legend.click_policy="mute"
+
+        # Customize the plot
+        p.legend.title = "Transition"
+        p.legend.label_text_font_size = "10pt"
+        p.grid.visible = True
+
+        return p
+
+    def process_spectra(self, p: figure, spectra: Spectrum, label: str, color: str='black', line_type: str="dashed", is_precursor: bool=True, transitionGroup: TransitionGroup=None) -> Line:
+        """
+        Process a spectrum and add it to a Bokeh figure.
+
+        Args:
+            p (figure): Bokeh figure to add the spectrum to.
+            spectra (Spectrum): Spectrum object to process.
+            label (str): Label for the spectrum.
+            color (str, optional): Color for the spectrum line. Defaults to 'black'.
+            line_type (str, optional): Line type for the spectrum line. Defaults to "dashed".
+            is_precursor (bool, optional): Whether the spectrum is for the precursor ion. Defaults to True.
+            transitionGroup (TransitionGroup, optional): TransitionGroup object containing precursor and product ion information. Defaults to None.
+
+        Returns:
+            Line: Bokeh line object representing the spectrum.
+        """
+        mz = spectra.mz
+        intensity = spectra.intensity
+
+        if self.scale_intensity:
+            intensity = np.array(normalize(intensity.tolist()))
+
+        intensity = np.where(intensity < 0, 0, intensity)
+
+        # Get precursor and product info
+        precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
+        product_mz = None
+        product_charge = None
+
+        if not is_precursor:
+            label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
+            product_mz = np.unique(label_info['ProductMz'].values)[0]
+            product_charge = np.unique(label_info['ProductCharge'].values)[0]
+
+        source_data = {'x': mz, 'y0':[0]*len(mz), 'y': intensity, 'precursor_mz': [precursor_mz] * len(mz), 'product_mz': [product_mz] * len(mz), 'product_charge': [product_charge] * len(mz)}
+
+        source = ColumnDataSource(data=source_data)
+        line = p.vbar('x', bottom='y0', top='y', source=source, width=0.1, line_width=2, line_color=color, line_alpha=0.5, line_dash=line_type)
+
+        return line
+    
 
     def plot_spectra(self, transitionGroup: TransitionGroup) -> figure:
         """
@@ -228,5 +404,78 @@ class InteractivePlotter(GenericPlotter):
         precursorSpectra = transitionGroup.precursorSpectra
         transitionSpectra = transitionGroup.transitionSpectra
 
-        # Create and display spectra plots
-        # Implement the spectra plotting logic here
+        n_transitions = len(transitionSpectra)
+
+        # Define a list of distinct colors
+        if n_transitions <=20 and n_transitions > 2:
+            colors = Category20[len(transitionSpectra)]
+        elif n_transitions <=2 and n_transitions > 0:
+            colors = Category20[3]
+        elif n_transitions == 1:
+            colors = ['black']
+        else:
+            colors = Viridis256[len(transitionSpectra)]
+
+        # Tooltips for interactive information
+        TOOLTIPS = [
+                ("index", "$index"),
+                ("(mz,int)", "(@x{0.00}, @y)"),
+                ("precursor_mz", "@precursor_mz"),
+                ("product_mz", "@product_mz"),
+                ("product_charge", "@product_charge")
+            ]
+        
+        # Create a Bokeh figure
+        p = figure(title=self.title, x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+
+        # Limit axes ranges
+        if self.x_range is not None:
+            print(f"Info: Setting x-axis range to: {self.x_range}")
+            p.x_range = Range1d(self.x_range[0], self.x_range[1])
+        
+        if self.y_range is not None:
+            print(f"Info: Setting y-axis range to: {self.y_range}")
+            p.y_range = Range1d(self.y_range[0], self.y_range[1])
+
+        p.sizing_mode = 'scale_width'
+        # Add a main title
+        p.title.text_font_size = "16pt"
+        p.title.align = "center"
+
+        # Create a subtitle
+        p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
+
+        # Create a legend
+        legend = Legend()
+
+        # Create a list to store legend items
+        legend_items = []
+
+        if self.include_ms1:
+            for precursorSpectrum in precursorSpectra:
+                label = precursorSpectrum.label
+                line = self.process_spectra(p, precursorSpectrum, label, transitionGroup=transitionGroup)
+                legend_items.append((label, [line]))
+
+        if self.include_ms2:
+            for i, transitionSpectrum in enumerate(transitionSpectra):
+                label = transitionSpectrum.label
+                line = self.process_spectra(p, transitionSpectrum, label, color=colors[i], line_type='solid', is_precursor=False, transitionGroup=transitionGroup)
+                legend_items.append((label, [line]))
+        
+        # Add legend items to the legend
+        legend.items = legend_items
+
+        # Add the legend to the plot
+        p.add_layout(legend, 'right')
+
+        p.legend.location = "top_left"
+        # p.legend.click_policy="hide"
+        p.legend.click_policy="mute"
+
+        # Customize the plot
+        p.legend.title = "Transition"
+        p.legend.label_text_font_size = "10pt"
+        p.grid.visible = True
+
+        return p
