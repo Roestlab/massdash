@@ -13,6 +13,15 @@ class FeatureMap:
         self.feature_df = feature_df
         self.has_im = 'im' in feature_df.columns
 
+    def empty(self) -> bool:
+        """
+        Check if the FeatureMap is empty.
+
+        Returns:
+            bool: True if the feature_df is empty, False otherwise.
+        """
+        return self.feature_df.empty
+
     @staticmethod
     def average_intensity_across_two_dimensions(df: pd.DataFrame, index: str='im', columns: str='rt', values: str='int', axis: int=0):
         """
@@ -49,6 +58,8 @@ class FeatureMap:
         '''
         Get a list of precursor chromatograms from the feature map
         '''
+        if self.feature_df.shape[0] == 0:
+            return [Chromatogram(np.array([]), np.array([]), 'No precursor chromatograms found')]
         # Filter the feature map to only precursor chromatograms
         precursor_df = self.feature_df[self.feature_df['ms_level']==1]
         # If ion mobility data is present, compute mean of intensities across ion mobility for retention time
@@ -64,6 +75,8 @@ class FeatureMap:
         '''
         Get a list of transition chromatograms from the feature map
         '''
+        if self.feature_df.shape[0] == 0:
+            return [Chromatogram(np.array([]), np.array([]), 'No transition chromatograms found')]
         # Filter the feature map to only transition chromatograms
         transition_df = self.feature_df[self.feature_df['ms_level']==2]
         transition_chromatograms = []
@@ -84,6 +97,8 @@ class FeatureMap:
         '''
         Get a list of precursor ion mobility from the feature map
         '''
+        if self.feature_df.shape[0] == 0:
+            return [Mobilogram(np.array([]), np.array([]), 'No precursor ion mobility found')]
         # Filter the feature map to only precursor ion mobility
         precursor_df = self.feature_df[self.feature_df['ms_level']==1]
         # If ion mobility data is present, compute mean of intensities across retention time for ion mobility
@@ -99,6 +114,8 @@ class FeatureMap:
         '''
         Get a list of transition ion mobility from the feature map
         '''
+        if self.feature_df.shape[0] == 0:
+            return [Mobilogram(np.array([]), np.array([]), 'No transition ion mobility found')]
         # Filter the feature map to only transition ion mobility
         transition_df = self.feature_df[self.feature_df['ms_level']==2]
         transition_ion_mobilities = []
@@ -119,6 +136,8 @@ class FeatureMap:
         '''
         Get a list of precursor spectra from the feature map
         '''
+        if self.feature_df.shape[0] == 0:
+            return [Spectrum(np.array([]), np.array([]), 'No precursor spectra found')]
         # Filter the feature map to only precursor spectra
         precursor_df = self.feature_df[self.feature_df['ms_level']==1]
         precursor_spectra = []
@@ -132,6 +151,8 @@ class FeatureMap:
         '''
         Get a list of transition spectra from the feature map
         '''
+        if self.feature_df.shape[0] == 0:
+            return [Spectrum(np.array([]), np.array([]), 'No transition spectra found')]
         # Filter the feature map to only transition spectra
         transition_df = self.feature_df[self.feature_df['ms_level']==2]
         transition_spectra = []

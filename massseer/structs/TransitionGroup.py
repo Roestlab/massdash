@@ -25,7 +25,17 @@ class TransitionGroup:
         Returns:
             str: A string representation of the transition group.
         '''
+
         return f"{'-'*8} TransitionGroup {'-'*8}\nprecursor chromatograms: {len(self.precursorChroms)}\ntransition chromatograms: {len(self.transitionChroms)}\nprecursor mobilograms: {len(self.precursorMobilos)}\ntransition mobilograms: {len(self.transitionMobilos)}\nprecursor spectra: {len(self.precursorSpectra)}\ntransition spectra: {len(self.transitionSpectra)}"
+
+    def empty(self) -> bool:
+        """
+        Check if the TransitionGroup is empty.
+
+        Returns:
+            bool: True if all of the chromatograms, mobilograms, and spectra are empty, False otherwise.
+        """
+        return not any(chrom.empty() for chrom in self.precursorChroms) or any(chrom.empty() for chrom in self.transitionChroms) or any(mobil.empty() for mobil in self.precursorMobilos) or any(mobil.empty() for mobil in self.transitionMobilos) or any(spec.empty() for spec in self.precursorSpectra) or any(spec.empty() for spec in self.transitionSpectra)
 
     @classmethod
     def from_feature_map(cls, feature_map: FeatureMap, targeted_transition_list: Optional[pd.DataFrame] = None):
@@ -44,8 +54,8 @@ class TransitionGroup:
             precursorMobilos = feature_map.get_precursor_mobilograms()
             transitionMobilos = feature_map.get_transition_mobilograms()
         else:
-            precursorMobilos = None
-            transitionMobilos = None
+            precursorMobilos = [Mobilogram([], [], 'precursor mobilogram')]
+            transitionMobilos = [Mobilogram([], [], 'transition mobilogram')]
         precursorSpectra = feature_map.get_precursor_spectra()
         transitionSpectra = feature_map.get_transition_spectra()
         return cls(precursorChroms, transitionChroms, precursorMobilos, transitionMobilos, precursorSpectra, transitionSpectra, targeted_transition_list)
