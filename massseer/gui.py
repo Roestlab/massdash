@@ -214,6 +214,8 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
         print("Plotting...")
         # Show Plotting Settings UI
         massseer_gui.show_chromatogram_plot_settings()
+
+        # Generate Chromatgoram Plot
         plot_settings_dict = massseer_gui.chromatogram_plot_settings.get_settings()
         plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
         plot_settings_dict['y_axis_label'] = 'Intensity'
@@ -221,16 +223,50 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
         plot_settings_dict['subtitle'] = f"{targeted_experiment_ui.transition_settings.selected_protein} | {targeted_experiment_ui.transition_settings.selected_peptide}_{targeted_experiment_ui.transition_settings.selected_charge}"
         plot_config = PlotConfig()
         plot_config.update(plot_settings_dict)
-        print(transition_group.precursorChroms[0].rt)
-        print([c.empty() for c in transition_group.precursorChroms])
-        print(transition_group.empty())
+
         if not transition_group.precursorChroms[0].empty():
             plotter = InteractivePlotter(plot_config)
             plot_obj = plotter.plot(transition_group)
-            st.bokeh_chart(plot_obj)
         else:
             st.error("No data found for selected transition group.")
 
+        # Generate Mobilogram Plot
+        plot_settings_dict = massseer_gui.chromatogram_plot_settings.get_settings()
+        plot_settings_dict['x_axis_label'] = 'Ion Mobility (1/K0)'
+        plot_settings_dict['y_axis_label'] = 'Intensity'
+        plot_settings_dict['title'] = os.path.basename(massseer_gui.raw_file_path_input)
+        plot_settings_dict['subtitle'] = f"{targeted_experiment_ui.transition_settings.selected_protein} | {targeted_experiment_ui.transition_settings.selected_peptide}_{targeted_experiment_ui.transition_settings.selected_charge}"
+        plot_config = PlotConfig()
+        plot_config.update(plot_settings_dict)
+
+        if not transition_group.precursorChroms[0].empty():
+            plotter = InteractivePlotter(plot_config)
+            plot_mobilo_obj = plotter.plot(transition_group, plot_type='mobilogram')
+        else:
+            st.error("No data found for selected transition group.")
+
+        # Generate Spectrum Plot
+        plot_settings_dict = massseer_gui.chromatogram_plot_settings.get_settings()
+        plot_settings_dict['x_axis_label'] = 'm/z'
+        plot_settings_dict['y_axis_label'] = 'Intensity'
+        plot_settings_dict['title'] = os.path.basename(massseer_gui.raw_file_path_input)
+        plot_settings_dict['subtitle'] = f"{targeted_experiment_ui.transition_settings.selected_protein} | {targeted_experiment_ui.transition_settings.selected_peptide}_{targeted_experiment_ui.transition_settings.selected_charge}"
+        plot_config = PlotConfig()
+        plot_config.update(plot_settings_dict)
+
+        if not transition_group.precursorChroms[0].empty():
+            plotter = InteractivePlotter(plot_config)
+            plot_spectrum_obj = plotter.plot(transition_group, plot_type='spectra')
+        else:
+            st.error("No data found for selected transition group.")
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.bokeh_chart(plot_obj)
+        with col2:
+            st.bokeh_chart(plot_mobilo_obj)
+        with col3:
+            st.bokeh_chart(plot_spectrum_obj)
         st.write(f"Total elapsed time of extraction: {timedelta(seconds=elapsed)}")
 
     for df in targeted_data.values():
