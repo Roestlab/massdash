@@ -19,7 +19,7 @@ class TransitionGroup:
         self.transitionSpectra = transitionSpectra
         self._protein = None
 
-    def to_pyopenms(self, includePrecursors=False):
+    def to_pyopenms(self, includePrecursors=True):
         '''
         Converts the TransitionGroup to an OpenMS TransitionGroup
         '''
@@ -27,7 +27,7 @@ class TransitionGroup:
         for i in range(len(self.transitionChroms)):
             transition = po.ReactionMonitoringTransition()
             transition.setNativeID(str(i))
-            chrom = self.transitionChroms[i].topyopenms(label=str(i))
+            chrom = self.transitionChroms[i].to_pyopenms(id=str(i))
             transitionGroup.addChromatogram(chrom, chrom.getNativeID())
             transitionGroup.addTransition(transition, transition.getNativeID())
 
@@ -35,9 +35,8 @@ class TransitionGroup:
             for i in range(len(self.precursorChroms)):
                 precursor = po.ReactionMonitoringTransition()
                 precursor.setNativeID('p' + str(i))
-                chrom = self.precursorChroms[i].topyopenms(label='p' + str(i))
-                transitionGroup.addChromatogram(chrom, chrom.getNativeID())
-                transitionGroup.addTransition(transition, transition.getNativeID())
+                chrom = self.precursorChroms[i].to_pyopenms(id='p' + str(i))
+                transitionGroup.addPrecursorChromatogram(chrom, chrom.getNativeID())
         return transitionGroup
     
     def max(self, boundary: Tuple[float, float], level: Optional[str] = 'ms1ms2') -> float:

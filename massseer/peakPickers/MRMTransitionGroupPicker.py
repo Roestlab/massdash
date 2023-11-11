@@ -1,6 +1,6 @@
 import pyopenms as po
 from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.PeakFeature import PeakFeature
+from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from typing import List
 
 class MRMTransitionGroupPicker:
@@ -10,7 +10,7 @@ class MRMTransitionGroupPicker:
         ' smoother - which smoother to use for picking chromatogram valid options: ["original", "guassian", "sgolay"]'
         ' **kwargs - keyword arguments to be passed to setSmoother function valid options ["sgolay_frame_length (default 11)", "sgolay_polynomial_order (default 3)", "gauss_width (default 50.0)"]'
         self.picker = po.MRMTransitionGroupPicker()
-        self.params = self.setDefaults()
+        self.setDefaults()
         self.setSmoother(smoother, **kwargs)
 
 
@@ -66,31 +66,42 @@ class MRMTransitionGroupPicker:
             self.params.setValue(b'PeakPickerMRM:use_gauss','false')
             self.params.setValue(b'PeakPickerMRM:sgolay_frame_length', sgolay_frame_length)
             self.params.setValue(b'PeakPickerMRM:sgolay_polynomial_order', sgolay_polynomial_order)
+        else:
+            raise ValueError("Smoother must be one of ['original', 'gauss', 'sgolay']")
 
         self.picker.setParameters(self.params)
 
 
-    def setGeneralParameters(self, param, value):
+    def setGeneralParameters(self, **kwargs):
         ''' Set a supported parameter '''
-        valid_params = ['stop_after_feature', 'stop_after_intensity_ratio', 'min_peak_width', 'use_consensus', 'recalculate_peaks_max_z']
-        if param not in valid_params:
-            raise ValueError("Parameter is not valid or is not currently supported")
-        else:
-            self.params.setValue(bytes(param), value)
-            self.picker.setParameters(self.params)
+        valid_params = ['stop_after_feature', 'stop_after_intensity_ratio', 'min_peak_width', 'recalculate_peaks_max_z', 'resample_boundary', 'recalculate_peaks', 'background_subtraction', 'use_precursors']
+        mrmParams = ['signal_to_noise']
+        valid_params = valid_params + mrmParams
+        for k, val in kwargs.items():
+            if k not in valid_params:
+                raise ValueError(f"Parameter {k} is not valid or is not currently supported")
+            else:
+                if k in mrmParams:
+                    self.params.setValue(bytes('PeakPickerMRM:'+k, encoding='utf-8'), val)
+                else:
+                    self.params.setValue(bytes(k, encoding='utf-8'), val)
+                self.picker.setParameters(self.params)
 
-    def pick(self, transitionGroup: TransitionGroup) -> List[PeakFeature]:
-        ''' Performs Peak Picking, Should return a PeakFeatureList object '''
+    def pick(self, transitionGroup: TransitionGroup) -> List[TransitionGroupFeature]:
+        ''' Performs Peak Picking, Should return a TransitionGroupFeatureList object '''
         pyopenmsTransitionGroup = transitionGroup.to_pyopenms()
-        pyopenmsFeatures = self.picker.pickTransitionGroup(pyopenmsTransitionGroup).getFeatures()
-        return self._convertPyopenMSFeaturesToPeakFeatures(pyopenmsFeatures)
 
-    def _convertPyopenMSFeaturesToPeakFeatures(self, pyopenmsFeatures) -> List[PeakFeature]:
-        ''' Convert pyopenms features to PeakFeatures '''
-        peakFeatures = []
+        self.picker.pickTransitionGroup(pyopenmsTransitionGroup)
+        pyopenmsFeatures = pyopenmsTransitionGroup.getFeatures()
+
+        return self._convertPyopenMSFeaturesToTransitionGroupFeatures(pyopenmsFeatures)
+
+    def _convertPyopenMSFeaturesToTransitionGroupFeatures(self, pyopenmsFeatures) -> List[TransitionGroupFeature]:
+        ''' Convert pyopenms features to TransitionGroupFeatures '''
+        transitionGroupFeatures = []
         for f in pyopenmsFeatures:
-            peakFeatures.append(PeakFeature(leftWidth=f.getMetaValue(b'leftWidth'), 
-                                            rightWidth=f.getMetaValue(b'rightWidth'),
-                                            area_intensity=f.getIntensity(),
-                                            apex=f.getRT()))
-        return peakFeatures
+            transitionGroupFeatures.append(TransitionGroupFeature(leftBoundary=f.getMetaValue(b'leftWidth'), 
+                                            rightBoundary=f.getMetaValue(b'rightWidth'),
+                                            areaIntensity=f.getIntensity(),
+                                            consensusApex=f.getRT()))
+        return transitionGroupFeatures
