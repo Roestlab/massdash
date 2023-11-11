@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
-
 # Type hinting
 from typing import List, Tuple
 
