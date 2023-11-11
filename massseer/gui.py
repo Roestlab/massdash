@@ -221,17 +221,21 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
         plot_settings_dict['subtitle'] = f"{targeted_experiment_ui.transition_settings.selected_protein} | {targeted_experiment_ui.transition_settings.selected_peptide}_{targeted_experiment_ui.transition_settings.selected_charge}"
         plot_config = PlotConfig()
         plot_config.update(plot_settings_dict)
-        print(plot_config)
+        print(transition_group.precursorChroms[0].rt)
+        print([c.empty() for c in transition_group.precursorChroms])
+        print(transition_group.empty())
+        if not transition_group.precursorChroms[0].empty():
+            plotter = InteractivePlotter(plot_config)
+            plot_obj = plotter.plot(transition_group)
+            st.bokeh_chart(plot_obj)
+        else:
+            st.error("No data found for selected transition group.")
 
-        plotter = InteractivePlotter(plot_config)
-        plot_obj = plotter.plot(transition_group)
-
-        st.bokeh_chart(plot_obj)
         st.write(f"Total elapsed time of extraction: {timedelta(seconds=elapsed)}")
 
     for df in targeted_data.values():
-        print(df.columns)
-        st.dataframe(df, hide_index=True, column_order =('native_id', 'ms_level', 'precursor_mz', 'product_mz', 'mz', 'rt', 'im', 'int', 'rt_apex', 'rt_left_width', 'rt_right_width', 'im_apex', 'PrecursorCharge', 'ProductCharge', 'LibraryIntensity', 'NormalizedRetentionTime', 'PeptideSequence', 'ModifiedPeptideSequence', 'ProteinId', 'GeneName', 'Annotation', 'PrecursorIonMobility'))
+        if not df.empty:            
+            st.dataframe(df, hide_index=True, column_order =('native_id', 'ms_level', 'precursor_mz', 'product_mz', 'mz', 'rt', 'im', 'int', 'rt_apex', 'rt_left_width', 'rt_right_width', 'im_apex', 'PrecursorCharge', 'ProductCharge', 'LibraryIntensity', 'NormalizedRetentionTime', 'PeptideSequence', 'ModifiedPeptideSequence', 'ProteinId', 'GeneName', 'Annotation', 'PrecursorIonMobility'))
 
 
 # OpenMS Siderbar Bottom Logo

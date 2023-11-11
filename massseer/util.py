@@ -30,6 +30,24 @@ PEAK_PICKING_ALGORITHMS = ["OSW-PyProphet","PeakPickerMRM"]
 
 
 # Common methods
+def check_streamlit():
+    """
+    Function to check whether python code is run within streamlit
+
+    Returns
+    -------
+    use_streamlit : boolean
+        True if code is run within streamlit, else False
+    """
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+        if not get_script_run_ctx():
+            use_streamlit = False
+        else:
+            use_streamlit = True
+    except ModuleNotFoundError:
+        use_streamlit = False
+    return use_streamlit
 
 def check_sqlite_table(con, table):
     """
@@ -166,7 +184,7 @@ def get_logger(logger_name):
        logger (logging.Logger): The logger object with the specified name and handlers.
    """
    logger = logging.getLogger(logger_name)
-   logger.setLevel(logging.DEBUG) # better to have too much log than not enough
+   logger.setLevel(logging.CRITICAL) # better to have too much log than not enough
    logger.addHandler(get_console_handler())
    logger.addHandler(get_file_handler())
    # with this pattern, it's rarely necessary to propagate the error up to parent
