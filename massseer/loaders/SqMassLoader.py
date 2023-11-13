@@ -44,7 +44,7 @@ class SqMassLoader(GenericLoader):
             prec_chrom_ids = t.getPrecursorChromIDs(metaInfo['PRECURSOR_ID'].iloc[0])
             precursor_chroms = t.getDataForChromatograms(prec_chrom_ids['chrom_ids'], prec_chrom_ids['native_ids'])
 
-            out[t] = TransitionGroup(precursorChroms = precursor_chroms, transitionChroms=transition_chroms)
+            out[t] = TransitionGroup(precursor_chroms, transition_chroms, [], [], [], [])
         return out
 
     def loadPeakFeature(self, pep_id: str, charge: int) -> List[PeakFeature]:

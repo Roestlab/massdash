@@ -44,3 +44,6 @@ class TestOSWDataAccess(TestCase):
 
     def tearDown(self):
         self.osw_data_access.conn.close()
+
+if __name__ == '__main__':
+    unittest.main()
