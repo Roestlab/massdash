@@ -1,43 +1,41 @@
 
+import unittest
 import numpy as np
-from massseer.structs.Chromatogram import Chromatogram
 import pyopenms as po
-from snapshottest import TestCase
+from massseer.structs.Chromatogram import Chromatogram
 
-def test_chromatogram(TestCase):
-    
+class TestChromatogram(unittest.TestCase):
     def setUp(self):
-        # Create a test chromatogram
-        self.chromatogram = Chromatogram(np.array([1, 2, 3, 4, 5]), np.array([10, 20, 30, 40, 50]), "test")
+        self.rt = np.array([1.0, 2.0, 3.0])
+        self.intensity = np.array([10.0, 20.0, 30.0])
+        self.label = "test"
+        self.chromatogram = Chromatogram(self.rt, self.intensity, self.label)
 
+    def test_str(self):
+        self.assertEqual(f"{'-'*8} Chromatogram {'-'*8}\nlabel: {self.chromatogram.label}\nlength of chromatogram: {len(self.chromatogram.rt)}", str(self.chromatogram))
 
     def test_to_pyopenms(self):
-        # Test to_pyopenms method
         pyopenms_chromatogram = self.chromatogram.to_pyopenms()
-        self.assertIsInstance(pyopenms_chromatogram, po.Chromatogram)
-        self.assertMatchSnapShot(pyopenms_chromatogram) 
+        self.assertIsInstance(pyopenms_chromatogram, po.MSChromatogram)
+        self.assertTrue(np.array_equal(pyopenms_chromatogram.get_peaks()[1], self.intensity))
+        self.assertTrue(np.array_equal(pyopenms_chromatogram.get_peaks()[0], self.rt))
 
-    def max(self):
-        # Test max method
-        assert self.chromatogram.max() == 50
-        assert self.chromatogram.max((2, 4)) == 40
+    def test_max(self):
+        self.assertEqual(self.chromatogram.max(), (3,30.0))
+        self.assertEqual(self.chromatogram.max((1.5, 2.5)), (2, 20.0))
 
-    # Test max method
-    assert chromatogram.max() == 50
-    assert chromatogram.max((2, 4)) == 40
+    def test_filterChromatogram(self):
+        filtered_chromatogram = self.chromatogram.filterChromatogram((1.5, 2.5))
+        self.assertTrue(np.array_equal(filtered_chromatogram.rt, np.array([2.0])))
+        self.assertTrue(np.array_equal(filtered_chromatogram.intensity, np.array([20.0])))
 
-    # Test filterChromatogram method
-    filtered_chromatogram = chromatogram.filterChromatogram((2, 4))
-    assert np.array_equal(filtered_chromatogram.rt, np.array([3, 4]))
-    assert np.array_equal(filtered_chromatogram.intensity, np.array([30, 40]))
+    def test_sum(self):
+        self.assertEqual(self.chromatogram.sum(), 60.0)
+        self.assertEqual(self.chromatogram.sum((1.5, 2.5)), 20.0)
 
-    # Test sum method
-    assert chromatogram.sum() == 150
-    assert chromatogram.sum((2, 4)) == 70
+    def test_median(self):
+        self.assertEqual(self.chromatogram.median(), 20.0)
+        self.assertEqual(self.chromatogram.median((1.5, 2.5)), 20.0)
 
-    # Test median method
-    assert chromatogram.median() == 30
-    assert chromatogram.median((2, 4)) == 35
-
-    # Test snapshot of the chromatogram object
-    snapshot.assert_match(chromatogram.__dict__)
+if __name__ == '__main__':
+    unittest.main()
