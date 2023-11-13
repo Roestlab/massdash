@@ -24,7 +24,7 @@ class Chromatogram:
             chrom.setNativeID(id)
         return chrom
     
-    def max(self, boundary: Optional[Tuple[float,float]] = None) -> float:
+    def max(self, boundary: Optional[Tuple[float,float]] = None) -> (float, float):
         """
         Calculate the highest intensity within a given boundary.
 
@@ -37,7 +37,8 @@ class Chromatogram:
         if boundary is not None:
             return self.filterChromatogram(boundary).max()
         else:
-            return np.max(self.intensity)
+            idx_max = np.argmax(self.intensity)
+            return (self.rt[idx_max], self.intensity[idx_max])
         
     def filterChromatogram(self, boundary: Tuple[float, float]) -> 'Chromatogram':
         """

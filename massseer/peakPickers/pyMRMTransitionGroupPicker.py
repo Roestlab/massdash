@@ -6,17 +6,17 @@ from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.structs.TransitionFeature import TransitionFeature
 from massseer.structs.TransitionGroup import TransitionGroup
 from typing import List
+import pandas as pd
 
 class pyMRMTransitionGroupPicker:
     '''
     This is a python implementation based on OpenMS peak picker
     '''
 
-    def __init__(self, level='ms1ms2', sgolay_frame_length=11, sgolay_polynomial_order=3, merged_peak_picking=False):
+    def __init__(self, level='ms1ms2', sgolay_frame_length=11, sgolay_polynomial_order=3):
         self.level = level
         self.top_n_features = 5
         self.peak_picker = po.PeakPickerMRM()
-        
 
         ##### Set the pyopenms peak picker parameters
         params = self.peak_picker.getDefaults()
@@ -53,7 +53,7 @@ class pyMRMTransitionGroupPicker:
         """
 
         # Create an MSChromatogram object
-        po_chrom = chrom.topyopenms()
+        po_chrom = chrom.to_pyopenms()
 
         # Create an empty MSChromatogram object to store the picked chromatogram
         picked_chrom = po.MSChromatogram()
@@ -64,147 +64,68 @@ class pyMRMTransitionGroupPicker:
         transitionFeatures = []
         if len(picked_chrom.get_peaks()[0]) > 0: ## return nothing if no peaks found
             apex_arr, apex_intensity_arr = picked_chrom.get_peaks()
-            fda = p.getFloatDataArrays()
+            fda = picked_chrom.getFloatDataArrays()
             area_intensity_arr = fda[1].get_data()
             left_boundary_arr = fda[2].get_data()
             right_boundary_arr = fda[3].get_data()
 
             for apex, apex_intensity, area_intensity, left_boundary, right_boundary in zip(apex_arr, apex_intensity_arr, area_intensity_arr, left_boundary_arr, right_boundary_arr):
-                    transitionFeatures.append(TransitionFeature(left_boundary, right_boundary, area_intensity=area_intensity, peak_apex=apex, peak_apex_intensity=apex_intensity))
+                    transitionFeatures.append(TransitionFeature(left_boundary, right_boundary, areaIntensity=area_intensity, peakApex=apex, apexIntensity=apex_intensity))
         return transitionFeatures
 
-    def get_peak_boundariers_for_single_chromatogram(self, chrom: Chromatogram ) -> List[TransitionGroupFeature]:
+    def pick(self, transitionGroup: TransitionGroup) -> List[TransitionGroupFeature]:
         """
-        Get peak boundaries for a single chromatogram.
-
-        Args:
-            chrom_data (list): List of chromatogram data.
-            rt_peak_picker (pyopenms.PeakPickerMRM): PeakPickerMRM object.
-            top_n_features (int): Number of top features to consider for merging (default is None).
-
-        Returns:
-            dict: A dictionary containing the consensus peak boundaries and integrated intensity.
+        Performs Peak Picking, Should return a list of TransitionGroupFeatures
         """
-        peak_features = self.find_peak_boundaries(chrom)
 
-        if peak_features is not None:
-            merged_intensities = []
-            for boundary in zip(peak_features.getBoundaries()):
-                integrated_intensity = chrom.calculate_highest_intensity(boundary)
-                merged_intensities.append(integrated_intensity)
-
-            # Convert peak boundaries to a list of tuples
-            merged_boundaries = [i.getBoundaries() for i in peak_features ] 
-
-            # Sort the merged boundaries by integrated intensity in descending order
-            sorted_boundaries = sorted(zip(merged_boundaries, merged_intensities), key=lambda x: x[1], reverse=True)
-
-        # Filter the top n features if specified
-        if self.top_n_features is not None:
-            sorted_boundaries = sorted_boundaries[:self.top_n_features]
-
-        top_boundaries, top_intensities = zip(*sorted_boundaries)
-
-        # Calculate the consensus boundaries and integrated intensity
-        transitionGroupFeatures = []
-        for boundary, intensity in zip(top_boundaries, top_intensities):
-            leftBoundary, rightBoundary = boundary
-            transitionGroupFeatures.append(TransitionGroupFeature(leftBoundary, rightBoundary, area_intensity=intensity)) 
-        return transitionGroupFeatures
-
-    def merge_and_calculate_consensus_peak_boundaries(self, transitionGroup):
-        """
-        Merge peak boundaries from multiple chromatograms and calculate the consensus peak boundaries and integrated intensity.
-
-        Args:
-            chrom_data (list): List of chromatogram data.
-            rt_peak_picker (pyopenms.PeakPickerMRM): PeakPickerMRM object.
-            top_n_features (int): Number of top features to consider for merging (default is None).
-
-        Returns:
-            dict: A dictionary containing the consensus peak boundaries and integrated intensity.
-        """
         chroms = self._resolveLevel(transitionGroup)
-        trace_peaks_list = []
+        peaks = []
         # Iterate through chrom_data to find peak boundaries
-        min_rt, max_rt = None, None
-        for i in range(len(chroms)):
-            if min_rt is None or min_rt > min(chroms[i].rt):
-                min_rt = min(chroms[i].rt)
-            if max_rt is None or max_rt > max(chroms[i].rt):
-                max_rt = max(chroms[i].rt)
-            peak_features = self.find_peak_boundaries(chroms[i])
-            if peak_features is not None:
-                trace_peaks_list.append(peak_features)
-        if len(trace_peaks_list)==0:
-            return TransitionGroupFeature(leftWidth=min_rt, rightWidth=max_rt, IntegratedIntensity=0)
+        for c in range(len(chroms)):
+            peaks.extend(self.find_peak_boundaries(chroms[c]))
 
-        # Initialize empty lists to store boundaries and intensities
-        boundaries = []
-        integrated_intensities = []
+        if len(peaks)==0:
+            return []
 
         # Iterate through the dictionaries in the list
-        for trace_peak_dict in trace_peaks_list:
-            integrated_intensity = trace_peak_dict['IntegratedIntensity']
+        peaksDf = TransitionFeature.toPandasDf(peaks)
 
-            # Combine left and right boundaries
-            peak_boundaries = [ i.getBoundaries for i in peak_features ]
+        # sort boundaries by left end
+        peaksDf.sort_values(by=['leftBoundary'], inplace=True)
 
-            # Append boundaries and integrated intensity
-            boundaries.extend(peak_boundaries)
-            integrated_intensities.extend(integrated_intensity)
+        newPeaks = pd.DataFrame(peaksDf.loc[0]).T
 
-        # Sort boundaries by their left end
-        boundaries.sort(key=lambda x: x[0])
-
-        # Initialize the merged boundaries and intensities
-        merged_boundaries = [boundaries[0]]
-        merged_intensities = [integrated_intensities[0]]
-
-        # Merge overlapping boundaries and accumulate intensities
-        for i in range(1, len(boundaries)):
-            # print(f"Adding {boundaries[i]}")
-            if boundaries[i][0] < merged_boundaries[-1][1]:
-                if boundaries[i][1] > merged_boundaries[-1][1]:
+        for idx in range(1, len(peaksDf)):
+            if peaksDf['leftBoundary'][idx] < newPeaks['rightBoundary'].iloc[-1]:
+                if peaksDf['rightBoundary'][idx] > peaksDf['rightBoundary'].iloc[-1]:
                     # Overlapping boundaries; merge them
-                    merged_boundaries[-1] = (merged_boundaries[-1][0], boundaries[i][1])
+                    newPeaks['rightBoundary'].iloc[-1] = peaksDf['rightBoundary'][idx]
                 # Accumulate intensities
-                merged_intensities[-1] += integrated_intensities[i]
+                newPeaks['areaIntensity'].iloc[-1] += peaksDf['areaIntensity'][idx]
             else:
-                # print(f"Appending Non-Overlapping {boundaries[i]}")
                 # Non-overlapping boundaries; append them
-                merged_boundaries.append(boundaries[i])
-                merged_intensities.append(integrated_intensities[i])
+                pd.concat([newPeaks, peaksDf.iloc[idx]]) 
 
-
-        # Recompute the integrated intensities for merged boundaries
-        merged_intensities = []
-        for merged_boundary in list(merged_boundaries):
+        # Recompute the peak apex for merged boundaries
+        for idx in newPeaks.index:
             # Find data points within the merged boundary range and compute integrated intensity
-            integrated_intensity = chroms.calculate_highest_intensity(merged_boundary)
-            merged_intensities.append(integrated_intensity)
+            highest = (0,0)
+            for c in chroms:
+                newHighest = c.max(tuple(newPeaks[['leftBoundary', 'rightBoundary']].iloc[idx].to_list()))
+                highest = highest if highest[1] > newHighest[1] else newHighest
+
+            newPeaks.loc[idx, ['peakApex', 'apexIntensity']] = highest
 
         # Sort the merged boundaries by integrated intensity in descending order
-        sorted_boundaries = sorted(zip(merged_boundaries, merged_intensities), key=lambda x: x[1], reverse=True)
+        newPeaks.sort_values(by=['apexIntensity'], inplace=True, ascending=False)
 
         # Filter the top n features if specified
         if self.top_n_features is not None:
-            sorted_boundaries = sorted_boundaries[:self.top_n_features]
-
-        top_boundaries, top_intensities = zip(*sorted_boundaries)
+            newPeaks = newPeaks[:self.top_n_features]
 
         # Calculate the consensus boundaries and integrated intensity
         transitionGroupFeatures = []
-        for boundary, intensity in zip(top_boundaries, top_intensities):
-            leftBoundary, rightBoundary = boundary
-            transitionGroupFeatures.append(TransitionGroupFeature(leftBoundary, rightBoundary, area_intensity=intensity)) 
+        for idx, row in newPeaks.iterrows():
+            transitionGroupFeatures.append(TransitionGroupFeature(row['leftBoundary'], row['rightBoundary'], areaIntensity=row['areaIntensity'], consensusApexIntensity=row['apexIntensity']))
         
         return transitionGroupFeatures
-
-    def pick(self, transitionGroup: TransitionGroup) -> List[TransitionGroupFeature]:
-        if self.merged_peak_picking:
-            peak_features = self.merge_and_calculate_consensus_peak_boundaries(transitionGroup)
-        else:
-            peak_features = self.get_peak_boundariers_for_single_chromatogram(transitionGroup)
-
-        return peak_features
