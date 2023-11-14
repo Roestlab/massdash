@@ -74,7 +74,8 @@ class InteractivePlotter(GenericPlotter):
                         error_message = f"Error: {ve}"
 
                     if check_streamlit():
-                        st.error(error_message)
+                        print(error_message)
+                        # st.error(error_message)
                     else:
                         raise ValueError(error_message)
             elif self.smoothing_dict['type'] == 'none':
@@ -192,6 +193,7 @@ class InteractivePlotter(GenericPlotter):
             p.legend.title = "Transition"
             p.legend.label_text_font_size = "10pt"
             p.grid.visible = True
+            p.toolbar_location = "above"
 
             return p
 
@@ -224,7 +226,8 @@ class InteractivePlotter(GenericPlotter):
                     error_message = f"Error: {ve}"
 
                 if check_streamlit():
-                    st.error(error_message)
+                    print(error_message)
+                    # st.error(error_message)
                 else:
                     raise ValueError(error_message)
         elif self.smoothing_dict['type'] == 'none':
@@ -341,6 +344,7 @@ class InteractivePlotter(GenericPlotter):
         p.legend.title = "Transition"
         p.legend.label_text_font_size = "10pt"
         p.grid.visible = True
+        p.toolbar_location = "above"
 
         return p
 
@@ -477,5 +481,6 @@ class InteractivePlotter(GenericPlotter):
         p.legend.title = "Transition"
         p.legend.label_text_font_size = "10pt"
         p.grid.visible = True
+        p.toolbar_location = "above"
 
         return p
