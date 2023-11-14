@@ -17,7 +17,7 @@ class TransitionGroup:
         self.transitionMobilos = transitionMobilos
         self.precursorSpectra = precursorSpectra
         self.transitionSpectra = transitionSpectra
-        self._protein = None
+  
 
     def to_pyopenms(self, includePrecursors=True):
         '''
@@ -125,19 +125,14 @@ class TransitionGroup:
         '''
         return f"{'-'*8} TransitionGroup {'-'*8}\nprecursor chromatograms: {len(self.precursorChroms)}\ntransition chromatograms: {len(self.transitionChroms)}\nprecursor mobilograms: {len(self.precursorMobilos)}\ntransition mobilograms: {len(self.transitionMobilos)}\nprecursor spectra: {len(self.precursorSpectra)}\ntransition spectra: {len(self.transitionSpectra)}\n{self.protein}"
 
-    @property
-    def protein(self):
+    def empty(self) -> bool:
         """
-        Returns the protein associated with this transition group.
-        """
-        return self._protein
+        Check if the TransitionGroup is empty.
 
-    @protein.setter
-    def protein(self, value):
+        Returns:
+            bool: True if all of the chromatograms, mobilograms, and spectra are empty, False otherwise.
         """
-        Sets the protein associated with this transition group.
-        """
-        self._protein = value
+        return not any(chrom.empty() for chrom in self.precursorChroms) or any(chrom.empty() for chrom in self.transitionChroms) or any(mobil.empty() for mobil in self.precursorMobilos) or any(mobil.empty() for mobil in self.transitionMobilos) or any(spec.empty() for spec in self.precursorSpectra) or any(spec.empty() for spec in self.transitionSpectra)
 
 
     @classmethod
@@ -157,8 +152,8 @@ class TransitionGroup:
             precursorMobilos = feature_map.get_precursor_mobilograms()
             transitionMobilos = feature_map.get_transition_mobilograms()
         else:
-            precursorMobilos = None
-            transitionMobilos = None
+            precursorMobilos = [Mobilogram([], [], 'precursor mobilogram')]
+            transitionMobilos = [Mobilogram([], [], 'transition mobilogram')]
         precursorSpectra = feature_map.get_precursor_spectra()
         transitionSpectra = feature_map.get_transition_spectra()
         return cls(precursorChroms, transitionChroms, precursorMobilos, transitionMobilos, precursorSpectra, transitionSpectra)

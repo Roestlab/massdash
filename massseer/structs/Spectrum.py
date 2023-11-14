@@ -11,3 +11,12 @@ class Spectrum:
 
     def __str__(self):
         return f"{'-'*8} Spectrum {'-'*8}\nlabel: {self.label}\nlength of spectrum: {len(self.mz)}"
+    
+    def empty(self) -> bool:
+        """
+        Check if the Spectrum is empty.
+
+        Returns:
+            bool: True if both mz and intensity are empty, False otherwise.
+        """
+        return not (self.mz.any() and self.intensity.any())

@@ -34,17 +34,18 @@ $Maintainer: Justin Sing$
 $Authors: Hannes Roest, Justin Sing$
 --------------------------------------------------------------------------
 """
-import pandas as pd
-import sqlite3
 from massseer.util import check_sqlite_column_in_table, check_sqlite_table
 from massseer.structs.Chromatogram import Chromatogram
 from typing import List
 from collections import OrderedDict
+import base64
+import pyopenms as po
+import sqlite3
+import zlib
 
 class SqMassDataAccess:
 
     def __init__(self, filename):
-        import sqlite3
         self.conn = sqlite3.connect(filename)
         self.c = self.conn.cursor()
         self.filename = filename
@@ -145,14 +146,13 @@ class SqMassDataAccess:
         return res
 
     def _returnDataForChromatogram(self, data):
-        import PyMSNumpress
-        import zlib
-
         # prepare result
         chr_ids = set([chr_id for chr_id, compr, data_type, d in data] )
         res = OrderedDict()
+        numpress_config = po.NumpressConfig()
         for i in chr_ids:
             res[i] = [None, None]
+
 
         for chr_id, compr, data_type, d in data:
             result = []
@@ -161,14 +161,16 @@ class SqMassDataAccess:
                 # tmp = [ord(q) for q in zlib.decompress(d)]
                 tmp = bytearray( zlib.decompress(d) )
                 if len(tmp) > 0:
-                    PyMSNumpress.decodeLinear(tmp, result)
+                    numpress_config.setCompression('linear')
+                    po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
                 else:
                     result = [0]
             if compr == 6:
                 # tmp = [ord(q) for q in zlib.decompress(d)]
                 tmp = bytearray( zlib.decompress(d) )
                 if len(tmp) > 0:
-                    PyMSNumpress.decodeSlof(tmp, result)
+                    numpress_config.setCompression('slof')
+                    po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
                 else:
                     result = [0]
 

@@ -1,6 +1,7 @@
 from snapshottest import TestCase
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.loaders.SqMassLoader import SqMassLoader
+import unittest
 
 class TestSqMassLoader(TestCase):
     def setUp(self):
@@ -27,3 +28,6 @@ class TestSqMassLoader(TestCase):
         # Test loading a chromatogram for an invalid peptide ID and charge
         transitionGroup = self.loader.loadTransitionGroups('INVALID', 0)
         self.assertIsNone(transitionGroup)
+
+if __name__ == '__main__':
+    unittest.main()

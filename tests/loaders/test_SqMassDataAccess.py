@@ -1,6 +1,7 @@
 from snapshottest import TestCase
 from massseer.loaders.SqMassDataAccess import SqMassDataAccess
 from massseer.structs.Chromatogram import Chromatogram
+import unittest
 
 class TestSqMassDataAccess(TestCase):
     def setUp(self):
@@ -40,3 +41,6 @@ class TestSqMassDataAccess(TestCase):
 
     def tearDown(self):
         self.mass_data_access.conn.close()
+
+if __name__ == '__main__':
+    unittest.main()
