@@ -19,7 +19,7 @@ class MRMTransitionGroupPicker:
         ''' get the default parameters used by OpenSwath '''
         params = self.picker.getDefaults()
 
-        params.setValue(b'stop_after_feature', -1)
+        params.setValue(b'stop_after_feature', 5)
         params.setValue( b'stop_after_intensity_ratio', 0.0001)
         params.setValue( b'min_peak_width', -1.0)
         params.setValue( b'peak_integration', 'original')
