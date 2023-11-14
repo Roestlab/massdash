@@ -41,6 +41,14 @@ class TestOSWDataAccess(TestCase):
         self.assertIsInstance(peptide_transition_info, pd.DataFrame)
         self.assertMatchSnapshot(peptide_transition_info.shape)
         self.assertMatchSnapshot(peptide_transition_info)
+    
+    def test_getPeptideTransitionInfoShort(self):
+        fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
+        charge = 2
+        peptide_transition_info = self.osw_data_access.getPeptideTransitionInfoShort(fullpeptidename, charge)
+        self.assertIsInstance(peptide_transition_info, pd.DataFrame)
+        self.assertMatchSnapshot(peptide_transition_info.shape)
+        self.assertMatchSnapshot(peptide_transition_info)
 
     def tearDown(self):
         self.osw_data_access.conn.close()

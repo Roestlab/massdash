@@ -2,6 +2,7 @@ from snapshottest import TestCase
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.loaders.SqMassLoader import SqMassLoader
 import unittest
+import pandas as pd
 
 class TestSqMassLoader(TestCase):
     def setUp(self):
@@ -28,6 +29,18 @@ class TestSqMassLoader(TestCase):
         # Test loading a chromatogram for an invalid peptide ID and charge
         transitionGroup = self.loader.loadTransitionGroups('INVALID', 0)
         self.assertIsNone(transitionGroup)
+    
+    def test_loadTransitionGroupsDf(self):
+        # Test loading a chromatogram for a valid peptide ID and charge
+        transitionGroup = self.loader.loadTransitionGroupsDf("NKESPT(UniMod:21)KAIVR(UniMod:267)", 3)
+        self.assertIsInstance(transitionGroup, pd.DataFrame)
+        self.assertMatchSnapshot(transitionGroup)
+
+        # Test loading a chromatogram for an invalid peptide ID and charge
+        transitionGroup = self.loader.loadTransitionGroupsDf('INVALID', 0)
+        self.assertIsInstance(transitionGroup, pd.DataFrame)
+        self.assertTrue(transitionGroup.empty)
+    
 
 if __name__ == '__main__':
     unittest.main()

@@ -141,6 +141,47 @@ class OSWDataAccess:
 
         return data
 
+    def getPeptideTransitionInfoShort(self, fullpeptidename, charge):
+        """
+        Retrieves transition information for a given peptide and charge.
+
+        Args:
+            fullpeptidename (str): The full modified sequence of the peptide.
+            charge (int): The precursor charge.
+
+        Returns:
+            pandas.DataFrame: The transition information.
+        """
+        # Older OSW files (<v2.4) do not have the ANNOTATION column in the TRANSITION table
+        if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"):
+            stmt = f"""SELECT DISTINCT
+                PRECURSOR.ID AS PRECURSOR_ID,
+                TRANSITION.ID AS TRANSITION_ID,
+                TRANSITION.ANNOTATION AS ANNOTATION
+                FROM (SELECT * FROM PRECURSOR WHERE PRECURSOR.CHARGE = {charge}) AS PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN (SELECT * FROM PEPTIDE WHERE PEPTIDE.MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+                INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID
+                and TRANSITION.DETECTING = 1"""
+        else:
+            stmt = f"""SELECT DISTINCT
+                PRECURSOR.ID AS PRECURSOR_ID,
+                TRANSITION.ID AS TRANSITION_ID,
+                PRECURSOR.CHARGE AS PRECURSOR_CHARGE,
+                TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE AS ANNOTATION
+                FROM (SELECT * FROM PRECURSOR WHERE PRECURSOR.CHARGE = {charge}) AS PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN (SELECT * FROM PEPTIDE WHERE PEPTIDE.MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+                INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID and
+                TRANSITION.DETECTING = 1"""
+
+        data = pd.read_sql(stmt, self.conn)
+
+        return data
+
+
     def getPeptideTransitionInfo(self, fullpeptidename, charge):
         """
         Retrieves transition information for a given peptide and charge.
