@@ -22,3 +22,18 @@ class TransitionGroupFeature(GenericFeature):
     
     def getBoundaries(self) -> Tuple[float, float]:
         return super().getBoundaries()
+
+    @staticmethod
+    def toPanadsDf(transitionGroupFeatureLst: List["TransitionGroupFeature"]) -> pd.DataFrame:
+        '''
+        Convert a list of TransitionGroupFeature objects to a pandas dataframe
+        '''
+        leftBoundaries = [i.leftBoundary for i in transitionGroupFeatureLst ]
+        rightBoundaries = [i.rightBoundary for i in transitionGroupFeatureLst ]
+        areaIntensities = [i.areaIntensity for i in transitionGroupFeatureLst ]
+        qvalues = [i.qvalue for i in transitionGroupFeatureLst ]
+        consensusApexes = [i.consensusApex for i in transitionGroupFeatureLst ]
+        consensusApexIntensities = [i.consensusApexIntensity for i in transitionGroupFeatureLst ]
+
+        return pd.DataFrame(np.column_stack([leftBoundaries, rightBoundaries, areaIntensities, qvalues, consensusApexes, consensusApexIntensities]),
+                            columns=['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity'])
