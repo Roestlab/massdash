@@ -102,7 +102,7 @@ class SqMassLoader(GenericLoader):
         for t in self.transitionFiles_str:
             runname = basename(t).split('.')[0]
             features = self.rsltsFile.getRunPrecursorPeakBoundaries(runname, pep_id, charge)
-            features = features.rename(columns={'ms2_dscore':'qvalue', 'RT':'consensusApex', 'Intensity':'consensusApexIntensity', 'leftWidth':'leftBoundary', 'rightWidth':'rightBoundary'})
+            features = features.rename(columns={'ms2_mscore':'qvalue', 'RT':'consensusApex', 'Intensity':'consensusApexIntensity', 'leftWidth':'leftBoundary', 'rightWidth':'rightBoundary'})
             features = features[['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']]
             out[t] = features
 
