@@ -1,7 +1,7 @@
 
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from massseer.structs.PeakFeature import PeakFeature
+from massseer.structs.TransitionGroupFeature import PeakFeature
 from massseer.structs.TransitionGroup import TransitionGroup
 
 class GenericPlotter(ABC):
