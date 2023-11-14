@@ -94,6 +94,20 @@ class SqMassLoader(GenericLoader):
                 out[t] = tmp
         return out
 
+    def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
+        '''
+        Loads a TransitionGroupFeature object from the results file to a pandas dataframe
+        '''
+        out = {}
+        for t in self.transitionFiles_str:
+            runname = basename(t).split('.')[0]
+            features = self.rsltsFile.getRunPrecursorPeakBoundaries(runname, pep_id, charge)
+            features = features.rename(columns={'ms2_dscore':'qvalue', 'RT':'consensusApex', 'Intensity':'consensusApexIntensity', 'leftWidth':'leftBoundary', 'rightWidth':'rightBoundary'})
+            features = features[['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']]
+            out[t] = features
+
+        return pd.concat(out).reset_index().drop('level_1', axis=1).rename(columns=dict(level_0='filename'))
+
     def __str__(self):
         return f"SqMassLoader(rsltsFile={self.rsltsFile_str}, transitionFiles={self.transitionFiles_str}"
 

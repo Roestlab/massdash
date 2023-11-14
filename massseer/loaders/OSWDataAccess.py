@@ -278,6 +278,7 @@ class OSWDataAccess:
                 PEPTIDE.MODIFIED_SEQUENCE AS FullPeptideName,
                 PRECURSOR.CHARGE AS Charge,
                 FEATURE.ID AS feature_id,
+                FEATURE_MS2.AREA_INTENSITY AS areaIntensity,
                 FEATURE_MS2.APEX_INTENSITY AS Intensity,
                 FEATURE.EXP_RT AS RT,
                 FEATURE.LEFT_WIDTH AS leftWidth,

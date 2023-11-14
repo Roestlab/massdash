@@ -41,6 +41,17 @@ class TestSqMassLoader(TestCase):
         self.assertIsInstance(transitionGroup, pd.DataFrame)
         self.assertTrue(transitionGroup.empty)
     
+    def test_loadTransitionGroupFeaturesDf(self):
+        # Test loading a chromatogram for a valid peptide ID and charge
+        transitionGroup = self.loader.loadTransitionGroupFeaturesDf("NKESPT(UniMod:21)KAIVR(UniMod:267)", 3)
+        self.assertIsInstance(transitionGroup, pd.DataFrame)
+        self.assertMatchSnapshot(transitionGroup)
+
+        # Test loading a chromatogram for an invalid peptide ID and charge
+        transitionGroup = self.loader.loadTransitionGroupFeaturesDf('INVALID', 0)
+        self.assertIsInstance(transitionGroup, pd.DataFrame)
+        self.assertTrue(transitionGroup.empty)
+
 
 if __name__ == '__main__':
     unittest.main()

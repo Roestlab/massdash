@@ -1,5 +1,7 @@
 from massseer.structs.GenericFeature import GenericFeature
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
+import pandas as pd
+import numpy as np
 
 class TransitionGroupFeature(GenericFeature):
     '''
@@ -13,10 +15,10 @@ class TransitionGroupFeature(GenericFeature):
         self.qvalue = qvalue
 
     def __str__(self):
-        return f"{'-'*8} PeakFeature {'-'*8}\nApex: {self.consensusApex}\nLeftWidth: {self.leftBoundary}\nRightWidth: {self.rightBoundary}\nArea: {self.areaIntensity}\nQvalue: {self.qvalue}"
+        return f"{'-'*8} TransitionGroupFeature {'-'*8}\nApex: {self.consensusApex}\nLeftWidth: {self.leftBoundary}\nRightWidth: {self.rightBoundary}\nArea: {self.areaIntensity}\nQvalue: {self.qvalue}"
 
     def __repr__(self):
-        return f"PeakFeature Apex: {self.consensusApex} LeftWidth: {self.leftBoundary} RightWidth: {self.rightBoundary} Area: {self.areaIntensity} Qvalue: {self.qvalue}"
+        return f"TransitionGroupFeature Apex: {self.consensusApex} LeftWidth: {self.leftBoundary} RightWidth: {self.rightBoundary} Area: {self.areaIntensity} Qvalue: {self.qvalue}"
     
     def getBoundaries(self) -> Tuple[float, float]:
         return super().getBoundaries()
