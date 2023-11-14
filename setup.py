@@ -1,5 +1,4 @@
 import sys
-import numpy
 from setuptools import setup, find_packages
 
 # read the contents of README for PyPI
@@ -19,7 +18,6 @@ setup(name='MassSeer',
       url="https://github.com/Roestlab/massseer",
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
-      include_dirs=[numpy.get_include()],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
@@ -35,9 +33,8 @@ setup(name='MassSeer',
           "streamlit",
           "numpy >= 1.9.0",
           "pandas >= 0.17",
-          "cython==0.29.32",
+          "scipy",
           "pyopenms",
-          "PyMSNumpress==0.2.2",
           "bokeh==2.4.3",
           "matplotlib"
       ],

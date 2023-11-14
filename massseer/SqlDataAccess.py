@@ -133,8 +133,12 @@ class SqMassDataAccess(object):
         return res
 
     def _returnDataForChromatogram(self, data):
-        import PyMSNumpress
+        import pyopenms as po
+        import base64
         import zlib
+
+        # numpress config
+        numpress_config = po.NumpressConfig()
 
         # prepare result
         chr_ids = set([chr_id for chr_id, compr, data_type, d in data] )
@@ -149,14 +153,16 @@ class SqMassDataAccess(object):
                 # tmp = [ord(q) for q in zlib.decompress(d)]
                 tmp = bytearray( zlib.decompress(d) )
                 if len(tmp) > 0:
-                    PyMSNumpress.decodeLinear(tmp, result)
+                    numpress_config.setCompression('linear')
+                    po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
                 else:
                     result = [0]
             if compr == 6:
                 # tmp = [ord(q) for q in zlib.decompress(d)]
                 tmp = bytearray( zlib.decompress(d) )
                 if len(tmp) > 0:
-                    PyMSNumpress.decodeSlof(tmp, result)
+                    numpress_config.setCompression('slof')
+                    po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
                 else:
                     result = [0]
 
