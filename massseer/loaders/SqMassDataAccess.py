@@ -34,16 +34,21 @@ $Maintainer: Justin Sing$
 $Authors: Hannes Roest, Justin Sing$
 --------------------------------------------------------------------------
 """
-import pandas as pd
-import sqlite3
 from massseer.util import check_sqlite_column_in_table, check_sqlite_table
+from massseer.structs.Chromatogram import Chromatogram
+from typing import List
+from collections import OrderedDict
+import base64
+import pyopenms as po
+import sqlite3
+import zlib
 
 class SqMassDataAccess:
 
     def __init__(self, filename):
-        import sqlite3
         self.conn = sqlite3.connect(filename)
         self.c = self.conn.cursor()
+        self.filename = filename
 
     def getPrecursorChromIDs(self, precursor_id):
         """
@@ -52,8 +57,9 @@ class SqMassDataAccess:
         data = [row for row in self.c.execute(f"""SELECT ID, NATIVE_ID FROM CHROMATOGRAM WHERE NATIVE_ID LIKE '{precursor_id}_Precursor%'""")]
         return {"chrom_ids":[d[0] for d in data], "native_ids":[d[1] for d in data]}
 
-    def getDataForChromatograms(self, ids):
+    def getDataForChromatograms(self, ids: List[str], labels: List[str]) -> List[Chromatogram]:
         """
+        Get 
         Get data from multiple chromatograms chromatogram
 
         - compression is one of 0 = no, 1 = zlib, 2 = np-linear, 3 = np-slof, 4 = np-pic, 5 = np-linear + zlib, 6 = np-slof + zlib, 7 = np-pic + zlib
@@ -71,14 +77,21 @@ class SqMassDataAccess:
         stmt += ")"
 
         data = [row for row in self.c.execute(stmt)]
-        tmpres = self._returnDataForChromatogram(data)
+        res = self._returnDataForChromatogram(data)
 
-        res = []
-        for myid in ids:
-            res.append( tmpres[myid] )
-        return res
+        #res = []
+        #for myid in ids:
+        #    res.append( tmpres[myid] )
 
-    def getDataForChromatogram(self, myid):
+        ### Convert to chromatograms
+        ### match ids with labels
+        c = []
+        for l, val in zip(labels, res.values()):
+            c.append(Chromatogram(val[0], val[1], l))
+
+        return c
+
+    def getDataForChromatogram(self, myid: str, label: str) -> Chromatogram:
         """
         Get data from a single chromatogram
 
@@ -88,7 +101,8 @@ class SqMassDataAccess:
         """
 
         data = [row for row in self.c.execute("SELECT CHROMATOGRAM_ID, COMPRESSION, DATA_TYPE, DATA FROM DATA WHERE CHROMATOGRAM_ID = %s" % myid )]
-        return list(self._returnDataForChromatogram(data).values())[0]
+        res = list(self._returnDataForChromatogram(data).values())[0]
+        return Chromatogram(res[0], res[1], label)
 
     def getDataForChromatogramFromNativeId(self, native_id):
         """
@@ -128,18 +142,18 @@ class SqMassDataAccess:
         res = []
         for myid in chrom_ids:
             res.append( tmpres[myid] )
+
         return res
 
     def _returnDataForChromatogram(self, data):
-        import PyMSNumpress
-        import zlib
-
         # prepare result
         chr_ids = set([chr_id for chr_id, compr, data_type, d in data] )
-        res = { chr_id : [None, None] for chr_id in chr_ids }
+        res = OrderedDict()
+        numpress_config = po.NumpressConfig()
+        for i in chr_ids:
+            res[i] = [None, None]
 
-        rt_array = []
-        intensity_array = []
+
         for chr_id, compr, data_type, d in data:
             result = []
 
@@ -147,14 +161,16 @@ class SqMassDataAccess:
                 # tmp = [ord(q) for q in zlib.decompress(d)]
                 tmp = bytearray( zlib.decompress(d) )
                 if len(tmp) > 0:
-                    PyMSNumpress.decodeLinear(tmp, result)
+                    numpress_config.setCompression('linear')
+                    po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
                 else:
                     result = [0]
             if compr == 6:
                 # tmp = [ord(q) for q in zlib.decompress(d)]
                 tmp = bytearray( zlib.decompress(d) )
                 if len(tmp) > 0:
-                    PyMSNumpress.decodeSlof(tmp, result)
+                    numpress_config.setCompression('slof')
+                    po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
                 else:
                     result = [0]
 
@@ -168,4 +184,9 @@ class SqMassDataAccess:
                 raise Exception("Only expected RT or Intensity data for chromatogram")
 
         return res
-
+    
+    def __str__(self):
+        return f"SqMassDataAccess(filename={self.filename})"
+ 
+    def __repr__(self):
+        return f"SqMassDataAccess(filename={self.filename})"

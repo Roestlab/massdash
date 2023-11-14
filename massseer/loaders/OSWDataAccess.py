@@ -229,7 +229,7 @@ class OSWDataAccess:
             select_score_ms2 = ""
         
         if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
-            select_feature_exp_im = "SELECT FEATURE.EXP_IM AS IM,"
+            select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
         else:
             select_feature_exp_im = "-1 AS IM,"
         
