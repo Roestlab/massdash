@@ -8,18 +8,25 @@ from massseer.file_handling_ui import TransitionListUI
 
 # Server side imports
 from massseer.util import get_logger
+from massseer.util_ui import MassSeerGUI
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from massseer.loaders.DiaNNLoader import DiaNNLoader    
 from massseer.loaders.TargeteddiaPASEFLoader import TargeteddiaPASEFLoader
 from massseer.loaders.TargeteddiaPASEFDataAccess import TargeteddiaPASEFConfig
 # from massseer.targeted_data_extraction import TargeteddiaPASEFExperiment
 
 class TargetedExperimentUI(TransitionListUI):
-    def __init__(self, transition_list: SpectralLibraryLoader) -> None:
+    def __init__(self, massseer_gui: MassSeerGUI, transition_list: SpectralLibraryLoader) -> None:
         super().__init__()
+        self.massseer_gui = massseer_gui
         self.transition_list = transition_list
         self.target_transition_list = None
         self.search_results = None
         self.targeted_exp_params = TargeteddiaPASEFConfig()
+
+        if 'protein_list' not in st.session_state:   
+            st.session_state['protein_list'] = []
+
 
     def show(self) -> None:
         self.show_protein_selection()
@@ -28,35 +35,71 @@ class TargetedExperimentUI(TransitionListUI):
         self.show_transition_list()
         self.show_chromatogram_plot()
 
-    def show_transition_information(self) -> None:
+    @staticmethod
+    @st.cache_data(show_spinner=False)
+    def filter_search_results_by_qvalue(_diann_data: DiaNNLoader, qvalue_threshold: float) -> pd.DataFrame:
+        return _diann_data.filter_search_results_proteins_by_qvalue(qvalue_threshold)
+    
+    @st.cache_data(show_spinner=False)
+    def get_protein_list(_self, qvalue_threshold, _diann_data: DiaNNLoader=None) -> List[str]:
+        diann_qvalue_filtered_analytes = _self.filter_search_results_by_qvalue(_diann_data, qvalue_threshold)
+        protein_list = diann_qvalue_filtered_analytes['Protein.Ids'].unique().tolist()
+        # Filter for only proteins in the transition list
+        protein_list = [protein for protein in protein_list if protein in _self.transition_list.get_unique_proteins()]
+        return protein_list, diann_qvalue_filtered_analytes
+
+    @st.cache_data(show_spinner=False)
+    def get_peptide_list(_self, selected_proten,  _diann_qvalue_filtered_analytes: pd.DataFrame=None) -> List[str]:
+        peptide_list = _diann_qvalue_filtered_analytes[_diann_qvalue_filtered_analytes['Protein.Ids'] == selected_proten]['Modified.Sequence'].unique().tolist()
+        # Filter for only the peptides that are in the transition list
+        peptide_list = [peptide for peptide in peptide_list if peptide in _self.transition_list.get_unique_peptides_per_protein(_self.transition_settings.selected_protein)]
+        return peptide_list
+
+    def show_transition_information(self, diann_data: DiaNNLoader=None) -> None:
         # Create a UI for the transition list
         self.transition_settings = TransitionListUI()
+        if self.massseer_gui.diann_report_file_path_input != "*.tsv":
+            # QValue threshold numeric input to filter search results and filter transition list based on filtered search results
+            self.transition_settings.qvalue_threshold = st.sidebar.number_input("Filter Proteins by QValue", value=0.01, format="%.9f", help="If a search results file is supplied, you can filter the protein/precursor list by the QValue." )
+            protein_list, diann_qvalue_filtered_analytes = self.get_protein_list(self.transition_settings.qvalue_threshold, diann_data)
+            # Get protein lists
+            st.session_state['protein_list'] = protein_list
+        else:
+            st.session_state['protein_list'] = self.transition_list.get_unique_proteins()
+
         # Show proteins
-        self.transition_settings.show_protein_selection(self.transition_list.get_unique_proteins())
+        self.transition_settings.show_protein_selection(st.session_state['protein_list'])
+
+        # Get filtered peptides if a search results file is supplied
+        if self.massseer_gui.diann_report_file_path_input != "*.tsv":
+            peptide_list = self.get_peptide_list(self.transition_settings.selected_protein, diann_qvalue_filtered_analytes)
+        else:
+            peptide_list = self.transition_list.get_unique_peptides_per_protein(self.transition_settings.selected_protein)
+
         # Show peptides for selected protein
-        self.transition_settings.show_peptide_selection(self.transition_list.get_unique_peptides_per_protein(self.transition_settings.selected_protein))
+        self.transition_settings.show_peptide_selection(peptide_list)
+
+        # Get filtered precursor charge states if a search results file is supplied
+        if self.massseer_gui.diann_report_file_path_input != "*.tsv":
+            charge_list = diann_qvalue_filtered_analytes[(diann_qvalue_filtered_analytes['Protein.Ids'] == self.transition_settings.selected_protein) & (diann_qvalue_filtered_analytes['Modified.Sequence'] == self.transition_settings.selected_peptide)]['Precursor.Charge'].unique().tolist()
+            precursor_mz = diann_qvalue_filtered_analytes[(diann_qvalue_filtered_analytes['Protein.Ids'] == self.transition_settings.selected_protein) & (diann_qvalue_filtered_analytes['Modified.Sequence'] == self.transition_settings.selected_peptide)]['Precursor.Mz'].unique().tolist()[0]
+        else:
+            charge_list = self.transition_list.get_unique_charge_states_per_peptide(self.transition_settings.selected_peptide)
+            precursor_mz = self.transition_list.get_peptide_precursor_mz(self.selected_peptide, self.selected_charge)
+
         # Show charge states for selected peptide
-        self.transition_settings.show_charge_selection(self.transition_list.get_unique_charge_states_per_peptide(self.transition_settings.selected_peptide), self.transition_list)
+        self.transition_settings.show_charge_selection(charge_list, precursor_mz)
+
         # Show library features
         self.transition_settings.show_library_features(self.transition_list)
 
         # Filter the transition list based on the selected protein, peptide and charge state
         self.target_transition_list =  self.transition_list.filter_for_target_transition_list(self.transition_settings.selected_protein, self.transition_settings.selected_peptide, self.transition_settings.selected_charge)
 
-    def update_transition_information(self, filtered_analyte_data: pd.DataFrame) -> None:
-        new_protein_data = filtered_analyte_data['Protein.Ids'].tolist()
-        new_peptide_data = filtered_analyte_data['Modified.Sequence'].tolist()
-        print(f"len new_protein_data: {len(new_protein_data)}")
-        # Update protein selection
-        self.transition_settings.update_protein_selection(new_protein_data)
-        # Update peptide selection
-        # self.transition_settings.update_peptide_selection(new_peptide_data)
-
     def show_search_results_information(self) -> None:
         st.sidebar.divider()
         st.sidebar.subheader("Search results")
-        # QValue threshold numeric input to filter search results and filter transition list based on filtered search results
-        self.qvalue_threshold = st.sidebar.number_input("QValue threshold", value=0.01, format="%.9f" )
+        
         # Check to see if chromatogram peak feature apex is not none and mobilogram peak feature apex is not none to enable the use search results checkbox otherwise disable it
         enable_use_search_results_checkbox = self.search_results.chromatogram_peak_feature.apex is not None and self.search_results.mobilogram_peak_feature.apex is not None
         # Checkbox to use search results RT apex and IM apex for extraction parameters
@@ -100,7 +143,7 @@ class TargetedExperimentUI(TransitionListUI):
             # UI for RT extraction window in seconds
             self.targeted_exp_params.rt_window = st.number_input("RT window (seconds)", value=35)
             # UI for IM extraction window in 1/K0
-            self.targeted_exp_params.im_window = st.number_input("IM window (1/K0)", value=0.06)
+            self.targeted_exp_params.im_window = st.number_input("IM window (1/K0)", value=0.0600, format="%.8f")
 
     def get_mslevel_list(self) -> list:
         mslevel_list = []
@@ -169,8 +212,19 @@ class TargetedExperimentUI(TransitionListUI):
             'area_intensity': use_area_intensity}
         return peptide_dict
 
+    def get_targeted_extraction_params_dict(self) -> dict:
+        extraction_params_dict = {
+            'mslevel': self.get_mslevel_list(),
+            'ms1_mz_tol': self.targeted_exp_params.ms1_mz_tol,
+            'mz_tol': self.targeted_exp_params.mz_tol,
+            'rt_window': self.targeted_exp_params.rt_window,
+            'im_window': self.targeted_exp_params.im_window
+        }
+        return extraction_params_dict
+
     @st.cache_resource(show_spinner="Loading data...")
     def load_targeted_experiment(_self, mzml_files: List[str]):
+        # print(_self.targeted_exp_params)
         _self.targeted_exp = TargeteddiaPASEFLoader(mzml_files, _self.targeted_exp_params)
         _self.targeted_exp.load_mzml_data()
         return _self.targeted_exp
@@ -180,13 +234,11 @@ class TargetedExperimentUI(TransitionListUI):
         _targeted_exp.targeted_diapasef_data_access()
 
     @st.cache_resource(show_spinner="Extracting data...")
-    def targeted_extraction(_self, _targeted_exp: TargeteddiaPASEFLoader, peptide_coord: Dict) -> None:
-        _targeted_exp.reduce_targeted_spectra(peptide_coord)
+    def targeted_extraction(_self, _targeted_exp: TargeteddiaPASEFLoader, peptide_coord: Dict, config) -> None:
+        _targeted_exp.reduce_targeted_spectra(peptide_coord, config)
 
     # @st.cache_data(show_spinner="Returning data as dataframe...")  
     def get_targeted_data(_self, _targeted_exp: TargeteddiaPASEFLoader):
-        print("HERE")
-        print(_self.target_transition_list)
         targeted_data = _targeted_exp.get_targeted_dataframe(_self.get_mslevel_list(), _self.transition_list.get_peptide_product_mz_list(_self.transition_settings.selected_peptide, _self.transition_settings.selected_charge), _self.target_transition_list)
 
         return targeted_data

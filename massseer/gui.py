@@ -6,6 +6,8 @@ from PIL import Image
 # Type hinting
 from typing import List
 
+from bokeh.layouts import gridplot
+
 # Internal UI modules
 from massseer.util_ui import MassSeerGUI
 from massseer.file_handling_ui import process_osw_file, get_sqmass_files, get_mzml_files, TransitionListUI
@@ -21,6 +23,7 @@ from massseer.chromatogram_data_handling import get_chrom_data_limits, get_chrom
 from massseer.peak_picking import perform_chromatogram_peak_picking
 
 from massseer.loaders.DiaNNLoader import DiaNNLoader
+from massseer.plotting.InteractiveTwoDimensionPlotter import InteractiveTwoDimensionPlotter
 
 # Confit
 # There currently is warning with the icon size for some reason, not sure why
@@ -150,9 +153,7 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
     transition_list.load()
 
     # Create a UI for targeted experiment
-    targeted_experiment_ui = TargetedExperimentUI(transition_list)
-    targeted_experiment_ui.show_transition_information()
-    print(targeted_experiment_ui.target_transition_list)
+    targeted_experiment_ui = TargetedExperimentUI(massseer_gui, transition_list)
     
     if massseer_gui.raw_file_path_input != "*.mzML":
         mzml_file_path_list, threads = get_mzml_files(massseer_gui.raw_file_path_input)
@@ -162,15 +163,14 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
 
         # Load DIA-NN search results
         diann_data.load_report()
-        print(diann_data.report.search_data.columns)
+
+        targeted_experiment_ui.show_transition_information(diann_data=diann_data)
+
         
         # Get DIA-NN search results information for precursor
         targeted_experiment_ui.search_results = diann_data.load_report_for_precursor(targeted_experiment_ui.transition_settings.selected_peptide,  targeted_experiment_ui.transition_settings.selected_charge)
 
         targeted_experiment_ui.show_search_results_information()
-
-        diann_qvalue_filtered_analytes = diann_data.filter_search_results_proteins_by_qvalue(targeted_experiment_ui.qvalue_threshold)
-        targeted_experiment_ui.update_transition_information(diann_qvalue_filtered_analytes)
 
     if massseer_gui.raw_file_path_input != "*.mzML":
 
@@ -194,7 +194,9 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
             st.write(f"Setting up extraction parameters... Elapsed time: {elapsed_time()}")
             with time_block() as elapsed_time:
                 peptide_coord = targeted_experiment_ui.get_peptide_dict()
-                targeted_experiment_ui.targeted_extraction(targeted_exp, peptide_coord)
+                targeted_extraction_params = targeted_experiment_ui.get_targeted_extraction_params_dict()
+                print(targeted_extraction_params)
+                targeted_experiment_ui.targeted_extraction(targeted_exp, peptide_coord, targeted_extraction_params)
             st.write(f"Extracting data... Elapsed time: {elapsed_time()}")
             with time_block() as elapsed_time:
                 targeted_data = targeted_experiment_ui.get_targeted_data(targeted_exp)
@@ -203,75 +205,99 @@ if massseer_gui.transition_list_file_path != "*.pqp / *.tsv":
                 massseer_gui.transition_group_dict = targeted_experiment_ui.load_transition_group(targeted_exp)
             st.write(f'Creating TransitionGroup... Elapsed time: {elapsed_time()}')
             status.update(label="Targeted extraction complete!", state="complete", expanded=False)
-            # print(transition_group)
         elapsed = timeit.default_timer() - start_time
+    print(f"Info: Targeted extraction complete! Elapsed time: {timedelta(seconds=elapsed)}")
 
     from massseer.plotting.InteractivePlotter import InteractivePlotter
     from massseer.plotting.GenericPlotter import PlotConfig
+    print(massseer_gui.transition_group_dict.values())
+    print("Start plotting")
     for transition_group  in massseer_gui.transition_group_dict.values():
 
 
         print("Plotting...")
         # Show Plotting Settings UI
-        massseer_gui.show_chromatogram_plot_settings()
+        massseer_gui.show_chromatogram_plot_settings(include_raw_data_settings=True)
+
+        run_plots_list = []
+        # Generate Spectrum Plot
+        if massseer_gui.chromatogram_plot_settings.display_spectrum:
+            plot_settings_dict = massseer_gui.chromatogram_plot_settings.get_settings()
+            plot_settings_dict['x_axis_label'] = 'm/z'
+            plot_settings_dict['y_axis_label'] = 'Intensity'
+            plot_settings_dict['title'] = os.path.basename(massseer_gui.raw_file_path_input)
+            plot_settings_dict['subtitle'] = f"{targeted_experiment_ui.transition_settings.selected_protein} | {targeted_experiment_ui.transition_settings.selected_peptide}_{targeted_experiment_ui.transition_settings.selected_charge}"
+            plot_config = PlotConfig()
+            plot_config.update(plot_settings_dict)
+
+            if not transition_group.precursorChroms[0].empty():
+                plotter = InteractivePlotter(plot_config)
+                plot_spectrum_obj = plotter.plot(transition_group, plot_type='spectra')
+                run_plots_list.append(plot_spectrum_obj)
+            else:
+                st.error("No data found for selected transition group.")
 
         # Generate Chromatgoram Plot
-        plot_settings_dict = massseer_gui.chromatogram_plot_settings.get_settings()
-        plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
-        plot_settings_dict['y_axis_label'] = 'Intensity'
-        plot_settings_dict['title'] = os.path.basename(massseer_gui.raw_file_path_input)
-        plot_settings_dict['subtitle'] = f"{targeted_experiment_ui.transition_settings.selected_protein} | {targeted_experiment_ui.transition_settings.selected_peptide}_{targeted_experiment_ui.transition_settings.selected_charge}"
-        plot_config = PlotConfig()
-        plot_config.update(plot_settings_dict)
+        if massseer_gui.chromatogram_plot_settings.display_chromatogram:
+            plot_settings_dict = massseer_gui.chromatogram_plot_settings.get_settings()
+            plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
+            plot_settings_dict['y_axis_label'] = 'Intensity'
+            plot_settings_dict['title'] = os.path.basename(massseer_gui.raw_file_path_input)
+            plot_settings_dict['subtitle'] = f"{targeted_experiment_ui.transition_settings.selected_protein} | {targeted_experiment_ui.transition_settings.selected_peptide}_{targeted_experiment_ui.transition_settings.selected_charge}"
+            plot_config = PlotConfig()
+            plot_config.update(plot_settings_dict)
 
-        if not transition_group.precursorChroms[0].empty():
-            plotter = InteractivePlotter(plot_config)
-            plot_obj = plotter.plot(transition_group)
-        else:
-            st.error("No data found for selected transition group.")
+            if not transition_group.precursorChroms[0].empty():
+                plotter = InteractivePlotter(plot_config)
+                plot_obj = plotter.plot(transition_group)
+                run_plots_list.append(plot_obj)
+            else:
+                st.error("No data found for selected transition group.")
 
         # Generate Mobilogram Plot
-        plot_settings_dict = massseer_gui.chromatogram_plot_settings.get_settings()
-        plot_settings_dict['x_axis_label'] = 'Ion Mobility (1/K0)'
-        plot_settings_dict['y_axis_label'] = 'Intensity'
-        plot_settings_dict['title'] = os.path.basename(massseer_gui.raw_file_path_input)
-        plot_settings_dict['subtitle'] = f"{targeted_experiment_ui.transition_settings.selected_protein} | {targeted_experiment_ui.transition_settings.selected_peptide}_{targeted_experiment_ui.transition_settings.selected_charge}"
-        plot_config = PlotConfig()
-        plot_config.update(plot_settings_dict)
+        if massseer_gui.chromatogram_plot_settings.display_mobilogram:
+            plot_settings_dict = massseer_gui.chromatogram_plot_settings.get_settings()
+            plot_settings_dict['x_axis_label'] = 'Ion Mobility (1/K0)'
+            plot_settings_dict['y_axis_label'] = 'Intensity'
+            plot_settings_dict['title'] = os.path.basename(massseer_gui.raw_file_path_input)
+            plot_settings_dict['subtitle'] = f"{targeted_experiment_ui.transition_settings.selected_protein} | {targeted_experiment_ui.transition_settings.selected_peptide}_{targeted_experiment_ui.transition_settings.selected_charge}"
+            plot_config = PlotConfig()
+            plot_config.update(plot_settings_dict)
 
-        if not transition_group.precursorChroms[0].empty():
-            plotter = InteractivePlotter(plot_config)
-            plot_mobilo_obj = plotter.plot(transition_group, plot_type='mobilogram')
-        else:
-            st.error("No data found for selected transition group.")
+            if not transition_group.precursorChroms[0].empty():
+                plotter = InteractivePlotter(plot_config)
+                plot_mobilo_obj = plotter.plot(transition_group, plot_type='mobilogram')
+                run_plots_list.append(plot_mobilo_obj)
+            else:
+                st.error("No data found for selected transition group.")
 
-        # Generate Spectrum Plot
-        plot_settings_dict = massseer_gui.chromatogram_plot_settings.get_settings()
-        plot_settings_dict['x_axis_label'] = 'm/z'
-        plot_settings_dict['y_axis_label'] = 'Intensity'
-        plot_settings_dict['title'] = os.path.basename(massseer_gui.raw_file_path_input)
-        plot_settings_dict['subtitle'] = f"{targeted_experiment_ui.transition_settings.selected_protein} | {targeted_experiment_ui.transition_settings.selected_peptide}_{targeted_experiment_ui.transition_settings.selected_charge}"
-        plot_config = PlotConfig()
-        plot_config.update(plot_settings_dict)
 
-        if not transition_group.precursorChroms[0].empty():
-            plotter = InteractivePlotter(plot_config)
-            plot_spectrum_obj = plotter.plot(transition_group, plot_type='spectra')
-        else:
-            st.error("No data found for selected transition group.")
+        super_plot_title = run_plots_list[0].title
+       
 
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.bokeh_chart(plot_obj)
-        with col2:
-            st.bokeh_chart(plot_mobilo_obj)
-        with col3:
-            st.bokeh_chart(plot_spectrum_obj)
+        st.subheader(super_plot_title.text)
+        cols = st.columns(len(run_plots_list))
+        for i, col in enumerate(cols):
+            with col:
+                run_plots_list[i].title = None
+                st.bokeh_chart(run_plots_list[i])
+        
         st.write(f"Total elapsed time of extraction: {timedelta(seconds=elapsed)}")
+    
+
+ 
 
     for df in targeted_data.values():
         if not df.empty:            
+
+            plotter = InteractiveTwoDimensionPlotter(df)
+            two_d_plots = plotter.plot(False)
+            p = gridplot(two_d_plots, ncols=3, sizing_mode='stretch_width')
+            st.bokeh_chart(p)
+
             st.dataframe(df, hide_index=True, column_order =('native_id', 'ms_level', 'precursor_mz', 'product_mz', 'mz', 'rt', 'im', 'int', 'rt_apex', 'rt_left_width', 'rt_right_width', 'im_apex', 'PrecursorCharge', 'ProductCharge', 'LibraryIntensity', 'NormalizedRetentionTime', 'PeptideSequence', 'ModifiedPeptideSequence', 'ProteinId', 'GeneName', 'Annotation', 'PrecursorIonMobility'))
+
+
 
 
 # OpenMS Siderbar Bottom Logo

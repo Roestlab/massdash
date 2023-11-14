@@ -27,8 +27,9 @@ class ChromatogramPlotSettings:
         self.set_y_range = False
         self.do_smoothing = 'none'
         self.smoothing_dict = {}
+        
 
-    def create_sidebar(self):
+    def create_sidebar(self, include_raw_data_settings=False):
         """
         Creates a sidebar in Streamlit for adjusting the plot settings.
 
@@ -39,6 +40,14 @@ class ChromatogramPlotSettings:
         # Add checkboxes in the sidebar to include MS1 and/or MS2 traces
         self.include_ms1 = st.sidebar.checkbox("Include MS1 Traces", value=self.include_ms1)
         self.include_ms2 = st.sidebar.checkbox("Include MS2 Traces", value=self.include_ms2)
+
+        # If raw data, add checkboxes to display spectrum, chromatogram and mobilgoram plots
+        if include_raw_data_settings:
+            self.display_plot_dimension_type = st.sidebar.selectbox("Display Plot Type", ['1D', '2D', '3D'])
+            if self.display_plot_dimension_type == '1D':
+                    self.display_spectrum = st.sidebar.checkbox("Display Spectrum", value=True)
+                    self.display_chromatogram = st.sidebar.checkbox("Display Chromatogram", value=True)
+                    self.display_mobilogram = st.sidebar.checkbox("Display Mobilogram", value=True)            
 
         with st.sidebar.expander("Advanced Settings"):
             # Display plots in N columns

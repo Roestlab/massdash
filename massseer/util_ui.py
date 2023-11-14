@@ -94,9 +94,9 @@ class MassSeerGUI:
 
         return self
 
-    def show_chromatogram_plot_settings(self):
+    def show_chromatogram_plot_settings(self, include_raw_data_settings=False):
         self.chromatogram_plot_settings = ChromatogramPlotSettings(self)
-        self.chromatogram_plot_settings.create_sidebar()
+        self.chromatogram_plot_settings.create_sidebar(include_raw_data_settings)
         return self
 
     def show_algorithm_settings(self):

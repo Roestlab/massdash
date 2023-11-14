@@ -195,44 +195,44 @@ def get_mzml_files(raw_file_path_input, threads=1):
     return raw_file_path_list, threads
 
 
-
-
 class TransitionListUI:
     def __init__(self) -> None:
         self.transition_list = ""
         self.selected_protein = ""
         self.selected_peptide = ""
         self.selected_charge = ""
-        if 'protein_list' not in st.session_state:   
-            st.session_state['protein_list'] = []
+        self.qvalue_threshold = 0.01
+        
         
     def show_protein_selection(self, protein_list):
-        st.session_state['protein_list'] = protein_list
-        self.selected_protein = st.sidebar.selectbox(f"Select protein (of {len(st.session_state['protein_list'])} proteins)", st.session_state['protein_list'])
-        print(f"show protein selection | len = {len(st.session_state['protein_list'])}")
+        
+        self.selected_protein = st.sidebar.selectbox(f"Select protein (of {len(protein_list)} proteins)", protein_list)
 
     def show_peptide_selection(self, peptide_list):
         self.selected_peptide = st.sidebar.selectbox(f"Select peptide (of {len(peptide_list)} peptides)", peptide_list)
     
-    def show_charge_selection(self, charge_list, transition_list):
+    def show_charge_selection(self, charge_list, precursor_mz):
         col1, col2 = st.sidebar.columns(2)
         with col1:
             self.selected_charge = st.selectbox("Select charge", charge_list)
         with col2:
-            precursor_mz = transition_list.get_peptide_precursor_mz(self.selected_peptide, self.selected_charge)
             st.code(f"Precursor m/z\n{precursor_mz}", language="markdown")
 
     def show_library_features(self, transition_list):
-        library_int = transition_list.get_peptide_library_intensity(self.selected_peptide, self.selected_charge)
-        library_rt = transition_list.get_peptide_retention_time(self.selected_peptide, self.selected_charge)
-        library_ion_mobility = transition_list.get_peptide_ion_mobility(self.selected_peptide, self.selected_charge)
-        with st.sidebar.expander("Library features", expanded=False):
-            st.code(f"Library intensity: {library_int}\nLibrary RT: {library_rt}\nLibrary IM: {library_ion_mobility}", language="markdown")
+        try:
+            library_int = transition_list.get_peptide_library_intensity(self.selected_peptide, self.selected_charge)
+            library_rt = transition_list.get_peptide_retention_time(self.selected_peptide, self.selected_charge)
+            library_ion_mobility = transition_list.get_peptide_ion_mobility(self.selected_peptide, self.selected_charge)
+            with st.sidebar.expander("Library features", expanded=False):
+                st.code(f"Library intensity: {library_int}\nLibrary RT: {library_rt}\nLibrary IM: {library_ion_mobility}", language="markdown")
+        except:
+            with st.sidebar.expander("Library features", expanded=False):
+                st.code(f"Could not find library features for the selected precursor.", language="markdown")
 
     def update_protein_selection(self, new_protein_list):
         # Update the available protein options
-        print(len(st.session_state['protein_list']))
+        print(f"current protein list len= {len(st.session_state['protein_list'])}")
         st.session_state['protein_list'] = new_protein_list
-        print(len(st.session_state['protein_list']))
+        print(f"new protein list len= {len(st.session_state['protein_list'])}")
 
         
