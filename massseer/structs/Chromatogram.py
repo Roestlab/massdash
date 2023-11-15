@@ -1,6 +1,7 @@
 import numpy as np
 import pyopenms as po
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
+import pandas as pd
 
 class Chromatogram:
     ''' 
@@ -96,3 +97,12 @@ class Chromatogram:
             return self.filterChromatogram(boundary).median()
         else:
             return np.median(self.intensity)
+
+    def toPandasDf(self) -> pd.DataFrame:
+        '''
+        Convert a Chromatogram object to a pandas dataframe
+        '''
+        df = pd.DataFrame(np.column_stack([self.rt, self.intensity]),
+                            columns=['rt', 'intensity'])
+        df['annotation'] = self.label
+        return df
