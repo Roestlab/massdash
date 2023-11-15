@@ -133,15 +133,22 @@ class InteractivePlotter(GenericPlotter):
                 colors = ['black']
             else:
                 colors = Viridis256[len(transitionChroms)]
-            
-            # Tooltips for interactive information
-            TOOLTIPS = [
-                    ("index", "$index"),
-                    ("(rt,int)", "(@x{0.00}, @y)"),
-                    ("precursor_mz", "@precursor_mz"),
-                    ("product_mz", "@product_mz"),
-                    ("product_charge", "@product_charge")
-                ]
+
+            if hasattr(transitionGroup, 'targeted_transition_list'):
+                # Tooltips for interactive information
+                TOOLTIPS = [
+                        ("index", "$index"),
+                        ("(rt,int)", "(@x{0.00}, @y)"),
+                        ("precursor_mz", "@precursor_mz"),
+                        ("product_mz", "@product_mz"),
+                        ("product_charge", "@product_charge")
+                    ]
+            else:
+                # Tooltips for interactive information
+                TOOLTIPS = [
+                        ("index", "$index"),
+                        ("(rt,int)", "(@x{0.00}, @y)"),
+                    ]
 
             # Create a Bokeh figure
             p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
@@ -293,13 +300,19 @@ class InteractivePlotter(GenericPlotter):
             colors = Viridis256[len(transitionMobilos)]
 
         # Tooltips for interactive information
-        TOOLTIPS = [
-                ("index", "$index"),
-                ("(im,int)", "(@x{0.00}, @y)"),
-                ("precursor_mz", "@precursor_mz"),
-                ("product_mz", "@product_mz"),
-                ("product_charge", "@product_charge")
-            ]
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(im,int)", "(@x{0.00}, @y)"),
+                    ("precursor_mz", "@precursor_mz"),
+                    ("product_mz", "@product_mz"),
+                    ("product_charge", "@product_charge")
+                ]
+        else:
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(im,int)", "(@x{0.00}, @y)"),
+                ]
         
         # Create a Bokeh figure
         p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
@@ -439,13 +452,19 @@ class InteractivePlotter(GenericPlotter):
             colors = Viridis256[len(transitionSpectra)]
 
         # Tooltips for interactive information
-        TOOLTIPS = [
-                ("index", "$index"),
-                ("(mz,int)", "(@x{0.00}, @y)"),
-                ("precursor_mz", "@precursor_mz"),
-                ("product_mz", "@product_mz"),
-                ("product_charge", "@product_charge")
-            ]
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(mz,int)", "(@x{0.00}, @y)"),
+                    ("precursor_mz", "@precursor_mz"),
+                    ("product_mz", "@product_mz"),
+                    ("product_charge", "@product_charge")
+                ]
+        else:
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(mz,int)", "(@x{0.00}, @y)"),
+                ]
         
         # Create a Bokeh figure
         p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
