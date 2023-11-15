@@ -23,7 +23,7 @@ class TransitionPQPLoader:
         self.data: pd.DataFrame = pd.DataFrame()
     
     @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
-    def load(_self) -> None:
+    def _load(_self) -> None:
         '''
         Load the transition PQP file
         '''
