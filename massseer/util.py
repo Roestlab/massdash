@@ -13,9 +13,6 @@ from datetime import datetime
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
-# streamlit components
-import streamlit as st
-
 # Type hinting
 from typing import List, Tuple
 
@@ -51,6 +48,25 @@ def get_base64_of_bin_file(png_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
+
+def check_streamlit():
+    """
+    Function to check whether python code is run within streamlit
+
+    Returns
+    -------
+    use_streamlit : boolean
+        True if code is run within streamlit, else False
+    """
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+        if not get_script_run_ctx():
+            use_streamlit = False
+        else:
+            use_streamlit = True
+    except ModuleNotFoundError:
+        use_streamlit = False
+    return use_streamlit
 
 def check_sqlite_table(con, table):
     """
