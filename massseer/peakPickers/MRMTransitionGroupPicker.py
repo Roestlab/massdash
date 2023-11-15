@@ -1,4 +1,7 @@
 import pyopenms as po
+from massseer.structs.TransitionGroup import TransitionGroup
+from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+from typing import List
 
 class MRMTransitionGroupPicker:
     ''' python wrapper of the pyopenms MRMTransitionGroupPicker '''
@@ -7,7 +10,7 @@ class MRMTransitionGroupPicker:
         ' smoother - which smoother to use for picking chromatogram valid options: ["original", "guassian", "sgolay"]'
         ' **kwargs - keyword arguments to be passed to setSmoother function valid options ["sgolay_frame_length (default 11)", "sgolay_polynomial_order (default 3)", "gauss_width (default 50.0)"]'
         self.picker = po.MRMTransitionGroupPicker()
-        self.params = self.setDefaults()
+        self.setDefaults()
         self.setSmoother(smoother, **kwargs)
 
 
@@ -63,39 +66,42 @@ class MRMTransitionGroupPicker:
             self.params.setValue(b'PeakPickerMRM:use_gauss','false')
             self.params.setValue(b'PeakPickerMRM:sgolay_frame_length', sgolay_frame_length)
             self.params.setValue(b'PeakPickerMRM:sgolay_polynomial_order', sgolay_polynomial_order)
+        else:
+            raise ValueError("Smoother must be one of ['original', 'gauss', 'sgolay']")
 
         self.picker.setParameters(self.params)
 
 
-    def setGeneralParameters(self, param, value):
+    def setGeneralParameters(self, **kwargs):
         ''' Set a supported parameter '''
-        valid_params = ['stop_after_feature', 'stop_after_intensity_ratio', 'min_peak_width', 'use_consensus', 'recalculate_peaks_max_z']
-        if param not in valid_params:
-            raise ValueError("Parameter is not valid or is not currently supported")
-        else:
-            self.params.setValue(bytes(param), value)
-            self.picker.setParameters(self.params)
+        valid_params = ['stop_after_feature', 'stop_after_intensity_ratio', 'min_peak_width', 'recalculate_peaks_max_z', 'resample_boundary', 'recalculate_peaks', 'background_subtraction', 'use_precursors']
+        mrmParams = ['signal_to_noise']
+        valid_params = valid_params + mrmParams
+        for k, val in kwargs.items():
+            if k not in valid_params:
+                raise ValueError(f"Parameter {k} is not valid or is not currently supported")
+            else:
+                if k in mrmParams:
+                    self.params.setValue(bytes('PeakPickerMRM:'+k, encoding='utf-8'), val)
+                else:
+                    self.params.setValue(bytes(k, encoding='utf-8'), val)
+                self.picker.setParameters(self.params)
 
-    def run(self, chroms):
-        pass
+    def pick(self, transitionGroup: TransitionGroup) -> List[TransitionGroupFeature]:
+        ''' Performs Peak Picking, Should return a TransitionGroupFeatureList object '''
+        pyopenmsTransitionGroup = transitionGroup.to_pyopenms()
 
+        self.picker.pickTransitionGroup(pyopenmsTransitionGroup)
+        pyopenmsFeatures = pyopenmsTransitionGroup.getFeatures()
 
-    def computeFeature(my_chroms, params):
-        transitionGroupPicker = po.MRMTransitionGroupPicker()
-        transitionGroupPicker.setParameters(params)
+        return self._convertPyopenMSFeaturesToTransitionGroupFeatures(pyopenmsFeatures)
 
-        transitionGroup = po.MRMTransitionGroupCP()
-
-        for i in range(len(my_chroms.transitionChroms)):
-            transition = po.ReactionMonitoringTransition()
-            transition.setNativeID(str(i))
-            chrom = po.MSChromatogram()
-            chrom.set_peaks((my_chroms.transitionChroms[i].rt, my_chroms.transitionChroms[i].intensity))
-            chrom.setNativeID(str(i))
-            transitionGroup.addChromatogram(chrom, chrom.getNativeID())
-            transitionGroup.addTransition(transition, transition.getNativeID())
-
-        transitionGroupPicker.pickTransitionGroup(transitionGroup)
-
-        return transitionGroup.getFeatures()
-
+    def _convertPyopenMSFeaturesToTransitionGroupFeatures(self, pyopenmsFeatures) -> List[TransitionGroupFeature]:
+        ''' Convert pyopenms features to TransitionGroupFeatures '''
+        transitionGroupFeatures = []
+        for f in pyopenmsFeatures:
+            transitionGroupFeatures.append(TransitionGroupFeature(leftBoundary=f.getMetaValue(b'leftWidth'), 
+                                            rightBoundary=f.getMetaValue(b'rightWidth'),
+                                            areaIntensity=f.getIntensity(),
+                                            consensusApex=f.getRT()))
+        return transitionGroupFeatures
