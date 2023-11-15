@@ -9,7 +9,7 @@ from bokeh.palettes import Category20, Viridis256
 
 from massseer.plotting.GenericPlotter import GenericPlotter, PlotConfig
 from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.PeakFeature import PeakFeature
+from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.structs.Chromatogram import Chromatogram
 from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
@@ -24,13 +24,13 @@ class InteractivePlotter(GenericPlotter):
     def __init__(self, config: PlotConfig):
         super().__init__(config)
 
-    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectra'] = 'chromatogram') -> figure:
+    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectra'] = 'chromatogram') -> figure:
         """
         Plots the given transitionGroup using the specified plot type.
 
         Args:
             transitionGroup (TransitionGroup): The transition group to plot.
-            features (Optional[List[PeakFeature]], optional): A list of peak features to highlight on the plot. Defaults to None.
+            features (Optional[List[TransitionGroupFeature]], optional): A list of peak features to highlight on the plot. Defaults to None.
             plot_type (Literal['chromatogram', 'mobilogram', 'spectrum'], optional): The type of plot to generate. Defaults to 'chromatogram'.
 
         Returns:
