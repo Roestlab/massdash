@@ -37,5 +37,13 @@ class TestChromatogram(unittest.TestCase):
         self.assertEqual(self.chromatogram.median(), 20.0)
         self.assertEqual(self.chromatogram.median((1.5, 2.5)), 20.0)
 
+    def test_toPandasDf(self):
+        df = self.chromatogram.toPandasDf()
+        self.assertEqual(df.shape, (3,3))
+        self.assertEqual(df.columns.tolist(), ['rt', 'intensity', 'annotation'])
+        self.assertTrue(np.array_equal(df['rt'], self.rt))
+        self.assertTrue(np.array_equal(df['intensity'], self.intensity))
+        self.assertTrue(np.array_equal(df['annotation'], np.array(['test', 'test', 'test'])))
+
 if __name__ == '__main__':
     unittest.main()

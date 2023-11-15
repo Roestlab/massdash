@@ -42,6 +42,7 @@ import base64
 import pyopenms as po
 import sqlite3
 import zlib
+import pandas as pd
 
 class SqMassDataAccess:
 
@@ -57,6 +58,48 @@ class SqMassDataAccess:
         data = [row for row in self.c.execute(f"""SELECT ID, NATIVE_ID FROM CHROMATOGRAM WHERE NATIVE_ID LIKE '{precursor_id}_Precursor%'""")]
         return {"chrom_ids":[d[0] for d in data], "native_ids":[d[1] for d in data]}
 
+
+    def _getChromatogramsHelper(self, ids: List[str], labels: List[str]):
+        """
+        Helper function to get chromatogram data, assumes that ids are not empty
+        """
+        stmt ="SELECT CHROMATOGRAM_ID, COMPRESSION, DATA_TYPE, DATA FROM DATA WHERE CHROMATOGRAM_ID IN ("
+        for myid in ids:
+            stmt += str(myid) + ","
+        stmt = stmt[:-1]
+        stmt += ")"
+
+        data = [row for row in self.c.execute(stmt)]
+        return self._returnDataForChromatogram(data)
+    
+    def _getChromatogramsHelperFromNativeIds(self, native_ids: List[str]):
+        stmt ="SELECT CHROMATOGRAM_ID, COMPRESSION, DATA_TYPE, DATA FROM DATA INNER JOIN CHROMATOGRAM ON CHROMATOGRAM.ID = CHROMATOGRAM_ID WHERE NATIVE_ID IN ("
+        for myid in native_ids:
+            stmt += str(myid) + ","
+        stmt = stmt[:-1]
+        stmt += ")"
+
+        data = [row for row in self.c.execute(stmt)]
+        return self._returnDataForChromatogram(data)
+
+    def getDataForChromatogramsDf(self, ids: List[str], labels: List[str]) -> pd.DataFrame:
+        '''
+        Get chromatogram data as a dataframe
+        '''
+        if len(ids) == 0:
+            return pd.DataFrame(columns=['rt', 'intensity', 'annotation'])
+
+        res = self._getChromatogramsHelper(ids, labels)
+
+        c = []
+        for l, val in zip(labels, res.values()):
+            c.append(Chromatogram(val[0], val[1], l).toPandasDf())
+
+        if len(c) == 0:
+            return pd.DataFrame(columns=['rt', 'intensity', 'annotation'])
+        else:
+            return pd.concat(c)
+
     def getDataForChromatograms(self, ids: List[str], labels: List[str]) -> List[Chromatogram]:
         """
         Get 
@@ -70,18 +113,7 @@ class SqMassDataAccess:
         if len(ids) == 0:
             return [ [ [0], [0] ] ]
 
-        stmt ="SELECT CHROMATOGRAM_ID, COMPRESSION, DATA_TYPE, DATA FROM DATA WHERE CHROMATOGRAM_ID IN ("
-        for myid in ids:
-            stmt += str(myid) + ","
-        stmt = stmt[:-1]
-        stmt += ")"
-
-        data = [row for row in self.c.execute(stmt)]
-        res = self._returnDataForChromatogram(data)
-
-        #res = []
-        #for myid in ids:
-        #    res.append( tmpres[myid] )
+        res = self._getChromatogramsHelper(ids, labels)
 
         ### Convert to chromatograms
         ### match ids with labels
@@ -116,7 +148,25 @@ class SqMassDataAccess:
         data = [row for row in self.c.execute("SELECT CHROMATOGRAM_ID, COMPRESSION, DATA_TYPE, DATA FROM DATA INNER JOIN CHROMATOGRAM ON CHROMATOGRAM.ID = CHROMATOGRAM_ID WHERE NATIVE_ID = %s" % native_id )]
         return list(self._returnDataForChromatogram(data).values())[0]
 
-    def getDataForChromatogramsFromNativeIds(self, native_ids):
+    def getDataForChromatogramsFromNativeIdsDf(self, native_ids: List[str], labels: List[str]) -> pd.DataFrame:
+        '''
+        Get chromatogram data as a dataframe
+        '''
+        if len(native_ids) == 0:
+            return pd.DataFrame(columns=['rt', 'intensity', 'annotation'])
+
+        res = self._getChromatogramsHelperFromNativeIds(native_ids)
+
+        c = []
+        for l, val in zip(labels, res.values()):
+            c.append(Chromatogram(val[0], val[1], l).toPandasDf())
+
+        if len(c) == 0:
+            return pd.DataFrame(columns=['rt', 'intensity', 'annotation'])
+        else:
+            return pd.concat(c)
+
+    def getDataForChromatogramsFromNativeIds(self, native_ids: List, labels: List[str]) -> List[Chromatogram]:
         """
         Get data from multiple chromatograms chromatogram
 
@@ -127,23 +177,16 @@ class SqMassDataAccess:
 
         if len(native_ids) == 0:
             return [ [ [0], [0] ] ]
-
-        stmt ="SELECT CHROMATOGRAM_ID, COMPRESSION, DATA_TYPE, DATA FROM DATA INNER JOIN CHROMATOGRAM ON CHROMATOGRAM.ID = CHROMATOGRAM_ID WHERE NATIVE_ID IN ("
-        for myid in native_ids:
-            stmt += str(myid) + ","
-        stmt = stmt[:-1]
-        stmt += ")"
-
-        data = [row for row in self.c.execute(stmt)]
-        tmpres = self._returnDataForChromatogram(data)
-
-        chrom_ids = list(tmpres.keys())
         
-        res = []
-        for myid in chrom_ids:
-            res.append( tmpres[myid] )
+        res = self._getChromatogramsHelperFromNativeIds(native_ids)
 
-        return res
+        ### Convert to chromatograms
+        ### match ids with labels
+        c = []
+        for l, val in zip(labels, res.values()):
+            c.append(Chromatogram(val[0], val[1], l))
+
+        return c
 
     def _returnDataForChromatogram(self, data):
         # prepare result
