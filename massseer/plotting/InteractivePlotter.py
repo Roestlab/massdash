@@ -89,14 +89,16 @@ class InteractivePlotter(GenericPlotter):
             intensity = np.where(intensity < 0, 0, intensity)
 
             # Get precursor and product info
-            precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
+            precursor_mz = None
             product_mz = None
             product_charge = None
+            if hasattr(transitionGroup, 'targeted_transition_list'):
+                precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
 
-            if not is_precursor:
-                label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
-                product_mz = np.unique(label_info['ProductMz'].values)[0]
-                product_charge = np.unique(label_info['ProductCharge'].values)[0]
+                if not is_precursor:
+                    label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
+                    product_mz = np.unique(label_info['ProductMz'].values)[0]
+                    product_charge = np.unique(label_info['ProductCharge'].values)[0]
 
             source_data = {'x': rt, 'y': intensity, 'precursor_mz': [precursor_mz] * len(rt),
                         'product_mz': [product_mz] * len(rt), 'product_charge': [product_charge] * len(rt)}
@@ -131,18 +133,35 @@ class InteractivePlotter(GenericPlotter):
                 colors = ['black']
             else:
                 colors = Viridis256[len(transitionChroms)]
-            
-            # Tooltips for interactive information
-            TOOLTIPS = [
-                    ("index", "$index"),
-                    ("(rt,int)", "(@x{0.00}, @y)"),
-                    ("precursor_mz", "@precursor_mz"),
-                    ("product_mz", "@product_mz"),
-                    ("product_charge", "@product_charge")
-                ]
+
+            if hasattr(transitionGroup, 'targeted_transition_list'):
+                # Tooltips for interactive information
+                TOOLTIPS = [
+                        ("index", "$index"),
+                        ("(rt,int)", "(@x{0.00}, @y)"),
+                        ("precursor_mz", "@precursor_mz"),
+                        ("product_mz", "@product_mz"),
+                        ("product_charge", "@product_charge")
+                    ]
+            else:
+                # Tooltips for interactive information
+                TOOLTIPS = [
+                        ("index", "$index"),
+                        ("(rt,int)", "(@x{0.00}, @y)"),
+                    ]
 
             # Create a Bokeh figure
-            p = figure(title=self.title, x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+            p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+
+            # Add title
+            if self.title is not None:
+                p.title.text = self.title
+                p.title.text_font_size = "16pt"
+                p.title.align = "center"
+
+            if self.subtitle is not None:
+                # Create a subtitle
+                p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
             # Limit axes ranges
             if self.x_range is not None:
@@ -154,12 +173,6 @@ class InteractivePlotter(GenericPlotter):
                 p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
             p.sizing_mode = 'scale_width'
-            # Add a main title
-            p.title.text_font_size = "16pt"
-            p.title.align = "center"
-
-            # Create a subtitle
-            p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
             # Create a legend
             legend = Legend()
@@ -241,14 +254,17 @@ class InteractivePlotter(GenericPlotter):
         intensity = np.where(intensity < 0, 0, intensity)
 
         # Get precursor and product info
-        precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
+        precursor_mz = None
         product_mz = None
         product_charge = None
 
-        if not is_precursor:
-            label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
-            product_mz = np.unique(label_info['ProductMz'].values)[0]
-            product_charge = np.unique(label_info['ProductCharge'].values)[0]
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
+
+            if not is_precursor:
+                label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
+                product_mz = np.unique(label_info['ProductMz'].values)[0]
+                product_charge = np.unique(label_info['ProductCharge'].values)[0]
 
         source_data = {'x': im, 'y': intensity, 'precursor_mz': [precursor_mz] * len(im), 'product_mz': [product_mz] * len(im), 'product_charge': [product_charge] * len(im)}
 
@@ -284,16 +300,32 @@ class InteractivePlotter(GenericPlotter):
             colors = Viridis256[len(transitionMobilos)]
 
         # Tooltips for interactive information
-        TOOLTIPS = [
-                ("index", "$index"),
-                ("(im,int)", "(@x{0.00}, @y)"),
-                ("precursor_mz", "@precursor_mz"),
-                ("product_mz", "@product_mz"),
-                ("product_charge", "@product_charge")
-            ]
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(im,int)", "(@x{0.00}, @y)"),
+                    ("precursor_mz", "@precursor_mz"),
+                    ("product_mz", "@product_mz"),
+                    ("product_charge", "@product_charge")
+                ]
+        else:
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(im,int)", "(@x{0.00}, @y)"),
+                ]
         
         # Create a Bokeh figure
-        p = figure(title=self.title, x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+
+        # Add title
+        if self.title is not None:
+            p.title.text = self.title
+            p.title.text_font_size = "16pt"
+            p.title.align = "center"
+
+        if self.subtitle is not None:
+            # Create a subtitle
+            p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
         # Limit axes ranges
         if self.x_range is not None:
@@ -305,9 +337,6 @@ class InteractivePlotter(GenericPlotter):
             p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
         p.sizing_mode = 'scale_width'
-        # Add a main title
-        p.title.text_font_size = "16pt"
-        p.title.align = "center"
 
         # Create a subtitle
         p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
@@ -373,14 +402,16 @@ class InteractivePlotter(GenericPlotter):
         intensity = np.where(intensity < 0, 0, intensity)
 
         # Get precursor and product info
-        precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
+        precursor_mz = None
         product_mz = None
         product_charge = None
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
 
-        if not is_precursor:
-            label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
-            product_mz = np.unique(label_info['ProductMz'].values)[0]
-            product_charge = np.unique(label_info['ProductCharge'].values)[0]
+            if not is_precursor:
+                label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
+                product_mz = np.unique(label_info['ProductMz'].values)[0]
+                product_charge = np.unique(label_info['ProductCharge'].values)[0]
 
         source_data = {'x': mz, 'y0':[0]*len(mz), 'y': intensity, 'precursor_mz': [precursor_mz] * len(mz), 'product_mz': [product_mz] * len(mz), 'product_charge': [product_charge] * len(mz)}
 
@@ -421,16 +452,32 @@ class InteractivePlotter(GenericPlotter):
             colors = Viridis256[len(transitionSpectra)]
 
         # Tooltips for interactive information
-        TOOLTIPS = [
-                ("index", "$index"),
-                ("(mz,int)", "(@x{0.00}, @y)"),
-                ("precursor_mz", "@precursor_mz"),
-                ("product_mz", "@product_mz"),
-                ("product_charge", "@product_charge")
-            ]
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(mz,int)", "(@x{0.00}, @y)"),
+                    ("precursor_mz", "@precursor_mz"),
+                    ("product_mz", "@product_mz"),
+                    ("product_charge", "@product_charge")
+                ]
+        else:
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(mz,int)", "(@x{0.00}, @y)"),
+                ]
         
         # Create a Bokeh figure
-        p = figure(title=self.title, x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+
+        # Add title
+        if self.title is not None:
+            p.title.text = self.title
+            p.title.text_font_size = "16pt"
+            p.title.align = "center"
+
+        if self.subtitle is not None:
+            # Create a subtitle
+            p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
         # Limit axes ranges
         if self.x_range is not None:
@@ -442,12 +489,6 @@ class InteractivePlotter(GenericPlotter):
             p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
         p.sizing_mode = 'scale_width'
-        # Add a main title
-        p.title.text_font_size = "16pt"
-        p.title.align = "center"
-
-        # Create a subtitle
-        p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
         # Create a legend
         legend = Legend()

@@ -5,8 +5,9 @@ import pandas as pd
 
 import streamlit as st
 
+# Internal modules
+from massseer.util import check_streamlit, conditional_decorator
 from massseer.util import check_sqlite_column_in_table, check_sqlite_table
-
 
 class TransitionPQPLoader:
     '''
@@ -27,8 +28,8 @@ class TransitionPQPLoader:
         self.conn = sqlite3.connect(filename)
         self.c = self.conn.cursor()
     
-    @st.cache_data(show_spinner=False)
-    def _load(_self) -> None:
+    @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
+    def load(_self) -> None:
         '''
         Load the transition PQP file
         '''
