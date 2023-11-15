@@ -43,3 +43,5 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
 
         # Filter the transition list based on the selected protein, peptide and charge state
         self.target_transition_list =  self.transition_list.filter_for_target_transition_list(self.transition_settings.selected_protein, self.transition_settings.selected_peptide, self.transition_settings.selected_charge)
+
+    
