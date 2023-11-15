@@ -5,7 +5,7 @@ import pandas as pd
 
 import streamlit as st
 
-from massseer.util import check_sqlite_column_in_table
+from massseer.util import check_sqlite_column_in_table, check_sqlite_table
 
 
 class TransitionPQPLoader:
@@ -14,7 +14,7 @@ class TransitionPQPLoader:
     '''
     REQUIRED_PQP_COLUMNS: List[str] = ['PrecursorMz', 'ProductMz', 'PrecursorCharge', 'ProductCharge',
                                    'LibraryIntensity', 'NormalizedRetentionTime', 'PeptideSequence',
-                                   'ModifiedPeptideSequence', 'ProteinId', 'GeneName', 'Annotation', 'PrecursorIonMobility']
+                                   'ModifiedPeptideSequence', 'ProteinId', 'GeneName', 'Annotation', 'PrecursorIonMobility', 'Decoy']
     
     def __init__(self, filename: str) -> None:
         '''
@@ -28,7 +28,7 @@ class TransitionPQPLoader:
         self.c = self.conn.cursor()
     
     @st.cache_data(show_spinner=False)
-    def load(_self) -> None:
+    def _load(_self) -> None:
         '''
         Load the transition PQP file
         '''
@@ -36,7 +36,7 @@ class TransitionPQPLoader:
         if _self._validate_columns():
             return _self.data
         else:
-            raise ValueError(f"The PQP file does not have the required columns.\n {TransitionPQPLoader.REQUIRED_PQP_COLUMNS}")
+            raise ValueError(f"The PQP file does not have the required columns.\n {TransitionPQPLoader.REQUIRED_PQP_COLUMNS}.\nSupplied PQP is missing columns: {set(TransitionPQPLoader.REQUIRED_PQP_COLUMNS) - set(_self.data.columns)}")
         
     def getTransitionList(self):
         """
@@ -55,8 +55,18 @@ class TransitionPQPLoader:
         else:
             prec_lib_drift_time_query = "-1 AS PrecursorIonMobility,"
 
+        # Older PQP files do not have GENE table and PEPTIDE_GENE_MAPPING table
+        if check_sqlite_table(self.conn, "GENE") and check_sqlite_table(self.conn, "PEPTIDE_GENE_MAPPING"):
+            gene_select_stmt = "GENE.GENE_NAME AS GeneName,"
+            gene_join_stmt = "INNER JOIN PEPTIDE_GENE_MAPPING ON PEPTIDE_GENE_MAPPING.PEPTIDE_ID = PEPTIDE.ID INNER JOIN GENE ON GENE.ID = PEPTIDE_GENE_MAPPING.GENE_ID"
+        else:
+            gene_select_stmt = "'' AS GeneName,"
+            gene_join_stmt = ""
+
         if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"):
             stmt = f"""SELECT 
+                {gene_select_stmt}
+                PROTEIN.PROTEIN_ACCESSION AS ProteinId,
                 PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
                 PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
                 PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
@@ -69,13 +79,18 @@ class TransitionPQPLoader:
                 TRANSITION.LIBRARY_INTENSITY AS LibraryIntensity,
                 TRANSITION.DETECTING AS PRODUCT_DETECTING,
                 PRECURSOR.DECOY AS Decoy
-                FROM AS PRECURSOR
+                FROM PRECURSOR
                 INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
                 INNER JOIN AS PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+                INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+                {gene_join_stmt}
                 INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
                 INNER JOIN TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID"""
         else:
             stmt = f"""SELECT 
+                {gene_select_stmt}
+                PROTEIN.PROTEIN_ACCESSION AS ProteinId,
                 PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
                 PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
                 PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
@@ -87,9 +102,12 @@ class TransitionPQPLoader:
                 TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE AS Annotation,
                 TRANSITION.LIBRARY_INTENSITY AS LibraryIntensity,
                 PRECURSOR.DECOY AS Decoy
-                FROM AS PRECURSOR
+                FROM PRECURSOR
                 INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
                 INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+                INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+                {gene_join_stmt}
                 INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
                 INNER JOIN TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID"""
 
