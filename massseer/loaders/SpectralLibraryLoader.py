@@ -23,7 +23,7 @@ class SpectralLibraryLoader:
         _, file_extension = os.path.splitext(_self.in_file)
         if file_extension.lower() == '.tsv':
             loader = TransitionTSVLoader(_self.in_file)
-        elif file_extension.lower() == '.pqp':
+        elif file_extension.lower() == '.pqp' or file_extension.lower() == '.osw':
             loader = TransitionPQPLoader(_self.in_file)
         else:
             raise ValueError("Unsupported file format")
