@@ -13,9 +13,9 @@ class FileInputUISettings:
 
     def create_sidebar(self, feature_file_path=None, xic_file_path=None):
         st.sidebar.subheader("Input OSW file")
-        self.osw_file_path = st.sidebar.text_input("Enter file path", feature_file_path, key='osw_file_path_sidebar')
+        self.osw_file_path = st.sidebar.text_input("Enter file path", feature_file_path, key='osw_file_path_sidebar', help="Path to the OpenSwathWorkflow output file (*.osw)")
         st.sidebar.subheader("Input sqMass file")
-        self.sqmass_file_path_input = st.sidebar.text_input("Enter file path", xic_file_path, key='sqmass_file_path_input_sidebar')
+        self.sqmass_file_path_input = st.sidebar.text_input("Enter file path", xic_file_path, key='sqmass_file_path_input_sidebar', help="Path to the sqMass file (*.sqMass) or path to a directory containing sqMass files.")
 
     def get_sqmass_files(self, threads=1):
         """
@@ -51,7 +51,7 @@ class FileInputUISettings:
                 sorted_filenames = sorted(files_in_directory, reverse=False)
 
                 # Create a selection box in the sidebar
-                selected_sorted_filenames = st.multiselect("sqMass files", sorted_filenames, sorted_filenames)    
+                selected_sorted_filenames = st.multiselect("sqMass files", sorted_filenames, sorted_filenames, help="Select the sqMass files to process")    
 
                 # Create a list of full file paths
                 sqmass_file_path_list = [os.path.join(self.sqmass_file_path_input, file) for file in selected_sorted_filenames]
