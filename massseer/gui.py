@@ -7,7 +7,8 @@ from PIL import Image
 from typing import List
 
 # Internal UI modules
-from massseer.util_ui import MassSeerGUI
+from massseer.ui.MassSeerGUI import MassSeerGUI
+from massseer.sever.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
 from massseer.file_handling_ui import process_osw_file, get_sqmass_files
 from massseer.plotting_ui import ChromatogramPlotSettings
 from massseer.algo_ui import AlgorithmUISettings
@@ -52,14 +53,18 @@ st.sidebar.image(MASSSEER_LOGO)
 st.sidebar.divider()
 
 if st.session_state.clicked['load_toy_dataset']:
-    massseer_gui.sqmass_file_path_input = os.path.join(dirname, '..', 'tests', 'test_data', 'xics')
-    massseer_gui.osw_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
+    sqmass_file_path_input = os.path.join(dirname, '..', 'tests', 'test_data', 'xics')
+    osw_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
+
+    massseer_gui.show_file_input_settings(osw_file_path, sqmass_file_path_input)
 
     # Remove welcome message container if dataset is loaded
     massseer_gui.welcome_container.empty()
-    # del welcome_container
 
 if massseer_gui.osw_file_path!="*.osw" and massseer_gui.sqmass_file_path_input!="*.sqMass" and not st.session_state.clicked['load_toy_dataset']:
+
+    massseer_gui.show_file_input_settings(massseer_gui.osw_file_path, massseer_gui.sqmass_file_path_input)
+
     # Remove welcome message container if dataset is loaded
     massseer_gui.welcome_container.empty()
     # del welcome_container
@@ -139,6 +144,10 @@ if massseer_gui.osw_file_path!="*.osw":
                         col_counter+=1
                         if col_counter >= len(plot_cols):
                             col_counter = 0
+
+if massseer_gui.file_input_settings.osw_file_path is not None and massseer_gui.file_input_settings.sqmass_file_path_input is not None:
+    show_xic_exp = ExtractedIonChromatogramAnalysisServer(massseer_gui)
+    show_xic_exp.main()
 
 # OpenMS Siderbar Bottom Logo
 st.sidebar.image(OPENMS_LOGO)
