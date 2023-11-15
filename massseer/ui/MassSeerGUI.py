@@ -9,6 +9,16 @@ from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUIS
 class MassSeerGUI:
     def __init__(self):
         self.welcome_container = st.empty()
+        self.tab1 = None
+        self.tab2 = None
+        self.load_toy_dataset = None
+        self.osw_file_path = None
+        self.sqmass_file_path_input = None
+        self.file_input_settings = None
+        self.chromatogram_plot_settings = None
+        self.peak_picking_settings = None
+        self.concensus_chromatogram_settings = None
+
 
     def clicked(self, button):
         """
@@ -43,6 +53,7 @@ class MassSeerGUI:
 
                 # Tabs for different data workflows
                 self.tab1, self.tab2 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data"])
+
                 with self.tab1:
 
                     st.write("This workflow is designed for post-extracted ion chromatogram data. For example sqMass files generated from an OpenSwathWorkflow experiment.")
@@ -63,17 +74,17 @@ class MassSeerGUI:
         self.file_input_settings = FileInputUISettings(self)
         self.file_input_settings.create_sidebar(feature_file_path, xic_file_path)
         self.file_input_settings.get_sqmass_files()
-        st.divider()
-        return self
+        st.sidebar.divider()
+        
 
     def show_chromatogram_plot_settings(self):
         self.chromatogram_plot_settings = ChromatogramPlotUISettings(self)
         self.chromatogram_plot_settings.create_sidebar()
-        return self
+        
 
     def show_algorithm_settings(self):
         self.peak_picking_settings = PeakPickingUISettings(self)
         self.peak_picking_settings.create_ui(self.chromatogram_plot_settings)
         self.concensus_chromatogram_settings = ConcensusChromatogramUISettings(self)
         self.concensus_chromatogram_settings.create_ui(self.chromatogram_plot_settings)
-        return self
+        
