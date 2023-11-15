@@ -67,8 +67,9 @@ class ExtractedIonChromatogramAnalysisServer:
             plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
             plot_config = PlotConfig()
             plot_config.update(plot_settings_dict)
+            print(plot_config)
 
-            if not tr_group.precursorChroms[0].empty():
+            if not tr_group.empty():
                 plotter = InteractivePlotter(plot_config)
                 plot_obj = plotter.plot(tr_group)
                 plot_obj_dict[file.filename] = plot_obj
