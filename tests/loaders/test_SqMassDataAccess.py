@@ -2,6 +2,7 @@ from snapshottest import TestCase
 from massseer.loaders.SqMassDataAccess import SqMassDataAccess
 from massseer.structs.Chromatogram import Chromatogram
 import unittest
+import pandas as pd
 
 class TestSqMassDataAccess(TestCase):
     def setUp(self):
@@ -34,10 +35,39 @@ class TestSqMassDataAccess(TestCase):
 
     def test_getDataForChromatogramsFromNativeIds(self):
         native_ids = [180, 181, 182, 183, 183, 185]
-        data = self.mass_data_access.getDataForChromatogramsFromNativeIds(native_ids)
+        labels = ["y4^1", "y3^1", "y6^1", "y7^1", "y7^1", "y8^1"]
+        data = self.mass_data_access.getDataForChromatogramsFromNativeIds(native_ids, labels)
         self.assertMatchSnapshot(len(data))
-        self.assertIsInstance(data[0][0], list)
-        self.assertIsInstance(data[0][1], list)
+        self.assertIsInstance(data[0], Chromatogram)
+        self.assertIsInstance(data[1], Chromatogram)
+        self.assertIsInstance(data[2], Chromatogram)
+        self.assertMatchSnapshot(data)
+
+
+    def test_getDataForChromatogramsDf(self):
+        ids = [41353, 41354, 41387]
+        data = self.mass_data_access.getDataForChromatogramsDf(ids, ["y4^1", "y3^1", "y6^1"])
+        self.assertIsInstance(data, pd.DataFrame)
+        self.assertMatchSnapshot(data)
+
+        ## test invalid ids
+        ids = [0]
+        data = self.mass_data_access.getDataForChromatogramsDf(ids, ["y4^1"])
+        self.assertIsInstance(data, pd.DataFrame)
+        self.assert_match_snapshot(data)
+
+        ## test empty ids
+        ids = []
+        data = self.mass_data_access.getDataForChromatogramsDf(ids, ["y4^1"])
+        self.assertIsInstance(data, pd.DataFrame)
+        self.assert_match_snapshot(data)
+
+    def test_getDataForChromatogramsFromNativeIdsDf(self):
+        ids = [180, 181, 182, 183, 183, 185]
+        labels = ["y4^1", "y3^1", "y6^1", "y7^1", "y7^1", "y8^1"]
+        data = self.mass_data_access.getDataForChromatogramsFromNativeIdsDf(ids, labels)
+        self.assertIsInstance(data, pd.DataFrame)
+        self.assert_match_snapshot(data)
 
     def tearDown(self):
         self.mass_data_access.conn.close()
