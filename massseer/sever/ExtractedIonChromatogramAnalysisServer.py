@@ -55,12 +55,15 @@ class ExtractedIonChromatogramAnalysisServer:
 
             tr_group.targeted_transition_list = transition_list_ui.target_transition_list
 
+            print(transition_list_ui.target_transition_list.columns)
+
             plot_settings_dict = chrom_plot_settings.get_settings()
             plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
             plot_settings_dict['y_axis_label'] = 'Intensity'
-            plot_settings_dict['title'] = os.path.basename(file.filename)
+            # plot_settings_dict['title'] = os.path.basename(file.filename)
             plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
             plot_config = PlotConfig()
+            plot_config.title = os.path.basename(file.filename)
             plot_config.update(plot_settings_dict)
 
             if not tr_group.precursorChroms[0].empty():
