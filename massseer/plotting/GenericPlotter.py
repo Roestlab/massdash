@@ -1,6 +1,6 @@
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Literal
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.structs.TransitionGroup import TransitionGroup
 
