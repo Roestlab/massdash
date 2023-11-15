@@ -7,6 +7,7 @@
 - [ ] Generate concensus chrom traces per transition
 - [ ] Docker / or just ssh port
 - [ ] Make available on PyPi closer to time of publication
+- [ ] Generate an exectuable
 
 # In Progress
 - [ ] Major refactoring of code base. For main refactoring branch, see patch/masterRefactor
