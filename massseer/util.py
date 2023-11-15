@@ -30,7 +30,6 @@ LOG_FILE = "MassSeer.log"
 # Alorithms
 PEAK_PICKING_ALGORITHMS = ["OSW-PyProphet","PeakPickerMRM"]
 
-
 # Common methods
 def get_data_folder():
     return os.path.join(PROJECT_FOLDER, "data")
@@ -88,7 +87,6 @@ def check_streamlit():
     except ModuleNotFoundError:
         use_streamlit = False
     return use_streamlit
-
 
 def check_sqlite_table(con, table):
     """

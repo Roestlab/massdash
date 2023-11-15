@@ -3,6 +3,9 @@ import os
 import pandas as pd
 import streamlit as st
 
+# Internal modules
+from massseer.util import check_streamlit, conditional_decorator
+
 class TransitionPQPLoader:
     '''
     Class to load a transition PQP file
@@ -19,7 +22,7 @@ class TransitionPQPLoader:
         self.in_file = in_file
         self.data: pd.DataFrame = pd.DataFrame()
     
-    @st.cache_data(show_spinner=False)
+    @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
     def load(_self) -> None:
         '''
         Load the transition PQP file
