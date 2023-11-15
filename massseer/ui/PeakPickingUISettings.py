@@ -62,6 +62,8 @@ class PeakPickingUISettings:
         """
         Creates the user interface for setting the algorithm parameters.
         """
+        st.sidebar.divider()
+        st.sidebar.title("Peak Picking")
         ## Perform Peak Picking
         self.do_peak_picking = st.sidebar.selectbox("Peak Picking", ['none', 'OSW-PyProphet', 'PeakPickerMRM'])
         if self.do_peak_picking != 'none':

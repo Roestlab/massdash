@@ -15,6 +15,8 @@ class ConcensusChromatogramUISettings:
         """
         Creates the user interface for setting the algorithm parameters.
         """
+        st.sidebar.divider()
+        st.sidebar.title("Chromatgoram Transformations")
         ## Make a consensus chromatogram
         self.do_consensus_chrom = st.sidebar.selectbox("Generate Consensus Chromatogram", ['none', 'run-specific', 'global'])
         self.scale_intensity = st.sidebar.checkbox("Scale Intensity", value=False)

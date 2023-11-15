@@ -4,6 +4,8 @@ import streamlit as st
 
 from massseer.ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
 from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
+from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 
 from massseer.loaders.OSWDataAccess import OSWDataAccess
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
@@ -37,7 +39,7 @@ class ExtractedIonChromatogramAnalysisServer:
         self.append_qvalues_to_transition_list()
 
         # Create a UI for the transition list
-        transition_list_ui = ExtractedIonChromatogramAnalysisUI(self.transition_list)
+        transition_list_ui = ExtractedIonChromatogramAnalysisUI(self.massseer_gui, self.transition_list)
         transition_list_ui.show_transition_information()
 
         self.xic_data = SqMassLoader(self.massseer_gui.file_input_settings.sqmass_file_path_list, self.massseer_gui.file_input_settings.osw_file_path)
@@ -48,28 +50,29 @@ class ExtractedIonChromatogramAnalysisServer:
 
         chrom_plot_settings = ChromatogramPlotUISettings(self.massseer_gui)
         chrom_plot_settings.create_sidebar()
+        peak_picking_settings = PeakPickingUISettings(self.massseer_gui)
+        peak_picking_settings.create_ui(chrom_plot_settings)
+        concensus_chromatogram_settings = ConcensusChromatogramUISettings(self.massseer_gui)  
+        concensus_chromatogram_settings.create_ui(chrom_plot_settings)      
 
+        plot_obj_dict = {}
         for file, tr_group in tr_group_data.items():
-            print(tr_group)
-            print(file.filename)
 
             tr_group.targeted_transition_list = transition_list_ui.target_transition_list
-
-            print(transition_list_ui.target_transition_list.columns)
 
             plot_settings_dict = chrom_plot_settings.get_settings()
             plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
             plot_settings_dict['y_axis_label'] = 'Intensity'
-            # plot_settings_dict['title'] = os.path.basename(file.filename)
+            plot_settings_dict['title'] = os.path.basename(file.filename)
             plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
             plot_config = PlotConfig()
-            plot_config.title = os.path.basename(file.filename)
             plot_config.update(plot_settings_dict)
 
             if not tr_group.precursorChroms[0].empty():
                 plotter = InteractivePlotter(plot_config)
                 plot_obj = plotter.plot(tr_group)
-                st.bokeh_chart(plot_obj)
+                plot_obj_dict[file.filename] = plot_obj
     
+        transition_list_ui.show_extracted_ion_chromatograms(chrom_plot_settings, concensus_chromatogram_settings, plot_obj_dict)
 
-    
+

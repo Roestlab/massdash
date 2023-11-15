@@ -1,11 +1,13 @@
 import streamlit as st
 
+from massseer.ui.MassSeerGUI import MassSeerGUI
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.ui.TransitionListUISettings import TransitionListUISettings
 
 class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
-    def __init__(self, transition_list: SpectralLibraryLoader) -> None:
+    def __init__(self, massseer_gui: MassSeerGUI, transition_list: SpectralLibraryLoader) -> None:
         super().__init__()
+        self.massseer_gui = massseer_gui
         self.transition_list = transition_list
         self.transition_settings = None
         self.target_transition_list = None
@@ -44,4 +46,18 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
         # Filter the transition list based on the selected protein, peptide and charge state
         self.target_transition_list =  self.transition_list.filter_for_target_transition_list(self.transition_settings.selected_protein, self.transition_settings.selected_peptide, self.transition_settings.selected_charge)
 
-    
+    def show_extracted_ion_chromatograms(self, chrom_plot_settings, concensus_chromatogram_settings, plot_dict) -> None:
+        plot_cols = st.columns(chrom_plot_settings.num_plot_columns)
+        col_counter = 0
+        for file in plot_dict:
+            plot_obj = plot_dict[file]
+
+            if concensus_chromatogram_settings.do_consensus_chrom != 'none':
+                # TODO
+                pass
+            else:
+                with plot_cols[col_counter]:
+                    st.bokeh_chart(plot_obj)
+                    col_counter+=1
+                    if col_counter >= len(plot_cols):
+                        col_counter = 0

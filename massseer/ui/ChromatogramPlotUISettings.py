@@ -36,6 +36,7 @@ class ChromatogramPlotUISettings:
         Returns:
             self (ChromatogramPlotSettings): The current instance of the ChromatogramPlotSettings class.
         """
+        st.sidebar.divider()
         st.sidebar.title("Plotting Settings")
         # Add checkboxes in the sidebar to include MS1 and/or MS2 traces
         col1, col2 = st.sidebar.columns(2)
