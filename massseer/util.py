@@ -30,7 +30,6 @@ LOG_FILE = "MassSeer.log"
 # Alorithms
 PEAK_PICKING_ALGORITHMS = ["OSW-PyProphet","PeakPickerMRM"]
 
-
 # Common methods
 def get_data_folder():
     return os.path.join(PROJECT_FOLDER, "data")
@@ -48,7 +47,28 @@ def get_base64_of_bin_file(png_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
+class conditional_decorator(object):
+    """
+    A decorator that applies another decorator to a function only if a condition is met.
+    See: https://gist.github.com/T1T4N/22ca7b0764cefe917b2b3a6bb056364c
 
+    Args:
+        dec (function): The decorator to apply.
+        condition (bool): The condition that must be met for the decorator to be applied.
+
+    Returns:
+        function: The decorated function, or the original function if the condition is not met.
+    """
+    def __init__(self, dec, condition):
+        self.decorator = dec
+        self.condition = condition
+
+    def __call__(self, func):
+        if not self.condition:
+            # Return the function unchanged, not decorated.
+            return func
+        return self.decorator(func)
+    
 def check_streamlit():
     """
     Function to check whether python code is run within streamlit
