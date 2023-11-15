@@ -3,6 +3,8 @@ import os
 import pandas as pd
 import streamlit as st
 
+from massseer.util import check_streamlit, conditional_decorator
+
 
 class TransitionTSVLoader:
     '''
@@ -38,7 +40,7 @@ class TransitionTSVLoader:
         self.in_file = in_file
         self.data: pd.DataFrame = pd.DataFrame()
     
-    @st.cache_data(show_spinner=False)
+    @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
     def _load(_self) -> None:
         '''
         Load the transition TSV file
