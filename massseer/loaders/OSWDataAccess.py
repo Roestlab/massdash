@@ -255,3 +255,33 @@ class OSWDataAccess:
         data = pd.read_sql(stmt, self.conn)
 
         return data
+    
+    def get_top_rank_precursor_features_across_runs(self):
+        """
+        Retrieves the top ranking precursor features across runs from the database.
+
+        Returns:
+            pandas.DataFrame: The top ranking precursor features.
+        """
+        stmt = """SELECT 
+                RUN.FILENAME as filename,
+                PROTEIN.PROTEIN_ACCESSION AS ProteinId,
+                PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
+                PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
+                PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
+                PRECURSOR.CHARGE AS PrecursorCharge,
+                PRECURSOR.DECOY AS Decoy,
+                MIN(DISTINCT SCORE_MS2.QVALUE) as Qvalue
+                FROM FEATURE
+                INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
+                INNER JOIN (SELECT * FROM SCORE_MS2 WHERE SCORE_MS2.RANK = 1) AS SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN PRECURSOR ON PRECURSOR.ID = FEATURE.PRECURSOR_ID
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+                INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+                GROUP BY ProteinId, PeptideSequence, ModifiedPeptideSequence, PrecursorMz, PrecursorCharge;"""
+
+        data = pd.read_sql(stmt, self.conn)
+
+        return data
