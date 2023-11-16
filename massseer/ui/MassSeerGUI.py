@@ -91,37 +91,6 @@ class MassSeerGUI:
             None
         """
         self.file_input_settings = FileInputUISettings(self)
-        self.file_input_settings.create_sidebar(feature_file_path, xic_file_path)
+        self.file_input_settings.create_ui(feature_file_path, xic_file_path)
         self.file_input_settings.get_sqmass_files()
         st.sidebar.divider()
-        
-
-    def show_chromatogram_plot_settings(self):
-        """
-        Displays the chromatogram plot settings.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.chromatogram_plot_settings = ChromatogramPlotUISettings(self)
-        self.chromatogram_plot_settings.create_sidebar()
-        
-
-    def show_algorithm_settings(self):
-        """
-        Displays the algorithm settings.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.peak_picking_settings = PeakPickingUISettings(self)
-        self.peak_picking_settings.create_ui(self.chromatogram_plot_settings)
-        self.concensus_chromatogram_settings = ConcensusChromatogramUISettings(self)
-        self.concensus_chromatogram_settings.create_ui(self.chromatogram_plot_settings)
-        
