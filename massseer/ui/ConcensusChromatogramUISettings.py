@@ -1,14 +1,10 @@
 import streamlit as st
 
 class ConcensusChromatogramUISettings:
-    def __init__(self, massseer_gui):
+    def __init__(self):
         """
         Initializes the ConcensusChromatogramUISettings class.
-
-        Args:
-        massseer_gui: The MassSeer GUI object.
         """
-        self.massseer_gui = massseer_gui
         self.do_consensus_chrom = 'none'
         self.scale_intensity = False
         self.consensus_chrom_mode = None
@@ -17,7 +13,7 @@ class ConcensusChromatogramUISettings:
         self.threshold = 0
         self.auto_threshold = True
     
-    def create_ui(self, plot_settings):
+    def create_ui(self):
         """
         Creates the user interface for setting the algorithm parameters.
         """

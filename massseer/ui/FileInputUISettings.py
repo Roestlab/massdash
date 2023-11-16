@@ -15,7 +15,7 @@ class FileInputUISettings:
         self.sqmass_file_path_list = None 
         self.threads = None
 
-    def create_sidebar(self, feature_file_path: str=None, xic_file_path: str=None):
+    def create_ui(self, feature_file_path: str=None, xic_file_path: str=None):
         """
         Creates the sidebar for the input file paths.
 

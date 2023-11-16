@@ -10,8 +10,6 @@ class PeakPickingUISettings:
 
     Attributes:
     -----------
-    massseer_gui : MassSeerGUI
-        The MassSeerGUI instance associated with these peak picking settings.
     do_peak_picking : str
         The type of peak picking to perform. Defaults to 'none'.
     peak_pick_on_displayed_chrom : bool
@@ -29,9 +27,7 @@ class PeakPickingUISettings:
     gauss_width : float
         The width of the Gaussian smoothing. Defaults to 30.0.
     """
-    def __init__(self, massseer_gui):
-        self.massseer_gui = massseer_gui
-
+    def __init__(self):
         self.do_peak_picking = 'none'
         self.peak_pick_on_displayed_chrom = True
         self.peak_picker_algo_settings = None

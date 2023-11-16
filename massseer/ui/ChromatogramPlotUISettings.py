@@ -14,22 +14,21 @@ class ChromatogramPlotUISettings:
         smoothing_dict (dict): A dictionary of additional settings for the smoothing.
 
     Methods:
-        create_sidebar(): Creates a sidebar in Streamlit for adjusting the plot settings.
+        create_ui(): Creates a sidebar in Streamlit for adjusting the plot settings.
         get_settings(): Returns a dictionary of the current plot settings.
     """
-    def __init__(self, massseer_gui):
-        self.massseer_gui = massseer_gui
-
+    def __init__(self):
         self.include_ms1 = True
         self.include_ms2 = True
         self.num_plot_columns = 2
+        self.link_plot_ranges = False
         self.set_x_range = False
         self.set_y_range = False
         self.do_smoothing = 'none'
         self.smoothing_dict = {}
         self.scale_intensity = False
 
-    def create_sidebar(self):
+    def create_ui(self):
         """
         Creates a sidebar in Streamlit for adjusting the plot settings.
 
