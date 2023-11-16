@@ -75,7 +75,7 @@ your_user_name@remote_ip_address
 Navigate to MassSeer directory and start GUI. 
 
 ```
-your_user_name@remote_ip_address
+MassSeer gui
 ```
 
 You will receive a message letting you know you can view Streamlit app in your browser with two URLs. 
@@ -85,10 +85,10 @@ You will receive a message letting you know you can view Streamlit app in your b
   External URL: http://142.150.84.40:8501
 ```
 
-In your local machine, start a fresh terminal window. And enter the following command. Replace 'XXXX' with the last 4 digits from the URLs above
+In your local machine, start a fresh terminal window. And enter the following command. Replace '----' with the last 4 digits from the URLs above. In this example, '----' would be 8501.
 
 ```
-ssh -NfL localhost:XXXX:localhost:XXXX your_user_name@remote_ip_address
+ssh -NfL localhost:----:localhost:---- your_user_name@remote_ip_address
 ```
 
 Now you can copy Network/External url to your local machine browser and use MassSeer. 
