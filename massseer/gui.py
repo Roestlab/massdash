@@ -37,6 +37,7 @@ OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
 
 massseer_gui = MassSeerGUI()
 massseer_gui.show_welcome_message()
+WELCOME_PAGE_STATE = True
 
 # initialize load_toy_dataset key in clicked session state
 # This is needed because streamlit buttons return True when clicked and then default back to False.
@@ -61,13 +62,16 @@ if st.session_state.clicked['load_toy_dataset']:
     # Remove welcome message container if dataset is loaded
     massseer_gui.welcome_container.empty()
 
+    WELCOME_PAGE_STATE = False
+
 if massseer_gui.osw_file_path!="*.osw" and massseer_gui.sqmass_file_path_input!="*.sqMass" and not st.session_state.clicked['load_toy_dataset']:
 
     massseer_gui.show_file_input_settings(massseer_gui.osw_file_path, massseer_gui.sqmass_file_path_input)
 
     # Remove welcome message container if dataset is loaded
     massseer_gui.welcome_container.empty()
-    # del welcome_container
+    
+    WELCOME_PAGE_STATE = False
 
 if massseer_gui.sqmass_file_path_input!="*.sqMass":
     sqmass_file_path_list, threads = get_sqmass_files(massseer_gui.sqmass_file_path_input)
@@ -145,7 +149,7 @@ if massseer_gui.osw_file_path!="*.osw":
                         if col_counter >= len(plot_cols):
                             col_counter = 0
 
-if massseer_gui.file_input_settings.osw_file_path is not None and massseer_gui.file_input_settings.sqmass_file_path_input is not None:
+if not WELCOME_PAGE_STATE and  massseer_gui.file_input_settings.osw_file_path is not None and massseer_gui.file_input_settings.sqmass_file_path_input is not None:
     show_xic_exp = ExtractedIonChromatogramAnalysisServer(massseer_gui)
     show_xic_exp.main()
 
