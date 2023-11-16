@@ -116,7 +116,10 @@ class InteractivePlotter(GenericPlotter):
             p (figure): The Bokeh figure to add the peak boundaries to.
             features (List[TransitionGroupFeature]): A list of peak features to highlight on the plot.
         """
-        dark2_palette = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666']
+        if len(features) <= 8:
+            dark2_palette = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666']
+        else:
+            dark2_palette = Viridis256[0:len(features)]
 
         # Add peak boundaries
         i = 0
@@ -144,7 +147,7 @@ class InteractivePlotter(GenericPlotter):
 
             # Add a point to the left border to attached the hover tool to
             leftWidth_apex_point = p.circle(source=source, x='leftWidth', y='Intensity', name='leftWidth_apex_point', alpha=0) 
-            
+
             i += 1
 
         # Create a HoverTool
@@ -187,7 +190,7 @@ class InteractivePlotter(GenericPlotter):
             elif n_transitions == 1:
                 colors = ['black']
             else:
-                colors = Viridis256[len(transitionChroms)]
+                colors = Viridis256[0:len(transitionChroms)]
 
             if hasattr(transitionGroup, 'targeted_transition_list'):
                 # Tooltips for interactive information
@@ -356,7 +359,7 @@ class InteractivePlotter(GenericPlotter):
         elif n_transitions == 1:
             colors = ['black']
         else:
-            colors = Viridis256[len(transitionMobilos)]
+            colors = Viridis256[0:len(transitionMobilos)]
 
         # Tooltips for interactive information
         if hasattr(transitionGroup, 'targeted_transition_list'):
@@ -508,7 +511,7 @@ class InteractivePlotter(GenericPlotter):
         elif n_transitions == 1:
             colors = ['black']
         else:
-            colors = Viridis256[len(transitionSpectra)]
+            colors = Viridis256[0:len(transitionSpectra)]
 
         # Tooltips for interactive information
         if hasattr(transitionGroup, 'targeted_transition_list'):

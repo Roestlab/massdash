@@ -4,14 +4,19 @@ import pandas as pd
 
 import streamlit as st
 
+# UI
 from massseer.ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
 from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
 from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
-
+# Loaders
 from massseer.loaders.OSWDataAccess import OSWDataAccess
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.loaders.SqMassLoader import SqMassLoader
+# Peak Picking
+from massseer.peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
+from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
+# Plotting
 from massseer.plotting.GenericPlotter import PlotConfig
 from massseer.plotting.InteractivePlotter import InteractivePlotter
 
@@ -32,6 +37,17 @@ class ExtractedIonChromatogramAnalysisServer:
         top_ranked_precursor_features = self.osw_data.get_top_rank_precursor_features_across_runs()
         # merge transition list with top ranked precursor features
         self.transition_list.data = pd.merge(self.transition_list.data, top_ranked_precursor_features, on=['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence', 'PrecursorMz', 'PrecursorCharge', 'Decoy'], how='left')
+
+    def get_string_mslevels_from_bool(self, mslevel_bool_dict):
+        if mslevel_bool_dict['ms1']:
+            mslevel_str = 'ms1'
+        elif mslevel_bool_dict['ms2']:
+            mslevel_str = 'ms2'
+        elif mslevel_bool_dict['ms1'] and mslevel_bool_dict['ms2']:
+            mslevel_str = 'ms1ms2'
+        else:
+            raise ValueError('No mslevel selected')
+        return mslevel_str
 
     def main(self):
 
@@ -63,8 +79,27 @@ class ExtractedIonChromatogramAnalysisServer:
 
         if peak_picking_settings.do_peak_picking == 'OSW-PyProphet':
             tr_group_feature_data = self.xic_data.loadTransitionGroupFeature(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+        elif peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
+            if peak_picking_settings.peak_pick_on_displayed_chrom:
+                mslevel = self.get_string_mslevels_from_bool({'ms1':chrom_plot_settings.include_ms1, 'ms2':chrom_plot_settings.include_ms2})
+            else:
+                mslevel = peak_picking_settings.mslevels
+            peak_picker_param = peak_picking_settings.PeakPickerMRMParams
+
+            tr_group_feature_data = {}
+            for file, tr_group in tr_group_data.items():
+                peak_picker = pyMRMTransitionGroupPicker(mslevel, peak_picker=peak_picker_param.peak_picker)
+                peak_features = peak_picker.pick(tr_group)
+                tr_group_feature_data[file.filename] = peak_features
+        elif peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
+            tr_group_feature_data = {}
+            for file, tr_group in tr_group_data.items():
+                peak_picker = MRMTransitionGroupPicker(peak_picking_settings.smoother)
+                peak_features = peak_picker.pick(tr_group)
+                print(len(peak_features))
+                tr_group_feature_data[file.filename] = peak_features
         else:
-            tr_group_feature_data = {file:None for file in tr_group_data.keys()}
+            tr_group_feature_data = {file.filename:None for file in tr_group_data.keys()}
 
         axis_limits_dict = {'x_range' : [], 'y_range' : []}
         master_rt_arr = np.concatenate([tg.flatten().rt for tg in tr_group_data.values()])
