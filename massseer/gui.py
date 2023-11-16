@@ -7,7 +7,7 @@ from typing import List
 
 # Internal UI modules
 from massseer.ui.MassSeerGUI import MassSeerGUI
-from massseer.sever.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
+from massseer.server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
 
 # Confit
 # There currently is warning with the icon size for some reason, not sure why
