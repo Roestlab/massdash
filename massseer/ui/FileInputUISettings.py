@@ -3,6 +3,10 @@ import streamlit as st
 import os
 import fnmatch
 
+import os
+import fnmatch
+import streamlit as st
+
 class FileInputUISettings:
     def __init__(self, massseer_gui) -> None:
         self.massseer_gui = massseer_gui
@@ -11,13 +15,20 @@ class FileInputUISettings:
         self.sqmass_file_path_list = None 
         self.threads = None
 
-    def create_sidebar(self, feature_file_path=None, xic_file_path=None):
+    def create_sidebar(self, feature_file_path: str=None, xic_file_path: str=None):
+        """
+        Creates the sidebar for the input file paths.
+
+        Parameters:
+        feature_file_path (str): Path to the OpenSwathWorkflow output file (*.osw)
+        xic_file_path (str): Path to the sqMass file (*.sqMass) or path to a directory containing sqMass files.
+        """
         st.sidebar.subheader("Input OSW file")
         self.osw_file_path = st.sidebar.text_input("Enter file path", feature_file_path, key='osw_file_path_sidebar', help="Path to the OpenSwathWorkflow output file (*.osw)")
         st.sidebar.subheader("Input sqMass file")
         self.sqmass_file_path_input = st.sidebar.text_input("Enter file path", xic_file_path, key='sqmass_file_path_input_sidebar', help="Path to the sqMass file (*.sqMass) or path to a directory containing sqMass files.")
 
-    def get_sqmass_files(self, threads=1):
+    def get_sqmass_files(self, threads: int=1):
         """
         Given a path to a directory or a file, returns a list of full file paths to *.sqMass files in the directory or the file itself.
         If the input path is a directory, the function displays a selection box in the sidebar to select the *.sqMass files.

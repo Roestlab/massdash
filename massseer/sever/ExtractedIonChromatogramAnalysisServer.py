@@ -2,8 +2,6 @@ import os
 import numpy as np
 import pandas as pd
 
-import streamlit as st
-
 # UI
 from massseer.ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
 from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
@@ -20,25 +18,65 @@ from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPick
 from massseer.plotting.GenericPlotter import PlotConfig
 from massseer.plotting.InteractivePlotter import InteractivePlotter
 
-
 class ExtractedIonChromatogramAnalysisServer:
+    """
+    A class representing a server for extracted ion chromatogram analysis.
+
+    Attributes:
+    -----------
+    massseer_gui : object
+        An object representing the MassSeer GUI.
+    transition_list : list or None
+        A list of transitions or None if not yet initialized.
+    osw_data : object or None
+        An object representing OpenSWATH data or None if not yet initialized.
+    xic_data : object or None
+        An object representing XIC data or None if not yet initialized.
+    """
     def __init__(self, massseer_gui):
+        """
+        Initializes the ExtractedIonChromatogramAnalysisServer object.
+
+        Parameters:
+        -----------
+        massseer_gui : object
+            An object representing the MassSeer GUI.
+        """
         self.massseer_gui = massseer_gui
         self.transition_list = None
         self.osw_data = None
         self.xic_data = None
 
     def get_transition_list(self):
+        """
+        Loads the spectral library and sets the transition list attribute.
+        """
         self.transition_list = SpectralLibraryLoader(self.massseer_gui.file_input_settings.osw_file_path)
         self.transition_list.load()
         print(self.transition_list.data.shape)
 
     def append_qvalues_to_transition_list(self):
+        """
+        Appends q-values to the transition list.
+        """
         top_ranked_precursor_features = self.osw_data.get_top_rank_precursor_features_across_runs()
         # merge transition list with top ranked precursor features
         self.transition_list.data = pd.merge(self.transition_list.data, top_ranked_precursor_features, on=['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence', 'PrecursorMz', 'PrecursorCharge', 'Decoy'], how='left')
 
     def get_string_mslevels_from_bool(self, mslevel_bool_dict):
+        """
+        Converts a dictionary of boolean values for mslevels to a string.
+
+        Parameters:
+        -----------
+        mslevel_bool_dict : dict
+            A dictionary containing boolean values for mslevels.
+
+        Returns:
+        --------
+        mslevel_str : str
+            A string representing the selected mslevel.
+        """
         if mslevel_bool_dict['ms1']:
             mslevel_str = 'ms1'
         elif mslevel_bool_dict['ms2']:
@@ -50,7 +88,9 @@ class ExtractedIonChromatogramAnalysisServer:
         return mslevel_str
 
     def main(self):
-
+        """
+        Runs the main analysis workflow.
+        """
         self.osw_data = OSWDataAccess(self.massseer_gui.file_input_settings.osw_file_path)
 
         self.get_transition_list()
@@ -75,16 +115,14 @@ class ExtractedIonChromatogramAnalysisServer:
 
         tr_group_data = self.xic_data.loadTransitionGroups(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
 
-          
-
         if peak_picking_settings.do_peak_picking == 'OSW-PyProphet':
             tr_group_feature_data = self.xic_data.loadTransitionGroupFeature(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
         elif peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
             if peak_picking_settings.peak_pick_on_displayed_chrom:
                 mslevel = self.get_string_mslevels_from_bool({'ms1':chrom_plot_settings.include_ms1, 'ms2':chrom_plot_settings.include_ms2})
             else:
-                mslevel = peak_picking_settings.mslevels
-            peak_picker_param = peak_picking_settings.PeakPickerMRMParams
+                mslevel = peak_picking_settings.peak_picker_algo_settings.mslevels
+            peak_picker_param = peak_picking_settings.peak_picker_algo_settings.PeakPickerMRMParams
 
             tr_group_feature_data = {}
             for file, tr_group in tr_group_data.items():
@@ -94,9 +132,8 @@ class ExtractedIonChromatogramAnalysisServer:
         elif peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
             tr_group_feature_data = {}
             for file, tr_group in tr_group_data.items():
-                peak_picker = MRMTransitionGroupPicker(peak_picking_settings.smoother)
+                peak_picker = MRMTransitionGroupPicker(peak_picking_settings.peak_picker_algo_settings.smoother)
                 peak_features = peak_picker.pick(tr_group)
-                print(len(peak_features))
                 tr_group_feature_data[file.filename] = peak_features
         else:
             tr_group_feature_data = {file.filename:None for file in tr_group_data.keys()}
@@ -110,12 +147,8 @@ class ExtractedIonChromatogramAnalysisServer:
         if chrom_plot_settings.set_y_range:
             axis_limits_dict['y_range'] = [0, master_int_arr.max()]
 
-        # get the first plots x and y ranges
-        first_file = list(tr_group_data.keys())[0]
-
         plot_obj_dict = {}
         for file, tr_group in tr_group_data.items():
-            
             tr_group.targeted_transition_list = transition_list_ui.target_transition_list
 
             plot_settings_dict = chrom_plot_settings.get_settings()

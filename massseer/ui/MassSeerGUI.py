@@ -8,6 +8,15 @@ from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUIS
 
 class MassSeerGUI:
     def __init__(self):
+        """
+        Initializes the MassSeerGUI class.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         self.welcome_container = st.empty()
         self.tab1 = None
         self.tab2 = None
@@ -71,6 +80,16 @@ class MassSeerGUI:
         return self
 
     def show_file_input_settings(self, feature_file_path=None, xic_file_path=None):
+        """
+        Displays the file input settings.
+
+        Args:
+            feature_file_path (str): The path to the feature file.
+            xic_file_path (str): The path to the XIC file.
+
+        Returns:
+            None
+        """
         self.file_input_settings = FileInputUISettings(self)
         self.file_input_settings.create_sidebar(feature_file_path, xic_file_path)
         self.file_input_settings.get_sqmass_files()
@@ -78,11 +97,29 @@ class MassSeerGUI:
         
 
     def show_chromatogram_plot_settings(self):
+        """
+        Displays the chromatogram plot settings.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         self.chromatogram_plot_settings = ChromatogramPlotUISettings(self)
         self.chromatogram_plot_settings.create_sidebar()
         
 
     def show_algorithm_settings(self):
+        """
+        Displays the algorithm settings.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         self.peak_picking_settings = PeakPickingUISettings(self)
         self.peak_picking_settings.create_ui(self.chromatogram_plot_settings)
         self.concensus_chromatogram_settings = ConcensusChromatogramUISettings(self)
