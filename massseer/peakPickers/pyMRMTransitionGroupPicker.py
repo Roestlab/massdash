@@ -96,22 +96,23 @@ class pyMRMTransitionGroupPicker:
         newPeaks = pd.DataFrame(peaksDf.loc[0]).T
 
         for idx in range(1, len(peaksDf)):
-            if peaksDf['leftBoundary'][idx] < newPeaks['rightBoundary'].iloc[-1]:
-                if peaksDf['rightBoundary'][idx] > peaksDf['rightBoundary'].iloc[-1]:
+            if peaksDf['leftBoundary'].iloc[idx] < newPeaks['rightBoundary'].iloc[-1]:
+                if peaksDf['rightBoundary'].iloc[idx] > peaksDf['rightBoundary'].iloc[-1]:
                     # Overlapping boundaries; merge them
-                    newPeaks['rightBoundary'].iloc[-1] = peaksDf['rightBoundary'][idx]
+                    newPeaks['rightBoundary'].iloc[-1] = peaksDf['rightBoundary'].iloc[idx]
                 # Accumulate intensities
-                newPeaks['areaIntensity'].iloc[-1] += peaksDf['areaIntensity'][idx]
+                newPeaks['areaIntensity'].iloc[-1] += peaksDf['areaIntensity'].iloc[idx]
             else:
                 # Non-overlapping boundaries; append them
-                pd.concat([newPeaks, peaksDf.iloc[idx]]) 
+                newPeaks = pd.concat([newPeaks, peaksDf.iloc[[idx]]])
 
         # Recompute the peak apex for merged boundaries
         for idx in newPeaks.index:
             # Find data points within the merged boundary range and compute integrated intensity
             highest = (0,0)
+            boundaries = tuple(newPeaks[['leftBoundary', 'rightBoundary']].loc[idx].values)
             for c in chroms:
-                newHighest = c.max(tuple(newPeaks[['leftBoundary', 'rightBoundary']].iloc[idx].to_list()))
+                newHighest = c.max(boundaries)
                 highest = highest if highest[1] > newHighest[1] else newHighest
 
             newPeaks.loc[idx, ['peakApex', 'apexIntensity']] = highest
