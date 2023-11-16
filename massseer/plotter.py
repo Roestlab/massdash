@@ -90,8 +90,8 @@ class Plotter:
                 smoothed_intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
                 
             if self.smoothing_dict['type'] == 'gaussian':
-                window_size_g = self.smoothing_dict.get(['gaussian_window_size'])
-                sigma_g = self.smoothing_dict.get(['gaussian_sigma'])
+                window_size_g = self.smoothing_dict['gaussian_window_size']
+                sigma_g = self.smoothing_dict['gaussian_sigma']
                 gaussian_window = gaussian(window_size_g, std=sigma_g)
                 smoothed_intensity = convolve(intensity, gaussian_window, mode='same') / sum(gaussian_window)
 
@@ -178,8 +178,8 @@ class Plotter:
                 smoothed_intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
                 
             if self.smoothing_dict['type'] == 'gaussian':
-                window_size_g = self.smoothing_dict.get(['gaussian_window_size'])
-                sigma_g = self.smoothing_dict.get(['gaussian_sigma'])
+                window_size_g = self.smoothing_dict['gaussian_window_size']
+                sigma_g = self.smoothing_dict['gaussian_sigma']
                 gaussian_window = gaussian(window_size_g, std=sigma_g)
                 smoothed_intensity = convolve(intensity, gaussian_window, mode='same') / sum(gaussian_window)
                 
