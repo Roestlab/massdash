@@ -3,7 +3,7 @@ import multiprocessing
 import streamlit as st
 
 import numpy as np
-from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter, gaussian, convolve
 
 
 import matplotlib.pyplot as plt
@@ -53,7 +53,7 @@ class Plotter:
     plot()
         Creates a static or interactive plot of the chromatographic data depending on the plot_type attribute.
     """
-    def __init__(self, data, peptide_transition_list, trace_annotation, title, subtitle, x_axis_label="Retention Time", y_axis_label="Intensity", smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, plot_type='matplotlib', x_range=None, y_range=None, scale_intensity=False):
+    def __init__(self, data, peptide_transition_list, trace_annotation, title, subtitle, x_axis_label="Retention Time", y_axis_label="Intensity", smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11, 'gaussian_window_size': 11, 'gaussian_sigma': 5}, plot_type='matplotlib', x_range=None, y_range=None, scale_intensity=False):
         
         self.data = data
         self.peptide_transition_list = peptide_transition_list
@@ -88,6 +88,13 @@ class Plotter:
             if self.smoothing_dict['type'] == 'sgolay':
                 # Apply Savitzky-Golay smoothing to the intensity data
                 smoothed_intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
+                
+            if self.smoothing_dict['type'] == 'gaussian':
+                window_size_g = self.smoothing_dict.get(['gaussian_window_size'])
+                sigma_g = self.smoothing_dict.get(['gaussian_sigma'])
+                gaussian_window = gaussian(window_size_g, std=sigma_g)
+                smoothed_intensity = convolve(intensity, gaussian_window, mode='same') / sum(gaussian_window)
+
             else:
                 smoothed_intensity = np.array(intensity)
             # Set negative values in smoothed_intensity to 0
@@ -169,6 +176,13 @@ class Plotter:
             if self.smoothing_dict['type'] == 'sgolay':
                 # Apply Savitzky-Golay smoothing to the intensity data
                 smoothed_intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
+                
+            if self.smoothing_dict['type'] == 'gaussian':
+                window_size_g = self.smoothing_dict.get(['gaussian_window_size'])
+                sigma_g = self.smoothing_dict.get(['gaussian_sigma'])
+                gaussian_window = gaussian(window_size_g, std=sigma_g)
+                smoothed_intensity = convolve(intensity, gaussian_window, mode='same') / sum(gaussian_window)
+                
             else:
                 smoothed_intensity = np.array(intensity)
             
@@ -253,7 +267,7 @@ class ChromDataDrawer:
         self.trace_annotation_all = []
         self.plot_obj = None
 
-    def draw_chrom_data(self, sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, x_range=None, y_range=None, scale_intensity=False):
+    def draw_chrom_data(self, sqmass_file_path, chrom_data, include_ms1, include_ms2, peptide_transition_list, selected_peptide, selected_precursor_charge, smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11, 'gaussian_window_size': 11, 'gaussian_sigma': 5}, x_range=None, y_range=None, scale_intensity=False):
         """
         Adds chromatogram data to the ChromDataDrawer object's chrom_data_all and trace_annotation_all lists, and generates a plot using the Plotter class.
 
@@ -299,7 +313,7 @@ class ChromDataDrawer:
 
         return self
 
-    def draw_consensus_chrom_data(self, consensus_chrom_mode, averaged_chrom_data, plot_title, selected_peptide, selected_precursor_charge, smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11}, x_range=None, y_range=None):
+    def draw_consensus_chrom_data(self, consensus_chrom_mode, averaged_chrom_data, plot_title, selected_peptide, selected_precursor_charge, smoothing_dict={'type':'sgolay', 'sgolay_polynomial_order':3, 'sgolay_frame_length':11, 'gaussian_window_size': 11, 'gaussian_sigma': 5}, x_range=None, y_range=None):
         """
         Draws consensus chromatogram data for a selected peptide and precursor charge.
 
