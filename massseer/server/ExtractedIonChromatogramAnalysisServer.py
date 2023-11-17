@@ -105,7 +105,7 @@ class ExtractedIonChromatogramAnalysisServer:
         self.append_qvalues_to_transition_list()
 
         # Create a UI for the transition list and show transition information
-        transition_list_ui = ExtractedIonChromatogramAnalysisUI(self.massseer_gui, self.transition_list)
+        transition_list_ui = ExtractedIonChromatogramAnalysisUI(self.transition_list)
         transition_list_ui.show_transition_information()
 
         # Create UI settings for chromatogram plotting, peak picking, and consensus chromatogram
