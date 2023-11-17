@@ -2,3 +2,5 @@ MassSeer.egg-info
 __pycache__
 *~
 tmp
+# Ignore macOS system files
+.DS_Store
