@@ -1,10 +1,6 @@
 import streamlit as st
 
 from massseer.ui.FileInputUISettings import FileInputUISettings
-from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
-from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
-
 
 class MassSeerGUI:
     def __init__(self):
