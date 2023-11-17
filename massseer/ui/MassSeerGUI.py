@@ -86,7 +86,7 @@ class MassSeerGUI:
         Returns:
             None
         """
-        self.file_input_settings = FileInputUISettings(self)
+        self.file_input_settings = FileInputUISettings()
         self.file_input_settings.create_ui(feature_file_path, xic_file_path)
         self.file_input_settings.get_sqmass_files()
         st.sidebar.divider()

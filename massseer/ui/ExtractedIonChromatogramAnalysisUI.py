@@ -24,7 +24,7 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
         A pandas DataFrame containing the filtered transition list based on the selected protein, peptide and charge state.
     """
 
-    def __init__(self, massseer_gui: MassSeerGUI, transition_list: SpectralLibraryLoader) -> None:
+    def __init__(self, transition_list: SpectralLibraryLoader) -> None:
         """
          Initializes the ExtractedIonChromatogramAnalysisServer object.
 
@@ -36,7 +36,6 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
             An object representing the transition list.
         """
         super().__init__()
-        self.massseer_gui = massseer_gui
         self.transition_list = transition_list
         self.transition_settings = None
         self.target_transition_list = None
