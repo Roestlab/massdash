@@ -90,7 +90,8 @@ class SqMassLoader(GenericLoader):
             features = self.rsltsFile.getRunPrecursorPeakBoundaries(runname, pep_id, charge)
             tmp = []
             for _, i in features.iterrows():
-                tmp.append(TransitionGroupFeature(i['leftWidth'], i['rightWidth'], areaIntensity=i['Intensity'], qvalue=i['ms2_mscore'])) 
+                tmp.append(TransitionGroupFeature(i['leftWidth'], i['rightWidth'], areaIntensity=i['Intensity'], qvalue= i['ipf_mscore'] if 'ipf_mscore' in i else i['ms2_mscore'] )) 
+                
                 out[t] = tmp
         return out
 
