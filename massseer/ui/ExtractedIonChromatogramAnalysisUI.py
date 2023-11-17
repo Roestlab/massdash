@@ -78,12 +78,14 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
         # Filter the transition list based on the selected protein, peptide and charge state
         self.target_transition_list =  self.transition_list.filter_for_target_transition_list(self.transition_settings.selected_protein, self.transition_settings.selected_peptide, self.transition_settings.selected_charge)
 
-    def show_extracted_ion_chromatograms(self, chrom_plot_settings, concensus_chromatogram_settings, plot_dict) -> None:
+    def show_extracted_ion_chromatograms(self, plot_container, chrom_plot_settings, concensus_chromatogram_settings, plot_dict) -> None:
         """
         Displays the extracted ion chromatograms based on user input.
 
         Parameters:
         -----------
+        plot_container : st.container
+            A container for the plots.
         chrom_plot_settings : ChromatogramPlotSettings
             An instance of the ChromatogramPlotSettings class.
         concensus_chromatogram_settings : ConsensusChromatogramSettings
@@ -91,17 +93,18 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
         plot_dict : dict
             A dictionary containing the plot objects for each file.
         """
-        plot_cols = st.columns(chrom_plot_settings.num_plot_columns)
-        col_counter = 0
-        for file in plot_dict:
-            plot_obj = plot_dict[file]
+        with plot_container:
+            plot_cols = st.columns(chrom_plot_settings.num_plot_columns)
+            col_counter = 0
+            for file in plot_dict:
+                plot_obj = plot_dict[file]
 
-            if concensus_chromatogram_settings.do_consensus_chrom != 'none':
-                # TODO
-                pass
-            else:
-                with plot_cols[col_counter]:
-                    st.bokeh_chart(plot_obj)
-                    col_counter+=1
-                    if col_counter >= len(plot_cols):
-                        col_counter = 0
+                if concensus_chromatogram_settings.do_consensus_chrom != 'none':
+                    # TODO
+                    pass
+                else:
+                    with plot_cols[col_counter]:
+                        st.bokeh_chart(plot_obj)
+                        col_counter+=1
+                        if col_counter >= len(plot_cols):
+                            col_counter = 0

@@ -1,6 +1,11 @@
 import os
 import numpy as np
 import pandas as pd
+import streamlit as st
+
+import timeit
+from datetime import timedelta
+
 
 # UI
 from massseer.ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
@@ -17,6 +22,8 @@ from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPick
 # Plotting
 from massseer.plotting.GenericPlotter import PlotConfig
 from massseer.plotting.InteractivePlotter import InteractivePlotter
+# Util
+from massseer.util import time_block
 
 class ExtractedIonChromatogramAnalysisServer:
     """
@@ -118,69 +125,94 @@ class ExtractedIonChromatogramAnalysisServer:
         # Print selected peptide and charge information
         print(f"Selected peptide: {transition_list_ui.transition_settings.selected_peptide} Selected charge: {transition_list_ui.transition_settings.selected_charge}")
 
-        # Load transition group data
-        tr_group_data = self.xic_data.loadTransitionGroups(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+        # Create a container for the plots
+        plot_container = st.container()
 
-        # Perform peak picking based on user settings
-        if peak_picking_settings.do_peak_picking == 'OSW-PyProphet':
-            tr_group_feature_data = self.xic_data.loadTransitionGroupFeature(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
-        elif peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
-            # Peak picking using pyMRMTransitionGroupPicker
-            if peak_picking_settings.peak_pick_on_displayed_chrom:
-                mslevel = self.get_string_mslevels_from_bool({'ms1':chrom_plot_settings.include_ms1, 'ms2':chrom_plot_settings.include_ms2})
+        # Add a status indicator and start the overall timer
+        overall_start_time = timeit.default_timer()
+        with st.status("Performing targeted extraction...", expanded=True) as status:
+            with time_block() as elapsed_time:
+                # Load transition group data
+                tr_group_data = self.xic_data.loadTransitionGroups(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+            st.write(f"Loading XIC data... Elapsed time: {elapsed_time()}") 
+
+            # Perform peak picking based on user settings
+            if peak_picking_settings.do_peak_picking == 'OSW-PyProphet':
+                with time_block() as elapsed_time:
+                    tr_group_feature_data = self.xic_data.loadTransitionGroupFeature(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+                st.write(f"Loading OSW-PyProphet Peak Boundaries... Elapsed time: {elapsed_time()}")
+            elif peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
+                with time_block() as elapsed_time:
+                    # Peak picking using pyMRMTransitionGroupPicker
+                    if peak_picking_settings.peak_pick_on_displayed_chrom:
+                        mslevel = self.get_string_mslevels_from_bool({'ms1':chrom_plot_settings.include_ms1, 'ms2':chrom_plot_settings.include_ms2})
+                    else:
+                        mslevel = peak_picking_settings.peak_picker_algo_settings.mslevels
+                    peak_picker_param = peak_picking_settings.peak_picker_algo_settings.PeakPickerMRMParams
+
+                    tr_group_feature_data = {}
+                    for file, tr_group in tr_group_data.items():
+                        peak_picker = pyMRMTransitionGroupPicker(mslevel, peak_picker=peak_picker_param.peak_picker)
+                        peak_features = peak_picker.pick(tr_group)
+                        tr_group_feature_data[file.filename] = peak_features
+                st.write(f"Performing pyPeakPickerMRM Peak Picking... Elapsed time: {elapsed_time()}")
+            elif peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
+                with time_block() as elapsed_time:
+                    # Peak picking using MRMTransitionGroupPicker
+                    tr_group_feature_data = {}
+                    for file, tr_group in tr_group_data.items():
+                        peak_picker = MRMTransitionGroupPicker(peak_picking_settings.peak_picker_algo_settings.smoother)
+                        peak_features = peak_picker.pick(tr_group)
+                        tr_group_feature_data[file.filename] = peak_features
+                st.write(f"Performing MRMTransitionGroupPicker Peak Picking... Elapsed time: {elapsed_time()}")
             else:
-                mslevel = peak_picking_settings.peak_picker_algo_settings.mslevels
-            peak_picker_param = peak_picking_settings.peak_picker_algo_settings.PeakPickerMRMParams
+                tr_group_feature_data = {file.filename: None for file in tr_group_data.keys()}
 
-            tr_group_feature_data = {}
-            for file, tr_group in tr_group_data.items():
-                peak_picker = pyMRMTransitionGroupPicker(mslevel, peak_picker=peak_picker_param.peak_picker)
-                peak_features = peak_picker.pick(tr_group)
-                tr_group_feature_data[file.filename] = peak_features
-        elif peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
-            # Peak picking using MRMTransitionGroupPicker
-            tr_group_feature_data = {}
-            for file, tr_group in tr_group_data.items():
-                peak_picker = MRMTransitionGroupPicker(peak_picking_settings.peak_picker_algo_settings.smoother)
-                peak_features = peak_picker.pick(tr_group)
-                tr_group_feature_data[file.filename] = peak_features
-        else:
-            tr_group_feature_data = {file.filename: None for file in tr_group_data.keys()}
+            with time_block() as elapsed_time:
+                
+                # Initialize axis limits for plotting
+                axis_limits_dict = {'x_range' : [], 'y_range' : []}
+                master_rt_arr = np.concatenate([tg.flatten().rt for tg in tr_group_data.values()])
+                master_int_arr = np.concatenate([tg.flatten().intensity for tg in tr_group_data.values()])
 
-        # Initialize axis limits for plotting
-        axis_limits_dict = {'x_range' : [], 'y_range' : []}
-        master_rt_arr = np.concatenate([tg.flatten().rt for tg in tr_group_data.values()])
-        master_int_arr = np.concatenate([tg.flatten().intensity for tg in tr_group_data.values()])
+                # Set axis limits based on user settings
+                if chrom_plot_settings.set_x_range:
+                    axis_limits_dict['x_range'] = [master_rt_arr.min(), master_rt_arr.max()]
+                if chrom_plot_settings.set_y_range:
+                    axis_limits_dict['y_range'] = [0, master_int_arr.max()]
 
-        # Set axis limits based on user settings
-        if chrom_plot_settings.set_x_range:
-            axis_limits_dict['x_range'] = [master_rt_arr.min(), master_rt_arr.max()]
-        if chrom_plot_settings.set_y_range:
-            axis_limits_dict['y_range'] = [0, master_int_arr.max()]
+                # Initialize plot object dictionary
+                plot_obj_dict = {}
 
-        # Initialize plot object dictionary
-        plot_obj_dict = {}
+                # Iterate through each file and generate chromatogram plots
+                for file, tr_group in tr_group_data.items():
+                    tr_group.targeted_transition_list = transition_list_ui.target_transition_list
 
-        # Iterate through each file and generate chromatogram plots
-        for file, tr_group in tr_group_data.items():
-            tr_group.targeted_transition_list = transition_list_ui.target_transition_list
+                    # Configure plot settings
+                    plot_settings_dict = chrom_plot_settings.get_settings()
+                    plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
+                    plot_settings_dict['y_axis_label'] = 'Intensity'
+                    plot_settings_dict['title'] = os.path.basename(file.filename)
+                    plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
 
-            # Configure plot settings
-            plot_settings_dict = chrom_plot_settings.get_settings()
-            plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
-            plot_settings_dict['y_axis_label'] = 'Intensity'
-            plot_settings_dict['title'] = os.path.basename(file.filename)
-            plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
+                    # Update plot configuration
+                    plot_config = PlotConfig()
+                    plot_config.update(plot_settings_dict)
 
-            # Update plot configuration
-            plot_config = PlotConfig()
-            plot_config.update(plot_settings_dict)
+                    # chromatogram plot generation
+                    if not tr_group.empty():
+                        plotter = InteractivePlotter(plot_config)
+                        plot_obj = plotter.plot(tr_group, tr_group_feature_data[file.filename])
+                        plot_obj_dict[file.filename] = plot_obj
+            st.write(f"Generating chromatogram plots... Elapsed time: {elapsed_time()}")
 
-            # chromatogram plot generation
-            if not tr_group.empty():
-                plotter = InteractivePlotter(plot_config)
-                plot_obj = plotter.plot(tr_group, tr_group_feature_data[file.filename])
-                plot_obj_dict[file.filename] = plot_obj
+        with time_block() as elapsed_time:
+            # Show extracted ion chromatograms
+            transition_list_ui.show_extracted_ion_chromatograms(plot_container, chrom_plot_settings, concensus_chromatogram_settings, plot_obj_dict)
+        status.write(f"Drawing extracted ion chromatograms... Elapsed time: {elapsed_time()}")
 
-        # Show extracted ion chromatograms
-        transition_list_ui.show_extracted_ion_chromatograms(chrom_plot_settings, concensus_chromatogram_settings, plot_obj_dict)
+        # Update status indicator
+        overall_elapsed_time = timeit.default_timer() - overall_start_time
+        status.update(label=f"{transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge} XIC extration complete! Total elapsed time: {timedelta(seconds=overall_elapsed_time)}", state="complete", expanded=False)
+        
+
