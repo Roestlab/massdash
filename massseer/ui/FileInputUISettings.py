@@ -3,13 +3,8 @@ import streamlit as st
 import os
 import fnmatch
 
-import os
-import fnmatch
-import streamlit as st
-
 class FileInputUISettings:
-    def __init__(self, massseer_gui) -> None:
-        self.massseer_gui = massseer_gui
+    def __init__(self) -> None:
         self.osw_file_path = None
         self.sqmass_file_path_input = None
         self.sqmass_file_path_list = None 
