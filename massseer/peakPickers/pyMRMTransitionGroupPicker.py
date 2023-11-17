@@ -1,31 +1,34 @@
-from massseer.peakPickers.GenericPeakPicker import GenericPeakPicker
+from typing import List, Optional
+import pandas as pd
 import pyopenms as po
 import numpy as np
+
+from massseer.peakPickers.GenericPeakPicker import GenericPeakPicker
 from massseer.structs.Chromatogram import Chromatogram
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.structs.TransitionFeature import TransitionFeature
 from massseer.structs.TransitionGroup import TransitionGroup
-from typing import List
-import pandas as pd
 
 class pyMRMTransitionGroupPicker:
     '''
     This is a python implementation based on OpenMS peak picker
     '''
 
-    def __init__(self, level='ms1ms2', sgolay_frame_length=11, sgolay_polynomial_order=3):
+    def __init__(self, level: str='ms1ms2', sgolay_frame_length: Optional[int]=11, sgolay_polynomial_order: Optional[int]=3, peak_picker: Optional[po.PeakPickerMRM]=None):
         self.level = level
         self.top_n_features = 5
-        self.peak_picker = po.PeakPickerMRM()
-
-        ##### Set the pyopenms peak picker parameters
-        params = self.peak_picker.getDefaults()
-        params.setValue(b'sgolay_frame_length', sgolay_frame_length)
-        params.setValue(b'sgolay_polynomial_order', sgolay_polynomial_order)
-        params.setValue(b'use_gauss', 'false')
-        params.setValue(b'method', 'corrected')
-        params.setValue(b'remove_overlapping_peaks', 'true')
-        self.peak_picker.setParameters(params)
+        if peak_picker is None:
+            self.peak_picker = po.PeakPickerMRM()
+            ##### Set the pyopenms peak picker parameters
+            params = self.peak_picker.getDefaults()
+            params.setValue(b'sgolay_frame_length', sgolay_frame_length)
+            params.setValue(b'sgolay_polynomial_order', sgolay_polynomial_order)
+            params.setValue(b'use_gauss', 'false')
+            params.setValue(b'method', 'corrected')
+            params.setValue(b'remove_overlapping_peaks', 'true')
+            self.peak_picker.setParameters(params)
+        else:
+            self.peak_picker = peak_picker
 
     def _resolveLevel(self, transitionGroup):
         if self.level == 'ms1':

@@ -9,7 +9,8 @@ import ast
 from functools import wraps
 import contextlib
 from time import time
-from datetime import datetime
+from timeit import default_timer 
+from datetime import datetime, timedelta
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
@@ -183,6 +184,22 @@ def code_block_timer(ident, log_type):
     yield
     elapsed = time() - tstart
     log_type("{0}: Elapsed {1} ms".format(ident, elapsed))
+
+@contextlib.contextmanager
+def time_block():
+    """
+    A context manager that measures the time it takes to execute a block of code.
+
+    Usage:
+    with time_block() as elapsed_time:
+        # code block to be timed
+
+    Returns:
+    A timedelta object representing the elapsed time.
+    """
+    start = end = default_timer()
+    yield lambda: timedelta(seconds=end - start)
+    end = default_timer()
 
 def get_console_handler():
    console_handler = logging.StreamHandler(sys.stdout)

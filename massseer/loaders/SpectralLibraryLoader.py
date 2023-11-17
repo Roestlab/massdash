@@ -23,7 +23,7 @@ class SpectralLibraryLoader:
         _, file_extension = os.path.splitext(_self.in_file)
         if file_extension.lower() == '.tsv':
             loader = TransitionTSVLoader(_self.in_file)
-        elif file_extension.lower() == '.pqp':
+        elif file_extension.lower() == '.pqp' or file_extension.lower() == '.osw':
             loader = TransitionPQPLoader(_self.in_file)
         else:
             raise ValueError("Unsupported file format")
@@ -81,3 +81,5 @@ class SpectralLibraryLoader:
     def get_peptide_fragment_annotation_list(self, peptide: str, charge: int) -> List[str]:
         return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['Annotation'].tolist()
     
+    def filter_for_target_transition_list(self, protein:str, peptide: str, charge: int) -> pd.DataFrame:
+        return self.data[( self.data['ProteinId'] == protein) & (self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]

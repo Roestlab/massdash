@@ -4,7 +4,7 @@ from scipy.signal import savgol_filter
 
 import matplotlib.pyplot as plt
 from bokeh.plotting import figure
-from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, HoverTool, Label
+from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, DataRange1d, HoverTool, Label
 from bokeh.palettes import Category20, Viridis256
 
 from massseer.plotting.GenericPlotter import GenericPlotter, PlotConfig
@@ -37,7 +37,7 @@ class InteractivePlotter(GenericPlotter):
             figure: The generated plot as a Bokeh figure object.
         """
         if plot_type == 'chromatogram':
-            return self.plot_chromatogram(transitionGroup)
+            return self.plot_chromatogram(transitionGroup, features)
         elif plot_type == 'mobilogram':
             return self.plot_mobilogram(transitionGroup)
         elif plot_type == 'spectra':
@@ -108,7 +108,65 @@ class InteractivePlotter(GenericPlotter):
 
             return line
 
-    def plot_chromatogram(self, transitionGroup: TransitionGroup) -> figure:
+    def add_peak_boundaries(self, p: figure, features: List[TransitionGroupFeature]) -> None:
+        """
+        Adds peak boundaries to a Bokeh figure.
+
+        Args:
+            p (figure): The Bokeh figure to add the peak boundaries to.
+            features (List[TransitionGroupFeature]): A list of peak features to highlight on the plot.
+        """
+        if len(features) <= 8:
+            dark2_palette = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666']
+        else:
+            dark2_palette = Viridis256[0:len(features)]
+
+        # Add peak boundaries
+        i = 0
+        for feature in features:
+            if self.scale_intensity:
+                source = ColumnDataSource(data = {
+                    'Intensity' : [1],
+                    'leftWidth'   : [feature.leftBoundary],
+                    'rightWidth'   : [feature.rightBoundary],
+                    'ms2_mscore' : [feature.qvalue],
+                    'bottom_int'    : [0]})
+            else:
+                source = ColumnDataSource(data = {
+                    'Intensity' : [feature.areaIntensity],
+                    'leftWidth'   : [feature.leftBoundary],
+                    'rightWidth'   : [feature.rightBoundary],
+                    'ms2_mscore' : [feature.qvalue],
+                    'bottom_int'    : [0]})
+            
+            # Left border
+            leftWidth_line = p.vbar(x='leftWidth', bottom='bottom_int', top='Intensity', width=0.1, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+
+            # Right border
+            p.vbar(x='rightWidth', bottom='bottom_int', top='Intensity', width=0.1, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+
+            # Add a point to the left border to attached the hover tool to
+            leftWidth_apex_point = p.circle(source=source, x='leftWidth', y='Intensity', name='leftWidth_apex_point', alpha=0) 
+
+            i += 1
+
+        # Create a HoverTool
+        hover = HoverTool(names=['leftWidth_apex_point'],
+            tooltips=[
+                ("Intensity", "@Intensity"),
+                ("Left Width", "@leftWidth{0.00}"),
+                ("Right Width", "@rightWidth{0.00}"),
+                ("Peak Group Rank", "@peakgroup_rank"),
+                ("MS2 m-score", "@ms2_mscore"),
+            ]
+        )
+        # hover.renderers = [leftWidth_apex_point]
+        # Add the HoverTool to your plot
+        p.add_tools(hover)
+
+        return p
+
+    def plot_chromatogram(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]]) -> figure:
             """
             Plots a chromatogram for a given TransitionGroup.
 
@@ -132,7 +190,7 @@ class InteractivePlotter(GenericPlotter):
             elif n_transitions == 1:
                 colors = ['black']
             else:
-                colors = Viridis256[len(transitionChroms)]
+                colors = Viridis256[0:len(transitionChroms)]
 
             if hasattr(transitionGroup, 'targeted_transition_list'):
                 # Tooltips for interactive information
@@ -164,11 +222,11 @@ class InteractivePlotter(GenericPlotter):
                 p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
             # Limit axes ranges
-            if self.x_range is not None:
+            if self.x_range is not None and isinstance(self.x_range, list):
                 print(f"Info: Setting x-axis range to: {self.x_range}")
                 p.x_range = Range1d(self.x_range[0], self.x_range[1])
 
-            if self.y_range is not None:
+            if self.y_range is not None and isinstance(self.y_range, list):
                 print(f"Info: Setting y-axis range to: {self.y_range}")
                 p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
@@ -207,6 +265,10 @@ class InteractivePlotter(GenericPlotter):
             p.legend.label_text_font_size = "10pt"
             p.grid.visible = True
             p.toolbar_location = "above"
+
+            # Add peak boundaries if available
+            if features is not None:
+                p = self.add_peak_boundaries(p, features)
 
             return p
 
@@ -297,7 +359,7 @@ class InteractivePlotter(GenericPlotter):
         elif n_transitions == 1:
             colors = ['black']
         else:
-            colors = Viridis256[len(transitionMobilos)]
+            colors = Viridis256[0:len(transitionMobilos)]
 
         # Tooltips for interactive information
         if hasattr(transitionGroup, 'targeted_transition_list'):
@@ -449,7 +511,7 @@ class InteractivePlotter(GenericPlotter):
         elif n_transitions == 1:
             colors = ['black']
         else:
-            colors = Viridis256[len(transitionSpectra)]
+            colors = Viridis256[0:len(transitionSpectra)]
 
         # Tooltips for interactive information
         if hasattr(transitionGroup, 'targeted_transition_list'):
