@@ -60,7 +60,6 @@ class ExtractedIonChromatogramAnalysisServer:
         """
         self.transition_list = SpectralLibraryLoader(self.massseer_gui.file_input_settings.osw_file_path)
         self.transition_list.load()
-        print(self.transition_list.data.shape)
 
     def append_qvalues_to_transition_list(self):
         """
@@ -202,8 +201,14 @@ class ExtractedIonChromatogramAnalysisServer:
                     # chromatogram plot generation
                     if not tr_group.empty():
                         plotter = InteractivePlotter(plot_config)
-                        plot_obj = plotter.plot(tr_group, tr_group_feature_data[file.filename])
+                        # Check if there is available feature data
+                        if file.filename in tr_group_feature_data.keys():
+                            feature_data =  tr_group_feature_data[file.filename]
+                        else:
+                            feature_data = None
+                        plot_obj = plotter.plot(tr_group, feature_data)
                         plot_obj_dict[file.filename] = plot_obj
+
             st.write(f"Generating chromatogram plots... Elapsed time: {elapsed_time()}")
 
         with time_block() as elapsed_time:
