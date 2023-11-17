@@ -268,6 +268,13 @@ class OSWDataAccess:
         else:
             join_score_ms2 = ""
             select_score_ms2 = ""
+
+        if check_sqlite_table(self.conn, "SCORE_IPF"):
+            join_score_ipf = "INNER JOIN SCORE_IPF ON SCORE_IPF.FEATURE_ID = FEATURE.ID"
+            select_score_ipf = """SCORE_IPF.QVALUE AS ipf_mscore,"""
+        else:
+            join_score_ipf = ""
+            select_score_ipf = ""
         
         if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
             select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
@@ -285,6 +292,7 @@ class OSWDataAccess:
                 FEATURE.RIGHT_WIDTH AS rightWidth,
                 {select_feature_exp_im}
                 {select_score_ms2}
+                {select_score_ipf}
                 PRECURSOR.DECOY AS decoy
                 FROM (SELECT * FROM PRECURSOR WHERE CHARGE = {charge}) AS PRECURSOR
                 INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
@@ -292,7 +300,8 @@ class OSWDataAccess:
                 INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
                 INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
                 INNER JOIN (SELECT * FROM RUN WHERE FILENAME LIKE '%{run_basename_wo_ext}%') AS RUN ON RUN.ID = FEATURE.RUN_ID
-                {join_score_ms2}"""
+                {join_score_ms2}
+                {join_score_ipf}"""
 
         data = pd.read_sql(stmt, self.conn)
 
