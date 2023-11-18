@@ -19,6 +19,7 @@ from massseer.loaders.SqMassLoader import SqMassLoader
 # Peak Picking
 from massseer.peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
 from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
+from massseer.peakPickers.ConformerPeakPicker import ConformerPeakPicker
 # Plotting
 from massseer.plotting.GenericPlotter import PlotConfig
 from massseer.plotting.InteractivePlotter import InteractivePlotter
@@ -164,6 +165,16 @@ class ExtractedIonChromatogramAnalysisServer:
                         peak_features = peak_picker.pick(tr_group)
                         tr_group_feature_data[file.filename] = peak_features
                 st.write(f"Performing MRMTransitionGroupPicker Peak Picking... Elapsed time: {elapsed_time()}")
+            elif peak_picking_settings.do_peak_picking == 'Conformer':
+                with time_block() as elapsed_time:
+                    # Peak picking using Conformer
+                    tr_group_feature_data = {}
+                    for file, tr_group in tr_group_data.items():
+                        tr_group.targeted_transition_list = transition_list_ui.target_transition_list
+                        print(f"Pretrained model file: {peak_picking_settings.peak_picker_algo_settings.pretrained_model_file}")
+                        peak_picker = ConformerPeakPicker(tr_group, peak_picking_settings.peak_picker_algo_settings.pretrained_model_file)
+                        peak_picker.pick()
+                st.write(f"Performing Conformer Peak Picking... Elapsed time: {elapsed_time()}")
             else:
                 tr_group_feature_data = {file.filename: None for file in tr_group_data.keys()}
 
