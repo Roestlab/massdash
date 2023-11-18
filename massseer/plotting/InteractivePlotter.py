@@ -4,12 +4,12 @@ from scipy.signal import savgol_filter
 
 import matplotlib.pyplot as plt
 from bokeh.plotting import figure
-from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, HoverTool, Label
+from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, DataRange1d, HoverTool, Label
 from bokeh.palettes import Category20, Viridis256
 
 from massseer.plotting.GenericPlotter import GenericPlotter, PlotConfig
 from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.PeakFeature import PeakFeature
+from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.structs.Chromatogram import Chromatogram
 from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
@@ -24,20 +24,20 @@ class InteractivePlotter(GenericPlotter):
     def __init__(self, config: PlotConfig):
         super().__init__(config)
 
-    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[PeakFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectra'] = 'chromatogram') -> figure:
+    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectra'] = 'chromatogram') -> figure:
         """
         Plots the given transitionGroup using the specified plot type.
 
         Args:
             transitionGroup (TransitionGroup): The transition group to plot.
-            features (Optional[List[PeakFeature]], optional): A list of peak features to highlight on the plot. Defaults to None.
+            features (Optional[List[TransitionGroupFeature]], optional): A list of peak features to highlight on the plot. Defaults to None.
             plot_type (Literal['chromatogram', 'mobilogram', 'spectrum'], optional): The type of plot to generate. Defaults to 'chromatogram'.
 
         Returns:
             figure: The generated plot as a Bokeh figure object.
         """
         if plot_type == 'chromatogram':
-            return self.plot_chromatogram(transitionGroup)
+            return self.plot_chromatogram(transitionGroup, features)
         elif plot_type == 'mobilogram':
             return self.plot_mobilogram(transitionGroup)
         elif plot_type == 'spectra':
@@ -74,7 +74,8 @@ class InteractivePlotter(GenericPlotter):
                         error_message = f"Error: {ve}"
 
                     if check_streamlit():
-                        st.error(error_message)
+                        print(error_message)
+                        # st.error(error_message)
                     else:
                         raise ValueError(error_message)
             elif self.smoothing_dict['type'] == 'none':
@@ -88,14 +89,16 @@ class InteractivePlotter(GenericPlotter):
             intensity = np.where(intensity < 0, 0, intensity)
 
             # Get precursor and product info
-            precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
+            precursor_mz = None
             product_mz = None
             product_charge = None
+            if hasattr(transitionGroup, 'targeted_transition_list'):
+                precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
 
-            if not is_precursor:
-                label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
-                product_mz = np.unique(label_info['ProductMz'].values)[0]
-                product_charge = np.unique(label_info['ProductCharge'].values)[0]
+                if not is_precursor:
+                    label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
+                    product_mz = np.unique(label_info['ProductMz'].values)[0]
+                    product_charge = np.unique(label_info['ProductCharge'].values)[0]
 
             source_data = {'x': rt, 'y': intensity, 'precursor_mz': [precursor_mz] * len(rt),
                         'product_mz': [product_mz] * len(rt), 'product_charge': [product_charge] * len(rt)}
@@ -105,7 +108,65 @@ class InteractivePlotter(GenericPlotter):
 
             return line
 
-    def plot_chromatogram(self, transitionGroup: TransitionGroup) -> figure:
+    def add_peak_boundaries(self, p: figure, features: List[TransitionGroupFeature]) -> None:
+        """
+        Adds peak boundaries to a Bokeh figure.
+
+        Args:
+            p (figure): The Bokeh figure to add the peak boundaries to.
+            features (List[TransitionGroupFeature]): A list of peak features to highlight on the plot.
+        """
+        if len(features) <= 8:
+            dark2_palette = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666']
+        else:
+            dark2_palette = Viridis256[0:len(features)]
+
+        # Add peak boundaries
+        i = 0
+        for feature in features:
+            if self.scale_intensity:
+                source = ColumnDataSource(data = {
+                    'Intensity' : [1],
+                    'leftWidth'   : [feature.leftBoundary],
+                    'rightWidth'   : [feature.rightBoundary],
+                    'ms2_mscore' : [feature.qvalue],
+                    'bottom_int'    : [0]})
+            else:
+                source = ColumnDataSource(data = {
+                    'Intensity' : [feature.areaIntensity],
+                    'leftWidth'   : [feature.leftBoundary],
+                    'rightWidth'   : [feature.rightBoundary],
+                    'ms2_mscore' : [feature.qvalue],
+                    'bottom_int'    : [0]})
+            
+            # Left border
+            leftWidth_line = p.vbar(x='leftWidth', bottom='bottom_int', top='Intensity', width=0.1, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+
+            # Right border
+            p.vbar(x='rightWidth', bottom='bottom_int', top='Intensity', width=0.1, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+
+            # Add a point to the left border to attached the hover tool to
+            leftWidth_apex_point = p.circle(source=source, x='leftWidth', y='Intensity', name='leftWidth_apex_point', alpha=0) 
+
+            i += 1
+
+        # Create a HoverTool
+        hover = HoverTool(names=['leftWidth_apex_point'],
+            tooltips=[
+                ("Intensity", "@Intensity"),
+                ("Left Width", "@leftWidth{0.00}"),
+                ("Right Width", "@rightWidth{0.00}"),
+                ("Peak Group Rank", "@peakgroup_rank"),
+                ("MS2 m-score", "@ms2_mscore"),
+            ]
+        )
+        # hover.renderers = [leftWidth_apex_point]
+        # Add the HoverTool to your plot
+        p.add_tools(hover)
+
+        return p
+
+    def plot_chromatogram(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]]) -> figure:
             """
             Plots a chromatogram for a given TransitionGroup.
 
@@ -129,36 +190,47 @@ class InteractivePlotter(GenericPlotter):
             elif n_transitions == 1:
                 colors = ['black']
             else:
-                colors = Viridis256[len(transitionChroms)]
-            
-            # Tooltips for interactive information
-            TOOLTIPS = [
-                    ("index", "$index"),
-                    ("(rt,int)", "(@x{0.00}, @y)"),
-                    ("precursor_mz", "@precursor_mz"),
-                    ("product_mz", "@product_mz"),
-                    ("product_charge", "@product_charge")
-                ]
+                colors = Viridis256[0:len(transitionChroms)]
+
+            if hasattr(transitionGroup, 'targeted_transition_list'):
+                # Tooltips for interactive information
+                TOOLTIPS = [
+                        ("index", "$index"),
+                        ("(rt,int)", "(@x{0.00}, @y)"),
+                        ("precursor_mz", "@precursor_mz"),
+                        ("product_mz", "@product_mz"),
+                        ("product_charge", "@product_charge")
+                    ]
+            else:
+                # Tooltips for interactive information
+                TOOLTIPS = [
+                        ("index", "$index"),
+                        ("(rt,int)", "(@x{0.00}, @y)"),
+                    ]
 
             # Create a Bokeh figure
-            p = figure(title=self.title, x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+            p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+
+            # Add title
+            if self.title is not None:
+                p.title.text = self.title
+                p.title.text_font_size = "16pt"
+                p.title.align = "center"
+
+            if self.subtitle is not None:
+                # Create a subtitle
+                p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
             # Limit axes ranges
-            if self.x_range is not None:
+            if self.x_range is not None and isinstance(self.x_range, list):
                 print(f"Info: Setting x-axis range to: {self.x_range}")
                 p.x_range = Range1d(self.x_range[0], self.x_range[1])
 
-            if self.y_range is not None:
+            if self.y_range is not None and isinstance(self.y_range, list):
                 print(f"Info: Setting y-axis range to: {self.y_range}")
                 p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
             p.sizing_mode = 'scale_width'
-            # Add a main title
-            p.title.text_font_size = "16pt"
-            p.title.align = "center"
-
-            # Create a subtitle
-            p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
             # Create a legend
             legend = Legend()
@@ -192,6 +264,11 @@ class InteractivePlotter(GenericPlotter):
             p.legend.title = "Transition"
             p.legend.label_text_font_size = "10pt"
             p.grid.visible = True
+            p.toolbar_location = "above"
+
+            # Add peak boundaries if available
+            if features is not None:
+                p = self.add_peak_boundaries(p, features)
 
             return p
 
@@ -224,7 +301,8 @@ class InteractivePlotter(GenericPlotter):
                     error_message = f"Error: {ve}"
 
                 if check_streamlit():
-                    st.error(error_message)
+                    print(error_message)
+                    # st.error(error_message)
                 else:
                     raise ValueError(error_message)
         elif self.smoothing_dict['type'] == 'none':
@@ -238,14 +316,17 @@ class InteractivePlotter(GenericPlotter):
         intensity = np.where(intensity < 0, 0, intensity)
 
         # Get precursor and product info
-        precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
+        precursor_mz = None
         product_mz = None
         product_charge = None
 
-        if not is_precursor:
-            label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
-            product_mz = np.unique(label_info['ProductMz'].values)[0]
-            product_charge = np.unique(label_info['ProductCharge'].values)[0]
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
+
+            if not is_precursor:
+                label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
+                product_mz = np.unique(label_info['ProductMz'].values)[0]
+                product_charge = np.unique(label_info['ProductCharge'].values)[0]
 
         source_data = {'x': im, 'y': intensity, 'precursor_mz': [precursor_mz] * len(im), 'product_mz': [product_mz] * len(im), 'product_charge': [product_charge] * len(im)}
 
@@ -278,19 +359,35 @@ class InteractivePlotter(GenericPlotter):
         elif n_transitions == 1:
             colors = ['black']
         else:
-            colors = Viridis256[len(transitionMobilos)]
+            colors = Viridis256[0:len(transitionMobilos)]
 
         # Tooltips for interactive information
-        TOOLTIPS = [
-                ("index", "$index"),
-                ("(im,int)", "(@x{0.00}, @y)"),
-                ("precursor_mz", "@precursor_mz"),
-                ("product_mz", "@product_mz"),
-                ("product_charge", "@product_charge")
-            ]
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(im,int)", "(@x{0.00}, @y)"),
+                    ("precursor_mz", "@precursor_mz"),
+                    ("product_mz", "@product_mz"),
+                    ("product_charge", "@product_charge")
+                ]
+        else:
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(im,int)", "(@x{0.00}, @y)"),
+                ]
         
         # Create a Bokeh figure
-        p = figure(title=self.title, x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+
+        # Add title
+        if self.title is not None:
+            p.title.text = self.title
+            p.title.text_font_size = "16pt"
+            p.title.align = "center"
+
+        if self.subtitle is not None:
+            # Create a subtitle
+            p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
         # Limit axes ranges
         if self.x_range is not None:
@@ -302,9 +399,6 @@ class InteractivePlotter(GenericPlotter):
             p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
         p.sizing_mode = 'scale_width'
-        # Add a main title
-        p.title.text_font_size = "16pt"
-        p.title.align = "center"
 
         # Create a subtitle
         p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
@@ -341,6 +435,7 @@ class InteractivePlotter(GenericPlotter):
         p.legend.title = "Transition"
         p.legend.label_text_font_size = "10pt"
         p.grid.visible = True
+        p.toolbar_location = "above"
 
         return p
 
@@ -369,14 +464,16 @@ class InteractivePlotter(GenericPlotter):
         intensity = np.where(intensity < 0, 0, intensity)
 
         # Get precursor and product info
-        precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
+        precursor_mz = None
         product_mz = None
         product_charge = None
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
 
-        if not is_precursor:
-            label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
-            product_mz = np.unique(label_info['ProductMz'].values)[0]
-            product_charge = np.unique(label_info['ProductCharge'].values)[0]
+            if not is_precursor:
+                label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
+                product_mz = np.unique(label_info['ProductMz'].values)[0]
+                product_charge = np.unique(label_info['ProductCharge'].values)[0]
 
         source_data = {'x': mz, 'y0':[0]*len(mz), 'y': intensity, 'precursor_mz': [precursor_mz] * len(mz), 'product_mz': [product_mz] * len(mz), 'product_charge': [product_charge] * len(mz)}
 
@@ -414,19 +511,35 @@ class InteractivePlotter(GenericPlotter):
         elif n_transitions == 1:
             colors = ['black']
         else:
-            colors = Viridis256[len(transitionSpectra)]
+            colors = Viridis256[0:len(transitionSpectra)]
 
         # Tooltips for interactive information
-        TOOLTIPS = [
-                ("index", "$index"),
-                ("(mz,int)", "(@x{0.00}, @y)"),
-                ("precursor_mz", "@precursor_mz"),
-                ("product_mz", "@product_mz"),
-                ("product_charge", "@product_charge")
-            ]
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(mz,int)", "(@x{0.00}, @y)"),
+                    ("precursor_mz", "@precursor_mz"),
+                    ("product_mz", "@product_mz"),
+                    ("product_charge", "@product_charge")
+                ]
+        else:
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(mz,int)", "(@x{0.00}, @y)"),
+                ]
         
         # Create a Bokeh figure
-        p = figure(title=self.title, x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+
+        # Add title
+        if self.title is not None:
+            p.title.text = self.title
+            p.title.text_font_size = "16pt"
+            p.title.align = "center"
+
+        if self.subtitle is not None:
+            # Create a subtitle
+            p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
         # Limit axes ranges
         if self.x_range is not None:
@@ -438,12 +551,6 @@ class InteractivePlotter(GenericPlotter):
             p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
         p.sizing_mode = 'scale_width'
-        # Add a main title
-        p.title.text_font_size = "16pt"
-        p.title.align = "center"
-
-        # Create a subtitle
-        p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
         # Create a legend
         legend = Legend()
@@ -477,5 +584,6 @@ class InteractivePlotter(GenericPlotter):
         p.legend.title = "Transition"
         p.legend.label_text_font_size = "10pt"
         p.grid.visible = True
+        p.toolbar_location = "above"
 
         return p

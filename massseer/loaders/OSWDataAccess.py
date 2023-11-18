@@ -141,6 +141,47 @@ class OSWDataAccess:
 
         return data
 
+    def getPeptideTransitionInfoShort(self, fullpeptidename, charge):
+        """
+        Retrieves transition information for a given peptide and charge.
+
+        Args:
+            fullpeptidename (str): The full modified sequence of the peptide.
+            charge (int): The precursor charge.
+
+        Returns:
+            pandas.DataFrame: The transition information.
+        """
+        # Older OSW files (<v2.4) do not have the ANNOTATION column in the TRANSITION table
+        if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"):
+            stmt = f"""SELECT DISTINCT
+                PRECURSOR.ID AS PRECURSOR_ID,
+                TRANSITION.ID AS TRANSITION_ID,
+                TRANSITION.ANNOTATION AS ANNOTATION
+                FROM (SELECT * FROM PRECURSOR WHERE PRECURSOR.CHARGE = {charge}) AS PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN (SELECT * FROM PEPTIDE WHERE PEPTIDE.MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+                INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID
+                and TRANSITION.DETECTING = 1"""
+        else:
+            stmt = f"""SELECT DISTINCT
+                PRECURSOR.ID AS PRECURSOR_ID,
+                TRANSITION.ID AS TRANSITION_ID,
+                PRECURSOR.CHARGE AS PRECURSOR_CHARGE,
+                TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE AS ANNOTATION
+                FROM (SELECT * FROM PRECURSOR WHERE PRECURSOR.CHARGE = {charge}) AS PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN (SELECT * FROM PEPTIDE WHERE PEPTIDE.MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+                INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID and
+                TRANSITION.DETECTING = 1"""
+
+        data = pd.read_sql(stmt, self.conn)
+
+        return data
+
+
     def getPeptideTransitionInfo(self, fullpeptidename, charge):
         """
         Retrieves transition information for a given peptide and charge.
@@ -227,9 +268,16 @@ class OSWDataAccess:
         else:
             join_score_ms2 = ""
             select_score_ms2 = ""
+
+        if check_sqlite_table(self.conn, "SCORE_IPF"):
+            join_score_ipf = "INNER JOIN SCORE_IPF ON SCORE_IPF.FEATURE_ID = FEATURE.ID"
+            select_score_ipf = """SCORE_IPF.QVALUE AS ipf_mscore,"""
+        else:
+            join_score_ipf = ""
+            select_score_ipf = ""
         
         if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
-            select_feature_exp_im = "SELECT FEATURE.EXP_IM AS IM,"
+            select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
         else:
             select_feature_exp_im = "-1 AS IM,"
         
@@ -237,12 +285,14 @@ class OSWDataAccess:
                 PEPTIDE.MODIFIED_SEQUENCE AS FullPeptideName,
                 PRECURSOR.CHARGE AS Charge,
                 FEATURE.ID AS feature_id,
+                FEATURE_MS2.AREA_INTENSITY AS areaIntensity,
                 FEATURE_MS2.APEX_INTENSITY AS Intensity,
                 FEATURE.EXP_RT AS RT,
                 FEATURE.LEFT_WIDTH AS leftWidth,
                 FEATURE.RIGHT_WIDTH AS rightWidth,
                 {select_feature_exp_im}
                 {select_score_ms2}
+                {select_score_ipf}
                 PRECURSOR.DECOY AS decoy
                 FROM (SELECT * FROM PRECURSOR WHERE CHARGE = {charge}) AS PRECURSOR
                 INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
@@ -250,7 +300,38 @@ class OSWDataAccess:
                 INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
                 INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
                 INNER JOIN (SELECT * FROM RUN WHERE FILENAME LIKE '%{run_basename_wo_ext}%') AS RUN ON RUN.ID = FEATURE.RUN_ID
-                {join_score_ms2}"""
+                {join_score_ms2}
+                {join_score_ipf}"""
+
+        data = pd.read_sql(stmt, self.conn)
+
+        return data
+    
+    def get_top_rank_precursor_features_across_runs(self):
+        """
+        Retrieves the top ranking precursor features across runs from the database.
+
+        Returns:
+            pandas.DataFrame: The top ranking precursor features.
+        """
+        stmt = """SELECT 
+                RUN.FILENAME as filename,
+                PROTEIN.PROTEIN_ACCESSION AS ProteinId,
+                PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
+                PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
+                PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
+                PRECURSOR.CHARGE AS PrecursorCharge,
+                PRECURSOR.DECOY AS Decoy,
+                MIN(DISTINCT SCORE_MS2.QVALUE) as Qvalue
+                FROM FEATURE
+                INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
+                INNER JOIN (SELECT * FROM SCORE_MS2 WHERE SCORE_MS2.RANK = 1) AS SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN PRECURSOR ON PRECURSOR.ID = FEATURE.PRECURSOR_ID
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+                INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+                GROUP BY ProteinId, PeptideSequence, ModifiedPeptideSequence, PrecursorMz, PrecursorCharge;"""
 
         data = pd.read_sql(stmt, self.conn)
 
