@@ -11,15 +11,17 @@ import contextlib
 from time import time
 from timeit import default_timer 
 from datetime import datetime, timedelta
-from timeit import default_timer 
-from datetime import datetime, timedelta
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
 # Type hinting
 from typing import List, Tuple
 
+import pyopenms as po
+
 # Common environment variables
+PROJECT_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+WORKING_FOLDER = os.getcwd()
 MASSPEC_FILE_FORMATS = ["mzML", "mzXML", "raw", "wiff", "d"]
 
 # Logging
@@ -30,6 +32,44 @@ LOG_FILE = "MassSeer.log"
 PEAK_PICKING_ALGORITHMS = ["OSW-PyProphet","PeakPickerMRM"]
 
 # Common methods
+def get_data_folder():
+    return os.path.join(PROJECT_FOLDER, "data")
+
+def get_input_folder():
+    return os.path.join(get_data_folder(), "input")
+
+def get_output_folder():
+    return os.path.join(get_data_folder(), "output")
+
+# @st.cache_data()
+def get_base64_of_bin_file(png_file):
+    """Convert a binary file to the corresponding base64 representation"""
+    with open(png_file, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+class conditional_decorator(object):
+    """
+    A decorator that applies another decorator to a function only if a condition is met.
+    See: https://gist.github.com/T1T4N/22ca7b0764cefe917b2b3a6bb056364c
+
+    Args:
+        dec (function): The decorator to apply.
+        condition (bool): The condition that must be met for the decorator to be applied.
+
+    Returns:
+        function: The decorated function, or the original function if the condition is not met.
+    """
+    def __init__(self, dec, condition):
+        self.decorator = dec
+        self.condition = condition
+
+    def __call__(self, func):
+        if not self.condition:
+            # Return the function unchanged, not decorated.
+            return func
+        return self.decorator(func)
+    
 def check_streamlit():
     """
     Function to check whether python code is run within streamlit
@@ -94,17 +134,39 @@ def check_sqlite_column_in_table(con, table, column):
 
     return(column_present)
 
+def setCompressionOptions(opt):
+    """
+    Adds suitable compression options for an object of type
+    pyopenms.PeakFileOptions
+        - compresses mass / time arrays with numpress linear
+        - compresses intensity with slof (log integer)
+        - compresses ion mobility with slof (log integer)
+    """
+    cfg = po.NumpressConfig()
+    cfg.estimate_fixed_point = True
+    cfg.numpressErrorTolerance = -1.0 # skip check, faster
+    cfg.setCompression(b"linear");
+    cfg.linear_fp_mass_acc = -1; # set the desired RT accuracy in seconds
+    opt.setNumpressConfigurationMassTime(cfg)
+    cfg = po.NumpressConfig()
+    cfg.estimate_fixed_point = True
+    cfg.numpressErrorTolerance = -1.0 # skip check, faster
+    cfg.setCompression(b"slof");
+    opt.setNumpressConfigurationIntensity(cfg)
+    opt.setCompression(True) # zlib compression
+
+    # Now also try to compress float data arrays (this is not enabled in all
+    # versions of pyOpenMS).
+    try:
+        cfg = po.NumpressConfig()
+        cfg.estimate_fixed_point = True
+        cfg.numpressErrorTolerance = -1.0 # skip check, faster
+        cfg.setCompression(b"slof");
+        opt.setNumpressConfigurationFloatDataArray(cfg)
+    except Exception:
+        pass
 
 def method_timer(f):
-    """
-    A decorator that logs the time taken by a method to execute.
-
-    Args:
-        f (function): The method to be timed.
-
-    Returns:
-        function: The wrapped method.
-    """
     @wraps(f)
     def wrap(*args, **kw):
         ts = time()
@@ -115,23 +177,9 @@ def method_timer(f):
         return result
     return wrap
 
+
 @contextlib.contextmanager
 def code_block_timer(ident, log_type):
-    """
-    A context manager that logs the elapsed time of a code block.
-
-    Args:
-        ident (str): A string identifier for the code block.
-        log_type (function): A logging function that takes a string message as input.
-
-    Yields:
-        None
-
-    Example:
-        >>> with code_block_timer("my_code_block", print):
-        ...     # some code to be timed
-        my_code_block: Elapsed 0.123456789 ms
-    """
     tstart = time()
     yield
     elapsed = time() - tstart
@@ -154,43 +202,50 @@ def time_block():
     end = default_timer()
 
 def get_console_handler():
-    """
-    Returns a console handler for logging messages to the console.
-
-    Returns:
-    console_handler (logging.StreamHandler): A console handler with the specified formatter.
-    """
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(FORMATTER)
-    return console_handler
-
+   console_handler = logging.StreamHandler(sys.stdout)
+   console_handler.setFormatter(FORMATTER)
+   return console_handler
 def get_file_handler():
-    """
-    Returns a file handler for logging to a file with a rotating filename based on the current date.
-    """
-    file_handler = TimedRotatingFileHandler(LOG_FILE, when='midnight')
-    file_handler.setFormatter(FORMATTER)
-    return file_handler
-
-
+   file_handler = TimedRotatingFileHandler(LOG_FILE, when='midnight')
+   file_handler.setFormatter(FORMATTER)
+   return file_handler
 def get_logger(logger_name):
-   """
-   Returns a logger object with the specified name and configured with a console and file handler.
-   
-   Args:
-       logger_name (str): The name of the logger object.
-       
-   Returns:
-       logger (logging.Logger): The logger object with the specified name and handlers.
-   """
    logger = logging.getLogger(logger_name)
-   logger.setLevel(logging.CRITICAL) # better to have too much log than not enough
+   logger.setLevel(logging.DEBUG) # better to have too much log than not enough
    logger.addHandler(get_console_handler())
    logger.addHandler(get_file_handler())
    # with this pattern, it's rarely necessary to propagate the error up to parent
    logger.propagate = False
    return logger
 
-
-# Logger needs to initiated once
 LOGGER = get_logger('MassSeer')
+
+def check_im_array(im_array):
+    '''
+    Check Ion Mobility Array to make sure values are valid
+    '''
+    
+    if any(im_array<0):
+      raise click.ClickException(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ERROR: There are values below 0 in the input ion mobility array! {im_array[im_array<0]}. Most likely a pyopenms memory view issue.")
+    elif 'e' in str(im_array):
+      raise click.ClickException(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ERROR: The input ion mobility array seems to be in scientific notation! {im_array}. Most likely a pyopenms memory view issue.")
+
+def type_cast_value(value):
+    '''
+    Convert a string value to python literal
+    '''
+    if not isinstance(value, str):  # required for Click>=8.0.0
+        return value
+    try:
+        return ast.literal_eval(value)
+    except Exception:
+        raise click.BadParameter(value)
+
+def argument_value_log(args_dict):
+    '''
+    Print argument and value
+    '''
+    logging.debug("---------------- Input Parameters --------------------------")
+    for key, item in args_dict.items():
+        logging.debug(f"Parameter: {key} = {item}")
+    logging.debug("------------------------------------------------------------\n")
