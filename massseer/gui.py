@@ -46,10 +46,18 @@ st.sidebar.image(MASSSEER_LOGO)
 st.sidebar.divider()
 
 if st.session_state.clicked['load_toy_dataset']:
-    sqmass_file_path_input = os.path.join(dirname, '..', 'tests', 'test_data', 'xics')
-    osw_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
+    if massseer_gui.workflow == "xic_data:"
+        sqmass_file_path_input = os.path.join(dirname, '..', 'tests', 'test_data', 'xics')
+        osw_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
 
-    massseer_gui.show_file_input_settings(osw_file_path, sqmass_file_path_input)
+        massseer_gui.show_file_input_settings(osw_file_path, sqmass_file_path_input)
+    elif massseer_gui.workflow == "raw_data":
+        #TODO: Create small toy example 
+        transition_list_file_path = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/josh/diann/K562-Library-Default_osw_6Frags_diann.tsv"
+        raw_file_path_input = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/josh/90min-SP-30cm-2um-K562-100nL-25ng_DIA_Slot1-5_1_550_3-7-2021.mzML"
+        diann_report_file_path_input = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/josh/diann/jsc718.5808924.0/report.tsv"
+        
+        massseer_gui.show_file_input_settings(osw_file_path, sqmass_file_path_input)
 
     # Remove welcome message container if dataset is loaded
     massseer_gui.welcome_container.empty()
