@@ -56,7 +56,55 @@ class OSWDataAccess:
         """
         self.conn = sqlite3.connect(filename)
         self.c = self.conn.cursor()
+        
+        # hashtable, each run is its own data 
+        self.initializeHashTable()
 
+    def initializeHashTable(self):
+        '''
+        Initialize the which maps peptide precursor to its ID
+        '''
+        # Create indices if they do not exist
+        idx_query = ''' CREATE INDEX IF NOT EXISTS idx_transition_precursor_mapping_transition_id on TRANSITION_PRECURSOR_MAPPING(Transition_id);'''
+        idx_query += ''' CREATE INDEX IF NOT EXISTS idx_transition_precursor_mapping_precursor_id on TRANSITION_PRECURSOR_MAPPING(Precursor_id);'''
+        self.conn.executescript(idx_query)
+
+        # Older OSW files (<v2.4) do not have the ANNOTATION column in the TRANSITION table
+        if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"):
+            stmt = '''
+            SELECT DISTINCT GROUP_CONCAT(TRANSITION_ID, ';') AS TRANSITION_ID, 
+                    GROUP_CONCAT(ANNOTATION, ';') AS ANNOTATION,
+                    TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID as PRECURSOR_ID,
+                    PRECURSOR.CHARGE as PRECURSOR_CHARGE,
+                    PEPTIDE.MODIFIED_SEQUENCE as MODIFIED_SEQUENCE
+                    FROM TRANSITION_PRECURSOR_MAPPING 
+                    INNER JOIN TRANSITION ON TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID= TRANSITION.ID
+                    INNER JOIN PRECURSOR ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                    INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+                    INNER JOIN PEPTIDE ON PEPTIDE_ID = PEPTIDE.ID 
+                    WHERE TRANSITION.DETECTING = 1
+                    GROUP BY TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID
+                '''
+        else:
+            stmt = '''
+            SELECT DISTINCT GROUP_CONCAT(TRANSITION_ID, ';') AS TRANSITION_ID, 
+                GROUP_CONCAT(TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE, ';') AS ANNOTATION,
+                    TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID as PRECURSOR_ID,
+                    PRECURSOR.CHARGE as PRECURSOR_CHARGE,
+                    PEPTIDE.MODIFIED_SEQUENCE as MODIFIED_SEQUENCE
+                    FROM TRANSITION_PRECURSOR_MAPPING 
+                    INNER JOIN TRANSITION ON TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID= TRANSITION.ID
+                    INNER JOIN PRECURSOR ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                    INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+                    INNER JOIN PEPTIDE ON PEPTIDE_ID = PEPTIDE.ID
+                    GROUP BY TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID
+            '''
+
+        tmp = pd.read_sql(stmt, self.conn)
+        tmp['TRANSITION_ID'] = tmp['TRANSITION_ID'].str.split(';')
+        tmp['ANNOTATION'] = tmp['ANNOTATION'].str.split(';')
+        self.hashtable = tmp.set_index(['MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE'])
+   
     def getProteinTable(self, include_decoys=False):
         """
         Retrieves the protein table from the database.
@@ -152,35 +200,7 @@ class OSWDataAccess:
         Returns:
             pandas.DataFrame: The transition information.
         """
-        # Older OSW files (<v2.4) do not have the ANNOTATION column in the TRANSITION table
-        if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"):
-            stmt = f"""SELECT DISTINCT
-                PRECURSOR.ID AS PRECURSOR_ID,
-                TRANSITION.ID AS TRANSITION_ID,
-                TRANSITION.ANNOTATION AS ANNOTATION
-                FROM (SELECT * FROM PRECURSOR WHERE PRECURSOR.CHARGE = {charge}) AS PRECURSOR
-                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                INNER JOIN (SELECT * FROM PEPTIDE WHERE PEPTIDE.MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
-                INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                INNER JOIN TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID
-                and TRANSITION.DETECTING = 1"""
-        else:
-            stmt = f"""SELECT DISTINCT
-                PRECURSOR.ID AS PRECURSOR_ID,
-                TRANSITION.ID AS TRANSITION_ID,
-                PRECURSOR.CHARGE AS PRECURSOR_CHARGE,
-                TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE AS ANNOTATION
-                FROM (SELECT * FROM PRECURSOR WHERE PRECURSOR.CHARGE = {charge}) AS PRECURSOR
-                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                INNER JOIN (SELECT * FROM PEPTIDE WHERE PEPTIDE.MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
-                INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                INNER JOIN TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID and
-                TRANSITION.DETECTING = 1"""
-
-        data = pd.read_sql(stmt, self.conn)
-
-        return data
-
+        return self.hashtable.loc[(fullpeptidename, charge)]
 
     def getPeptideTransitionInfo(self, fullpeptidename, charge):
         """

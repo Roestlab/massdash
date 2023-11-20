@@ -26,16 +26,17 @@ class SqMassLoader(GenericLoader):
 
     def loadTransitionGroupsDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         metaInfo = self.rsltsFile.getPeptideTransitionInfoShort(pep_id, charge)
-        columns=['run_name', 'rt', 'intensity', 'annotation']
         if metaInfo.empty:
             return pd.DataFrame(columns=columns)
         out = {}
         for t in self.transitionFiles:
             ### Get Transition chromatogram IDs
-            transition_chroms = t.getDataForChromatogramsFromNativeIdsDf(metaInfo['TRANSITION_ID'].astype(str), metaInfo['ANNOTATION'])
+
+            transition_chroms = t.getDataForChromatogramsFromNativeIdsDf(metaInfo['TRANSITION_ID'], metaInfo['ANNOTATION'])
 
             ### Get Precursor chromatogram IDs
-            prec_chrom_ids = t.getPrecursorChromIDs(metaInfo['PRECURSOR_ID'].iloc[0])
+
+            prec_chrom_ids = t.getPrecursorChromIDs(metaInfo['PRECURSOR_ID'])
             precursor_chroms = t.getDataForChromatogramsDf(prec_chrom_ids['chrom_ids'], prec_chrom_ids['native_ids'])
 
             # only add if there is data
@@ -66,10 +67,12 @@ class SqMassLoader(GenericLoader):
         out = {}
         for t in self.transitionFiles:
             ### Get Transition chromatogram IDs
-            transition_chroms = t.getDataForChromatogramsFromNativeIds(metaInfo['TRANSITION_ID'].astype(str), metaInfo['ANNOTATION'])
+
+            transition_chroms = t.getDataForChromatogramsFromNativeIds(metaInfo['TRANSITION_ID'], metaInfo['ANNOTATION'])
 
             ### Get Precursor chromatogram IDs
-            prec_chrom_ids = t.getPrecursorChromIDs(metaInfo['PRECURSOR_ID'].iloc[0])
+            print(metaInfo)
+            prec_chrom_ids = t.getPrecursorChromIDs(metaInfo['PRECURSOR_ID'])
             precursor_chroms = t.getDataForChromatograms(prec_chrom_ids['chrom_ids'], prec_chrom_ids['native_ids'])
 
             out[t] = TransitionGroup(precursor_chroms, transition_chroms, [], [], [], [])
