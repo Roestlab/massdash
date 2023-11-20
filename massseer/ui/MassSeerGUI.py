@@ -88,40 +88,42 @@ class MassSeerGUI:
                     
                     if self.load_toy_dataset:
                         self.workflow = "xic_data"
+                        st.session_state.WELCOME_PAGE_STATE = False
                     elif self.osw_file_path is not None and self.sqmass_file_path_input is not None:
                         self.workflow = "xic_data"
+                        st.session_state.WELCOME_PAGE_STATE = False
                     
-                with self.tab2:
+                # with self.tab2:
                     
-                    st.write("This workflow is designed for raw mass spectrometry data. For example .mzML files generated from a DIA experiment.")
+                #     st.write("This workflow is designed for raw mass spectrometry data. For example .mzML files generated from a DIA experiment.")
 
-                    st.title("Raw Targeted Data Extraction")
+                #     st.title("Raw Targeted Data Extraction")
 
-                    self.load_toy_dataset = st.button('Load Raw Targeted Data Extraction Example', on_click=self.clicked , args=['load_toy_dataset'])
+                #     self.load_toy_dataset = st.button('Load Raw Targeted Data Extraction Example', on_click=self.clicked , args=['load_toy_dataset'])
                     
-                    if self.load_toy_dataset:
-                        self.workflow = "raw_data"
+                #     if self.load_toy_dataset:
+                #         self.workflow = "raw_data"
 
-                    st.subheader("Input Transition List")
-                    self.transition_list_file_path = st.text_input("Enter file path", "*.pqp / *.tsv", key='raw_data_transition_list')
+                #     st.subheader("Input Transition List")
+                #     self.transition_list_file_path = st.text_input("Enter file path", "*.pqp / *.tsv", key='raw_data_transition_list')
 
-                    st.subheader("Input Raw file")
-                    self.raw_file_path_input = st.text_input("Enter file path", "*.mzML", key='raw_data_file_path')
+                #     st.subheader("Input Raw file")
+                #     self.raw_file_path_input = st.text_input("Enter file path", "*.mzML", key='raw_data_file_path')
 
-                    # Tabs for different data workflows
-                    st.subheader("Input Search Results (Optional)")
-                    self.raw_data_osw, self.raw_data_diann = st.tabs(["OpenSwath", "DIA-NN"])
-                    with self.raw_data_osw:
-                        self.osw_file_path = st.text_input("Enter file path of the PyProphet scored OSW file", "*.osw", key='raw_data_osw_file_pat')
+                #     # Tabs for different data workflows
+                #     st.subheader("Input Search Results (Optional)")
+                #     self.raw_data_osw, self.raw_data_diann = st.tabs(["OpenSwath", "DIA-NN"])
+                #     with self.raw_data_osw:
+                #         self.osw_file_path = st.text_input("Enter file path of the PyProphet scored OSW file", "*.osw", key='raw_data_osw_file_pat')
 
-                    with self.raw_data_diann:
-                        st.subheader("DIA-NN")
-                        self.diann_report_file_path_input = st.text_input("Enter file path of DIA-NNs report file", "*.tsv", key='diann_report_file_path')
+                #     with self.raw_data_diann:
+                #         st.subheader("DIA-NN")
+                #         self.diann_report_file_path_input = st.text_input("Enter file path of DIA-NNs report file", "*.tsv", key='diann_report_file_path')
                         
-                    self.begin_button = st.button('Begin', on_click=self.clicked , args=['begin'])
+                #     self.begin_button = st.button('Begin', on_click=self.clicked , args=['begin'])
                     
-                    if self.begin_button:
-                        self.workflow = "raw_data"
+                #     if self.begin_button:
+                #         self.workflow = "raw_data"
 
         return self
 

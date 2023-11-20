@@ -23,6 +23,8 @@ OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
 ###########################
 ## Main Container Window
 
+st.session_state.WELCOME_PAGE_STATE = True
+
 massseer_gui = MassSeerGUI()
 massseer_gui.show_welcome_message()
 WELCOME_PAGE_STATE = True
@@ -36,6 +38,10 @@ st.sidebar.image(MASSSEER_LOGO)
 
 st.sidebar.divider()
 
+# print(f"Worflow: {massseer_gui.workflow}")
+# print(f"massseer_gui.osw_file_path: {massseer_gui.osw_file_path}")
+# print(f"massseer_gui.sqmass_file_path_input: {massseer_gui.sqmass_file_path_input}")
+
 if massseer_gui.workflow == "xic_data" and st.session_state.clicked['load_toy_dataset']:
     sqmass_file_path_input = os.path.join(dirname, '..', 'tests', 'test_data', 'xics')
     osw_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
@@ -48,7 +54,7 @@ if massseer_gui.workflow == "xic_data" and st.session_state.clicked['load_toy_da
     WELCOME_PAGE_STATE = False
 
 if massseer_gui.workflow == "xic_data" and massseer_gui.osw_file_path!="*.osw" and massseer_gui.sqmass_file_path_input!="*.sqMass" and not st.session_state.clicked['load_toy_dataset']:
-
+    print("here")
     massseer_gui.show_file_input_settings(massseer_gui.osw_file_path, massseer_gui.sqmass_file_path_input)
 
     # Remove welcome message container if dataset is loaded
