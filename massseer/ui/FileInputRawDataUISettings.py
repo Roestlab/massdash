@@ -6,6 +6,18 @@ import fnmatch
 from massseer.ui.BaseUISettings import BaseUISettings
 
 class FileInputRawDataUISettings(BaseUISettings):
+    """
+    Class to create the user interface for the FileInputXICDataUISettings.
+    
+    Attributes:
+        transition_list_file_path (streamlit.text_input): A text input field for the transition list file path.
+        raw_file_path_input (streamlit.text_input): A text input field for the raw file path.
+        feature_file_path (streamlit.text_input): A text input field for the search results output file path.
+        threads (int): Number of threads to use for processing the files.
+    
+    Methods:
+        create_ui: Creates the user interface for the FileInputXICDataUISettings.
+    """
     def __init__(self) -> None:
         """
         Initializes the FileInputRawDataUISettings class.
