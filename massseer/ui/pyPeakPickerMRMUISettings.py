@@ -4,12 +4,41 @@ import pyopenms as po
 from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
 class pyPeakPickerMRMUISettings:
+    """
+    A class representing the python based PeakPickerMRM peak picking UI settings for the MassSeerGUI.
+    
+    Attributes:
+        main_peak_picking_settings : PeakPickingSettings
+            The peak picking settings for the main chromatogram.
+        mslevels : str
+            The MS levels to consider for peak picking. Possible values are "ms1", "ms2", and "ms1ms2".
+        PeakPickerMRMParams : PeakPickerMRM_UI
+            The peak picking parameters for the pyOpenMS PeakPickerMRM algorithm.
+            
+    Methods:
+        create_ui : None
+            Creates the user interface for the pyPeakPickerMRMUISettings.
+    """
     def __init__(self, main_peak_picking_settings):
+        """
+        Initializes the pyPeakPickerMRMUISettings class.
+        
+        Args:
+            main_peak_picking_settings : PeakPickingSettings
+                The peak picking settings for the main chromatogram.
+        """
         self.main_peak_picking_settings = main_peak_picking_settings
         self.mslevels = "ms2"
         self.PeakPickerMRMParams = PeakPickerMRM_UI()
 
     def create_ui(self, plot_settings: ChromatogramPlotUISettings):
+        """
+        Creates the user interface for setting the algorithm parameters.
+        
+        Args:
+            plot_settings : ChromatogramPlotUISettings
+                The plot settings for the chromatogram.
+        """
         if not self.main_peak_picking_settings.peak_pick_on_displayed_chrom:
             with st.sidebar.expander("Advanced Settings"):
                 self.mslevels = st.selectbox("MS Levels", ["ms1", "ms2","ms1ms2"], index=1, help="MS levels to consider for peak picking.")
@@ -64,7 +93,6 @@ class PeakPickerMRM_UI:
     A class for setting peak picking parameters for pyOpenMS's PeakPickerMRM.
 
     Attributes:
-    -----------
     peak_picker : PeakPickerMRM object
         An instance of PeakPickerMRM class.
     use_gauss : bool
@@ -87,8 +115,17 @@ class PeakPickerMRM_UI:
         A string indicating whether to remove overlapping peaks.
     method : str
         A string indicating the method used for peak picking.
+        
+    Methods:
+    set_peak_picker_params : PeakPickerMRM_UI object
+        Set peak picking parameters for PeakPickerMRM.
+    __str__ : str
+        Return a string representation of the PeakPickerMRM parameters.
     """
     def __init__(self) -> None:
+        """
+        Initializes the PeakPickerMRM_UI class.
+        """
         self.peak_picker = po.PeakPickerMRM()
         self.use_gauss = False
         self.gauss_width = 30.0
@@ -106,7 +143,6 @@ class PeakPickerMRM_UI:
         Set peak picking parameters for PeakPickerMRM.
 
         Returns:
-        --------
         self : PeakPickerMRM_UI object
             Returns the instance of the PeakPickerMRM_UI class.
         """

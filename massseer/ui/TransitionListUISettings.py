@@ -2,6 +2,21 @@ import streamlit as st
 import numpy as np
 
 class TransitionListUISettings:
+    """
+    Class to create the user interface for the transition list.
+    
+    Attributes:
+        transition_list (str): A string indicating the transition list to use.
+        selected_protein (str): A string indicating the selected protein.
+        selected_peptide (str): A string indicating the selected peptide.
+        selected_charge (str): A string indicating the selected charge.
+        
+    Methods:
+        show_protein_selection: Displays a protein selection dropdown menu in the sidebar.
+        show_peptide_selection: Displays a peptide selection dropdown menu in the
+        show_charge_selection: Displays a charge selection dropdown menu in the sidebar, along with the precursor m/z value for the selected peptide and charge.
+        show_library_features: Displays the library intensity, retention time, and ion mobility for the selected peptide and charge in a sidebar expander.
+    """
     def __init__(self):
         """
         Initializes the TransitionListUISettings class with default values.
@@ -12,7 +27,7 @@ class TransitionListUISettings:
         self.selected_charge = ""
         if 'protein_list' not in st.session_state:   
             st.session_state['protein_list'] = []
-        
+
     def show_protein_selection(self, protein_list):
         """
         Displays a protein selection dropdown menu in the sidebar.

@@ -8,7 +8,6 @@ class MRMTransitionGroupPickerUISettings:
     Settings for the user interface of the MRMTransitionGroupPicker algorithm.
 
     Attributes:
-    -----------
     main_peak_picking_settings : PeakPickingSettings
         The peak picking settings for the main chromatogram.
     mslevels : str
@@ -21,14 +20,17 @@ class MRMTransitionGroupPickerUISettings:
         The polynomial order of the Savitzky-Golay filter, if `smoother` is "sgolay".
     gauss_width : float
         The width of the Gaussian filter, if `smoother` is "gauss".
+        
+    Methods:
+    create_ui : None
+        Creates the user interface for the MRMTransitionGroupPicker app.
     """
 
     def __init__(self, main_peak_picking_settings) -> None:
         """
         Initializes a new instance of the MRMTransitionGroupPickerUISettings class.
 
-        Parameters:
-        -----------
+        Args:
         main_peak_picking_settings : PeakPickingSettings
             The peak picking settings for the main chromatogram.
         """
@@ -43,8 +45,7 @@ class MRMTransitionGroupPickerUISettings:
         """
         Creates the user interface for the MRMTransitionGroupPicker app.
 
-        Parameters:
-        -----------
+        Args:
         plot_settings : ChromatogramPlotUISettings
             The plot settings for the chromatogram.
         """

@@ -9,23 +9,17 @@ class PeakPickingUISettings:
     A class representing the peak picking settings for the MassSeerGUI.
 
     Attributes:
-    -----------
     do_peak_picking : str
         The type of peak picking to perform. Defaults to 'none'.
     peak_pick_on_displayed_chrom : bool
         Whether to perform peak picking on the displayed chromatogram. Defaults to True.
-    mslevels : str
-        The MS levels to perform peak picking on. Defaults to 'ms2'.
-    PeakPickerMRMParams : PeakPickerMRM_UI
-        The peak picking parameters for MRM scans.
-    smoother : str
-        The type of smoothing to perform. Defaults to 'sgolay'.
-    sgolay_frame_length : int
-        The frame length for Savitzky-Golay smoothing. Defaults to 11.
-    sgolay_polynomial_order : int
-        The polynomial order for Savitzky-Golay smoothing. Defaults to 3.
-    gauss_width : float
-        The width of the Gaussian smoothing. Defaults to 30.0.
+    peak_picker_algo_settings : pyPeakPickerMRMUISettings/MRMTransitionGroupPickerUISettings
+    
+    Methods:
+    create_ui : None
+        Creates the user interface for the PeakPickingUISettings.
+    gety_settings : dict
+        Returns the current algorithm settings as a dictionary.
     """
     def __init__(self):
         self.do_peak_picking = 'none'
@@ -35,6 +29,10 @@ class PeakPickingUISettings:
     def create_ui(self, plot_settings: ChromatogramPlotUISettings):
         """
         Creates the user interface for setting the algorithm parameters.
+        
+        Args:
+        plot_settings : ChromatogramPlotUISettings
+            The plot settings for the chromatogram.
         """
         st.sidebar.divider()
         st.sidebar.title("Peak Picking")
