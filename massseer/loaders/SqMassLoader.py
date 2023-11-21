@@ -1,5 +1,4 @@
 
-from abc import ABC, abstractmethod
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.loaders.GenericLoader import GenericLoader
@@ -8,6 +7,12 @@ from massseer.loaders.OSWDataAccess import OSWDataAccess
 from typing import List, Dict, Union
 from os.path import basename
 import pandas as pd
+
+### Plotting
+from bokeh.plotting import show
+from bokeh.io import output_notebook
+from massseer.plotting.InteractivePlotter import InteractivePlotter
+from massseer.plotting.GenericPlotter import PlotConfig
 
 class SqMassLoader(GenericLoader):
 
@@ -105,6 +110,67 @@ class SqMassLoader(GenericLoader):
             out[t] = features
 
         return pd.concat(out).reset_index().drop('level_1', axis=1).rename(columns=dict(level_0='filename'))
+
+    def plotChromatogram(self,
+                        seq: str, 
+                        charge: int, 
+                        includeBoundaries: bool = True, 
+                        include_ms1: bool = False, 
+                        smooth: bool = True, 
+                        sgolay_polynomial_order: int = 3, 
+                        sgolay_frame_length: int = 11, 
+                        scale_intensity: bool = False) -> 'bokeh.plotting.figure.Figure':
+        '''
+        Plots a chromatogram for a given peptide sequence and charge state for a given run
+
+        Args:
+            loader (SqMassLoader): Instance of SqMassLoader
+            seq (str): Peptide sequence
+            charge (int): Charge state
+            includeBoundaries (bool, optional): Whether to include peak boundaries. Defaults to True.
+            include_ms1 (bool, optional): Whether to include MS1 data. Defaults to False.
+            smooth (bool, optional): Whether to smooth the chromatogram. Defaults to True.
+            sgolay_polynomial_order (int, optional): Order of the polynomial to use for smoothing. Defaults to 3.
+            sgolay_frame_length (int, optional): Frame length to use for smoothing. Defaults to 11.
+            scale_intensity (bool, optional): Whether to scale the intensity of the chromatogram such that all chromatograms are individually normalized to 1. Defaults to False.
+        Returns: 
+            bokeh.plotting.figure.Figure: Bokeh figure object
+        '''
+
+        ## TODO allow plotting of multiple chromatograms
+        if len(self.transitionFiles_str) > 1:
+            raise NotImplementedError("Only one transition file is supported")
+        
+        # Initiate Plotting in Jupyter Notebook
+        output_notebook()
+
+        # Load the peptide sequence and charge state into the SqlLoader
+        # Take the transitions from the first instance of the dictionary returned by the loadTransitionGroupFeature function since there is only run
+        transitionGroupFeatures = list(self.loadTransitionGroupFeature(seq, charge).values())[0]
+        transitionGroup = list(self.loadTransitionGroups(seq, charge).values())[0]
+
+        # Create an instance of the InteractivePlotter class and set appropriate config
+        pc = PlotConfig()
+        pc.include_ms1 = include_ms1
+        if smooth:
+            pc.smoothing_dict = {'type': 'sgolay', 'sgolay_polynomial_order': sgolay_polynomial_order, 'sgolay_frame_length': sgolay_frame_length}
+        else:
+            pc.smoothing_dict = {'type': 'none'}
+        pc.scale_intensity = scale_intensity
+
+        plotter = InteractivePlotter(pc)
+
+        # Plot the chromatogram data
+        fig = plotter.plot(transitionGroup)
+
+        # Add boundaries to the plot
+        if includeBoundaries:
+            fig = plotter.add_peak_boundaries(fig, transitionGroupFeatures)
+
+        show(fig)
+
+        return fig
+
 
     def __str__(self):
         return f"SqMassLoader(rsltsFile={self.rsltsFile_str}, transitionFiles={self.transitionFiles_str}"
