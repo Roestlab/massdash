@@ -72,7 +72,6 @@ class SqMassLoader(GenericLoader):
             transition_chroms = t.getDataForChromatogramsFromNativeIds(metaInfo['TRANSITION_ID'], metaInfo['ANNOTATION'])
 
             ### Get Precursor chromatogram IDs
-            print(metaInfo)
             prec_chrom_ids = t.getPrecursorChromIDs(metaInfo['PRECURSOR_ID'])
             precursor_chroms = t.getDataForChromatograms(prec_chrom_ids['chrom_ids'], prec_chrom_ids['native_ids'])
 

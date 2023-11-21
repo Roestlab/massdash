@@ -250,7 +250,11 @@ class OSWDataAccess:
         Returns:
             pandas.DataFrame: The transition information.
         """
-        return self.hashtable.loc[(fullpeptidename, charge)]
+        try:
+            return self.hashtable.loc[(fullpeptidename, charge)]
+        except KeyError:
+            print(f"Peptide {fullpeptidename} with charge {charge} not found.")
+            return pd.Series()
 
     def getPeptideTransitionInfo(self, fullpeptidename, charge):
         """
