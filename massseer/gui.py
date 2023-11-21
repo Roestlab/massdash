@@ -2,9 +2,6 @@ import os
 import streamlit as st
 from PIL import Image
 
-# Type hinting
-from typing import List
-
 # Internal UI modules
 from massseer.ui.MassSeerGUI import MassSeerGUI
 from massseer.server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
@@ -26,8 +23,8 @@ OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
 st.session_state.WELCOME_PAGE_STATE = True
 
 massseer_gui = MassSeerGUI()
-massseer_gui.show_welcome_message()
-WELCOME_PAGE_STATE = True
+if st.session_state.WELCOME_PAGE_STATE:
+    massseer_gui.show_welcome_message()
 
 
 ###########################
@@ -38,33 +35,37 @@ st.sidebar.image(MASSSEER_LOGO)
 
 st.sidebar.divider()
 
-# print(f"Worflow: {massseer_gui.workflow}")
-# print(f"massseer_gui.osw_file_path: {massseer_gui.osw_file_path}")
-# print(f"massseer_gui.sqmass_file_path_input: {massseer_gui.sqmass_file_path_input}")
-
-if massseer_gui.workflow == "xic_data" and st.session_state.clicked['load_toy_dataset']:
+if st.session_state.workflow == "xic_data" and st.session_state.clicked['load_toy_dataset_xic_data']:
     sqmass_file_path_input = os.path.join(dirname, '..', 'tests', 'test_data', 'xics')
     osw_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
-
+    
     massseer_gui.show_file_input_settings(osw_file_path, sqmass_file_path_input)
-
+    
     # Remove welcome message container if dataset is loaded
     massseer_gui.welcome_container.empty()
 
-    WELCOME_PAGE_STATE = False
+    st.session_state.WELCOME_PAGE_STATE = False
+    
+elif st.session_state.workflow == "raw_data" and st.session_state.clicked['load_toy_dataset_raw_data']:
+    st.write("In development, coming soon!")
+    pass
 
-if massseer_gui.workflow == "xic_data" and massseer_gui.osw_file_path!="*.osw" and massseer_gui.sqmass_file_path_input!="*.sqMass" and not st.session_state.clicked['load_toy_dataset']:
-    print("here")
+if st.session_state.workflow == "xic_data" and massseer_gui.osw_file_path!="*.osw" and massseer_gui.sqmass_file_path_input!="*.sqMass" and not st.session_state.clicked['load_toy_dataset_xic_data']:
+
     massseer_gui.show_file_input_settings(massseer_gui.osw_file_path, massseer_gui.sqmass_file_path_input)
 
     # Remove welcome message container if dataset is loaded
     massseer_gui.welcome_container.empty()
     
-    WELCOME_PAGE_STATE = False
+    st.session_state.WELCOME_PAGE_STATE = False
 
-if massseer_gui.workflow == "xic_data" and not WELCOME_PAGE_STATE and  massseer_gui.file_input_settings.osw_file_path is not None and massseer_gui.file_input_settings.sqmass_file_path_input is not None:
+if st.session_state.workflow == "xic_data" and not st.session_state.WELCOME_PAGE_STATE and massseer_gui.file_input_settings is not None:
     show_xic_exp = ExtractedIonChromatogramAnalysisServer(massseer_gui)
     show_xic_exp.main()
+    
+if st.session_state.workflow == "raw_data" and not st.session_state.WELCOME_PAGE_STATE:
+    st.write("In development, coming soon!")
+    pass
 
 # OpenMS Siderbar Bottom Logo
 st.sidebar.image(OPENMS_LOGO)

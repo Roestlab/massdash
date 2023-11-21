@@ -48,6 +48,22 @@ def get_base64_of_bin_file(png_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
+def copy_attributes(source_instance, destination_instance):
+    """
+    Copies attributes from the source instance to the destination instance.
+
+    Args:
+        source_instance: The object from which attributes will be copied.
+        destination_instance: The object to which attributes will be copied.
+
+    Returns:
+        None
+    """
+    # Iterate over attributes of the source instance
+    for attr_name, attr_value in vars(source_instance).items():
+        # Set the attribute in the destination instance
+        setattr(destination_instance, attr_name, attr_value)
+
 class conditional_decorator(object):
     """
     A decorator that applies another decorator to a function only if a condition is met.

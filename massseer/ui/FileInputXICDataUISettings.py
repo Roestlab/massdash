@@ -26,7 +26,7 @@ class FileInputXICDataUISettings(BaseUISettings):
         """
         st.sidebar.subheader("Input OSW file")
         self.osw_file_path = st.sidebar.text_input("Enter file path", feature_file_path, key='osw_file_path_sidebar', help="Path to the OpenSwathWorkflow output file (*.osw)")
-        st.sidebar.subheader("Input sqMass file")
+        st.sidebar.subheader("Input sqMass (file/directory)")
         self.sqmass_file_path_input = st.sidebar.text_input("Enter file path", xic_file_path, key='sqmass_file_path_input_sidebar', help="Path to the sqMass file (*.sqMass) or path to a directory containing sqMass files.")
 
     def get_sqmass_files(self, threads: int=1):
@@ -51,17 +51,17 @@ class FileInputXICDataUISettings(BaseUISettings):
             if not os.path.isdir(self.sqmass_file_path_input):
                 raise ValueError(f"Error: Directory {self.sqmass_file_path_input} does not exist!")
             
-            st.sidebar.subheader("sqMass file(s)")
+            # 1. Get the list of files in the directory
+            files_in_directory = os.listdir(self.sqmass_file_path_input)
+            
+            #2. Filter the files based on the *.sqMass file extension (case-insensitive)
+            files_in_directory = [filename for filename in files_in_directory if fnmatch.fnmatch(filename.lower(), '*.sqmass')]
+
+            # 3. Sort the filenames alphabetically
+            sorted_filenames = sorted(files_in_directory, reverse=False)
+            
+            st.sidebar.subheader(f"{len(sorted_filenames)} sqMass file(s)")
             with st.sidebar.expander("Advanced Settings"):
-                # 1. Get the list of files in the directory
-                files_in_directory = os.listdir(self.sqmass_file_path_input)
-                
-                #2. Filter the files based on the *.sqMass file extension (case-insensitive)
-                files_in_directory = [filename for filename in files_in_directory if fnmatch.fnmatch(filename.lower(), '*.sqmass')]
-
-                # 3. Sort the filenames alphabetically
-                sorted_filenames = sorted(files_in_directory, reverse=False)
-
                 # Create a selection box in the sidebar
                 selected_sorted_filenames = st.multiselect("sqMass files", sorted_filenames, sorted_filenames, help="Select the sqMass files to process")    
 
