@@ -26,6 +26,7 @@ class SqMassLoader(GenericLoader):
 
     def loadTransitionGroupsDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         metaInfo = self.rsltsFile.getPeptideTransitionInfoShort(pep_id, charge)
+        columns=['run_name', 'rt', 'intensity', 'annotation']
         if metaInfo.empty:
             return pd.DataFrame(columns=columns)
         out = {}
@@ -110,7 +111,7 @@ class SqMassLoader(GenericLoader):
             features = features[['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']]
             out[t] = features
 
-        return pd.concat(out).reset_index().drop('level_1', axis=1).rename(columns=dict(level_0='filename'))
+        return pd.concat(out).reset_index().drop(columns=['PRECURSOR_ID', 'RUN_ID']).rename(columns=dict(level_0='filename'))
 
     def __str__(self):
         return f"SqMassLoader(rsltsFile={self.rsltsFile_str}, transitionFiles={self.transitionFiles_str}"

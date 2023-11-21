@@ -58,9 +58,59 @@ class OSWDataAccess:
         self.c = self.conn.cursor()
         
         # hashtable, each run is its own data 
-        self.initializeHashTable()
+        self._initializePeptideHashtable()
+        self._initializeFeatureHashtable()
+        self._initializeRunHashtable()
 
-    def initializeHashTable(self):
+    def _initializeRunHashtable(self):
+        stmt = "select * from run"
+        self.runHashTable = pd.read_sql(stmt, self.conn)
+
+    def _initializeFeatureHashtable(self):
+
+        if check_sqlite_table(self.conn, "SCORE_MS2"):
+            join_score_ms2 = "INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID"
+            select_score_ms2 = """SCORE_MS2.SCORE AS ms2_dscore,
+                SCORE_MS2.RANK AS peakgroup_rank,
+                SCORE_MS2.QVALUE AS ms2_mscore,"""
+        else:
+            join_score_ms2 = ""
+            select_score_ms2 = ""
+
+        if check_sqlite_table(self.conn, "SCORE_IPF"):
+            join_score_ipf = "INNER JOIN SCORE_IPF ON SCORE_IPF.FEATURE_ID = FEATURE.ID"
+            select_score_ipf = """SCORE_IPF.QVALUE AS ipf_mscore,"""
+        else:
+            join_score_ipf = ""
+            select_score_ipf = ""
+        
+        if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
+            select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
+        else:
+            select_feature_exp_im = "-1 AS IM,"
+        
+        stmt = f"""SELECT 
+                FEATURE.ID AS feature_id,
+                PRECURSOR_ID,
+                FEATURE_MS2.AREA_INTENSITY AS areaIntensity,
+                FEATURE_MS2.APEX_INTENSITY AS Intensity,
+                FEATURE.EXP_RT AS RT,
+                FEATURE.LEFT_WIDTH AS leftWidth,
+                FEATURE.RIGHT_WIDTH AS rightWidth,
+                {select_feature_exp_im}
+                {select_score_ms2}
+                {select_score_ipf}
+                RUN_ID
+                FROM FEATURE
+                INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
+                {join_score_ms2}
+                {join_score_ipf}"""
+
+        tmp = pd.read_sql(stmt, self.conn)
+        self.featureHash = tmp.set_index(['RUN_ID', 'PRECURSOR_ID']).sort_index()
+
+    def _initializePeptideHashtable(self):
         '''
         Initialize the which maps peptide precursor to its ID
         '''
@@ -278,55 +328,43 @@ class OSWDataAccess:
 
         return data
 
-    def getRunPrecursorPeakBoundaries(self, run_basename_wo_ext, fullpeptidename, charge):
 
-        if check_sqlite_table(self.conn, "SCORE_MS2"):
-            join_score_ms2 = "INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID"
-            select_score_ms2 = """SCORE_MS2.SCORE AS ms2_dscore,
-                SCORE_MS2.RANK AS peakgroup_rank,
-                SCORE_MS2.QVALUE AS ms2_mscore,"""
-        else:
-            join_score_ms2 = ""
-            select_score_ms2 = ""
-
-        if check_sqlite_table(self.conn, "SCORE_IPF"):
-            join_score_ipf = "INNER JOIN SCORE_IPF ON SCORE_IPF.FEATURE_ID = FEATURE.ID"
-            select_score_ipf = """SCORE_IPF.QVALUE AS ipf_mscore,"""
-        else:
-            join_score_ipf = ""
-            select_score_ipf = ""
-        
-        if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
-            select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
-        else:
-            select_feature_exp_im = "-1 AS IM,"
-        
-        stmt = f"""SELECT 
-                PEPTIDE.MODIFIED_SEQUENCE AS FullPeptideName,
-                PRECURSOR.CHARGE AS Charge,
-                FEATURE.ID AS feature_id,
-                FEATURE_MS2.AREA_INTENSITY AS areaIntensity,
-                FEATURE_MS2.APEX_INTENSITY AS Intensity,
-                FEATURE.EXP_RT AS RT,
-                FEATURE.LEFT_WIDTH AS leftWidth,
-                FEATURE.RIGHT_WIDTH AS rightWidth,
-                {select_feature_exp_im}
-                {select_score_ms2}
-                {select_score_ipf}
-                PRECURSOR.DECOY AS decoy
-                FROM (SELECT * FROM PRECURSOR WHERE CHARGE = {charge}) AS PRECURSOR
-                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                INNER JOIN (SELECT * FROM PEPTIDE WHERE MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
-                INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
-                INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
-                INNER JOIN (SELECT * FROM RUN WHERE FILENAME LIKE '%{run_basename_wo_ext}%') AS RUN ON RUN.ID = FEATURE.RUN_ID
-                {join_score_ms2}
-                {join_score_ipf}"""
-
-        data = pd.read_sql(stmt, self.conn)
-
-        return data
     
+
+
+    def runIDFromRunName(self, run_name):
+        if self.runHashTable is None:
+            self.initializeRunHashTable()
+        try:
+            return self.runHashTable[self.runHashTable['FILENAME'].str.contains(run_name)]['ID'].values[0]
+        except KeyError:
+            print(f"Run name {run_name} not found.")
+            return None
+
+    def getPrecursorIDFromPeptideAndCharge(self, fullpeptidename, charge):
+        try:
+            return self.hashtable.loc[fullpeptidename, charge]['PRECURSOR_ID']
+        except KeyError:
+            print(f"Peptide {fullpeptidename} with charge {charge} not found.")
+            return None
+
+    def getRunPrecursorPeakBoundaries(self, run_basename_wo_ext, fullpeptidename, charge):
+        columns = ['feature_id', 'RUN_ID', 'PRECURSOR_ID', 'areaIntensity', 'Intensity', 'RT', 'leftWidth', 'rightWidth', 'IM', 'ms2_dscore', 'peakgroup_rank', 'ms2_mscore', 'ipf_mscore']
+        run_id = self.runIDFromRunName(run_basename_wo_ext)
+        precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
+        
+        if run_id is None or precursor_id is None:
+            tmp = pd.DataFrame(columns=columns)
+            tmp = tmp.set_index(['RUN_ID', 'PRECURSOR_ID'])
+            return tmp
+        try:
+            return self.featureHash.loc[run_id, precursor_id]
+        except KeyError:
+            print(f"Peptide {fullpeptidename} with charge {charge} not found in run {run_basename_wo_ext}.")
+            tmp = pd.DataFrame(columns=columns)
+            tmp = tmp.set_index(['RUN_ID', 'PRECURSOR_ID'])
+            return tmp
+
     def get_top_rank_precursor_features_across_runs(self):
         """
         Retrieves the top ranking precursor features across runs from the database.
