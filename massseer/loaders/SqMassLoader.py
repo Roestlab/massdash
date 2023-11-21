@@ -5,7 +5,7 @@ from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.loaders.GenericLoader import GenericLoader
 from massseer.loaders.SqMassDataAccess import SqMassDataAccess
 from massseer.loaders.OSWDataAccess import OSWDataAccess
-from typing import List, Dict
+from typing import List, Dict, Union
 from os.path import basename
 import pandas as pd
 
@@ -16,13 +16,10 @@ class SqMassLoader(GenericLoader):
     Inherits from GenericLoader
     '''
 
-    def __init__(self, transitionFiles: List[str], rsltsFile: str):
-        self.transitionFiles = [SqMassDataAccess(f) for f in transitionFiles]
-        self.rsltsFile = OSWDataAccess(rsltsFile)
-
-        self.transitionFiles_str = transitionFiles
-        self.rsltsFile_str = rsltsFile
-
+    def __init__(self, transitionFiles: Union[str, List[str]], rsltsFile: str):
+        super().__init__(rsltsFile, transitionFiles)
+        self.transitionFiles = [SqMassDataAccess(f) for f in self.transitionFiles_str]
+        self.rsltsFile = OSWDataAccess(self.rsltsFile_str)
 
     def loadTransitionGroupsDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         metaInfo = self.rsltsFile.getPeptideTransitionInfoShort(pep_id, charge)

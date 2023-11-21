@@ -1,17 +1,21 @@
 from abc import ABC, abstractmethod
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from typing import List
+from typing import List, Union
 
 class GenericLoader(ABC):
     ''' 
     Abstract class for loading Chromatograms and peak features
     Classes which inherit from this should contain one results file and one transition file
     '''
-    def __init__(self, rsltsFile: str, transitionFiles: List[str]):
+    def __init__(self, rsltsFile: str, transitionFiles: Union[str, List[str]]):
         self.rsltsFile_str = rsltsFile
-        self.transitionFiles_str = transitionFiles
+        if isinstance(transitionFiles, str):
+            self.transitionFiles_str = [transitionFiles]
+        else:
+            self.transitionFiles_str = transitionFiles
 
+        # These properties will be set by the child class
         self.rsltsFile = None
         self.tranisitonFiles = None
 
