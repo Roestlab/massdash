@@ -3,12 +3,21 @@ import streamlit as st
 # Internal
 from massseer.ui.util import clicked
 
-class ExtractedIonChromatogramAnalysisFormUI:   
+class ExtractedIonChromatogramAnalysisFormUI:
+    """
+    Class to create the user interface for the ExtractedIonChromatogramAnalysisForm.
+    
+    Attributes:
+        osw_file_path (streamlit.text_input): A text input field for the OpenSwath file path.
+        sqmass_file_path_input (streamlit.text_input): A text input field for the sqMass file path.
+        
+    Methods:
+        create_ui: Creates the user interface for the ExtractedIonChromatogramAnalysisForm.
+    """
     def __init__(self) -> None:
         """
         Initializes the ExtractedIonChromatogramAnalysisFormUI class.
         """
-        self.load_toy_dataset = None
         self.osw_file_path = None
         self.sqmass_file_path_input = None
         

@@ -4,6 +4,18 @@ import streamlit as st
 from massseer.ui.util import clicked
 
 class RawTargetedExtractionAnalysisFormUI:   
+    """
+    Class to create the user interface for the RawTargetedExtractionAnalysisForm.
+    
+    Attributes:
+        transition_list_file_path (streamlit.text_input): A text input field for the transition list file path.
+        raw_file_path_input (streamlit.text_input): A text input field for the raw file path.
+        osw_file_path_raw_workflow (streamlit.text_input): A text input field for the PyProphet scored OSW file path.
+        diann_report_file_path_input (streamlit.text_input): A text input field for the DIA-NN report file path.
+        
+    Methods:
+        create_ui: Creates the user interface for the RawTargetedExtractionAnalysisForm.
+    """
     def __init__(self) -> None:
         """
         Initializes the RawTargetedExtractionAnalysisFormUI class.

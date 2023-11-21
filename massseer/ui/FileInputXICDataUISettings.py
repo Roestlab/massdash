@@ -6,6 +6,19 @@ import fnmatch
 from massseer.ui.BaseUISettings import BaseUISettings
 
 class FileInputXICDataUISettings(BaseUISettings):
+    """
+    Class to create the user interface for the FileInputXICDataUISettings.
+    
+    Attributes:
+        osw_file_path (streamlit.text_input): A text input field for the OpenSwath file path.
+        sqmass_file_path_input (streamlit.text_input): A text input field for the sqMass file path.
+        sqmass_file_path_list (list): List of full file paths to *.sqMass files in the directory or the file itself.
+        threads (int): Number of threads to use for processing the files.
+        
+    Methods:
+        create_ui: Creates the user interface for the FileInputXICDataUISettings.
+        get_sqmass_files: Given a path to a directory or a file, returns a list of full file paths to *.sqMass files in the directory or the file itself.
+    """
     def __init__(self) -> None:
         """
         Initializes the FileInputXICDataUISettings class.
@@ -20,7 +33,7 @@ class FileInputXICDataUISettings(BaseUISettings):
         """
         Creates the sidebar for the input file paths.
 
-        Parameters:
+        Args:
         feature_file_path (str): Path to the OpenSwathWorkflow output file (*.osw)
         xic_file_path (str): Path to the sqMass file (*.sqMass) or path to a directory containing sqMass files.
         """
@@ -36,7 +49,7 @@ class FileInputXICDataUISettings(BaseUISettings):
         If the input path is a file, the function returns a list containing only the input file path.
         The function also displays a slider to select the number of threads to use for processing the files.
         
-        Parameters:
+        Args:
         sqmass_file_path_input (str): Path to a directory or a file
         
         Returns:

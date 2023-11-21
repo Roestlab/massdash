@@ -8,6 +8,17 @@ from massseer.ui.RawTargetedExtractionAnalysisFormUI import RawTargetedExtractio
 from massseer.util import copy_attributes
 
 class MassSeerGUI:
+    """
+    Class to create the user interface for MassSeer.
+    
+    Attributes:
+        welcome_container (streamlit.container): A container for the welcome message.
+        file_input_settings (FileInputXICDataUISettings/FileInputRawDataUISettings): A container for the file input settings.
+        
+    Methods:
+        show_welcome_message: Displays a welcome message and input fields for OpenSwath and DIA-NN workflows.
+        show_file_input_settings: Displays the file input settings.
+    """
     def __init__(self):
         """
         Initializes the MassSeerGUI class.
