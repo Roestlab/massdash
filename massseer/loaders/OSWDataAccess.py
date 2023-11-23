@@ -156,7 +156,7 @@ class OSWDataAccess:
         else:
             stmt = f'''
             SELECT TRANSITION_ID,
-                    TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE AS ANNOTATION,
+                    TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE AS ANNOTATION
                     FROM TRANSITION_PRECURSOR_MAPPING 
                     INNER JOIN TRANSITION ON TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID = TRANSITION.ID
                     WHERE TRANSITION.DETECTING = 1 and PRECURSOR_ID = {precursor_id}
@@ -164,14 +164,13 @@ class OSWDataAccess:
         return pd.read_sql(stmt, self.conn)
 
     def _runIDFromRunName(self, run_name):
-        try:
-            return self.runHashTable[self.runHashTable['FILENAME'].str.contains(run_name)]['ID'].values[0]
-        except KeyError:
+        df =  self.runHashTable[self.runHashTable['FILENAME'].str.contains(run_name, regex=False)]['ID']
+        if df.empty:
             print(f"Run name {run_name} not found.")
             return None
+        else:
+            return df.values[0]
    
-
-
     #### PUBLIC ACCESSORS ####
     def getPrecursorIDFromPeptideAndCharge(self, fullpeptidename: str, charge: int) -> int:
         try:
@@ -181,14 +180,12 @@ class OSWDataAccess:
             return None
 
     def getTransitionGroupFeaturesDf(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> pd.DataFrame:
-        columns = ['feature_id', 'RUN_ID', 'PRECURSOR_ID', 'areaIntensity', 'Intensity', 'RT', 'leftWidth', 'rightWidth', 'IM', 'ms2_dscore', 'peakgroup_rank', 'ms2_mscore', 'ipf_mscore']
+        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']
         run_id = self._runIDFromRunName(run_basename_wo_ext)
         precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
         
         if run_id is None or precursor_id is None:
-            tmp = pd.DataFrame(columns=columns)
-            tmp = tmp.set_index(['RUN_ID', 'PRECURSOR_ID'])
-            return tmp
+            return pd.DataFrame(columns=columns)
         else:
             return self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
 
@@ -217,7 +214,7 @@ class OSWDataAccess:
         if precursor_id is not None:
             return self._getTransitionsFromPrecursorId(precursor_id)
         else:
-            return None
+            return pd.DataFrame(columns=['TRANSITION_ID', 'ANNOTATION'])
 
     ##### UNUSED #####
     def get_top_rank_precursor_features_across_runs(self):
