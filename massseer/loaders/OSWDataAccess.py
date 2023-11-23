@@ -59,15 +59,13 @@ class OSWDataAccess:
         
         # hashtable, each run is its own data 
         self._initializePeptideHashtable()
-        self._initializeFeatureHashtable()
         self._initializeRunHashtable()
 
     def _initializeRunHashtable(self):
         stmt = "select * from run"
         self.runHashTable = pd.read_sql(stmt, self.conn)
 
-    def _initializeFeatureHashtable(self):
-
+    def getFeaturesFromPrecursorIdAndRun(self, run_id, precursor_id):
         if check_sqlite_table(self.conn, "SCORE_MS2"):
             join_score_ms2 = "INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID"
             select_score_ms2 = """SCORE_MS2.SCORE AS ms2_dscore,
@@ -105,55 +103,49 @@ class OSWDataAccess:
                 INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
                 INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
                 {join_score_ms2}
-                {join_score_ipf}"""
+                {join_score_ipf}
+                WHERE RUN_ID = {run_id} AND PRECURSOR_ID = {precursor_id}
+                """
 
-        tmp = pd.read_sql(stmt, self.conn)
-        self.featureHash = tmp.set_index(['RUN_ID', 'PRECURSOR_ID']).sort_index()
+        return pd.read_sql(stmt, self.conn)
 
     def _initializePeptideHashtable(self):
-        '''
-        Initialize the which maps peptide precursor to its ID
-        '''
+        stmt = '''
+            SELECT MODIFIED_SEQUENCE, CHARGE, PRECURSOR_ID 
+            FROM PRECURSOR
+            INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+            INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID'''
+        tmp = pd.read_sql(stmt, self.conn)
+        self.peptideHash = tmp.set_index(['MODIFIED_SEQUENCE', 'CHARGE'])
+
+    def _initialize_indices(self):
         # Create indices if they do not exist
         idx_query = ''' CREATE INDEX IF NOT EXISTS idx_transition_precursor_mapping_transition_id on TRANSITION_PRECURSOR_MAPPING(Transition_id);'''
         idx_query += ''' CREATE INDEX IF NOT EXISTS idx_transition_precursor_mapping_precursor_id on TRANSITION_PRECURSOR_MAPPING(Precursor_id);'''
         self.conn.executescript(idx_query)
 
+    def getTransitionsFromPrecursorId(self, precursor_id):
+        '''
+        Initialize the which maps peptide precursor to its ID
+        '''
         # Older OSW files (<v2.4) do not have the ANNOTATION column in the TRANSITION table
         if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"):
-            stmt = '''
-            SELECT DISTINCT GROUP_CONCAT(TRANSITION_ID, ';') AS TRANSITION_ID, 
-                    GROUP_CONCAT(ANNOTATION, ';') AS ANNOTATION,
-                    TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID as PRECURSOR_ID,
-                    PRECURSOR.CHARGE as PRECURSOR_CHARGE,
-                    PEPTIDE.MODIFIED_SEQUENCE as MODIFIED_SEQUENCE
+            stmt = f'''
+            SELECT  TRANSITION_ID,
+                    ANNOTATION 
                     FROM TRANSITION_PRECURSOR_MAPPING 
                     INNER JOIN TRANSITION ON TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID= TRANSITION.ID
-                    INNER JOIN PRECURSOR ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                    INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
-                    INNER JOIN PEPTIDE ON PEPTIDE_ID = PEPTIDE.ID 
-                    WHERE TRANSITION.DETECTING = 1
-                    GROUP BY TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID
+                    WHERE TRANSITION.DETECTING = 1 and PRECURSOR_ID = {precursor_id}
                 '''
         else:
             stmt = '''
-            SELECT DISTINCT GROUP_CONCAT(TRANSITION_ID, ';') AS TRANSITION_ID, 
-                GROUP_CONCAT(TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE, ';') AS ANNOTATION,
-                    TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID as PRECURSOR_ID,
-                    PRECURSOR.CHARGE as PRECURSOR_CHARGE,
-                    PEPTIDE.MODIFIED_SEQUENCE as MODIFIED_SEQUENCE
+            SELECT TRANSITION_ID,
+                    TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE AS ANNOTATION,
                     FROM TRANSITION_PRECURSOR_MAPPING 
-                    INNER JOIN TRANSITION ON TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID= TRANSITION.ID
-                    INNER JOIN PRECURSOR ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                    INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
-                    INNER JOIN PEPTIDE ON PEPTIDE_ID = PEPTIDE.ID
-                    GROUP BY TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID
+                    INNER JOIN TRANSITION ON TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID = TRANSITION.ID
+                    WHERE TRANSITION.DETECTING = 1 and PRECURSOR_ID = {precursor_id}
             '''
-
-        tmp = pd.read_sql(stmt, self.conn)
-        tmp['TRANSITION_ID'] = tmp['TRANSITION_ID'].str.split(';')
-        tmp['ANNOTATION'] = tmp['ANNOTATION'].str.split(';')
-        self.hashtable = tmp.set_index(['MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE'])
+        return pd.read_sql(stmt, self.conn)
    
     def getProteinTable(self, include_decoys=False):
         """
@@ -254,7 +246,7 @@ class OSWDataAccess:
             return self.hashtable.loc[(fullpeptidename, charge)]
         except KeyError:
             print(f"Peptide {fullpeptidename} with charge {charge} not found.")
-            return pd.Series()
+            return None
 
     def getPeptideTransitionInfo(self, fullpeptidename, charge):
         """
@@ -332,10 +324,6 @@ class OSWDataAccess:
 
         return data
 
-
-    
-
-
     def runIDFromRunName(self, run_name):
         if self.runHashTable is None:
             self.initializeRunHashTable()
@@ -346,8 +334,9 @@ class OSWDataAccess:
             return None
 
     def getPrecursorIDFromPeptideAndCharge(self, fullpeptidename, charge):
+        
         try:
-            return self.hashtable.loc[fullpeptidename, charge]['PRECURSOR_ID']
+            return self.peptideHash.loc[fullpeptidename, charge]['PRECURSOR_ID']
         except KeyError:
             print(f"Peptide {fullpeptidename} with charge {charge} not found.")
             return None
@@ -362,7 +351,7 @@ class OSWDataAccess:
             tmp = tmp.set_index(['RUN_ID', 'PRECURSOR_ID'])
             return tmp
         try:
-            return self.featureHash.loc[run_id, precursor_id]
+            return self.getFeaturesFromPrecursorIdAndRun(run_id, precursor_id)
         except KeyError:
             print(f"Peptide {fullpeptidename} with charge {charge} not found in run {run_basename_wo_ext}.")
             tmp = pd.DataFrame(columns=columns)
