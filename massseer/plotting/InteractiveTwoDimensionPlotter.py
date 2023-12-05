@@ -1,10 +1,11 @@
 from typing import List, Tuple
 import numpy as np
 import pandas as pd
-from bokeh.models import HoverTool, CrosshairTool
+from bokeh.models import HoverTool, CrosshairTool, Title
 from bokeh.plotting import figure
 from matplotlib import cm
 
+from massseer.plotting.GenericPlotter import PlotConfig
 
 def rgb_to_hex(rgb):
     return "#{:02x}{:02x}{:02x}".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
@@ -22,7 +23,7 @@ class InteractiveTwoDimensionPlotter:
     AFMHOT_CMAP = [rgb_to_hex(cm.afmhot_r(i)[:3]) for i in range(256)]
 
 
-    def __init__(self, df: pd.DataFrame):
+    def __init__(self, df: pd.DataFrame, config: PlotConfig):
         """
         Initialize the InteractiveTwoDimensionPlotter instance.
 
@@ -31,8 +32,9 @@ class InteractiveTwoDimensionPlotter:
             The input DataFrame containing the data for plotting.
         """
         self.df = df
+        self.config = config
 
-    def plot(self, aggregate: bool = False):
+    def plot(self):
         """
         Plot the data.
 
@@ -40,7 +42,7 @@ class InteractiveTwoDimensionPlotter:
         - aggregate: bool, optional (default=False)
             Whether to aggregate the data before plotting.
         """
-        if aggregate:
+        if self.config.aggregate_mslevels:
             plots = self.plot_aggregated_heatmap()
         else:
             plots = self.plot_individual_heatmaps()
@@ -50,7 +52,12 @@ class InteractiveTwoDimensionPlotter:
         """
         Plot a heatmap based on the provided DataFrame.
         """
-        arr = self.df.pivot_table(index='im', columns='rt', values='int', aggfunc=np.sum)
+        if self.config.type_of_heatmap == "m/z vs retention time":
+            arr = self.df.pivot_table(index='mz', columns='rt', values='int', aggfunc=np.sum)
+        elif self.config.type_of_heatmap == "m/z vs ion mobility":
+            arr = self.df.pivot_table(index='mz', columns='im', values='int', aggfunc=np.sum)
+        elif self.config.type_of_heatmap == "retention time vs ion mobility":
+            arr = self.df.pivot_table(index='im', columns='rt', values='int', aggfunc=np.sum)
 
         im_arr, rt_arr, dw_main, dh_main, rt_min, rt_max, im_min, im_max = self.get_plot_parameters(arr)
 
@@ -58,7 +65,18 @@ class InteractiveTwoDimensionPlotter:
 
         two_d_plots = []
         for (ms_level, Annotation, product_mz), group_df in self.df.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz']):
-            arr = group_df.pivot_table(index='im', columns='rt', values='int', aggfunc=np.sum)
+            if not self.config.include_ms1 and ms_level == 1:
+                continue
+            
+            if not self.config.include_ms2 and ms_level == 2:
+                continue
+            
+            if self.config.type_of_heatmap == "m/z vs retention time":
+                arr = group_df.pivot_table(index='mz', columns='rt', values='int', aggfunc=np.sum)
+            elif self.config.type_of_heatmap == "m/z vs ion mobility":
+                arr = group_df.pivot_table(index='mz', columns='im', values='int', aggfunc=np.sum)
+            elif self.config.type_of_heatmap == "retention time vs ion mobility":
+                arr = group_df.pivot_table(index='im', columns='rt', values='int', aggfunc=np.sum)
             arr = self.prepare_array(arr)
 
             title_text = f"MS{ms_level} | {Annotation} | {product_mz} m/z"
@@ -73,7 +91,17 @@ class InteractiveTwoDimensionPlotter:
         """
         Plot an aggregated heatmap based on the provided DataFrame.
         """
-        arr = self.df.pivot_table(index='im', columns='rt', values='int', aggfunc=np.sum)
+        if not self.config.include_ms1:
+            self.df = self.df[self.df['ms_level'] != 1]
+        if not self.config.include_ms2:
+            self.df = self.df[self.df['ms_level'] != 2]
+            
+        if self.config.type_of_heatmap == "m/z vs retention time":
+            arr = self.df.pivot_table(index='mz', columns='rt', values='int', aggfunc=np.sum)
+        elif self.config.type_of_heatmap == "m/z vs ion mobility":
+            arr = self.df.pivot_table(index='mz', columns='im', values='int', aggfunc=np.sum)
+        elif self.config.type_of_heatmap == "retention time vs ion mobility":
+            arr = self.df.pivot_table(index='im', columns='rt', values='int', aggfunc=np.sum)
 
         im_arr, rt_arr, dw_main, dh_main, rt_min, rt_max, im_min, im_max = self.get_plot_parameters(arr)
 
@@ -87,6 +115,14 @@ class InteractiveTwoDimensionPlotter:
         plot = self.create_heatmap_plot(title_text, arr, rt_min, rt_max, im_min, im_max, dw_main, dh_main, linked_crosshair, two_d_plots)
         two_d_plots.append(plot)
         return two_d_plots
+
+    def get_axis_titles(self) -> Tuple[str, str]:
+        if self.config.type_of_heatmap == "m/z vs retention time":
+            return "Retention time (s)", "m/z"
+        elif self.config.type_of_heatmap == "m/z vs ion mobility":
+            return "Ion mobility (1/K0)", "m/z"
+        elif self.config.type_of_heatmap == "retention time vs ion mobility":
+            return "Retention time (s)", "Ion mobility (1/K0)"
 
     def get_plot_parameters(self, arr: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, float, float, float, float, float, float]:
         """
@@ -158,7 +194,18 @@ class InteractiveTwoDimensionPlotter:
         - figure
             The created Bokeh figure.
         """
-        plot = figure(title=title_text, x_range=(rt_min, rt_max), y_range=(im_min, im_max))
+        x_axis_title, y_axis_title = self.get_axis_titles()
+        plot = figure(x_range=(rt_min, rt_max), y_range=(im_min, im_max), x_axis_label=x_axis_title, y_axis_label=y_axis_title)
+        
+        # Add title
+        if self.config.title is not None:
+            plot.title.text = self.config.title
+            plot.title.text_font_size = "16pt"
+            plot.title.align = "center"
+
+        if self.config.subtitle is not None:
+            # Create a subtitle
+            plot.add_layout(Title(text=self.config.subtitle + " | " + title_text, text_font_style="italic"), 'above')
 
         heatmap_img = plot.image(image=[arr], x=rt_min, y=im_min, dw=dw_main, dh=dh_main, palette=self.AFMHOT_CMAP)
 

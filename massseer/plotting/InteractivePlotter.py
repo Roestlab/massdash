@@ -400,9 +400,6 @@ class InteractivePlotter(GenericPlotter):
 
         p.sizing_mode = 'scale_width'
 
-        # Create a subtitle
-        p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
-
         # Create a legend
         legend = Legend()
 

@@ -94,4 +94,5 @@ class MassSeerGUI:
         elif st.session_state.workflow == "raw_data":
             self.file_input_settings = FileInputRawDataUISettings()
             self.file_input_settings.create_ui(transition_list_file_path, xic_file_path, feature_file_path)
+            self.file_input_settings.get_mzml_files()
         st.sidebar.divider()
