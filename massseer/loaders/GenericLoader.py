@@ -31,7 +31,7 @@ class GenericLoader(ABC):
         '''
         pass
     @abstractmethod
-    def loadTransitionGroupFeature(pep_id: str, charge: int) -> TransitionGroupFeature:
+    def loadTransitionGroupFeatures(pep_id: str, charge: int) -> TransitionGroupFeature:
         '''
         Loads a PeakFeature object from the results file
         Args:
