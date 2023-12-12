@@ -1,10 +1,9 @@
 
-from abc import ABC, abstractmethod
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.loaders.GenericLoader import GenericLoader
-from massseer.loaders.SqMassDataAccess import SqMassDataAccess
-from massseer.loaders.OSWDataAccess import OSWDataAccess
+from ..structs import TransitionGroup, TransitionGroupFeature
+from ._GenericLoader import GenericLoader
+from ._SqMassDataAccess import SqMassDataAccess
+from ._OSWDataAccess import OSWDataAccess
+
 from typing import List, Dict, Union
 from os.path import basename
 import pandas as pd

@@ -1,5 +1,7 @@
 import unittest
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+
+# Internal modules
+from massseer.structs import TransitionGroupFeature
 
 class TestTransitionGroupFeature(unittest.TestCase):
 

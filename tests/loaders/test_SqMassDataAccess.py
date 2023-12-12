@@ -1,8 +1,11 @@
 from snapshottest import TestCase
-from massseer.loaders.SqMassDataAccess import SqMassDataAccess
-from massseer.structs.Chromatogram import Chromatogram
 import unittest
 import pandas as pd
+
+# Internal modules
+from massseer.loaders import SqMassDataAccess
+from massseer.structs import Chromatogram
+
 
 class TestSqMassDataAccess(TestCase):
     def setUp(self):

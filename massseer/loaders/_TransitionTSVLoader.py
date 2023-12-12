@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 # Internal modules
-from massseer.util import check_streamlit, conditional_decorator
+from ..util import check_streamlit, conditional_decorator
 
 class TransitionTSVLoader:
     '''

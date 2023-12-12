@@ -1,7 +1,9 @@
 import unittest
 from snapshottest import TestCase
 import pandas as pd
-from massseer.loaders.OSWDataAccess import OSWDataAccess
+
+# Internal modules
+from massseer.loaders import OSWDataAccess
 
 class TestOSWDataAccess(TestCase):
     def setUp(self):

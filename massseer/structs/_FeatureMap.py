@@ -1,9 +1,11 @@
-from massseer.structs.Chromatogram import Chromatogram
-from massseer.structs.Mobilogram import Mobilogram
-from massseer.structs.Spectrum import Spectrum
 from typing import List
 import pandas as pd
 import numpy as np
+
+from ._Chromatogram import Chromatogram
+from ._Mobilogram import Mobilogram
+from ._Spectrum import Spectrum
+
 
 class FeatureMap:
     '''

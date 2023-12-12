@@ -1,11 +1,10 @@
-from abc import ABC, abstractmethod
 from typing import List
 import os
 import pandas as pd
 import streamlit as st
 
-from massseer.loaders.TransitionTSVLoader import TransitionTSVLoader
-from massseer.loaders.TransitionPQPLoader import TransitionPQPLoader
+from ._TransitionTSVLoader import TransitionTSVLoader
+from ._TransitionPQPLoader import TransitionPQPLoader
 
 from massseer.util import get_logger
 

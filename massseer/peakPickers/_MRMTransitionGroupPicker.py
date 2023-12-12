@@ -1,9 +1,11 @@
 import pyopenms as po
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from typing import List
 
-class MRMTransitionGroupPicker:
+# internal modules
+from ..structs import TransitionGroup, TransitionGroupFeature
+from ._GenericPeakPicker import GenericPeakPicker
+
+class MRMTransitionGroupPicker(GenericPeakPicker):
     ''' python wrapper of the pyopenms MRMTransitionGroupPicker '''
 
     def __init__(self, smoother, **kwargs):

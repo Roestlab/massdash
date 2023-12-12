@@ -36,7 +36,9 @@ $Authors: Hannes Roest, Justin Sing$
 """
 import pandas as pd
 import sqlite3
-from massseer.util import check_sqlite_column_in_table, check_sqlite_table
+from ..util import check_sqlite_column_in_table, check_sqlite_table
+
+__all__ = ['OSWDataAccess']
 
 class OSWDataAccess:
     """

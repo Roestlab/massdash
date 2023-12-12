@@ -1,7 +1,8 @@
 import unittest
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.Chromatogram import Chromatogram
 import numpy as np
+
+# Internal modules
+from massseer.structs import TransitionGroup, Chromatogram
 
 class TestTransitionGroup(unittest.TestCase):
 
@@ -9,7 +10,7 @@ class TestTransitionGroup(unittest.TestCase):
         # Create some example chromatograms for testing
         self.precursorChroms = [Chromatogram([1, 2, 3], [4, 5, 6], label='test1'), Chromatogram([1, 2, 3], [7, 8, 9], label='test2')]
         self.transitionChroms = [Chromatogram([1, 2, 3], [10, 11, 12], label='test3'), Chromatogram([1, 2, 3], [13, 14, 15], label='test4')]
-        self.transitionGroup = TransitionGroup(self.precursorChroms, self.transitionChroms)
+        self.transitionGroup = TransitionGroup(self.precursorChroms, self.transitionChroms, [], [], [], [])
 
     def test_max(self):
         # Test the max() method with some example boundaries

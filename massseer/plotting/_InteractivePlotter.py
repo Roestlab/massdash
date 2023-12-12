@@ -7,12 +7,9 @@ from bokeh.plotting import figure
 from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, DataRange1d, HoverTool, Label
 from bokeh.palettes import Category20, Viridis256
 
-from massseer.plotting.GenericPlotter import GenericPlotter, PlotConfig
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.structs.Chromatogram import Chromatogram
-from massseer.structs.Mobilogram import Mobilogram
-from massseer.structs.Spectrum import Spectrum
+from _GenericPlotter import GenericPlotter, PlotConfig
+from ..structs import TransitionGroup, TransitionGroupFeature, Chromatogram, Mobilogram, Spectrum
+
 from massseer.chromatogram_data_handling import normalize
 from massseer.util import check_streamlit
 from typing import List, Optional, Literal

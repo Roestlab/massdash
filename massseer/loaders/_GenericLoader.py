@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+from ..structs import TransitionGroup, TransitionGroupFeature
 from typing import List, Union
 
 class GenericLoader(ABC):

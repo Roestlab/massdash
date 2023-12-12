@@ -3,13 +3,10 @@ import pandas as pd
 import pyopenms as po
 import numpy as np
 
-from massseer.peakPickers.GenericPeakPicker import GenericPeakPicker
-from massseer.structs.Chromatogram import Chromatogram
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.structs.TransitionFeature import TransitionFeature
-from massseer.structs.TransitionGroup import TransitionGroup
+from ._GenericPeakPicker import GenericPeakPicker
+from ..structs import Chromatogram, TransitionGroupFeature, TransitionFeature, TransitionGroup
 
-class pyMRMTransitionGroupPicker:
+class pyMRMTransitionGroupPicker(GenericPeakPicker):
     '''
     This is a python implementation based on OpenMS peak picker
     '''

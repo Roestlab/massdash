@@ -2,7 +2,9 @@
 import unittest
 import numpy as np
 import pyopenms as po
-from massseer.structs.Chromatogram import Chromatogram
+
+# Internal modules
+from massseer.structs import Chromatogram
 
 class TestChromatogram(unittest.TestCase):
     def setUp(self):

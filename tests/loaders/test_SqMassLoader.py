@@ -1,8 +1,11 @@
 from snapshottest import TestCase
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.loaders.SqMassLoader import SqMassLoader
 import unittest
 import pandas as pd
+
+# Internal modules
+from massseer.structs import TransitionGroup
+from massseer.loaders import SqMassLoader
+
 
 class TestSqMassLoader(TestCase):
     def setUp(self):

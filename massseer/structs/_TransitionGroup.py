@@ -1,10 +1,13 @@
-from massseer.structs.Chromatogram import Chromatogram
 from typing import List, Tuple, Optional
+
 import pyopenms as po
-from massseer.structs.Mobilogram import Mobilogram
-from massseer.structs.Spectrum import Spectrum
-from massseer.structs.FeatureMap import FeatureMap
 import pandas as pd
+
+# internal imports
+from ._Chromatogram import Chromatogram
+from ._Mobilogram import Mobilogram
+from ._Spectrum import Spectrum
+from ._FeatureMap import FeatureMap
 
 class TransitionGroup:
     '''

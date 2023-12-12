@@ -1,11 +1,11 @@
 import unittest
-from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.structs.Chromatogram import Chromatogram
 import pyopenms as po
 from snapshottest import TestCase
 import numpy as np
+
+# Internal modules
+from massseer.peakPickers import MRMTransitionGroupPicker
+from massseer.structs import TransitionGroup, TransitionGroupFeature, Chromatogram
 
 class TestMRMTransitionGroupPicker(TestCase):
 

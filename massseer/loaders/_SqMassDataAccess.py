@@ -34,8 +34,8 @@ $Maintainer: Justin Sing$
 $Authors: Hannes Roest, Justin Sing$
 --------------------------------------------------------------------------
 """
-from massseer.util import check_sqlite_column_in_table, check_sqlite_table
-from massseer.structs.Chromatogram import Chromatogram
+from ..util import check_sqlite_column_in_table, check_sqlite_table
+from ..structs import Chromatogram
 from typing import List
 from collections import OrderedDict
 import base64
