@@ -1,29 +1,51 @@
 from typing import List, Tuple
+import streamlit as st
+
+# Data modules
 import numpy as np
 import pandas as pd
 import math  
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
-
+# Plotting modules
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import plotly.express as px
 
+# Plotting
 from massseer.plotting.GenericPlotter import PlotConfig
-from massseer.chromatogram_data_handling import normalize
+# Utils
 from massseer.util import check_streamlit
 
-def gaussian_2d(x, y, x0, y0, sigma_x, sigma_y):
-    return np.exp(-((x - x0)**2 / (2 * sigma_x**2) + (y - y0)**2 / (2 * sigma_y**2)))
-
 class InteractiveThreeDimensionPlotter:
+    """
+    Class for interactive three-dimensional plotting.
     
+    Attributes:
+        df (pd.DataFrame): The input DataFrame containing the data for plotting.
+        config (PlotConfig): The configuration for plotting.
+        
+    Methods:
+        plot: Plot the data.
+        plot_3d_scatter_general: Make a general 3D scatter plot with options for individual or overall plots.
+        plot_individual_3d_scatter: Make individual 3D scatter plots for each precursor and each product ion.
+        plot_3d_scatter: Make a 3D scatter plot with all MS data on the same plot.
+        plot_3d_vline: Plot a 3D spectrum-chromatogram vertical line plot.
+        plot_individual_3d_surface: Plot individual 3D surface plots for each precursor and each product ion.
+        plot_individual_3d_mesh_cube: Plot individual 3D surface plots for each precursor and each product ion. (EXPERIMENTAL)
+    """
     def __init__(self, df: pd.DataFrame, config: PlotConfig):
         self.df = df
         self.config = config
         
     def plot(self):
+        """
+        Plot the data based on the configuration settings.
+
+        Returns:
+            plots (list): List of plots generated based on the configuration settings.
+        """
         if self.config.type_of_3d_plot == "3D Scatter Plot" and self.config.aggregate_mslevels:
             plots = self.plot_3d_scatter()
         elif self.config.type_of_3d_plot == "3D Scatter Plot" and not self.config.aggregate_mslevels:
@@ -105,7 +127,7 @@ class InteractiveThreeDimensionPlotter:
                         camera=dict(eye=dict(x=1.25, y=1.25, z=1.25)),
                         xaxis_title = "RT",
                         yaxis_title = "MZ",
-                        zaxis_title = "IM=")
+                        zaxis_title = "IM")
             
             subfig.update_scenes(scene, row=row_num, col=col_num)
 
@@ -117,7 +139,6 @@ class InteractiveThreeDimensionPlotter:
         )
 
         return subfig
-
 
     def plot_individual_3d_scatter(self, num_cols: int = 2) -> go.Figure:
         """
@@ -131,7 +152,6 @@ class InteractiveThreeDimensionPlotter:
         """
         return self.plot_3d_scatter_general(self.df, num_cols = num_cols, include_ms1=self.config.include_ms1, include_ms2=self.config.include_ms2)
 
-
     def plot_3d_scatter(self) -> go.Figure:
         """
         Make a 3D scatter plot with all MS data on the same plot.
@@ -141,8 +161,13 @@ class InteractiveThreeDimensionPlotter:
         """
         return self.plot_3d_scatter_general(self.df, num_rows=1, num_cols=1, include_ms1=self.config.include_ms1, include_ms2=self.config.include_ms2)
 
-    
-    def plot_3d_vline(self):
+    def plot_3d_vline(self) -> go.Figure:
+        """
+        Plot a 3D spectrum-chromatogram vertical line plot.
+
+        Returns:
+            fig (plotly.graph_objs._figure.Figure): The generated 3D vertical line plot.
+        """
         # Step 1: Group DataFrame by 'Annotation' column
         grouped_df = self.df.groupby('Annotation')
         
@@ -209,15 +234,18 @@ class InteractiveThreeDimensionPlotter:
         )
         fig.update_layout(scene_camera=camera)
 
-    
         return fig
     
-
-    
-
-
+    def plot_individual_3d_surface(self, num_cols: int=2) -> go.Figure:
+        """
+        Plot individual 3D surface plots for each precursor and each product ion.
         
-    def plot_individual_3d_surface(self, num_cols=2):
+        Args:
+            num_cols (int, optional): Number of columns in the subplot grid. Defaults to 2.
+            
+        Returns:
+            go.Figure: The Plotly Figure object.
+        """
         # Create a subplot with 3D surface plots for each group
         subfig = make_subplots(rows=len(self.df['Annotation'].unique()), cols=num_cols,
                             subplot_titles=self.df['Annotation'].unique(),
@@ -248,7 +276,6 @@ class InteractiveThreeDimensionPlotter:
                 y = group_df['mz'].values
                 x_title, y_title, z_title = 'IM', 'MZ', 'Intensity'
             elif self.config.type_of_comparison == "retention time vs ion mobility vs m/z":
-                # group_df = group_df.groupby(['rt', 'im', 'mz']).agg({'int': 'sum'}).reset_index()
                 x = group_df['rt'].values
                 y = group_df['mz'].values
                 x_title, y_title, z_title = 'RT', 'MZ', 'IM'
@@ -264,8 +291,7 @@ class InteractiveThreeDimensionPlotter:
                         error_message = f"Error: {ve}"
 
                     if check_streamlit():
-                        print(error_message)
-                        # st.error(error_message)
+                        st.error(error_message)
                     else:
                         raise ValueError(error_message)
             elif self.config.smoothing_dict['type'] == 'none':
@@ -282,20 +308,9 @@ class InteractiveThreeDimensionPlotter:
             y_unique = np.unique(y)
             x_grid, y_grid = np.meshgrid(x_unique, y_unique)
             
-            # Set parameters for the Gaussian function
-            # Set the center of the Gaussian to the mean of x and y
-            x0, y0 = np.mean(x), np.mean(y)  
-            # Set the standard deviation based on the spread of x and y
-            sigma_x, sigma_y = np.std(x), np.std(y)  
-            
-            # Interpolate z values on the mesh grid using a 2D Gaussian function
-            # z_grid = gaussian_2d(x_grid, y_grid, x0, y0, sigma_x, sigma_y)
             z_grid = griddata((x, y), z, (x_grid, y_grid), method='cubic')
 
-            # Compute the Gaussian surface
-            # intensity_grid = gaussian_2d(x_grid, y_grid, x0, y0, sigma_x, sigma_y)
             intensity_grid = griddata((x, y), intensity, (x_grid, y_grid), method='cubic')
-
 
             # Create a 3D surface plot for each group
             trace = go.Surface(x=x_grid, y=y_grid, z=z_grid, surfacecolor=intensity_grid, colorscale='Viridis', 
@@ -324,3 +339,61 @@ class InteractiveThreeDimensionPlotter:
         subfig.update_coloraxes(showscale=False)
 
         return subfig
+    
+    def plot_individual_3d_mesh_cube(self, num_cols: int=2) -> go.Figure:
+        """
+        Plot individual 3D surface plots for each precursor and each product ion. (EXPERIMENTAL)
+        
+        Args:
+            num_cols (int, optional): Number of columns in the subplot grid. Defaults to 2.
+            
+        Returns:
+            go.Figure: The Plotly Figure object.
+        """
+        # Create a subplot with 3D surface plots for each group
+        subfig = make_subplots(rows=len(self.df['Annotation'].unique()), cols=num_cols,
+                            subplot_titles=self.df['Annotation'].unique(),
+                            specs=[[{'type': 'surface'}] * num_cols for _ in range(len(self.df['Annotation'].unique()))],
+                            horizontal_spacing=0.05, vertical_spacing=0.05)
+
+        # Iterate over groups and create subplots
+        for i, (group_key, group_df) in enumerate(self.df.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz'])):
+            if not self.config.include_ms1 and group_key[0] == 1:
+                continue
+            
+            if not self.config.include_ms2 and group_key[0] == 2:
+                continue
+        
+            
+            rt = group_df['rt'].values
+            im = group_df['im'].values
+            mz = group_df['mz'].values
+            x_title, y_title, z_title = 'RT', 'IM', 'MZ'
+
+            intensity = group_df['int'].values  # Assuming 'intensity' is the column representing intensity
+
+            rt_grid, im_grid, mz_grid = np.meshgrid(rt, im, mz, indexing='ij')
+
+            # Create a 3D surface plot for each group
+            trace = go.Mesh3d(x=rt_grid, y=im_grid, z=mz_grid, opacity=0.5)
+            row_num = math.floor(i / num_cols) + 1  # Calculate the row number based on the number of columns
+            col_num = i % num_cols + 1  # Calculate the column number based on the number of columns
+            subfig.add_trace(trace, row=row_num, col=col_num)  # Use the calculated row and column numbers
+            
+            scene = dict(aspectmode='manual',
+                        aspectratio=dict(x=1, y=1, z=1),
+                        camera=dict(eye=dict(x=1.25, y=1.25, z=1.25)),
+                        xaxis_title = x_title,
+                        yaxis_title = y_title,
+                        zaxis_title = z_title)
+            
+            subfig.update_scenes(scene, row=row_num, col=col_num)
+
+        # Update the layout of the overall figure
+        subfig.update_layout(height=len(self.df['Annotation'].unique()) * 800,
+                            width=len(self.df['Annotation'].unique()) * 800, showlegend=False)
+        
+        subfig.update_coloraxes(showscale=False)
+
+        return subfig
+    

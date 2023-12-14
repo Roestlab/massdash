@@ -11,8 +11,8 @@ from massseer.util import get_logger
 from massseer.util_ui import MassSeerGUI
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.loaders.DiaNNLoader import DiaNNLoader    
-from massseer.loaders.TargeteddiaPASEFLoader import TargeteddiaPASEFLoader
-from massseer.loaders.TargeteddiaPASEFDataAccess import TargeteddiaPASEFConfig
+from massseer.loaders.TargetedDIALoader import TargeteddiaPASEFLoader
+from massseer.loaders.TargetedDIADataAccess import TargeteddiaPASEFConfig
 # from massseer.targeted_data_extraction import TargeteddiaPASEFExperiment
 
 class TargetedExperimentUI(TransitionListUI):

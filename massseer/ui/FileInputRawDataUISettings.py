@@ -1,8 +1,9 @@
-import streamlit as st
-
 import os
 import fnmatch
 
+import streamlit as st
+
+# UI
 from massseer.ui.BaseUISettings import BaseUISettings
 
 class FileInputRawDataUISettings(BaseUISettings):
@@ -56,7 +57,7 @@ class FileInputRawDataUISettings(BaseUISettings):
         If the input path is a file, the function returns a list containing only the input file path.
         The function also displays a slider to select the number of threads to use for processing the files.
         
-        Parameters:
+        Args:
         raw_file_path_input (str): Path to a directory or a file
         
         Returns:

@@ -1,10 +1,11 @@
 import streamlit as st
 
+# UI
 from massseer.ui.FileInputXICDataUISettings import FileInputXICDataUISettings
 from massseer.ui.FileInputRawDataUISettings import FileInputRawDataUISettings
 from massseer.ui.ExtractedIonChromatogramAnalysisFormUI import ExtractedIonChromatogramAnalysisFormUI
 from massseer.ui.RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
-
+# Utils
 from massseer.util import copy_attributes
 
 class MassSeerGUI:
@@ -19,18 +20,19 @@ class MassSeerGUI:
         show_welcome_message: Displays a welcome message and input fields for OpenSwath and DIA-NN workflows.
         show_file_input_settings: Displays the file input settings.
     """
-    def __init__(self):
+    def __init__(self, verbose):
         """
         Initializes the MassSeerGUI class.
 
         Args:
-            None
+            verbose (bool): Enables verbose mode.
 
         Returns:
             None
         """
         self.welcome_container = st.empty()
         self.file_input_settings = None
+        self.verbose = verbose
         
         # initialize load_toy_dataset key in clicked session state
         # This is needed because streamlit buttons return True when clicked and then default back to False.

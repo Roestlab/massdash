@@ -1,3 +1,4 @@
+import os
 import sys
 
 # Logging and performance modules
@@ -40,7 +41,7 @@ def get_file_handler():
     file_handler.setFormatter(FORMATTER)
     return file_handler
 
-def get_logger(logger_name):
+def get_logger(logger_name, log_level=logging.INFO):
     """
     Get a logger with the specified name.
 
@@ -52,7 +53,7 @@ def get_logger(logger_name):
 
     """
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG) # better to have too much log than not enough
+    logger.setLevel(log_level) # better to have too much log than not enough
     logger.addHandler(get_console_handler())
     logger.addHandler(get_file_handler())
     # with this pattern, it's rarely necessary to propagate the error up to parent
@@ -182,6 +183,31 @@ def check_sqlite_column_in_table(con, table, column):
     c.fetchall()
 
     return(column_present)
+
+def file_basename_without_extension(file_path):
+    """
+    Returns the basename of a file without the extension including archive extensions.
+
+    Args:
+        file_path (str): Path to the file.
+
+    Returns:
+        str: Basename of the file without the extension.
+    """
+    # Get the base name of the file
+    base_name = os.path.basename(file_path)
+    
+    # Remove known archive extensions (gz, xz, tar, etc.)
+    archive_extensions = ['.gz', '.xz', '.tar', '.zip', '.rar', '.7z']
+    for ext in archive_extensions:
+        if base_name.endswith(ext):
+            base_name = base_name[:-len(ext)]
+    
+    # Remove other extensions
+    base_name, _ = os.path.splitext(base_name)
+    
+    return base_name
+    
 
 #######################################
 ## Decorators

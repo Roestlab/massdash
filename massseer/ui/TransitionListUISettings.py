@@ -49,7 +49,6 @@ class TransitionListUISettings:
             if pick_random_protein:
                 selected_protein = np.random.choice(protein_list)
                 selected_protein_index = int(np.where( [True if selected_protein==protein else False for protein in protein_list] )[0][0])
-                # print(f"Selected protein: {selected_protein} with index {selected_protein_index}")
                 self.selected_protein = st.selectbox(f"Select protein (of {len(st.session_state['protein_list'])} proteins)", protein_list, index=selected_protein_index, help="Select the protein to process")
             else:
                 self.selected_protein = st.selectbox(f"Select protein (of {len(st.session_state['protein_list'])} proteins)", st.session_state['protein_list'], help="Select the protein to process")
@@ -75,7 +74,6 @@ class TransitionListUISettings:
             if pick_random_peptide:
                 selected_peptide = np.random.choice(peptide_list)
                 selected_peptide_index = int(np.where( [True if selected_peptide==peptide else False for peptide in peptide_list] )[0][0])
-                # print(f"Selected peptide: {selected_peptide} with index {selected_peptide_index}")
                 self.selected_peptide = st.selectbox(f"Select peptide (of {len(peptide_list)} peptides)", peptide_list, index=selected_peptide_index, help="Select the peptide to process")
             else:
                 self.selected_peptide = st.selectbox(f"Select peptide (of {len(peptide_list)} peptides)", peptide_list, help="Select the peptide to process")

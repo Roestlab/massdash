@@ -2,16 +2,24 @@ from typing import List
 import os
 import sqlite3
 import pandas as pd
-
 import streamlit as st
 
-# Internal modules
-from massseer.util import check_streamlit, conditional_decorator
-from massseer.util import check_sqlite_column_in_table, check_sqlite_table
+# Utils
+from massseer.util import check_streamlit, conditional_decorator, check_sqlite_column_in_table, check_sqlite_table
 
 class TransitionPQPLoader:
     '''
     Class to load a transition PQP file
+    
+    Attributes:
+        conn: (sqlite3.Connection) The connection to the PQP file.
+        c: (sqlite3.Cursor) The cursor for the PQP file.
+        data: (pd.DataFrame) The PQP data.
+    
+    Methods:
+        _load: Loads the PQP file.
+        getTransitionList: Retrieves transition information.
+        _validate_columns: Validates the PQP file has the required columns.
     '''
     REQUIRED_PQP_COLUMNS: List[str] = ['PrecursorMz', 'ProductMz', 'PrecursorCharge', 'ProductCharge',
                                    'LibraryIntensity', 'NormalizedRetentionTime', 'PeptideSequence',
@@ -20,6 +28,9 @@ class TransitionPQPLoader:
     def __init__(self, filename: str) -> None:
         '''
         Constructor
+        
+        Args:
+            filename: (str) The path to the transition PQP file.
         '''
         # Check that filename is either of extension .pqp or .osw
         _, file_extension = os.path.splitext(filename)
@@ -27,6 +38,7 @@ class TransitionPQPLoader:
             raise ValueError("Unsupported file format. TransitionPQPLoader requires an sqlite-based .pqp file or .osw file.")
         self.conn = sqlite3.connect(filename)
         self.c = self.conn.cursor()
+        self.data: pd.DataFrame = pd.DataFrame()
     
     @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
     def _load(_self) -> None:
@@ -41,14 +53,7 @@ class TransitionPQPLoader:
         
     def getTransitionList(self):
         """
-        Retrieves transition information for a given peptide and charge.
-
-        Args:
-            fullpeptidename (str): The full modified sequence of the peptide.
-            charge (int): The precursor charge.
-
-        Returns:
-            pandas.DataFrame: The transition information.
+        Retrieves transition information 
         """
         # Older PQP files (<v2.4) do not have the ANNOTATION column in the TRANSITION table
         if check_sqlite_column_in_table(self.conn, "PRECURSOR", "LIBRARY_DRIFT_TIME"):

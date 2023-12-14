@@ -12,7 +12,8 @@ def cli():
 
 # GUI for MassSeer.
 @cli.command()
-def gui():
+@click.option('--verbose', '-v', is_flag=True, help="Enables verbose mode.")
+def gui(verbose):
     """
     GUI for MassSeer.
     """
@@ -20,5 +21,8 @@ def gui():
     click.echo("Starting MassSeer GUI...")
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, 'gui.py')
-    sys.argv = ["streamlit", "run", filename]
+    if verbose:
+        sys.argv = ["streamlit", "run", filename, " -- verbose"]
+    else:
+        sys.argv = ["streamlit", "run", filename]
     sys.exit(stcli.main())

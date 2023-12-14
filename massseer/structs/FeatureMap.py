@@ -1,17 +1,43 @@
+from typing import List, Tuple
+
+# Data modules
+import pandas as pd
+import numpy as np
+
+# Structs
 from massseer.structs.Chromatogram import Chromatogram
 from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
-from typing import List
-import pandas as pd
-import numpy as np
+# Utils
+from massseer.util import LOGGER
 
 class FeatureMap:
     '''
     Class for storing a feature map
+    
+    Attributes:
+        feature_df (pd.DataFrame): A DataFrame containing the feature map
+        has_im (bool): A boolean indicating if the feature map has ion mobility data
+        
+    Methods:
+        empty: Check if the FeatureMap is empty.
+        average_intensity_across_two_dimensions: Compute the average intensity across two dimensions of a DataFrame.
+        get_precursor_chromatograms: Get a list of precursor chromatograms from the feature map.
+        get_transition_chromatograms: Get a list of transition chromatograms from the feature map.
+        get_precursor_mobilograms: Get a list of precursor ion mobility from the feature map.
+        get_transition_mobilograms: Get a list of transition ion mobility from the feature map.
+        get_precursor_spectra: Get a list of precursor spectra from the feature map.
+        get_transition_spectra: Get a list of transition spectra from the feature map.
     '''
-    def __init__(self, feature_df: pd.DataFrame):
+    def __init__(self, feature_df: pd.DataFrame, verbose: bool=False):
         self.feature_df = feature_df
-        self.has_im = 'im' in feature_df.columns
+        self.has_im = 'im' in feature_df.columns and feature_df['im'].notnull().all()
+        
+        LOGGER.name = 'FeatureMap'
+        if verbose:
+            LOGGER.setLevel('DEBUG')
+        else:
+            LOGGER.setLevel('INFO')
 
     def empty(self) -> bool:
         """
@@ -23,7 +49,7 @@ class FeatureMap:
         return self.feature_df.empty
 
     @staticmethod
-    def average_intensity_across_two_dimensions(df: pd.DataFrame, index: str='im', columns: str='rt', values: str='int', axis: int=0):
+    def average_intensity_across_two_dimensions(df: pd.DataFrame, index: str='im', columns: str='rt', values: str='int', axis: int=0) -> Tuple[np.ndarray, np.ndarray]:
         """
         Compute the average intensity across two dimensions of a DataFrame.
 
@@ -62,12 +88,15 @@ class FeatureMap:
             return [Chromatogram(np.array([]), np.array([]), 'No precursor chromatograms found')]
         # Filter the feature map to only precursor chromatograms
         precursor_df = self.feature_df[self.feature_df['ms_level']==1]
+        if precursor_df.shape[0] == 0:
+            return [Chromatogram(np.array([]), np.array([]), 'No precursor chromatograms found')]
         # If ion mobility data is present, compute mean of intensities across ion mobility for retention time
-        if 'im' in precursor_df.columns:
+        if self.has_im:
             rt_arr, int_arr = FeatureMap.average_intensity_across_two_dimensions(precursor_df)
         else:
             rt_arr = precursor_df['rt'].to_numpy()
             int_arr = precursor_df['int'].to_numpy()
+        
         precursor_chromatogram = Chromatogram(rt_arr, int_arr, f'{pd.unique(precursor_df["Annotation"].values)[0]}')
         return [precursor_chromatogram]
 
@@ -77,6 +106,7 @@ class FeatureMap:
         '''
         if self.feature_df.shape[0] == 0:
             return [Chromatogram(np.array([]), np.array([]), 'No transition chromatograms found')]
+
         # Filter the feature map to only transition chromatograms
         transition_df = self.feature_df[self.feature_df['ms_level']==2]
         transition_chromatograms = []
@@ -84,11 +114,12 @@ class FeatureMap:
             transition_df_tmp = transition_df[transition_df['product_mz']==transition]
 
             # If ion mobility data is present, compute mean of intensities across ion mobility for retention time
-            if 'im' in transition_df_tmp.columns and transition_df_tmp.shape[0] > 1:
+            if self.has_im  and transition_df_tmp.shape[0] > 1:
                 rt_arr, int_arr = FeatureMap.average_intensity_across_two_dimensions(transition_df_tmp)
             else:
                 rt_arr = transition_df_tmp['rt'].to_numpy()
                 int_arr = transition_df_tmp['int'].to_numpy()
+
             transition_chromatogram = Chromatogram(rt_arr, int_arr, f'{pd.unique(transition_df_tmp["Annotation"].values)[0]}')
             transition_chromatograms.append(transition_chromatogram)
         return transition_chromatograms
@@ -101,6 +132,9 @@ class FeatureMap:
             return [Mobilogram(np.array([]), np.array([]), 'No precursor ion mobility found')]
         # Filter the feature map to only precursor ion mobility
         precursor_df = self.feature_df[self.feature_df['ms_level']==1]
+        
+        if precursor_df.shape[0] == 0:
+            return [Mobilogram(np.array([]), np.array([]), 'No precursor ion mobility found')]
         # If ion mobility data is present, compute mean of intensities across retention time for ion mobility
         if 'rt' in precursor_df.columns:
             im_arr, int_arr = FeatureMap.average_intensity_across_two_dimensions(precursor_df, axis=1)
@@ -118,12 +152,14 @@ class FeatureMap:
             return [Mobilogram(np.array([]), np.array([]), 'No transition ion mobility found')]
         # Filter the feature map to only transition ion mobility
         transition_df = self.feature_df[self.feature_df['ms_level']==2]
+        if transition_df.shape[0] == 0:
+            return [Mobilogram(np.array([]), np.array([]), 'No transition ion mobility found')]
         transition_ion_mobilities = []
         for transition in pd.unique(transition_df['product_mz']):
             transition_df_tmp = transition_df[transition_df['product_mz']==transition]
 
             # If ion mobility data is present, compute mean of intensities across retention time for ion mobility
-            if 'im' in transition_df_tmp.columns  and transition_df_tmp.shape[0] > 1:
+            if self.has_im and transition_df_tmp.shape[0] > 1:
                 im_arr, int_arr = FeatureMap.average_intensity_across_two_dimensions(transition_df_tmp, axis=1)
             else:
                 im_arr = transition_df_tmp['im'].to_numpy()

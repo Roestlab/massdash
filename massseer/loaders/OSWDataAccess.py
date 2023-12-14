@@ -336,3 +336,63 @@ class OSWDataAccess:
         data = pd.read_sql(stmt, self.conn)
 
         return data
+
+    def get_top_rank_precursor_feature(self, fullpeptidename, charge):
+        """
+        Retrieves the top ranking precursor feature for a given peptide and charge.
+
+        Args:
+            fullpeptidename (str): The full modified sequence of the peptide.
+            charge (int): The precursor charge.
+
+        Returns:
+            pandas.DataFrame: The top ranking precursor feature.
+        """
+        # Check if fullpeptidename contains a unimod modification at the beginning of the sequence
+        if fullpeptidename[0] == "(":
+            # If there is a (UniMod:#) at the beginning of the sequence, add a period (.) at the front 
+            fullpeptidename = "." + fullpeptidename
+        # Check if EXP_IM in FEATURE table
+        if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
+            select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
+        else:
+            select_feature_exp_im = "-1 AS IM,"
+            
+        stmt = f"""SELECT 
+            RUN.FILENAME AS filename,
+            FEATURE.EXP_RT AS RT,
+            {select_feature_exp_im}
+            FEATURE.EXP_RT - FEATURE.DELTA_RT AS assay_rt,
+            FEATURE.DELTA_RT AS delta_rt,
+            FEATURE.NORM_RT AS iRT,
+            PRECURSOR.LIBRARY_RT AS assay_iRT,
+            FEATURE.NORM_RT - PRECURSOR.LIBRARY_RT AS delta_iRT,
+            PROTEIN.PROTEIN_ACCESSION AS ProteinId,
+            PEPTIDE.UNMODIFIED_SEQUENCE AS Sequence,
+            PEPTIDE.MODIFIED_SEQUENCE AS FullPeptideName,
+            PRECURSOR.CHARGE AS PrecursorCharge,
+            PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
+            FEATURE_MS2.AREA_INTENSITY AS Intensity,
+            FEATURE_MS1.AREA_INTENSITY AS aggr_prec_Peak_Area,
+            FEATURE_MS1.APEX_INTENSITY AS aggr_prec_Peak_Apex,
+            FEATURE.LEFT_WIDTH AS leftWidth,
+            FEATURE.RIGHT_WIDTH AS rightWidth,
+            SCORE_MS2.RANK AS peak_group_rank,
+            SCORE_MS2.SCORE AS d_score,
+            SCORE_MS2.QVALUE AS Qvalue,
+            PRECURSOR.DECOY AS Decoy
+        FROM (SELECT * FROM PRECURSOR WHERE CHARGE = {charge}) AS PRECURSOR
+        INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+        INNER JOIN (SELECT * FROM PEPTIDE WHERE MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+        INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+        INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+        INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+        INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
+        LEFT JOIN FEATURE_MS1 ON FEATURE_MS1.FEATURE_ID = FEATURE.ID
+        LEFT JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+        LEFT JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+        WHERE SCORE_MS2.RANK = 1;"""
+
+        data = pd.read_sql(stmt, self.conn)
+
+        return data

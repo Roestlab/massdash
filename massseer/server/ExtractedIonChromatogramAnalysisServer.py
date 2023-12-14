@@ -1,13 +1,16 @@
 import os
-import numpy as np
-import pandas as pd
 import streamlit as st
 
+# Timing modules
 import timeit
 from datetime import timedelta
 
+# Data modules
+import numpy as np
+import pandas as pd
 
 # UI
+from massseer.ui.MassSeerGUI import MassSeerGUI
 from massseer.ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
 from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
@@ -23,36 +26,41 @@ from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPick
 from massseer.plotting.GenericPlotter import PlotConfig
 from massseer.plotting.InteractivePlotter import InteractivePlotter
 # Util
-from massseer.util import time_block
+from massseer.util import LOGGER, time_block
+from massseer.server.util import get_string_mslevels_from_bool
 
 class ExtractedIonChromatogramAnalysisServer:
     """
     A class representing a server for extracted ion chromatogram analysis.
 
     Attributes:
-    -----------
-    massseer_gui : object
-        An object representing the MassSeer GUI.
-    transition_list : list or None
-        A list of transitions or None if not yet initialized.
-    osw_data : object or None
-        An object representing OpenSWATH data or None if not yet initialized.
-    xic_data : object or None
-        An object representing XIC data or None if not yet initialized.
+        massseer_gui (MassSeerGUI): An object representing the MassSeer GUI.
+        transition_list (SpectralLibraryLoader): An object representing the transition list.
+        osw_data (OSWDataAccess): An object representing the OSW data.
+        xic_data (SqMassLoader): An object representing the XIC data.
+        
+    Methods:
+        get_transition_list: Loads the spectral library and sets the transition list attribute.
+        append_qvalues_to_transition_list: Appends q-values to the transition list.
+        main: Runs the main post extracted ion chromatogram analysis workflow.
     """
-    def __init__(self, massseer_gui):
+    def __init__(self, massseer_gui: MassSeerGUI):
         """
         Initializes the ExtractedIonChromatogramAnalysisServer object.
 
-        Parameters:
-        -----------
-        massseer_gui : object
-            An object representing the MassSeer GUI.
+        Args:
+            massseer_gui (MassSeerGUI): An object representing the MassSeer GUI.
         """
         self.massseer_gui = massseer_gui
         self.transition_list = None
         self.osw_data = None
         self.xic_data = None
+        
+        LOGGER.name = "ExtractedIonChromatogramAnalysisServer"
+        if massseer_gui.verbose:
+            LOGGER.setLevel("DEBUG")
+        else:
+            LOGGER.setLevel("INFO")
 
     def get_transition_list(self):
         """
@@ -68,30 +76,6 @@ class ExtractedIonChromatogramAnalysisServer:
         top_ranked_precursor_features = self.osw_data.get_top_rank_precursor_features_across_runs()
         # merge transition list with top ranked precursor features
         self.transition_list.data = pd.merge(self.transition_list.data, top_ranked_precursor_features, on=['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence', 'PrecursorMz', 'PrecursorCharge', 'Decoy'], how='left')
-
-    def get_string_mslevels_from_bool(self, mslevel_bool_dict):
-        """
-        Converts a dictionary of boolean values for mslevels to a string.
-
-        Parameters:
-        -----------
-        mslevel_bool_dict : dict
-            A dictionary containing boolean values for mslevels.
-
-        Returns:
-        --------
-        mslevel_str : str
-            A string representing the selected mslevel.
-        """
-        if mslevel_bool_dict['ms1']:
-            mslevel_str = 'ms1'
-        elif mslevel_bool_dict['ms2']:
-            mslevel_str = 'ms2'
-        elif mslevel_bool_dict['ms1'] and mslevel_bool_dict['ms2']:
-            mslevel_str = 'ms1ms2'
-        else:
-            raise ValueError('No mslevel selected')
-        return mslevel_str
 
     def main(self):
         """
@@ -122,7 +106,7 @@ class ExtractedIonChromatogramAnalysisServer:
         self.xic_data = SqMassLoader(self.massseer_gui.file_input_settings.sqmass_file_path_list, self.massseer_gui.file_input_settings.osw_file_path)
 
         # Print selected peptide and charge information
-        print(f"Selected peptide: {transition_list_ui.transition_settings.selected_peptide} Selected charge: {transition_list_ui.transition_settings.selected_charge}")
+        LOGGER.info(f"Selected peptide: {transition_list_ui.transition_settings.selected_peptide} Selected charge: {transition_list_ui.transition_settings.selected_charge}")
 
         # Create a container for the plots
         plot_container = st.container()
@@ -144,7 +128,7 @@ class ExtractedIonChromatogramAnalysisServer:
                 with time_block() as elapsed_time:
                     # Peak picking using pyMRMTransitionGroupPicker
                     if peak_picking_settings.peak_pick_on_displayed_chrom:
-                        mslevel = self.get_string_mslevels_from_bool({'ms1':chrom_plot_settings.include_ms1, 'ms2':chrom_plot_settings.include_ms2})
+                        mslevel = get_string_mslevels_from_bool({'ms1':chrom_plot_settings.include_ms1, 'ms2':chrom_plot_settings.include_ms2})
                     else:
                         mslevel = peak_picking_settings.peak_picker_algo_settings.mslevels
                     peak_picker_param = peak_picking_settings.peak_picker_algo_settings.PeakPickerMRMParams

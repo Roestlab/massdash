@@ -3,12 +3,23 @@ import os
 import pandas as pd
 import streamlit as st
 
-# Internal modules
+# Utils
 from massseer.util import check_streamlit, conditional_decorator
 
 class TransitionTSVLoader:
     '''
     Class to load a transition TSV file
+    
+    Attributes:
+        filename: (str) The path to the transition TSV file.
+        data: (pd.DataFrame) The TSV data.
+        
+    Methods:
+        _load: Loads the TSV file.
+        _validate_columns: Validates the TSV file has the required columns.
+        _resolve_column_names: Renames the columns of the TSV file to match the required column names.
+        _get_actual_column: Given an attribute name, returns the actual column name in the data that corresponds to that attribute.
+        generate_annotation: Generates an annotation for each row in the data by concatenating the 'FragmentType', 'FragmentSeriesNumber', and 'ProductCharge' columns.
     '''
     REQUIRED_TSV_COLUMNS: List[str] = ['PrecursorMz', 'ProductMz', 'PrecursorCharge', 'ProductCharge',
                                    'LibraryIntensity', 'NormalizedRetentionTime', 'PeptideSequence',
@@ -33,11 +44,15 @@ class TransitionTSVLoader:
         'PrecursorIonMobility': ['ion_mobility'],
     }
 
-    def __init__(self, in_file: str) -> None:
+    def __init__(self, filename: str) -> None:
         '''
         Constructor
         '''
-        self.in_file = in_file
+        # Check that filename is of extension tsv
+        _, file_extension = os.path.splitext(filename)
+        if file_extension.lower() not in ['.tsv']:
+            raise ValueError("Unsupported file format. TransitionTSVLoader requires a tab-separated .tsv file.")
+        self.filename = filename
         self.data: pd.DataFrame = pd.DataFrame()
     
     @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
@@ -45,7 +60,7 @@ class TransitionTSVLoader:
         '''
         Load the transition TSV file
         '''
-        _self.data = pd.read_csv(_self.in_file, sep='\t')
+        _self.data = pd.read_csv(_self.filename, sep='\t')
         # Multiply the retention time by 60 to convert from minutes to seconds
         _self.data['NormalizedRetentionTime'] = _self.data['NormalizedRetentionTime'] * 60
         _self._resolve_column_names()
