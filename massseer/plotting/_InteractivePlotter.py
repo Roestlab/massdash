@@ -1,13 +1,11 @@
-import streamlit as st
 import numpy as np
 from scipy.signal import savgol_filter
 
-import matplotlib.pyplot as plt
 from bokeh.plotting import figure
 from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, DataRange1d, HoverTool, Label
 from bokeh.palettes import Category20, Viridis256
 
-from _GenericPlotter import GenericPlotter, PlotConfig
+from ._GenericPlotter import GenericPlotter, PlotConfig
 from ..structs import TransitionGroup, TransitionGroupFeature, Chromatogram, Mobilogram, Spectrum
 
 from massseer.chromatogram_data_handling import normalize
