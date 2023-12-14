@@ -42,8 +42,10 @@ class FileInputRawDataUISettings(BaseUISettings):
         """
         st.sidebar.subheader("Input Transition List")
         self.transition_list_file_path = st.sidebar.text_input("Enter file path", transition_list_file_path, key='raw_data_transition_list', help="Path to the transition list file (*.pqp / *.tsv)")
+        self.transition_list_file_path = st.sidebar.text_input("Enter file path", transition_list_file_path, key='raw_data_transition_list', help="Path to the transition list file (*.pqp / *.tsv)")
 
         st.sidebar.subheader("Input Raw file")
+        self.raw_file_path_input = st.sidebar.text_input("Enter file path", raw_file_path, key='raw_data_file_path', help="Path to the raw file (*.mzML)")
         self.raw_file_path_input = st.sidebar.text_input("Enter file path", raw_file_path, key='raw_data_file_path', help="Path to the raw file (*.mzML)")
 
         # Tabs for different data workflows
