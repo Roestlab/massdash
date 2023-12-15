@@ -203,7 +203,9 @@ class RawTargetedExtractionAnalysisServer:
             with time_block() as elapsed_time:
                 peptide_coord = transition_list_ui.get_peptide_dict(self.feature_data.report)
                 targeted_extraction_params = transition_list_ui.get_targeted_extraction_params_dict()
-                self.targeted_extraction.clear()
+                if transition_list_ui.submit_extraction_params:
+                    LOGGER.debug("Clearing cached targeted extraction function.")
+                    self.targeted_extraction.clear()
                 LOGGER.debug(f"Targeted Extraction Paramters: {targeted_extraction_params}")
                 LOGGER.debug(f"Targeted Extraction Peptide Coordiantes: {peptide_coord}")
                 self.targeted_extraction(targeted_exp, peptide_coord, targeted_extraction_params)

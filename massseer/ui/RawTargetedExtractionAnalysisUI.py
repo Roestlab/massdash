@@ -63,6 +63,7 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         self.is_ion_mobility_data = is_ion_mobility_data
         self.include_ms1 = True
         self.include_ms2 = True
+        self.submit_extraction_params = False
         self.verbose = verbose
         
     def show_transition_information(self) -> None:
@@ -259,18 +260,21 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         self.targeted_exp_params.mslevel = self.get_mslevel_list()
 
         # Advanced UI paramaters
-        with st.sidebar.expander("Advanced parameters", expanded=False):
+        with st.sidebar.expander("Advanced parameters", expanded=True):
+            extraction_param_form = st.form(key="extraction_param_form")
             # UI for MS1 MZ tolerance in ppm
-            self.targeted_exp_params.ms1_mz_tol = st.number_input("MS1 m/z tolerance (ppm)", value=20, help="MS1 m/z tolerance in ppm")
+            self.targeted_exp_params.ms1_mz_tol = extraction_param_form.number_input("MS1 m/z tolerance (ppm)", value=20, help="MS1 m/z tolerance in ppm")
             # UI for MS2 MZ tolerance in ppm
-            self.targeted_exp_params.mz_tol = st.number_input("MS2 m/z tolerance (ppm)", value=20, help="MS2 m/z tolerance in ppm")
+            self.targeted_exp_params.mz_tol = extraction_param_form.number_input("MS2 m/z tolerance (ppm)", value=20, help="MS2 m/z tolerance in ppm")
             # UI for RT extraction window in seconds
-            self.targeted_exp_params.rt_window = st.number_input("RT window (seconds)", value=35, help="RT extraction window in seconds")
+            self.targeted_exp_params.rt_window = extraction_param_form.number_input("RT window (seconds)", value=35, help="RT extraction window in seconds")
             if self.is_ion_mobility_data:
                 # UI for IM extraction window in 1/K0
-                self.targeted_exp_params.im_window = st.number_input("IM window (1/K0)", value=0.0600, format="%.8f", help="IM extraction window in 1/K0")
+                self.targeted_exp_params.im_window = extraction_param_form.number_input("IM window (1/K0)", value=0.0600, format="%.8f", help="IM extraction window in 1/K0")
             else:
                 self.targeted_exp_params.im_window = 0.0
+                
+            self.submit_extraction_params = extraction_param_form.form_submit_button("Extract Data")
             
     def get_targeted_extraction_params_dict(self) -> Dict:
         """
