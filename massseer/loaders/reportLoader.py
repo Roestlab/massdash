@@ -4,6 +4,8 @@ import pandas as pd
 
 # Structs
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+# Loaders
+from massseer.loaders.mzMLLoader import mzMLLoader
 # Utils
 from massseer.util import LOGGER
 
@@ -22,11 +24,13 @@ class reportLoader:
         load_report_for_precursor: Load the report file for a precursor
         load_report: Load the report file
     '''
-    def __init__(self, filename: str, verbose: bool=False) -> None:
+    def __init__(self, filename: str, dataFiles: List[str], verbose: bool=False) -> None:
         self.filename = filename
+        self.dataFiles = [mzMLLoader(f, 'ondisk') for f in dataFiles]
         self.search_data: pd.DataFrame = pd.DataFrame()
         self.chromatogram_peak_feature = TransitionGroupFeature(None, None)
         self.mobilogram_peak_feature = TransitionGroupFeature(None, None)
+        self.precursor_search_data = {}
         
         LOGGER.name = "reportLoader"
         if verbose:
@@ -77,24 +81,28 @@ class reportLoader:
         LOGGER.debug(f"Loading report for {peptide_tmp} {charge} from {self.filename}")
         # Get the row indices for the peptide and charge
         row_indices = [0] + self.get_row_indices_for_peptide(peptide_tmp, charge)
-
+        out = {}
         if len(row_indices)-1 !=0:
-            # Load the report file for the peptide and charge
-            precursor_search_results = pd.read_csv(self.filename, sep='\t', skiprows=lambda x: x not in row_indices)
-            
-            LOGGER.debug(f"Found {precursor_search_results.shape[0]} rows from {self.filename} for feature data")
+            for file in self.dataFiles:
+                # Load the report file for the peptide and charge
+                precursor_search_results = pd.read_csv(self.filename, sep='\t', skiprows=lambda x: x not in row_indices)
+                
+                LOGGER.debug(f"Found {precursor_search_results.shape[0]} rows from {self.filename} for feature data")
 
-            # Save the chromatogram peak feature from the report using cols 'RT', 'RT.Start', 'RT.Stop', 'Precursor.Quantity', 'Q.Value'
-            # Multiply RT by 60 to convert from minutes to seconds
-            self.chromatogram_peak_feature = TransitionGroupFeature(consensusApex=precursor_search_results['RT'].iloc[0] * 60,  leftBoundary=precursor_search_results['RT.Start'].iloc[0] * 60, rightBoundary=precursor_search_results['RT.Stop'].iloc[0] * 60, areaIntensity=precursor_search_results['Precursor.Quantity'].iloc[0], qvalue=precursor_search_results['Q.Value'].iloc[0])
+                # Save the chromatogram peak feature from the report using cols 'RT', 'RT.Start', 'RT.Stop', 'Precursor.Quantity', 'Q.Value'
+                # Multiply RT by 60 to convert from minutes to seconds
+                self.chromatogram_peak_feature = TransitionGroupFeature(consensusApex=precursor_search_results['RT'].iloc[0] * 60,  leftBoundary=precursor_search_results['RT.Start'].iloc[0] * 60, rightBoundary=precursor_search_results['RT.Stop'].iloc[0] * 60, areaIntensity=precursor_search_results['Precursor.Quantity'].iloc[0], qvalue=precursor_search_results['Q.Value'].iloc[0])
 
-            # Save the mobilogram peak feature from the report using cols 'IM'
-            self.mobilogram_peak_feature = TransitionGroupFeature(leftBoundary=None, rightBoundary=None,consensusApex=precursor_search_results['IM'].iloc[0])
-
+                # Save the mobilogram peak feature from the report using cols 'IM'
+                self.mobilogram_peak_feature = TransitionGroupFeature(leftBoundary=None, rightBoundary=None,consensusApex=precursor_search_results['IM'].iloc[0])
+                
+                out[file] = {'chromatogram_peak_feature': self.chromatogram_peak_feature, 'mobilogram_peak_feature': self.mobilogram_peak_feature}
+                self.precursor_search_data = out           
             return self
 
         elif len(row_indices)-1==0:
             LOGGER.debug(f"Error: No feature results found for {peptide_tmp} {charge} in {self.filename}")
+            self.precursor_search_data = {f.filename : {'chromatogram_peak_feature': TransitionGroupFeature(None, None), 'mobilogram_peak_feature': TransitionGroupFeature(None, None)} for f in self.dataFiles} 
 
             return self
 

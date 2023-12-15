@@ -118,35 +118,40 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         st.sidebar.subheader("Search results")
         
         # Check to see if chromatogram peak feature apex is not none and mobilogram peak feature apex is not none to enable the use search results checkbox otherwise disable it
-        enable_use_search_results_checkbox = search_results.precursor_search_data[list(search_results.precursor_search_data.keys())[0]]['chromatogram_peak_feature'].consensusApex is not None
-        
-        # Checkbox to use search results RT apex and IM apex for extraction parameters
-        self.use_search_results_in_extraction = st.sidebar.checkbox("Use search result coordinates for extraction", value=True, disabled=not enable_use_search_results_checkbox)
-        
-        # Create tabs to display search results per file in search_results.precursor_search_data
-        search_results_tabs = st.sidebar.tabs([f"Run{i}" for i in range(1, len(search_results.precursor_search_data) + 1)])
-        for search_results_tab, (file, search_result) in zip(search_results_tabs, search_results.precursor_search_data.items()):
-            with search_results_tab:
-                with st.expander("Expand for search results", expanded=False):
-                    # Get chromatogram peak feature RT and boundaries from search results
-                    chrom_rt_apex = search_result['chromatogram_peak_feature'].consensusApex
-                    chrom_rt_start = search_result['chromatogram_peak_feature'].leftBoundary
-                    chrom_rt_end = search_result['chromatogram_peak_feature'].rightBoundary
-                    # Get chromatogram intensity and qvalue from search results
-                    chrom_intensity = search_result['chromatogram_peak_feature'].areaIntensity
-                    chrom_qvalue = search_result['chromatogram_peak_feature'].qvalue
-                    
-                    if self.is_ion_mobility_data:
-                        # Get mobilogram peak feature Im apex from search results
-                        mobilogram_im_apex = search_result['mobilogram_peak_feature'].consensusApex
+        if len(search_results.precursor_search_data) > 0:
+            enable_use_search_results_checkbox = search_results.precursor_search_data[list(search_results.precursor_search_data.keys())[0]]['chromatogram_peak_feature'].consensusApex is not None
+            
+            # Checkbox to use search results RT apex and IM apex for extraction parameters
+            self.use_search_results_in_extraction = st.sidebar.checkbox("Use search result coordinates for extraction", value=True, disabled=not enable_use_search_results_checkbox)
+            
+            # Create tabs to display search results per file in search_results.precursor_search_data
+            search_results_tabs = st.sidebar.tabs([f"Run{i}" for i in range(1, len(search_results.precursor_search_data) + 1)])
+            for search_results_tab, (file, search_result) in zip(search_results_tabs, search_results.precursor_search_data.items()):
+                with search_results_tab:
+                    with st.expander("Expand for search results", expanded=False):
+                        # Get chromatogram peak feature RT and boundaries from search results
+                        chrom_rt_apex = search_result['chromatogram_peak_feature'].consensusApex
+                        chrom_rt_start = search_result['chromatogram_peak_feature'].leftBoundary
+                        chrom_rt_end = search_result['chromatogram_peak_feature'].rightBoundary
+                        # Get chromatogram intensity and qvalue from search results
+                        chrom_intensity = search_result['chromatogram_peak_feature'].areaIntensity
+                        chrom_qvalue = search_result['chromatogram_peak_feature'].qvalue
+                        
+                        if self.is_ion_mobility_data:
+                            # Get mobilogram peak feature Im apex from search results
+                            mobilogram_im_apex = search_result['mobilogram_peak_feature'].consensusApex
 
-                    # Display in sidebar
-                    st.markdown(f"**{basename(file.filename)}**")
-                    st.markdown("**Chromatogram peak feature**")
-                    st.code(f"RT: {chrom_rt_apex}\nRT start: {chrom_rt_start}\nRT end: {chrom_rt_end}\nIntensity: {chrom_intensity}\nQvalue: {chrom_qvalue}", language="markdown")
-                    if self.is_ion_mobility_data:
-                        st.markdown("**Mobilogram peak feature**")
-                        st.code(f"IM: {mobilogram_im_apex}", language="markdown")
+                        # Display in sidebar
+                        st.markdown(f"**{basename(file.filename)}**")
+                        st.markdown("**Chromatogram peak feature**")
+                        st.code(f"RT: {chrom_rt_apex}\nRT start: {chrom_rt_start}\nRT end: {chrom_rt_end}\nIntensity: {chrom_intensity}\nQvalue: {chrom_qvalue}", language="markdown")
+                        if self.is_ion_mobility_data:
+                            st.markdown("**Mobilogram peak feature**")
+                            st.code(f"IM: {mobilogram_im_apex}", language="markdown")
+        else:
+            enable_use_search_results_checkbox = False
+            self.use_search_results_in_extraction = False
+            st.sidebar.info("No search results found. Load a search results file if you want to use search results for extraction parameters.")
 
     def get_mslevel_list(self) -> list:
         """
@@ -344,6 +349,8 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         num_cols : int
             The number of columns to display the plots in.
         """
+        if len(plot_dict) < num_cols:
+            num_cols = len(plot_dict)
         with plot_container:
             cols = st.columns(num_cols)
             for col, (file, p) in zip(cols, plot_dict.items()):

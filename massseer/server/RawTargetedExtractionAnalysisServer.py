@@ -151,7 +151,7 @@ class RawTargetedExtractionAnalysisServer:
         # Load feature file if available
         # Check if feature file ends with a tsv
         if self.massseer_gui.file_input_settings.feature_file_path.endswith('.tsv'):
-            self.feature_data = DiaNNLoader(self.massseer_gui.file_input_settings.feature_file_path, self.massseer_gui.verbose)
+            self.feature_data = DiaNNLoader(self.massseer_gui.file_input_settings.feature_file_path, self.massseer_gui.file_input_settings.raw_file_path_list, self.massseer_gui.verbose)
             self.feature_data.load_report()
         elif self.massseer_gui.file_input_settings.feature_file_path.endswith('.osw'):
             self.feature_data = OSWLoader(self.massseer_gui.file_input_settings.feature_file_path, self.massseer_gui.file_input_settings.raw_file_path_list, self.massseer_gui.verbose)
@@ -203,6 +203,7 @@ class RawTargetedExtractionAnalysisServer:
             with time_block() as elapsed_time:
                 peptide_coord = transition_list_ui.get_peptide_dict(self.feature_data.report)
                 targeted_extraction_params = transition_list_ui.get_targeted_extraction_params_dict()
+                self.targeted_extraction.clear()
                 LOGGER.debug(f"Targeted Extraction Paramters: {targeted_extraction_params}")
                 LOGGER.debug(f"Targeted Extraction Peptide Coordiantes: {peptide_coord}")
                 self.targeted_extraction(targeted_exp, peptide_coord, targeted_extraction_params)
