@@ -116,6 +116,7 @@ class RawTargetedExtractionAnalysisServer:
         _targeted_exp.reduce_targeted_spectra(_peptide_coord, config)
         
 
+    @conditional_decorator(lambda func: st.cache_resource(show_spinner="Getting extracted data...")(func), check_streamlit())
     def get_targeted_data(_self, _transition_list_ui, _targeted_exp: TargetedDIALoader):
         """
         Retrieves targeted data from a TargetedDIALoader object based on the provided transition list and settings.
@@ -132,6 +133,7 @@ class RawTargetedExtractionAnalysisServer:
         targeted_data = _targeted_exp.get_targeted_dataframe(_transition_list_ui.get_mslevel_list(), _self.transition_list.get_peptide_product_mz_list(_transition_list_ui.transition_settings.selected_peptide, _transition_list_ui.transition_settings.selected_charge), _transition_list_ui.target_transition_list)
         return targeted_data
     
+    @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading into transition group...")(func), check_streamlit())
     def load_transition_group(_self, _targeted_exp: TargetedDIALoader, target_transition_list: pd.DataFrame):
         """
         Load the transition group from the targeted experiment.
@@ -212,10 +214,14 @@ class RawTargetedExtractionAnalysisServer:
             st.write(f"Extracting data... Elapsed time: {elapsed_time()}")
             
             with time_block() as elapsed_time:
+                if transition_list_ui.submit_extraction_params:
+                    self.get_targeted_data.clear()
                 targeted_data = self.get_targeted_data(transition_list_ui, targeted_exp)
             st.write(f'Getting data as a pandas dataframe... Elapsed time: {elapsed_time()}')
             
             with time_block() as elapsed_time:
+                if transition_list_ui.submit_extraction_params:
+                    self.load_transition_group.clear()
                 transition_group_dict = self.load_transition_group(targeted_exp, transition_list_ui.target_transition_list)
             st.write(f'Creating TransitionGroup... Elapsed time: {elapsed_time()}')
             
