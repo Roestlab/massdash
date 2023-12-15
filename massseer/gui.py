@@ -66,12 +66,10 @@ def main(verbose):
         
     elif st.session_state.workflow == "raw_data" and st.session_state.clicked['load_toy_dataset_raw_data']:
         #TODO: Create small toy example 
-        # transition_list_file_path = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/josh/diann/K562-Library-Default_osw_6Frags_diann.tsv"
-        # raw_file_path_input = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/josh/90min-SP-30cm-2um-K562-100nL-25ng_DIA_Slot1-5_1_550_3-7-2021.mzML"
-        # diann_report_file_path_input = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/josh/diann/jsc718.5808924.0/report.tsv"
-        transition_list_file_path = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/spyogenes/openswath/lib/SpyogenesAssayLibrary_decoy_20231207.pqp"
-        raw_file_path_input = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/spyogenes/raw/"
-        diann_report_file_path_input = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/spyogenes/openswath/osw/merged.osw"
+        transition_list_file_path = ""
+        raw_file_path_input = ""
+        diann_report_file_path_input = ""
+        st.stop("Toy dataset not available yet.")
         
         massseer_gui.show_file_input_settings(diann_report_file_path_input, raw_file_path_input, transition_list_file_path)
 
