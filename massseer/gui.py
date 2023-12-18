@@ -5,6 +5,7 @@ from PIL import Image
 # Internal UI modules
 from massseer.ui.MassSeerGUI import MassSeerGUI
 from massseer.server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
+from massseer.server.SearchResultsAnalysisServer import SearchResultsAnalysisServer
 
 # Confit
 # There currently is warning with the icon size for some reason, not sure why
@@ -50,6 +51,20 @@ elif st.session_state.workflow == "raw_data" and st.session_state.clicked['load_
     st.write("In development, coming soon!")
     pass
 
+if st.session_state.workflow == "search_results_analysis" and st.session_state.clicked['load_toy_dataset_search_results_analysis']:
+    # feature_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
+    feature_file_path = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/spyogenes/openswath/osw/merged.osw"
+    feature_file_type = "OpenSwath"
+    
+    search_results_entries_dict = {'entry_1': {'search_results_file_path': feature_file_path, 'search_results_exp_name': 'test_data', 'search_results_file_type': feature_file_type}}
+    
+    massseer_gui.show_file_input_settings(feature_file_entries_dict=search_results_entries_dict)
+    
+    # Remove welcome message container if dataset is loaded
+    massseer_gui.welcome_container.empty()
+
+    st.session_state.WELCOME_PAGE_STATE = False
+
 if st.session_state.workflow == "xic_data" and massseer_gui.osw_file_path!="*.osw" and massseer_gui.sqmass_file_path_input!="*.sqMass" and not st.session_state.clicked['load_toy_dataset_xic_data']:
 
     massseer_gui.show_file_input_settings(massseer_gui.osw_file_path, massseer_gui.sqmass_file_path_input)
@@ -66,6 +81,10 @@ if st.session_state.workflow == "xic_data" and not st.session_state.WELCOME_PAGE
 if st.session_state.workflow == "raw_data" and not st.session_state.WELCOME_PAGE_STATE:
     st.write("In development, coming soon!")
     pass
+
+if st.session_state.workflow == "search_results_analysis" and not st.session_state.WELCOME_PAGE_STATE:
+    show_search_results_analysis = SearchResultsAnalysisServer(massseer_gui)
+    show_search_results_analysis.main()
 
 # OpenMS Siderbar Bottom Logo
 st.sidebar.image(OPENMS_LOGO)

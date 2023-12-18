@@ -2,8 +2,10 @@ import streamlit as st
 
 from massseer.ui.FileInputXICDataUISettings import FileInputXICDataUISettings
 from massseer.ui.FileInputRawDataUISettings import FileInputRawDataUISettings
+from massseer.ui.FileInputSearchResultsAnalysisUISettings import FileInputSearchResultsAnalysisUISettings
 from massseer.ui.ExtractedIonChromatogramAnalysisFormUI import ExtractedIonChromatogramAnalysisFormUI
 from massseer.ui.RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
+from massseer.ui.SearchResultsAnalysisFormUI import SearchResultsAnalysisFormUI
 
 from massseer.util import copy_attributes
 
@@ -36,7 +38,7 @@ class MassSeerGUI:
         # This is needed because streamlit buttons return True when clicked and then default back to False.
         # See: https://discuss.streamlit.io/t/how-to-make-st-button-content-stick-persist-in-its-own-section/45694/2
         if 'clicked' not in st.session_state:
-            st.session_state.clicked  = {'load_toy_dataset_xic_data':False, 'load_toy_dataset_raw_data':False}
+            st.session_state.clicked  = {'load_toy_dataset_xic_data':False, 'load_toy_dataset_raw_data':False, 'load_toy_dataset_search_results_analysis':False}
             
         if 'workflow' not in st.session_state:
             st.session_state.workflow = None
@@ -62,7 +64,7 @@ class MassSeerGUI:
                     st.write("This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.")
 
                     # Tabs for different data workflows
-                    tab1, tab2 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data"])
+                    tab1, tab2, tab3 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data", "Search Results Analysis"])
 
                     with tab1:
                         xic_form = ExtractedIonChromatogramAnalysisFormUI()
@@ -73,10 +75,15 @@ class MassSeerGUI:
                         raw_data_form = RawTargetedExtractionAnalysisFormUI()
                         raw_data_form.create_ui()
                         copy_attributes(raw_data_form, self)
+                        
+                    with tab3:
+                        search_results_form = SearchResultsAnalysisFormUI()
+                        search_results_form.create_ui()
+                        copy_attributes(search_results_form, self)
 
         return self
 
-    def show_file_input_settings(self, feature_file_path=None, xic_file_path=None, transition_list_file_path=None):
+    def show_file_input_settings(self, feature_file_path=None, xic_file_path=None, transition_list_file_path=None, feature_file_entries_dict: dict=None):
         """
         Displays the file input settings.
 
@@ -93,5 +100,8 @@ class MassSeerGUI:
             self.file_input_settings.get_sqmass_files()
         elif st.session_state.workflow == "raw_data":
             self.file_input_settings = FileInputRawDataUISettings()
-            self.file_input_settings.create_ui(transition_list_file_path, xic_file_path, feature_file_path)
+            self.file_input_settings.create_ui(transition_list_file_path, xic_file_path, feature_file_path)     
+        elif st.session_state.workflow == "search_results_analysis":
+            self.file_input_settings = FileInputSearchResultsAnalysisUISettings()
+            self.file_input_settings.create_ui(feature_file_entries_dict)
         st.sidebar.divider()

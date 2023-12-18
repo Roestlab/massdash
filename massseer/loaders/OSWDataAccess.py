@@ -38,7 +38,7 @@ import pandas as pd
 import sqlite3
 from massseer.util import check_sqlite_column_in_table, check_sqlite_table
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from typing import List
+from typing import List, Literal
 
 class OSWDataAccess:
     """
@@ -215,6 +215,194 @@ class OSWDataAccess:
             return self._getTransitionsFromPrecursorId(precursor_id)
         else:
             return pd.DataFrame(columns=['TRANSITION_ID', 'ANNOTATION'])
+
+    def get_score_tables(self):
+        """
+        Retrieves the score tables from the database.
+
+        Returns:
+            list: The score tables.
+        """
+        stmt = "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'SCORE%'"
+        data = pd.read_sql(stmt, self.conn)
+
+        return data["name"].tolist()
+    
+    def get_score_table_contexts(self, score_table: str):
+        """
+        Retrieves the score contexts from the database.
+
+        Returns:
+            list: The score contexts.
+        """
+        stmt = f"SELECT DISTINCT CONTEXT FROM {score_table}"
+        data = pd.read_sql(stmt, self.conn)
+
+        return data["CONTEXT"].tolist()
+
+    def get_score_distribution(self, score_table: str, context: Literal['run-specific', 'experiment-wide', 'global'] = None):
+        """
+        Retrieves the score distribution for a given score table.
+
+        Args:
+            score_table (str): The score table.
+
+        Returns:
+            pandas.DataFrame: The score distribution.
+        """
+        if score_table == "SCORE_MS2":
+            stmt = '''
+            SELECT FEATURE_MS2.*,
+                FEATURE.EXP_RT,
+                FEATURE.RUN_ID,
+                PRECURSOR.VAR_PRECURSOR_CHARGE,
+                PRECURSOR.DECOY,
+                VAR_TRANSITION_SCORE.VAR_TRANSITION_NUM_SCORE,
+                SCORE_MS2.SCORE,
+                SCORE_MS2.RANK,
+                SCORE_MS2.PVALUE,
+                SCORE_MS2.QVALUE,
+                SCORE_MS2.PEP,
+                RUN_ID || '_' || PRECURSOR_ID AS GROUP_ID
+            FROM FEATURE_MS2
+            INNER JOIN
+            (SELECT RUN_ID,
+                    ID,
+                    PRECURSOR_ID,
+                    EXP_RT
+            FROM FEATURE) AS FEATURE ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+            INNER JOIN
+            (SELECT ID,
+                    CHARGE AS VAR_PRECURSOR_CHARGE,
+                    DECOY
+            FROM PRECURSOR) AS PRECURSOR ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+            INNER JOIN
+            (SELECT PRECURSOR_ID AS ID,
+                    COUNT(*) AS VAR_TRANSITION_NUM_SCORE
+            FROM TRANSITION_PRECURSOR_MAPPING
+            INNER JOIN TRANSITION ON TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID = TRANSITION.ID
+            WHERE DETECTING==1
+            GROUP BY PRECURSOR_ID) AS VAR_TRANSITION_SCORE ON FEATURE.PRECURSOR_ID = VAR_TRANSITION_SCORE.ID
+            INNER JOIN SCORE_MS2 ON FEATURE.ID = SCORE_MS2.FEATURE_ID
+            WHERE RANK == 1
+            ORDER BY RUN_ID,
+                    PRECURSOR.ID ASC,
+                    FEATURE.EXP_RT ASC;
+            '''
+        elif score_table == "SCORE_MS1":
+            stmt = '''
+            SELECT FEATURE_MS1*,
+                FEATURE.EXP_RT,
+                FEATURE.RUN_ID,
+                PRECURSOR.VAR_PRECURSOR_CHARGE,
+                PRECURSOR.DECOY,
+                SCORE_MS1.SCORE,
+                SCORE_MS1.RANK,
+                SCORE_MS1.PVALUE,
+                SCORE_MS1.QVALUE,
+                SCORE_MS1.PEP,
+                RUN_ID || '_' || PRECURSOR_ID AS GROUP_ID
+            FROM FEATURE_MS1
+            INNER JOIN
+            (SELECT RUN_ID,
+                    ID,
+                    PRECURSOR_ID,
+                    EXP_RT
+            FROM FEATURE) AS FEATURE ON FEATURE_MS1.FEATURE_ID = FEATURE.ID
+            INNER JOIN
+            (SELECT ID,
+                    CHARGE AS VAR_PRECURSOR_CHARGE,
+                    DECOY
+            FROM PRECURSOR) AS PRECURSOR ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+            INNER JOIN SCORE_MS1 ON FEATURE.ID = SCORE_MS1.FEATURE_ID
+            WHERE RANK == 1
+            ORDER BY RUN_ID,
+                    PRECURSOR.ID ASC,
+                    FEATURE.EXP_RT ASC;
+            '''
+        elif score_table == "SCORE_TRANSITION":
+            stmt = '''
+            SELECT TRANSITION.DECOY AS DECOY,
+                FEATURE_TRANSITION.*,
+                PRECURSOR.CHARGE AS VAR_PRECURSOR_CHARGE,
+                TRANSITION.VAR_PRODUCT_CHARGE AS VAR_PRODUCT_CHARGE,
+                SCORE_TRANSITION.SCORE AS SCORE,
+                SCORE_TRANSITION.RANK AS RANK,
+                SCORE_TRANSITION.PVALUE AS PVALUE,
+                SCORE_TRANSITION.QVALUE AS QVALUE,
+                SCORE_TRANSITION.PEP AS PEP,
+                RUN_ID || '_' || FEATURE_TRANSITION.FEATURE_ID || '_' || PRECURSOR_ID || '_' || FEATURE_TRANSITION.TRANSITION_ID AS GROUP_ID
+            FROM FEATURE_TRANSITION
+            INNER JOIN
+            (SELECT RUN_ID,
+                    ID,
+                    PRECURSOR_ID,
+                    EXP_RT
+            FROM FEATURE) AS FEATURE ON FEATURE_TRANSITION.FEATURE_ID = FEATURE.ID
+            INNER JOIN PRECURSOR ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+            INNER JOIN SCORE_TRANSITION ON FEATURE_TRANSITION.FEATURE_ID = SCORE_TRANSITION.FEATURE_ID
+            AND FEATURE_TRANSITION.TRANSITION_ID = SCORE_TRANSITION.TRANSITION_ID
+            INNER JOIN
+            (SELECT ID,
+                    CHARGE AS VAR_PRODUCT_CHARGE,
+                    DECOY
+            FROM TRANSITION) AS TRANSITION ON FEATURE_TRANSITION.TRANSITION_ID = TRANSITION.ID
+            ORDER BY RUN_ID,
+                    PRECURSOR.ID,
+                    FEATURE.EXP_RT,
+                    TRANSITION.ID;
+            '''
+        elif score_table == "SCORE_PEPTIDE":
+            stmt = f'''
+            SELECT 
+                SCORE_PEPTIDE.CONTEXT,
+                RUN.FILENAME,
+                PEPTIDE.UNMODIFIED_SEQUENCE,
+                PEPTIDE.MODIFIED_SEQUENCE,
+                PEPTIDE.DECOY,
+                SCORE_PEPTIDE.SCORE,
+                SCORE_PEPTIDE.PVALUE,
+                SCORE_PEPTIDE.QVALUE,
+                SCORE_PEPTIDE.PEP
+            FROM SCORE_PEPTIDE
+            INNER JOIN PEPTIDE ON PEPTIDE.ID = SCORE_PEPTIDE.PEPTIDE_ID
+            LEFT JOIN RUN ON RUN.ID = SCORE_PEPTIDE.RUN_ID
+            WHERE SCORE_PEPTIDE.CONTEXT = '{context}'
+            '''
+        elif score_table == "SCORE_IPF":
+            stmt = '''
+            SELECT 
+                PEPTIDE.UNMODIFIED_SEQUENCE,
+                PEPTIDE.MODIFIED_SEQUENCE,
+                PEPTIDE.DECOY,
+                SCORE_IPF.PRECURSOR_PEAKGROUP_PEP,
+                SCORE_IPF.QVALUE,
+                SCORE_IPF.PEP
+            FROM SCORE_IPF
+            INNER JOIN PEPTIDE ON PEPTIDE.ID = SCORE_IPF.PEPTIDE_ID
+            '''
+        elif score_table == "SCORE_PROTEIN":
+            stmt = f'''
+            SELECT
+                SCORE_PROTEIN.CONTEXT,
+                RUN.FILENAME,
+                PROTEIN.PROTEIN_ACCESSION,
+                PROTEIN.DECOY,
+                SCORE_PROTEIN.SCORE,
+                SCORE_PROTEIN.PVALUE,
+                SCORE_PROTEIN.QVALUE,
+                SCORE_PROTEIN.PEP
+            FROM SCORE_PROTEIN
+            INNER JOIN PROTEIN ON PROTEIN.ID = SCORE_PROTEIN.PROTEIN_ID
+            LEFT JOIN RUN ON RUN.ID = SCORE_PROTEIN.RUN_ID
+            WHERE SCORE_PROTEIN.CONTEXT = '{context}'
+            '''
+        else:
+            raise ValueError(f"Score table {score_table} not supported.")
+        
+        data = pd.read_sql_query(stmt, self.conn)
+
+        return data
 
     ##### UNUSED #####
     def get_top_rank_precursor_features_across_runs(self):
