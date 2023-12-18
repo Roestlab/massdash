@@ -42,9 +42,9 @@ class SearchResultsAnalysisServer:
         feature_file_entries_dict : dict
             A dictionary containing the search result entries.
         """
-        print(feature_file_entries)
         data_access_dict = {}
         for entry, entry_data in feature_file_entries.items():
+            print(f"Loading search results from {entry_data['search_results_file_path']}")
             if entry_data['search_results_file_type'] == "OpenSwath":
                 data_access = OSWDataAccess(entry_data['search_results_file_path'])
                 data_access_dict[entry] = data_access   
@@ -63,6 +63,7 @@ class SearchResultsAnalysisServer:
         """
         score_distributions_dict = {}
         for entry, data_access in _data_access_dict.items():
+            print(f"Getting score distribution for {entry}")
             score_distributions_dict[entry] = data_access.get_score_distribution(score_table=score_column, context=score_table_context)
         return score_distributions_dict
                 
@@ -94,11 +95,20 @@ class SearchResultsAnalysisServer:
                 self.analysis_type.show_score_table_contexts(search_results_access_dict)
                 score_df = self.load_score_distribution_data(search_results_access_dict, self.analysis_type.selected_score_table, self.analysis_type.selected_score_table_context)
             self.analysis_type.show_score_distribution_score_colums(score_df)
+            
+            search_results_plots_container = st.container()
+            search_results_plots_container.empty()
+            
+            search_results_tabs = st.tabs([entry for entry in score_df.keys()])
+            
+            counter =  0
             for entry, df in score_df.items():
-                
+                print(f"Entry: {entry}")
                 plotter = SearchResultAnalysisPlots()
                 pobj = plotter.plot_score_distributions(df, self.analysis_type.selected_score_col)
-                st.bokeh_chart(pobj, use_container_width=True)
-                
-                st.dataframe(df)
+                with search_results_plots_container:
+                    st.bokeh_chart(pobj, use_container_width=True)
+                with search_results_tabs[counter]:
+                    st.dataframe(df)
+                    counter += 1
 
