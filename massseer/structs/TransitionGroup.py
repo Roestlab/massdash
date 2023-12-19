@@ -1,5 +1,5 @@
 from massseer.structs.Chromatogram import Chromatogram
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 import pyopenms as po
 from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
@@ -10,13 +10,18 @@ class TransitionGroup:
     '''
     Class for Storing a transition group
     '''
-    def __init__(self, precursorChroms: List[Chromatogram], transitionChroms: List[Chromatogram], precursorMobilos: Optional[List[Mobilogram]], transitionMobilos: Optional[List[Mobilogram]], precursorSpectra: Optional[List[Spectrum]], transitionSpectra: Optional[List[Spectrum]]):
-        self.precursorChroms = precursorChroms
-        self.transitionChroms = transitionChroms
-        self.precursorMobilos = precursorMobilos
-        self.transitionMobilos = transitionMobilos
-        self.precursorSpectra = precursorSpectra
-        self.transitionSpectra = transitionSpectra
+    def __init__(self, precursorData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum], List[FeatureMap]],
+                 transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum], List[FeatureMap]]):
+        self.precursorData = precursorData
+        self.transitionData = transitionData
+        if len(transitionData) > 0:
+            self.dataType = type(transitionData[0])
+        elif len(precursorData) > 0:
+            self.dataType = type(precursorData[0])
+        else: 
+            raise ValueError("Precursor and transition data cannot both be empty")
+        if len(precursorData) > 0 and len(transitionData) > 0:
+            assert (self.dataType == type(transitionData[0]), "Precursor and transition data must be of the same type")
   
 
     def to_pyopenms(self, includePrecursors=True):
@@ -24,18 +29,18 @@ class TransitionGroup:
         Converts the TransitionGroup to an OpenMS TransitionGroup
         '''
         transitionGroup = po.MRMTransitionGroupCP()
-        for i in range(len(self.transitionChroms)):
+        for i in range(len(self.transitionData)):
             transition = po.ReactionMonitoringTransition()
             transition.setNativeID(str(i))
-            chrom = self.transitionChroms[i].to_pyopenms(id=str(i))
+            chrom = self.transitionData[i].to_pyopenms(id=str(i))
             transitionGroup.addChromatogram(chrom, chrom.getNativeID())
             transitionGroup.addTransition(transition, transition.getNativeID())
 
         if includePrecursors:
-            for i in range(len(self.precursorChroms)):
+            for i in range(len(self.precursorData)):
                 precursor = po.ReactionMonitoringTransition()
                 precursor.setNativeID('p' + str(i))
-                chrom = self.precursorChroms[i].to_pyopenms(id='p' + str(i))
+                chrom = self.precursorData[i].to_pyopenms(id='p' + str(i))
                 transitionGroup.addPrecursorChromatogram(chrom, chrom.getNativeID())
         return transitionGroup
     
@@ -53,7 +58,7 @@ class TransitionGroup:
 
         highest_intensity = 0.0  # Initialize with a default value
         for c in chroms:
-            intens = c.max(boundary)
+            intens = c.max(boundary)[1]
             if intens > highest_intensity:
                 highest_intensity = intens
 
@@ -62,11 +67,11 @@ class TransitionGroup:
 
     def _resolveLevel(self, level):
         if level=='ms1':
-            return self.precursorChroms
+            return self.precursorData
         elif level=='ms2':
-            return self.transitionChroms
+            return self.transitionData
         elif level=='ms1ms2':
-            return self.precursorChroms + self.transitionChroms
+            return self.precursorData + self.transitionData
         else:
             raise ValueError("Level must be one of ['ms1', 'ms2', 'ms1ms2']")
 
@@ -123,7 +128,7 @@ class TransitionGroup:
         Returns:
             str: A string representation of the transition group.
         '''
-        return f"{'-'*8} TransitionGroup {'-'*8}\nprecursor chromatograms: {len(self.precursorChroms)}\ntransition chromatograms: {len(self.transitionChroms)}\nprecursor mobilograms: {len(self.precursorMobilos)}\ntransition mobilograms: {len(self.transitionMobilos)}\nprecursor spectra: {len(self.precursorSpectra)}\ntransition spectra: {len(self.transitionSpectra)}"
+        return f"{'-'*8} TransitionGroup {'-'*8}\nprecursor chromatograms: {len(self.precursorData)}\ntransition chromatograms: {len(self.transitionData)}\nprecursor mobilograms: {len(self.precursorMobilos)}\ntransition mobilograms: {len(self.transitionMobilos)}\nprecursor spectra: {len(self.precursorSpectra)}\ntransition spectra: {len(self.transitionSpectra)}"
 
     def empty(self) -> bool:
         """
@@ -132,9 +137,10 @@ class TransitionGroup:
         Returns:
             bool: True if all of the chromatograms, mobilograms, and spectra are empty, False otherwise.
         """
-        return not any(chrom.empty() for chrom in self.precursorChroms) and any(chrom.empty() for chrom in self.transitionChroms) and any(mobil.empty() for mobil in self.precursorMobilos) and any(mobil.empty() for mobil in self.transitionMobilos) and any(spec.empty() for spec in self.precursorSpectra) and any(spec.empty() for spec in self.transitionSpectra)
+        return not any(chrom.empty() for chrom in self.precursorData) and any(chrom.empty() for chrom in self.transitionData) and any(mobil.empty() for mobil in self.precursorMobilos) and any(mobil.empty() for mobil in self.transitionMobilos) and any(spec.empty() for spec in self.precursorSpectra) and any(spec.empty() for spec in self.transitionSpectra)
 
 
+    '''
     @classmethod
     def from_feature_map(cls, feature_map: FeatureMap):
         """
@@ -146,8 +152,8 @@ class TransitionGroup:
         Returns:
             cls: A TransitionGroup object.
         """
-        precursorChroms = feature_map.get_precursor_chromatograms()
-        transitionChroms = feature_map.get_transition_chromatograms()
+        precursorData = feature_map.get_precursor_chromatograms()
+        transitionData = feature_map.get_transition_chromatograms()
         if feature_map.has_im:
             precursorMobilos = feature_map.get_precursor_mobilograms()
             transitionMobilos = feature_map.get_transition_mobilograms()
@@ -156,4 +162,6 @@ class TransitionGroup:
             transitionMobilos = [Mobilogram([], [], 'transition mobilogram')]
         precursorSpectra = feature_map.get_precursor_spectra()
         transitionSpectra = feature_map.get_transition_spectra()
-        return cls(precursorChroms, transitionChroms, precursorMobilos, transitionMobilos, precursorSpectra, transitionSpectra)
+        return cls(precursorData, transitionData, precursorMobilos, transitionMobilos, precursorSpectra, transitionSpectra)
+
+    '''

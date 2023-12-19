@@ -21,7 +21,7 @@ class TestMRMTransitionGroupPicker(TestCase):
         chrom_2 = Chromatogram(rtdata_2, intdata_2)
         chrom_ms1 = Chromatogram(rtdata_2 + 0.5, ms1_intdata)
 
-        self.tg_1 = TransitionGroup([chrom_ms1], [chrom_1, chrom_2], [], [], [], [])
+        self.tg_1 = TransitionGroup([chrom_ms1], [chrom_1, chrom_2])
 
         # Initialize the second transition group (based on OpenMS MRMTransitioonGroupPicker_test)
         rtdata = np.arange(0, 30)
@@ -34,7 +34,7 @@ class TestMRMTransitionGroupPicker(TestCase):
         chrom_2 = Chromatogram(rtdata, intdata_2)
         chrom_3 = Chromatogram(rtdata, intdata_3)
 
-        self.tg_2 = TransitionGroup([], [chrom_1, chrom_2, chrom_3], [], [], [], [])
+        self.tg_2 = TransitionGroup([], [chrom_1, chrom_2, chrom_3])
 
         rt_arr_short = np.arange(1, 6)
         rt_arr = np.arange(1, 26)
@@ -53,12 +53,12 @@ class TestMRMTransitionGroupPicker(TestCase):
 
         ### Create empty transition group for testing ###
         chrom_empty = Chromatogram(rt_arr_short, empty_intens)
-        self.transition_group_empty = TransitionGroup([chrom_empty], [], [], [], [], [])
+        self.transition_group_empty = TransitionGroup([chrom_empty],[])
 
 
          
         ### Create Chromatograms for testing ####
-        self.tg_3 = TransitionGroup([chrom_1], [chrom_3], [], [], [], []) # only peak in precursor signal
+        self.tg_3 = TransitionGroup([chrom_1], [chrom_3])# only peak in precursor signal
         self.chrom_single_peak = Chromatogram(rt_arr, intens_single_peak)
         self.chrom_multiple_peaks = Chromatogram(rt_arr_long, intens_multiple_peaks)
 
