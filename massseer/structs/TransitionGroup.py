@@ -92,21 +92,25 @@ class TransitionGroup:
 
         return integrated_intensity
     
-    def flatten(self, level: str = 'ms2') -> Chromatogram:
+    def flatten(self, level: str = 'ms2'):
         '''
-        Flatten the TransitionGroup into a single Chromatogram
+        Flatten the TransitionGroup into a single Data1D object
         '''
-        chroms = self._resolveLevel(level)
-        rt = []
-        intensity = []
-        for c in chroms:
-            rt.extend(c.rt)
-            intensity.extend(c.intensity)
-        return Chromatogram(rt, intensity)
+        if self.dataType == FeatureMap:
+            raise NotImplementedError("Flattening FeatureMaps is not yet implemented")
+        else:
+            data1D = self._resolveLevel(level)
+            data = []
+            intensity = []
+            for c in data1D:
+                data.extend(c.data)
+                intensity.extend(c.intensity)
+            return self.dataType(data, intensity)
+    
 
     def median(self, boundary: Optional[Tuple[float, float]] = None, level: Optional[str] = 'ms2') -> float:
         """
-        Calculate the median intensity of a given boundary in the chromatogram data.
+        Calculate the median intensity of a given boundary in the 1D data.
 
         Args:
             chrom_data (list): A list of tuples containing the retention time and intensity values of a chromatogram.
@@ -116,11 +120,12 @@ class TransitionGroup:
             float: The median intensity value of the data points within the given boundary.
         """
 
-        chrom_flattened = self.flatten(level)
+        data_flattened = self.flatten(level)
         if boundary is not None:
-            chrom_flattened = chrom_flattened.filterChromatogram(boundary)
+            data_flattened = data_flattened.filter(boundary)
 
-        return chrom_flattened.median()
+        return data_flattened.median()
+
     def __str__(self) -> str:
         '''
         Returns a string representation of the transition group.
