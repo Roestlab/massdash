@@ -4,14 +4,13 @@ import pyopenms as po
 from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
 from massseer.structs.FeatureMap import FeatureMap
-import pandas as pd
 
 class TransitionGroup:
     '''
     Class for Storing a transition group
     '''
-    def __init__(self, precursorData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum], List[FeatureMap]],
-                 transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum], List[FeatureMap]]):
+    def __init__(self, precursorData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]],
+                 transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]]):
         self.precursorData = precursorData
         self.transitionData = transitionData
         if len(transitionData) > 0:
@@ -143,30 +142,3 @@ class TransitionGroup:
             bool: True if all of the chromatograms, mobilograms, and spectra are empty, False otherwise.
         """
         return not any(chrom.empty() for chrom in self.precursorData) and any(chrom.empty() for chrom in self.transitionData) and any(mobil.empty() for mobil in self.precursorMobilos) and any(mobil.empty() for mobil in self.transitionMobilos) and any(spec.empty() for spec in self.precursorSpectra) and any(spec.empty() for spec in self.transitionSpectra)
-
-
-    '''
-    @classmethod
-    def from_feature_map(cls, feature_map: FeatureMap):
-        """
-        Creates a TransitionGroup object from a pandas DataFrame containing feature information.
-
-        Args:
-            feature_map (FeatureMap): A FeatureMap containing mass spec feature information.
-
-        Returns:
-            cls: A TransitionGroup object.
-        """
-        precursorData = feature_map.get_precursor_chromatograms()
-        transitionData = feature_map.get_transition_chromatograms()
-        if feature_map.has_im:
-            precursorMobilos = feature_map.get_precursor_mobilograms()
-            transitionMobilos = feature_map.get_transition_mobilograms()
-        else:
-            precursorMobilos = [Mobilogram([], [], 'precursor mobilogram')]
-            transitionMobilos = [Mobilogram([], [], 'transition mobilogram')]
-        precursorSpectra = feature_map.get_precursor_spectra()
-        transitionSpectra = feature_map.get_transition_spectra()
-        return cls(precursorData, transitionData, precursorMobilos, transitionMobilos, precursorSpectra, transitionSpectra)
-
-    '''

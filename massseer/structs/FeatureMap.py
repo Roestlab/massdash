@@ -4,10 +4,17 @@ from massseer.structs.Spectrum import Spectrum
 from typing import List
 import pandas as pd
 import numpy as np
+from massseer.structs.TransitionGroup import TransitionGroup
 
 class FeatureMap:
     '''
-    Class for storing a feature map
+    Class for storing a feature map a feature map only contains the following columns:
+    - mz: mass to charge ratio
+    - rt: retention time
+    - im: ion mobility
+    - int: intensity
+    - ms_level: 1 for precursor, 2 for fragment
+    - annotation: annotation of precursor/fragment
     '''
     def __init__(self, feature_df: pd.DataFrame):
         self.feature_df = feature_df
@@ -51,6 +58,32 @@ class FeatureMap:
 
         return x_arr, int_arr
 
+    def to_chromatograms(self) -> TransitionGroup:
+        '''
+        Convert the feature map to a TransitionGroup object storing chromatograms
+
+        Returns:
+            TransitionGroup: A TransitionGroup object storing chromatograms
+        '''
+        return TransitionGroup(self.get_precursor_chromatograms(), self.get_transition_chromatograms())
+    
+    def to_mobilograms(self) -> TransitionGroup:
+        '''
+        Convert the feature map to a TransitionGroup object storing mobilograms
+        
+        Returns:
+            TransitionGroup: A TransitionGroup object storing mobilograms
+        '''
+        return TransitionGroup(self.get_precursor_mobilograms(), self.get_transition_mobilograms())
+    
+    def to_spectra(self) -> TransitionGroup:
+        '''
+        Convert the feature map to a TransitionGroup object storing spectra
+        
+        Returns:
+            TransitionGroup: A TransitionGroup object storing spectra
+        '''
+        return TransitionGroup(self.get_precursor_spectra(), self.get_transition_spectra())
 
     def get_precursor_chromatograms(self) -> List[Chromatogram]:
         '''
@@ -60,12 +93,15 @@ class FeatureMap:
             return [Chromatogram(np.array([]), np.array([]), 'No precursor chromatograms found')]
         # Filter the feature map to only precursor chromatograms
         precursor_df = self.feature_df[self.feature_df['ms_level']==1]
+        if precursor_df.shape[0] == 0:
+            return [Chromatogram(np.array([]), np.array([]), 'No precursor chromatograms found')]
         # If ion mobility data is present, compute mean of intensities across ion mobility for retention time
-        if 'im' in precursor_df.columns:
+        if self.has_im:
             rt_arr, int_arr = FeatureMap.average_intensity_across_two_dimensions(precursor_df)
         else:
             rt_arr = precursor_df['rt'].to_numpy()
             int_arr = precursor_df['int'].to_numpy()
+        
         precursor_chromatogram = Chromatogram(rt_arr, int_arr, f'{pd.unique(precursor_df["Annotation"].values)[0]}')
         return [precursor_chromatogram]
 
@@ -75,6 +111,7 @@ class FeatureMap:
         '''
         if self.feature_df.shape[0] == 0:
             return [Chromatogram(np.array([]), np.array([]), 'No transition chromatograms found')]
+
         # Filter the feature map to only transition chromatograms
         transition_df = self.feature_df[self.feature_df['ms_level']==2]
         transition_chromatograms = []
@@ -82,11 +119,12 @@ class FeatureMap:
             transition_df_tmp = transition_df[transition_df['product_mz']==transition]
 
             # If ion mobility data is present, compute mean of intensities across ion mobility for retention time
-            if 'im' in transition_df_tmp.columns and transition_df_tmp.shape[0] > 1:
+            if self.has_im  and transition_df_tmp.shape[0] > 1:
                 rt_arr, int_arr = FeatureMap.average_intensity_across_two_dimensions(transition_df_tmp)
             else:
                 rt_arr = transition_df_tmp['rt'].to_numpy()
                 int_arr = transition_df_tmp['int'].to_numpy()
+
             transition_chromatogram = Chromatogram(rt_arr, int_arr, f'{pd.unique(transition_df_tmp["Annotation"].values)[0]}')
             transition_chromatograms.append(transition_chromatogram)
         return transition_chromatograms
