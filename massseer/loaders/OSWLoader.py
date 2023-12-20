@@ -5,7 +5,7 @@ from typing import List, Dict, Union
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 # Loaders
 from massseer.loaders.access.OSWDataAccess import OSWDataAccess
-from massseer.loaders.mzMLLoader import mzMLLoader
+from massseer.loaders.access.MzMLDataAccess import mzMLLoader
 # Utils
 from massseer.util import LOGGER, file_basename_without_extension
 

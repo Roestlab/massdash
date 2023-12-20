@@ -9,7 +9,7 @@ from massseer.server.util import check_ion_mobility
 # Internal
 from massseer.util import LOGGER, method_timer, code_block_timer
 
-class mzMLLoader():
+class MzMLDataAccess():
     """
     Class for data input and output operations
     
