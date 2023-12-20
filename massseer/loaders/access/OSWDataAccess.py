@@ -50,13 +50,14 @@ class OSWDataAccess(GenericResultsAccess):
         c (sqlite3.Cursor): A cursor for executing SQL statements on the database.
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename: str, verbose: bool=False):
         """
         Initializes a new instance of the OSWDataAccess class.
 
         Args:
             filename (str): The path to the SQLite database file.
         """
+        super().__init__(filename, verbose)
         self.conn = sqlite3.connect(filename)
         self.c = self.conn.cursor()
         
