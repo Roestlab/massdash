@@ -4,11 +4,11 @@ import logging
 import streamlit as st
 from PIL import Image
 
-# UI 
-from massseer.ui.MassSeerGUI import MassSeerGUI
 # Server
 from massseer.server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
 from massseer.server.RawTargetedExtractionAnalysisServer import RawTargetedExtractionAnalysisServer
+# UI 
+from massseer.ui.MassSeerGUI import MassSeerGUI
 # Utils
 from massseer.util import LOGGER
 
