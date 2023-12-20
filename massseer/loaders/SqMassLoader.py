@@ -77,21 +77,6 @@ class SqMassLoader(GenericLoader):
             out[t] = TransitionGroup(precursor_chroms, transition_chroms, [], [], [], [])
         return out
 
-    def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> List[TransitionGroupFeature]:
-        '''
-        Loads a PeakFeature object from the results file
-        Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
-        Returns:
-            PeakFeature: PeakFeature object containing peak boundaries, intensity and confidence
-        '''
-        out = {}
-        for t in self.dataFiles_str:
-            runname = basename(t).split('.')[0]
-            out[t] = self.rsltsFile.getTransitionGroupFeatures(runname, pep_id, charge)
-        return out
-
     def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
         Loads a TransitionGroupFeature object from the results file to a pandas dataframe
