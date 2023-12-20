@@ -10,10 +10,17 @@ from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
 # Utils
 from massseer.util import LOGGER
+from massseer.structs.TransitionGroup import TransitionGroup
 
 class FeatureMap:
     '''
-    Class for storing a feature map
+    Class for storing a feature map a feature map only contains the following columns:
+    - mz: mass to charge ratio
+    - rt: retention time
+    - im: ion mobility
+    - int: intensity
+    - ms_level: 1 for precursor, 2 for fragment
+    - annotation: annotation of precursor/fragment
     
     Attributes:
         feature_df (pd.DataFrame): A DataFrame containing the feature map
@@ -79,6 +86,32 @@ class FeatureMap:
 
         return x_arr, int_arr
 
+    def to_chromatograms(self) -> TransitionGroup:
+        '''
+        Convert the feature map to a TransitionGroup object storing chromatograms
+
+        Returns:
+            TransitionGroup: A TransitionGroup object storing chromatograms
+        '''
+        return TransitionGroup(self.get_precursor_chromatograms(), self.get_transition_chromatograms())
+    
+    def to_mobilograms(self) -> TransitionGroup:
+        '''
+        Convert the feature map to a TransitionGroup object storing mobilograms
+        
+        Returns:
+            TransitionGroup: A TransitionGroup object storing mobilograms
+        '''
+        return TransitionGroup(self.get_precursor_mobilograms(), self.get_transition_mobilograms())
+    
+    def to_spectra(self) -> TransitionGroup:
+        '''
+        Convert the feature map to a TransitionGroup object storing spectra
+        
+        Returns:
+            TransitionGroup: A TransitionGroup object storing spectra
+        '''
+        return TransitionGroup(self.get_precursor_spectra(), self.get_transition_spectra())
 
     def get_precursor_chromatograms(self) -> List[Chromatogram]:
         '''

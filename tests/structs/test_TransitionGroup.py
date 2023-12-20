@@ -28,10 +28,10 @@ class TestTransitionGroup(unittest.TestCase):
     def test_flatten(self):
         # Test the flatten() method
         flattened = self.transitionGroup.flatten(level='ms2')
-        np.array_equal(flattened.rt, np.array([1, 2, 3, 1, 2, 3]))
+        np.array_equal(flattened.data, np.array([1, 2, 3, 1, 2, 3]))
         np.array_equal(flattened.intensity, [10, 11, 12, 13, 14, 15])
         flattened = self.transitionGroup.flatten(level='ms1ms2')
-        np.array_equal(flattened.rt, np.array([1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]))
+        np.array_equal(flattened.data, np.array([1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]))
         np.array_equal(flattened.intensity, np.array([4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ,15]))
 
     def test_median(self):

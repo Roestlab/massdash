@@ -4,7 +4,14 @@ import streamlit as st
 import numpy as np
 
 # Internal modules
-from massseer.loaders.OSWDataAccess import OSWDataAccess
+from massseer.loaders.access.OSWDataAccess import OSWDataAccess
+######################################
+### OpenSwath File Handling
+
+class ReadOSWFile:
+    def __init__(self, osw_file_path) -> None:
+        self.osw_file_path = osw_file_path
+        self.osw = OSWDataAccess(osw_file_path)
 
 @st.cache_data
 def get_protein_options(protein_table):
