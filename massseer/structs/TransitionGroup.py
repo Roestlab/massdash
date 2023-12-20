@@ -3,7 +3,7 @@ from typing import List, Tuple, Optional, Union
 import pyopenms as po
 from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
-from massseer.structs.FeatureMap import FeatureMap
+import pandas as pd
 
 class TransitionGroup:
     '''
@@ -95,17 +95,14 @@ class TransitionGroup:
         '''
         Flatten the TransitionGroup into a single Data1D object
         '''
-        if self.dataType == FeatureMap:
-            raise NotImplementedError("Flattening FeatureMaps is not yet implemented")
-        else:
-            data1D = self._resolveLevel(level)
-            data = []
-            intensity = []
-            for c in data1D:
-                data.extend(c.data)
-                intensity.extend(c.intensity)
-            return self.dataType(data, intensity)
-    
+        data1D = self._resolveLevel(level)
+        data = []
+        intensity = []
+        for c in data1D:
+            data.extend(c.data)
+            intensity.extend(c.intensity)
+        sorted = pd.DataFrame({'data': data, 'intensity': intensity}).sort_values(by='data')
+        return self.dataType(sorted['data'], sorted['intensity'])
 
     def median(self, boundary: Optional[Tuple[float, float]] = None, level: Optional[str] = 'ms2') -> float:
         """
