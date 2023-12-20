@@ -38,9 +38,10 @@ import pandas as pd
 import sqlite3
 from massseer.util import check_sqlite_column_in_table, check_sqlite_table
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+from massseer.loaders.access.GenericResultsAccess import GenericResultsAccess
 from typing import List
 
-class OSWDataAccess:
+class OSWDataAccess(GenericResultsAccess):
     """
     A class for accessing data from an OpenSWATH SQLite database.
 
