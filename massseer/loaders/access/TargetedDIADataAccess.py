@@ -1,6 +1,5 @@
 import sys
 from typing import Union, List, Tuple
-import logging
 import traceback
 from tqdm import tqdm
 

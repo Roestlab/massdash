@@ -1,8 +1,5 @@
 from typing import List
 
-# Structs
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 # Loaders
 from massseer.loaders.reportLoader import reportLoader
 # Utils
