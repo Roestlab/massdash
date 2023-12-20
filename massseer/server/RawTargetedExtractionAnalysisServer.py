@@ -21,7 +21,7 @@ from massseer.loaders.OSWLoader import OSWLoader
 from massseer.loaders.DiaNNLoader import DiaNNLoader
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.loaders.TargetedDIALoader import TargetedDIALoader
-from massseer.loaders.TargetedDIADataAccess import TargetedDIAConfig, TargetedDIADataAccess
+from massseer.loaders.access.TargetedDIADataAccess import TargetedDIAConfig, TargetedDIADataAccess
 # Util
 from massseer.util import LOGGER, conditional_decorator, check_streamlit, time_block
 
