@@ -74,5 +74,3 @@ class OSWLoader:
         elif precursor_search_results.shape[0] == 0:
             print(f"Warning: No precursor search results found for {peptide} with charge {charge}.")
             return self
-        
-        
