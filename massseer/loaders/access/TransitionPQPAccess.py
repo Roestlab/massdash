@@ -7,7 +7,7 @@ import streamlit as st
 # Utils
 from massseer.util import check_streamlit, conditional_decorator, check_sqlite_column_in_table, check_sqlite_table
 
-class TransitionPQPLoader:
+class TransitionPQPAccess:
     '''
     Class to load a transition PQP file
     

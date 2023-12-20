@@ -6,7 +6,7 @@ import streamlit as st
 # Utils
 from massseer.util import check_streamlit, conditional_decorator
 
-class TransitionTSVLoader:
+class TransitionTSVAccess:
     '''
     Class to load a transition TSV file
     
