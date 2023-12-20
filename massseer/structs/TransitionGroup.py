@@ -141,4 +141,4 @@ class TransitionGroup:
         Returns:
             bool: True if all of the chromatograms, mobilograms, and spectra are empty, False otherwise.
         """
-        return not any(chrom.empty() for chrom in self.precursorData) and any(chrom.empty() for chrom in self.transitionData) and any(mobil.empty() for mobil in self.precursorMobilos) and any(mobil.empty() for mobil in self.transitionMobilos) and any(spec.empty() for spec in self.precursorSpectra) and any(spec.empty() for spec in self.transitionSpectra)
+        return not any(p.empty() for p in self.precursorData) and any(t.empty() for t in self.transitionData)
