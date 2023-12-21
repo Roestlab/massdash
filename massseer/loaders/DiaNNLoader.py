@@ -4,7 +4,7 @@ from typing import List
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 # Loaders
-from massseer.loaders.reportLoader import reportLoader
+from massseer.loaders.SearchResultsTSVAccess import SearchResultsTSVAccess
 # Utils
 from massseer.util import LOGGER
 
@@ -16,7 +16,7 @@ class DiaNNLoader:
     Attributes:
         results_file_path: (str) The path to the results file
         dataFiles: (List[str]) A list of paths to the mzML files.
-        report: (reportLoader) The reportLoader object
+        report: (SearchResultsTSVAccess) The SearchResultsTSVAccess object
         
     Methods:
         loadTransitionGroups: Load transition groups from the given targeted transition list
@@ -26,7 +26,7 @@ class DiaNNLoader:
     '''
 
     def __init__(self, results_file_path: str, dataFiles: List[str], verbose: bool=False) -> None:
-        self.report = reportLoader(results_file_path, dataFiles, verbose)
+        self.report = SearchResultsTSVAccess(results_file_path, dataFiles, verbose)
         
         LOGGER.name = "DiaNNLoader"
         if verbose:
@@ -43,7 +43,7 @@ class DiaNNLoader:
         '''
         self.report.load_report()
     
-    def load_report_for_precursor(self, peptide: str, charge: int) -> reportLoader:
+    def load_report_for_precursor(self, peptide: str, charge: int) -> SearchResultsTSVAccess:
         '''
         Load the report file for a precursor
         
@@ -52,6 +52,6 @@ class DiaNNLoader:
             charge: (int) The charge state to search for
             
         Returns:
-            self: (reportLoader) The reportLoader object
+            self: (SearchResultsTSVAccess) The SearchResultsTSVAccess object
         '''
         return self.report.load_report_for_precursor(peptide, charge)

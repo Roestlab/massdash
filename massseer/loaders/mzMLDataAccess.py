@@ -9,7 +9,7 @@ from massseer.server.util import check_ion_mobility
 # Internal
 from massseer.util import LOGGER, method_timer, code_block_timer
 
-class mzMLLoader():
+class mzMLDataAccess():
     """
     Class for data input and output operations
     
@@ -28,7 +28,7 @@ class mzMLLoader():
 
     def __init__(self, mzml_file, readOptions="ondisk", verbose=False):
         """
-        Initialise mzMLLoader object
+        Initialise mzMLDataAccess object
 
         Args:
           mzml_file: (str) mzML file to load
@@ -42,17 +42,17 @@ class mzMLLoader():
         self.meta_data = po.MSExperiment()
         self.has_im = check_ion_mobility(mzml_file)
         
-        LOGGER.name = "mzMLLoader"
+        LOGGER.name = "mzMLDataAccess"
         if verbose:
             LOGGER.setLevel("DEBUG")
         else:
             LOGGER.setLevel("INFO")
 
     def __str__(self):
-        return f"mzMLLoader(filename={self.filename}, has_im={self.has_im})"
+        return f"mzMLDataAccess(filename={self.filename}, has_im={self.has_im})"
  
     def __repr__(self):
-        return f"mzMLLoader(filename={self.filename}, has_im={self.has_im})"
+        return f"mzMLDataAccess(filename={self.filename}, has_im={self.has_im})"
 
     @method_timer
     def load_data(self):

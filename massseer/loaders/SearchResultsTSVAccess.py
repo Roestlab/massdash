@@ -5,11 +5,11 @@ import pandas as pd
 # Structs
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 # Loaders
-from massseer.loaders.mzMLLoader import mzMLLoader
+from massseer.loaders.mzMLDataAccess import mzMLDataAccess
 # Utils
 from massseer.util import LOGGER
 
-class reportLoader:
+class SearchResultsTSVAccess:
     '''
     Class to load a TSV based searchs results report file
     
@@ -26,13 +26,13 @@ class reportLoader:
     '''
     def __init__(self, filename: str, dataFiles: List[str], verbose: bool=False) -> None:
         self.filename = filename
-        self.dataFiles = [mzMLLoader(f, 'ondisk') for f in dataFiles]
+        self.dataFiles = [mzMLDataAccess(f, 'ondisk') for f in dataFiles]
         self.search_data: pd.DataFrame = pd.DataFrame()
         self.chromatogram_peak_feature = TransitionGroupFeature(None, None)
         self.mobilogram_peak_feature = TransitionGroupFeature(None, None)
         self.precursor_search_data = {}
         
-        LOGGER.name = "reportLoader"
+        LOGGER.name = "SearchResultsTSVAccess"
         if verbose:
             LOGGER.setLevel("DEBUG")
         else:
@@ -42,7 +42,7 @@ class reportLoader:
         return f"{self.chromatogram_peak_feature},\n{self.mobilogram_peak_feature}"
     
     def __repr__(self) -> str:
-        return f"reportLoader(filename={self.filename})"
+        return f"SearchResultsTSVAccess(filename={self.filename})"
 
     def get_row_indices_for_peptide(self, peptide: str, charge: int) -> List[int]:   
         '''
@@ -73,7 +73,7 @@ class reportLoader:
             charge: (int) The charge state to search for
         
         Returns:
-            self: (reportLoader) The reportLoader object
+            self: (SearchResultsTSVAccess) The SearchResultsTSVAccess object
         '''
         # remove any periods from the peptide sequence i.e. for N terminal modifications
         # i.e. Convert .(UniMod:1)SEGDSVGESVHGKPSVVYR to (UniMod:1)SEGDSVGESVHGKPSVVYR
