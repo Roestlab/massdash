@@ -28,10 +28,11 @@ class FileInputRawDataUISettings(BaseUISettings):
         self.transition_list_file_path = None
         self.raw_file_path_input = None
         self.feature_file_path = None 
+        self.feature_file_type = None
         self.raw_file_path_list = None
         self.threads = None
 
-    def create_ui(self, transition_list_file_path: str=None, raw_file_path: str=None, feature_file_path: str=None):
+    def create_ui(self, transition_list_file_path: str=None, raw_file_path: str=None, feature_file_path: str=None, feature_file_type: str="OpenSWATH"):
         """
         Creates the user interface for inputting file paths.
 
@@ -49,6 +50,7 @@ class FileInputRawDataUISettings(BaseUISettings):
         # Tabs for different data workflows
         st.sidebar.subheader("Input Search Results")
         self.feature_file_path = st.sidebar.text_input("Enter file path", feature_file_path, key='feature_file_path', help="Path to the search results output file. Can be an Pyprophet scored OpenSwath file or a DIA-NN report file (*.osw / *.tsv)")
+        self.feature_file_type = st.sidebar.selectbox("File type", ["OpenSWATH", "DIA-NN"], index=["OpenSWATH", "DIA-NN"].index(feature_file_type), key='feature_file_type', help="File type of the search results output file")
 
     def get_mzml_files(self, threads: int=1):
         """

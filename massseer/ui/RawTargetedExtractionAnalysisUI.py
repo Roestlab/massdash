@@ -195,7 +195,6 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         """
         file_peptide_dict = {}
         for file, file_search_results in search_results.precursor_search_data.items():
-
             # Use search results RT and IM apexs if available
             if file_search_results['chromatogram_peak_feature'].consensusApex is not None:
                 use_rt_apex = file_search_results['chromatogram_peak_feature'].consensusApex

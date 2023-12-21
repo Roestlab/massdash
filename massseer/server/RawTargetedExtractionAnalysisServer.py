@@ -238,7 +238,7 @@ class RawTargetedExtractionAnalysisServer:
                     
                     
             elapsed = timeit.default_timer() - start_time
-            LOGGER.info(f"Targeted extraction complete! Elapsed time: {timedelta(seconds=elapsed)}")
+            LOGGER.info("Targeted extraction complete! Elapsed time: %s", timedelta(seconds=elapsed))
             status.update(label=f"Info: Targeted extraction and plot drawing complete! Elapsed time: {timedelta(seconds=elapsed)}", state="complete", expanded=False)
         
             if chrom_plot_settings.display_extracted_data_as_df:
