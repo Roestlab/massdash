@@ -152,10 +152,10 @@ class RawTargetedExtractionAnalysisServer:
         
         # Load feature file if available
         # Check if feature file ends with a tsv
-        if self.massseer_gui.file_input_settings.feature_file_path.endswith('.tsv'):
+        if self.massseer_gui.file_input_settings.feature_file_path.endswith('.tsv') and self.massseer_gui.file_input_settings.feature_file_type == 'DIA-NN':
             self.feature_data = DiaNNLoader(self.massseer_gui.file_input_settings.feature_file_path, self.massseer_gui.file_input_settings.raw_file_path_list, self.massseer_gui.verbose)
             self.feature_data.load_report()
-        elif self.massseer_gui.file_input_settings.feature_file_path.endswith('.osw'):
+        elif self.massseer_gui.file_input_settings.feature_file_path.endswith('.osw') and self.massseer_gui.file_input_settings.feature_file_type == 'OpenSWATH':
             self.feature_data = OSWLoader(self.massseer_gui.file_input_settings.feature_file_path, self.massseer_gui.file_input_settings.raw_file_path_list, self.massseer_gui.verbose)
             self.feature_data.load_report()
  
