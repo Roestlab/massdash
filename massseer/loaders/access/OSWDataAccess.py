@@ -458,7 +458,8 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         # Get top ranking feature ids from featureScoreHash
         if 'ms2_mscore' in self.featureScoreHash.columns:
             prec_feature = self.featureScoreHash.loc[(slice(None), precursor_id, slice(None)), :]
-            feature_ids = prec_feature.reset_index().set_index(['FEATURE_ID'])[['peakgroup_rank']].idxmin().values.flatten()
+            feature_ids = prec_feature.loc[prec_feature["peakgroup_rank"]==1].index.get_level_values("FEATURE_ID")
+
         else:
             raise KeyError("No ms2_mscore column found in featureScoreHash! You need to perform PyProphet ms2 / ms1ms2 scoring first.")
             

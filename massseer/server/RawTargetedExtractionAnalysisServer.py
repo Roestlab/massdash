@@ -196,20 +196,20 @@ class RawTargetedExtractionAnalysisServer:
         with st.status("Performing targeted extraction (this may take some time on the first load)...", expanded=True) as status:
             with time_block() as elapsed_time:
                 targeted_exp = self.load_targeted_experiment(self.massseer_gui.file_input_settings.raw_file_path_list, transition_list_ui.targeted_exp_params, self.massseer_gui.verbose)
-            st.write(f"Loading raw file... Elapsed time: {elapsed_time()}") 
+            st.write(f"Loading raw file... Elapsed time: {elapsed_time()}")
             
             with time_block() as elapsed_time:
                 self.targeted_data_access(targeted_exp)
             st.write(f"Setting up extraction parameters... Elapsed time: {elapsed_time()}")
-            
+
             with time_block() as elapsed_time:
                 peptide_coord = transition_list_ui.get_peptide_dict(self.feature_data.report)
                 targeted_extraction_params = transition_list_ui.get_targeted_extraction_params_dict()
                 if transition_list_ui.submit_extraction_params:
                     LOGGER.debug("Clearing cached targeted extraction function.")
                     self.targeted_extraction.clear()
-                LOGGER.debug(f"Targeted Extraction Paramters: {targeted_extraction_params}")
-                LOGGER.debug(f"Targeted Extraction Peptide Coordiantes: {peptide_coord}")
+                LOGGER.debug("Targeted Extraction Paramters: %s", targeted_extraction_params)
+                LOGGER.debug("Targeted Extraction Peptide Coordiantes: %s", peptide_coord)
                 self.targeted_extraction(targeted_exp, peptide_coord, targeted_extraction_params)
             st.write(f"Extracting data... Elapsed time: {elapsed_time()}")
             
@@ -252,7 +252,7 @@ class RawTargetedExtractionAnalysisServer:
                 
                 
         elapsed = timeit.default_timer() - start_time
-        LOGGER.info(f"Targeted extraction complete! Elapsed time: {timedelta(seconds=elapsed)}")
+        LOGGER.info("Targeted extraction complete! Elapsed time: %s", timedelta(seconds=elapsed))
         status.update(label=f"Info: Targeted extraction and plot drawing complete! Elapsed time: {timedelta(seconds=elapsed)}", state="complete", expanded=False)
     
         if chrom_plot_settings.display_extracted_data_as_df:
