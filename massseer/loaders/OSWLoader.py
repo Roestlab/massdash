@@ -5,7 +5,7 @@ from typing import List, Dict, Union
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 # Loaders
 from massseer.loaders.OSWDataAccess import OSWDataAccess
-from massseer.loaders.mzMLLoader import mzMLLoader
+from massseer.loaders.mzMLDataAccess import mzMLDataAccess
 # Utils
 from massseer.util import LOGGER, file_basename_without_extension
 
@@ -24,7 +24,7 @@ class OSWLoader:
     """
     def __init__(self, rsltsFile: str, dataFiles: List[str], verbose: bool=False):
         self.report = OSWDataAccess(rsltsFile)
-        self.dataFiles = [mzMLLoader(f, 'ondisk') for f in dataFiles]
+        self.dataFiles = [mzMLDataAccess(f, 'ondisk') for f in dataFiles]
         self.report.search_data: pd.DataFrame = pd.DataFrame()
         self.report.chromatogram_peak_feature = TransitionGroupFeature(None, None)
         self.report.mobilogram_peak_feature = TransitionGroupFeature(None, None)
