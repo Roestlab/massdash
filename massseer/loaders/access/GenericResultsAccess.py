@@ -19,4 +19,8 @@ class GenericResultsAccess(ABC):
     def getTransitionGroupFeaturesDf(self, runname: str, pep: str, charge: int) -> pd.DataFrame:
         pass
 
+    @abstractmethod
+    def getTopTransitionGroupFeature(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:
+        pass
+
 

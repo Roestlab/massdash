@@ -5,6 +5,7 @@ import pandas as pd
 # Loaders
 from massseer.loaders.access.TransitionTSVAccess import TransitionTSVAccess
 from massseer.loaders.access.TransitionPQPAccess import TransitionPQPAccess
+from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
 from massseer.util import LOGGER
 
@@ -127,6 +128,41 @@ class SpectralLibraryLoader:
 
         """
         return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['ProductMz'].tolist()
+    
+    # TODO not used remove?
+    def populateTransitionGroupFeature(self, transition_group_feature: TransitionGroupFeature) -> TransitionGroupFeature:
+        """
+        Appends library information to a TransitionGroupFeature object
+
+        Args:
+            transition_group_feature (TransitionGroupFeature): The TransitionGroupFeature object to append library information to.
+
+        Returns:
+            TransitionGroupFeature: The TransitionGroupFeature object with appended library information.
+        """
+        library_data = self.data[(self.data['ModifiedPeptideSequence'] == transition_group_feature.sequence) & (self.data['PrecursorCharge'] == transition_group_feature.precursor_charge)][['ProductMz', 'Annotation', 'PrecursorMz']]
+
+        if library_data.empty:
+            LOGGER.warning(f"No library data found for {transition_group_feature.sequence} {transition_group_feature.precursor_charge}")
+            return transition_group_feature
+        transition_group_feature.product_annotations = library_data['Annotation'].tolist()
+        transition_group_feature.product_mz = library_data['ProductMz'].tolist()
+        transition_group_feature.precursor_mz = library_data['PrecursorMz'].iloc[0]
+        return transition_group_feature
+    
+    def populateTransitionGroupFeatures(self, transition_group_features: List[TransitionGroupFeature]) -> List[TransitionGroupFeature]:
+        """
+        Populates library information for a list of TransitionGroupFeature objects.
+        ***Important:*** Assumes that all TransitionGroupFeature objects have the same peptide sequence and precursor charge.
+        """
+        peptide_sequence = transition_group_features[0].sequence
+        precursor_charge = transition_group_features[0].precursor_charge
+        library_data = self.data[(self.data['ModifiedPeptideSequence'] == peptide_sequence) & (self.data['PrecursorCharge'] == precursor_charge)][['ProductMz', 'Annotation', 'PrecursorMz']]
+
+        for t in transition_group_features:
+            t.product_annotations = library_data['Annotation'].tolist()
+            t.product_mz = library_data['ProductMz'].tolist()
+            t.precursor_mz = library_data['PrecursorMz'].iloc[0]
         
     def get_peptide_product_charge_list(self, peptide: str, charge: int) -> List[int]:
         """

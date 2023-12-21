@@ -133,14 +133,23 @@ class OSWDataAccess(GenericResultsAccess):
                 """
 
         return pd.read_sql(stmt, self.conn)
-   
-
+    
     def _getFeaturesFromPrecursorIdAndRun(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
         df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
         out = []
         for _, i in df.iterrows():
             out.append(TransitionGroupFeature(i['leftWidth'], i['rightWidth'], areaIntensity=i['Intensity'], qvalue= i['ipf_mscore'] if 'ipf_mscore' in i else i['ms2_mscore'] )) 
         return out
+    
+    def _getTopFeatureFromPrecursorIdAndRun(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
+        df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
+        if 'peakgroup_rank' in df.columns:
+            df = df[df['peakgroup_rank'] == 1].iloc[0]
+        else:
+            raise ValueError("SCORE_MS2 table not found, cannot get top feature")
+        return TransitionGroupFeature(df['leftWidth'], df['rightWidth'], areaIntensity=df['Intensity'], qvalue= df['ipf_mscore'] if 'ipf_mscore' in df else df['ms2_mscore'], consensusApex=df['RT']) 
+
+
 
     def _getTransitionsFromPrecursorId(self, precursor_id:int) -> pd.DataFrame:
         '''
@@ -199,6 +208,15 @@ class OSWDataAccess(GenericResultsAccess):
             return []
         else:
             return self._getFeaturesFromPrecursorIdAndRun(run_id, precursor_id)
+
+    def getTopTransitionGroupFeature(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> List[TransitionGroupFeature]:
+        run_id = self._runIDFromRunName(run_basename_wo_ext)
+        precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
+        
+        if run_id is None or precursor_id is None:
+            return None
+        else:
+            return self._getTopFeatureFromPrecursorIdAndRun(run_id, precursor_id)
     
 
     def getTransitionIDAnnotationFromSequence(self, fullpeptidename, charge):

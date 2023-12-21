@@ -33,6 +33,26 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         return pd.read_csv(self.filename, sep='\t', usecols=['Modified.Sequence', 'Precursor.Charge', 'Run'])
 
+
+    def getTopTransitionGroupFeature(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:
+        '''
+        Loads the top TransitionGroupFeature from the results file
+        Args:
+            pep_id (str): Peptide ID
+            charge (int): Charge
+        Returns:
+            TransitionGroupFeature: TransitionGroupFeature object containing peak boundaries, intensity and confidence
+        '''
+        tg = self.getTransitionGroupFeatures(runname, pep, charge)
+
+        if len(tg) == 0:
+            return None
+        elif len(tg) == 1:
+            return tg[0]
+        else:
+            LOGGER.debug(f"Warning: More than one feature found for {pep} {charge} in {self.filename}, returning the first feature, this can lead to unexcepted behaviour")
+            return tg[0]
+
     def getTransitionGroupFeatures(self, runname: str, peptide:str, charge: int):
         '''
         Loads a PeakFeature object from the results file

@@ -317,7 +317,10 @@ class MzMLDataAccess():
 
         Args:
             self: (TargetedDIADataAccess object) an object of self that contains an experiment of OnDiskMSExperiment
-            peptides: (dict) a dictionary of peptide sequences as keys and a dictionary of peptide meta data as values
+            peptide_transition_list: (dict) a dictionary of the transition m/z to extract and its annotation 
+            precursor_mz: (float) the precursor m/z to extract
+            rt: (float) the retention time to extract
+            im: (float) the ion mobility to extract
             config: (TargetedDIAConfig object) an object of TargetedDIAConfig that contains configuration parameters
 
         Return:
