@@ -129,7 +129,7 @@ class TransitionGroup:
         Returns:
             str: A string representation of the transition group.
         '''
-        return f"{'-'*8} TransitionGroup {'-'*8}\nprecursor chromatograms: {len(self.precursorData)}\ntransition chromatograms: {len(self.transitionData)}\nprecursor mobilograms: {len(self.precursorMobilos)}\ntransition mobilograms: {len(self.transitionMobilos)}\nprecursor spectra: {len(self.precursorSpectra)}\ntransition spectra: {len(self.transitionSpectra)}"
+        return f"{'-'*8} TransitionGroup {'-'*8}\nprecursor data: {len(self.precursorData)}\ntransition data: {len(self.transitionData)}"
 
     def empty(self) -> bool:
         """

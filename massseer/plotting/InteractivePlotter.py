@@ -61,7 +61,7 @@ class InteractivePlotter(GenericPlotter):
             Returns:
                 Line: Bokeh line object representing the chromatogram.
             """
-            rt = chrom.rt
+            rt = chrom.data
             intensity = chrom.intensity
 
             if self.smoothing_dict['type'] == 'sgolay':
@@ -177,8 +177,8 @@ class InteractivePlotter(GenericPlotter):
                 A Bokeh figure object representing the chromatogram plot.
             """
             # Extract chromatogram data from the transitionGroup
-            precursorChroms = transitionGroup.precursorChroms
-            transitionChroms = transitionGroup.transitionChroms
+            precursorChroms = transitionGroup.precursorData
+            transitionChroms = transitionGroup.transitionData
 
             n_transitions = len(transitionChroms)
 
@@ -288,7 +288,7 @@ class InteractivePlotter(GenericPlotter):
         Returns:
             Line: Bokeh line object representing the mobilogram.
         """
-        im = mobilo.im
+        im = mobilo.data
         intensity = mobilo.intensity
 
         if self.smoothing_dict['type'] == 'sgolay':
@@ -346,8 +346,8 @@ class InteractivePlotter(GenericPlotter):
             figure: The matplotlib figure object containing the mobilogram plot.
         """
         # Extract mobilogram data from the transitionGroup
-        precursorMobilos = transitionGroup.precursorMobilos
-        transitionMobilos = transitionGroup.transitionMobilos
+        precursorMobilos = transitionGroup.precursorData
+        transitionMobilos = transitionGroup.transitionData
 
         n_transitions = len(transitionMobilos)
 
@@ -455,7 +455,7 @@ class InteractivePlotter(GenericPlotter):
         Returns:
             Line: Bokeh line object representing the spectrum.
         """
-        mz = spectra.mz
+        mz = spectra.data
         intensity = spectra.intensity
 
         if self.scale_intensity:
@@ -498,8 +498,8 @@ class InteractivePlotter(GenericPlotter):
             The Bokeh figure object containing the plotted spectra data.
         """
         # Extract spectra data from the transitionGroup
-        precursorSpectra = transitionGroup.precursorSpectra
-        transitionSpectra = transitionGroup.transitionSpectra
+        precursorSpectra = transitionGroup.precursorData
+        transitionSpectra = transitionGroup.transitionData
 
         n_transitions = len(transitionSpectra)
 
