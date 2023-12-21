@@ -8,12 +8,12 @@ class GenericLoader(ABC):
     Abstract class for loading Chromatograms and peak features
     Classes which inherit from this should contain one results file and one transition file
     '''
-    def __init__(self, rsltsFile: str, transitionFiles: Union[str, List[str]]):
+    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]]):
         self.rsltsFile_str = rsltsFile
-        if isinstance(transitionFiles, str):
-            self.transitionFiles_str = [transitionFiles]
+        if isinstance(dataFiles, str):
+            self.dataFiles_str = [dataFiles]
         else:
-            self.transitionFiles_str = transitionFiles
+            self.dataFiles_str = dataFiles
 
         # These properties will be set by the child class
         self.rsltsFile = None
