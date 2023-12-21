@@ -4,6 +4,7 @@ from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from typing import List, Union
 from os.path import basename
 from massseer.util import LOGGER
+import pandas as pd
 
 class GenericLoader(ABC):
     ''' 

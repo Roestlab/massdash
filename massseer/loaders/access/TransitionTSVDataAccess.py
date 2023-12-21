@@ -6,7 +6,7 @@ import streamlit as st
 # Utils
 from massseer.util import check_streamlit, conditional_decorator
 
-class TransitionTSVAccess:
+class TransitionTSVDataAccess:
     '''
     Class to load a transition TSV file
     
@@ -71,7 +71,7 @@ class TransitionTSVAccess:
             _self.data.drop(columns=['FragmentType', 'FragmentSeriesNumber'], inplace=True)
             return _self.data
         else:
-            raise ValueError(f"The TSV file does not have the required columns.\n {TransitionTSVLoader.REQUIRED_TSV_COLUMNS}")
+            raise ValueError(f"The TSV file does not have the required columns.\n {TransitionTSVDataAccess.REQUIRED_TSV_COLUMNS}")
     
     def _resolve_column_names(self):
         """
@@ -124,4 +124,4 @@ class TransitionTSVAccess:
         '''
         Validate the TSV file has the required columns
         '''
-        return all(col in self.data.columns for col in TransitionTSVLoader.REQUIRED_TSV_COLUMNS)
+        return all(col in self.data.columns for col in TransitionTSVDataAccess.REQUIRED_TSV_COLUMNS)

@@ -8,10 +8,11 @@ from massseer.loaders.access.MzMLDataAccess import MzMLDataAccess
 from massseer.loaders.GenericLoader import GenericLoader
 from massseer.loaders.access.OSWDataAccess import OSWDataAccess
 from massseer.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
+from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
+# Structs
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.FeatureMap import FeatureMap
 from massseer.structs.TargetedDIAConfig import TargetedDIAConfig
-from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # Utils
 from massseer.util import LOGGER
 

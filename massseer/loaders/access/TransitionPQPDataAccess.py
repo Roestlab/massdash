@@ -7,7 +7,7 @@ import streamlit as st
 # Utils
 from massseer.util import check_streamlit, conditional_decorator, check_sqlite_column_in_table, check_sqlite_table
 
-class TransitionPQPAccess:
+class TransitionPQPDataAccess:
     '''
     Class to load a transition PQP file
     
@@ -49,7 +49,7 @@ class TransitionPQPAccess:
         if _self._validate_columns():
             return _self.data
         else:
-            raise ValueError(f"The PQP file does not have the required columns.\n {TransitionPQPLoader.REQUIRED_PQP_COLUMNS}.\nSupplied PQP is missing columns: {set(TransitionPQPLoader.REQUIRED_PQP_COLUMNS) - set(_self.data.columns)}")
+            raise ValueError(f"The PQP file does not have the required columns.\n {TransitionPQPDataAccess.REQUIRED_PQP_COLUMNS}.\nSupplied PQP is missing columns: {set(TransitionPQPDataAccess.REQUIRED_PQP_COLUMNS) - set(_self.data.columns)}")
         
     def getTransitionList(self):
         """
@@ -126,4 +126,4 @@ class TransitionPQPAccess:
         '''
         Validate the PQP file has the required columns
         '''
-        return all(col in self.data.columns for col in TransitionPQPLoader.REQUIRED_PQP_COLUMNS)
+        return all(col in self.data.columns for col in TransitionPQPDataAccess.REQUIRED_PQP_COLUMNS)

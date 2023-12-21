@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+import pandas as pd
 
 from massseer.util import LOGGER
 
