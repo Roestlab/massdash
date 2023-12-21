@@ -12,7 +12,7 @@ import itertools
 from joblib import Parallel, delayed
 
 # Internal
-from massseer.loaders.mzMLLoader import mzMLLoader
+from massseer.loaders.mzMLDataAccess import mzMLDataAccess
 from massseer.util import LOGGER, method_timer, code_block_timer
 
 class TargetedDIAConfig:
@@ -96,7 +96,7 @@ class TargetedDIADataAccess:
     Class for a targeted DIA-PASEF data extraction
     
     Attributes:
-        mzmlData (mzMLLoader): An mzMLLoader object containing the raw data.
+        mzmlData (mzMLDataAccess): An mzMLDataAccess object containing the raw data.
         filename (str): The filename of the mzML file.
         readOptions (str): The read options for the mzML file.
         ms1_mz_tol (float): The m/z tolerance for MS1 spectra.
@@ -115,7 +115,7 @@ class TargetedDIADataAccess:
         reduce_spectra: Reduce the spectra for a given peptide.
         get_df: Convert filtered spectra to Pandas DataFrame.
     """
-    def __init__(self, mzmlData: mzMLLoader, config: TargetedDIAConfig, readOptions: Union['ondisk', 'cached']='ondisk', verbose: bool=False):
+    def __init__(self, mzmlData: mzMLDataAccess, config: TargetedDIAConfig, readOptions: Union['ondisk', 'cached']='ondisk', verbose: bool=False):
         self.mzmlData = mzmlData
         self.filename = self.mzmlData.filename
         self.readOptions = readOptions

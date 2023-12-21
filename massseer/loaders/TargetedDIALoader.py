@@ -7,7 +7,7 @@ from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.structs.FeatureMap import FeatureMap
 # Loaders
-from massseer.loaders.mzMLLoader import mzMLLoader
+from massseer.loaders.mzMLDataAccess import mzMLDataAccess
 from massseer.loaders.TargetedDIADataAccess import TargetedDIAConfig, TargetedDIADataAccess
 
 class TargetedDIALoader:
@@ -53,7 +53,7 @@ class TargetedDIALoader:
         """
         mzml_data_container = {}
         for mzmlFile in self.mzmlFiles:
-            mzml_io = mzMLLoader(mzmlFile, 'ondisk', self.verbose)
+            mzml_io = mzMLDataAccess(mzmlFile, 'ondisk', self.verbose)
             mzml_io.load_data()
             mzml_data_container[mzmlFile] = mzml_io
         self.mzml_data_container = mzml_data_container
@@ -178,6 +178,3 @@ class TargetedDIALoader:
                 transition_group = TransitionGroup.from_feature_map(FeatureMap(mzml_df, self.verbose), targeted_transition_list)
                 out[file] = transition_group
             return out
-
-    def loadTransitionGroupFeature(pep_id: str, charge: int) -> TransitionGroupFeature:
-        pass
