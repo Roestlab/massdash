@@ -16,7 +16,7 @@ from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
 from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 # Loaders
-from massseer.loaders.OSWDataAccess import OSWDataAccess
+from massseer.loaders.access.OSWDataAccess import OSWDataAccess
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.loaders.SqMassLoader import SqMassLoader
 # Peak Picking

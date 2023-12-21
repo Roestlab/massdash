@@ -1,5 +1,5 @@
 from snapshottest import TestCase
-from massseer.loaders.SqMassDataAccess import SqMassDataAccess
+from massseer.loaders.access.SqMassDataAccess import SqMassDataAccess
 from massseer.structs.Chromatogram import Chromatogram
 import unittest
 import pandas as pd

@@ -46,22 +46,22 @@ class TestFindPeakBoundaries(TestCase):
     ### Test pick ###
     def test_perform_chromatogram_peak_picking_single_peak(self):
         picker = pyMRMTransitionGroupPicker(sgolay_frame_length=11, sgolay_polynomial_order=3)
-        output = picker.pick(TransitionGroup([self.chrom_single_peak], [], [], [], [], []))
+        output = picker.pick(TransitionGroup([self.chrom_single_peak], []))
         self.assertMatchSnapshot(output)
 
     def test_perform_chromatogram_peak_picking_multiple_peaks(self):
         picker = pyMRMTransitionGroupPicker(sgolay_frame_length=11, sgolay_polynomial_order=3)
-        output = picker.pick(TransitionGroup([self.chrom_multiple_peaks], [], [], [], [], []))
+        output = picker.pick(TransitionGroup([self.chrom_multiple_peaks], []))
         self.assertMatchSnapshot(output)
 
     def test_perform_chromatogram_peak_picking_merged_peak_picking(self):
         picker = pyMRMTransitionGroupPicker(sgolay_frame_length=11, sgolay_polynomial_order=3, level='ms1ms2')
-        output = picker.pick(TransitionGroup([self.chrom_single_peak, self.chrom_single_peak], [], [], [], [], []))
+        output = picker.pick(TransitionGroup([self.chrom_single_peak, self.chrom_single_peak], []))
         self.assertMatchSnapshot(output)
 
     ### Test get Level ###
     def test_resolve_level(self):
-        tg = TransitionGroup([self.chrom_single_peak, self.chrom_empty], [self.chrom_multiple_peaks], [], [], [], [])
+        tg = TransitionGroup([self.chrom_single_peak, self.chrom_empty], [self.chrom_multiple_peaks]) 
 
         picker = pyMRMTransitionGroupPicker(level='ms1ms2')
         output = picker._resolveLevel(tg)

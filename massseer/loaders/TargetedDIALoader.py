@@ -8,7 +8,7 @@ from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.structs.FeatureMap import FeatureMap
 # Loaders
 from massseer.loaders.mzMLDataAccess import mzMLDataAccess
-from massseer.loaders.TargetedDIADataAccess import TargetedDIAConfig, TargetedDIADataAccess
+from massseer.loaders.access.TargetedDIADataAccess import TargetedDIAConfig, TargetedDIADataAccess
 
 class TargetedDIALoader:
     ''' 
