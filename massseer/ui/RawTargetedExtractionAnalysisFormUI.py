@@ -55,7 +55,7 @@ class RawTargetedExtractionAnalysisFormUI:
             self.raw_file_path_input = st.text_input("Enter file path", value=None, placeholder="*.mzML", key='raw_data_file_path_tmp', help="Path to the raw file (*.mzML)")
 
             # Tabs for different data workflows
-            st.subheader("Input Search Results (Optional)")
+            st.subheader("Input Search Results")
 
             cols = st.columns([0.7, 0.3])
             self.feature_file_path = cols[0].text_input("Enter file path of the feature file", value=None, placeholder="*.osw / *.tsv", key='feature_file_path_tmp', help="Path to the feature file (*.osw / *.tsv) from an OpenSwath or DIA-NN workflow")
