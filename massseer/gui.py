@@ -69,8 +69,9 @@ def main(verbose):
         transition_list_file_path = ""
         raw_file_path_input = ""
         diann_report_file_path_input = ""
+        feature_file_type = ""
         st.stop("Toy dataset not available yet.")
-        massseer_gui.show_file_input_settings(diann_report_file_path_input, raw_file_path_input, transition_list_file_path)
+        massseer_gui.show_file_input_settings(diann_report_file_path_input, raw_file_path_input, transition_list_file_path, feature_file_type)
 
         # Remove welcome message container if dataset is loaded
         massseer_gui.welcome_container.empty()
@@ -88,7 +89,7 @@ def main(verbose):
 
     if st.session_state.workflow == "raw_data" and massseer_gui.transition_list_file_path!="*.pqp" and massseer_gui.raw_file_path_input!="*.mzML" and not st.session_state.clicked['load_toy_dataset_raw_data']:
         
-        massseer_gui.show_file_input_settings(massseer_gui.feature_file_path, massseer_gui.raw_file_path_input, massseer_gui.transition_list_file_path)
+        massseer_gui.show_file_input_settings(massseer_gui.feature_file_path, massseer_gui.raw_file_path_input, massseer_gui.transition_list_file_path, massseer_gui.feature_file_type)
         
         # Remove welcome message container if dataset is loaded
         massseer_gui.welcome_container.empty()
