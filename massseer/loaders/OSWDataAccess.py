@@ -62,6 +62,7 @@ class OSWDataAccess:
         # hashtable, each run is its own data 
         self._initializePeptideHashtable()
         self._initializeRunHashtable()
+        self._initializeFeatureScoreHashtable()
 
 
     ###### INDICES CREATOR ######
@@ -84,7 +85,26 @@ class OSWDataAccess:
             INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID'''
         tmp = pd.read_sql(stmt, self.conn)
         self.peptideHash = tmp.set_index(['MODIFIED_SEQUENCE', 'CHARGE'])
-
+    
+    def _initializeFeatureScoreHashtable(self):
+        if check_sqlite_table(self.conn, "SCORE_MS2"):
+            join_score_ms2 = "INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID"
+            select_score_ms2 = """SCORE_MS2.RANK AS peakgroup_rank,
+SCORE_MS2.QVALUE AS ms2_mscore,"""
+        else:
+            join_score_ms2 = ""
+            select_score_ms2 = ""
+            
+        stmt = f"""
+        SELECT FEATURE.ID AS FEATURE_ID,
+        {select_score_ms2}
+        FEATURE.PRECURSOR_ID,
+        FEATURE.RUN_ID
+        FROM FEATURE
+        {join_score_ms2}
+        """
+        tmp = pd.read_sql(stmt, self.conn)
+        self.featureScoreHash = tmp.set_index(['FEATURE_ID', 'PRECURSOR_ID', 'RUN_ID'])
 
     ###### INTERNAL ACCESSORS ######
 
@@ -224,7 +244,13 @@ class OSWDataAccess:
         Returns:
             pandas.DataFrame: The top ranking precursor features.
         """
-        stmt = """SELECT 
+        # Get top ranking feature ids from featureScoreHash
+        if 'ms2_mscore' in self.featureScoreHash.columns:
+            feature_ids = self.featureScoreHash.reset_index().set_index(['FEATURE_ID']).groupby(['PRECURSOR_ID'])[['peakgroup_rank']].idxmin().values.flatten()
+        else:
+            raise KeyError("No ms2_mscore column found in featureScoreHash! You need to perform PyProphet ms2 / ms1ms2 scoring first.")
+        
+        stmt = f"""SELECT 
                 RUN.FILENAME as filename,
                 PROTEIN.PROTEIN_ACCESSION AS ProteinId,
                 PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
@@ -232,16 +258,16 @@ class OSWDataAccess:
                 PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
                 PRECURSOR.CHARGE AS PrecursorCharge,
                 PRECURSOR.DECOY AS Decoy,
-                MIN(DISTINCT SCORE_MS2.QVALUE) as Qvalue
+                SCORE_MS2.QVALUE as Qvalue
                 FROM FEATURE
                 INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
-                INNER JOIN (SELECT * FROM SCORE_MS2 WHERE SCORE_MS2.RANK = 1) AS SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
                 INNER JOIN PRECURSOR ON PRECURSOR.ID = FEATURE.PRECURSOR_ID
                 INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
                 INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
                 INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
                 INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
-                GROUP BY ProteinId, PeptideSequence, ModifiedPeptideSequence, PrecursorMz, PrecursorCharge;"""
+                WHERE FEATURE.ID IN ({','.join(map(str, feature_ids))})"""
 
         data = pd.read_sql(stmt, self.conn)
 
@@ -427,6 +453,15 @@ class OSWDataAccess:
         else:
             select_feature_exp_im = "-1 AS IM,"
             
+        precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
+        
+        # Get top ranking feature ids from featureScoreHash
+        if 'ms2_mscore' in self.featureScoreHash.columns:
+            prec_feature = self.featureScoreHash.loc[(slice(None), precursor_id, slice(None)), :]
+            feature_ids = prec_feature.reset_index().set_index(['FEATURE_ID'])[['peakgroup_rank']].idxmin().values.flatten()
+        else:
+            raise KeyError("No ms2_mscore column found in featureScoreHash! You need to perform PyProphet ms2 / ms1ms2 scoring first.")
+            
         stmt = f"""SELECT 
             RUN.FILENAME AS filename,
             FEATURE.EXP_RT AS RT,
@@ -450,9 +485,9 @@ class OSWDataAccess:
             SCORE_MS2.SCORE AS d_score,
             SCORE_MS2.QVALUE AS Qvalue,
             PRECURSOR.DECOY AS Decoy
-        FROM (SELECT * FROM PRECURSOR WHERE CHARGE = {charge}) AS PRECURSOR
+        FROM PRECURSOR
         INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
-        INNER JOIN (SELECT * FROM PEPTIDE WHERE MODIFIED_SEQUENCE = '{fullpeptidename}') AS PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+        INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
         INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
         INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
         INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
@@ -460,8 +495,7 @@ class OSWDataAccess:
         LEFT JOIN FEATURE_MS1 ON FEATURE_MS1.FEATURE_ID = FEATURE.ID
         LEFT JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
         LEFT JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
-        WHERE SCORE_MS2.RANK = 1;"""
-
+        WHERE PRECURSOR.ID = {precursor_id} AND FEATURE.ID IN ({','.join(map(str, feature_ids))})"""
         data = pd.read_sql(stmt, self.conn)
 
         return data
