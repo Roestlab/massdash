@@ -16,12 +16,11 @@ from massseer.server.OneDimensionPlotterServer import OneDimensionPlotterServer
 from massseer.server.TwoDimensionPlotterServer import TwoDimensionPlotterServer
 from massseer.server.ThreeDimensionPlotterServer import ThreeDimensionalPlotter
 from massseer.server.util import check_ion_mobility
+# Structs 
+from massseer.structs.TargetedDIAConfig import TargetedDIAConfig
 # Loaders
-from massseer.loaders.OSWLoader import OSWLoader
-from massseer.loaders.DiaNNLoader import DiaNNLoader
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from massseer.loaders.TargetedDIALoader import TargetedDIALoader
-from massseer.loaders.access.TargetedDIADataAccess import TargetedDIAConfig, TargetedDIADataAccess
+from massseer.loaders.mzMLDataLoader import MzMLDataLoader
 # Util
 from massseer.util import LOGGER, conditional_decorator, check_streamlit, time_block
 
@@ -68,6 +67,21 @@ class RawTargetedExtractionAnalysisServer:
         # Decoy column is NaN replace with 0
         self.transition_list.data['Decoy'] = self.transition_list.data['Decoy'].fillna(0)
     
+    
+    @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading data...")(func), check_streamlit())
+    def initiate_mzML_interface(_self, mzml_files, resultsFile, dataFile, verbose) -> None:
+        """
+        Initiate an mzMLLoader Object.
+
+        Args:
+            mzml_files (List[str]): List of paths to the mzML files.
+            resultsFile (str): Path to the results file.
+            dataFile (str): Path to the data file.
+            verbose (bool): Whether or not to print verbose output.
+        
+        """
+        _self.mzml_loader = MzMLDataLoader(mzml_files, resultsFile, dataFile, verbose)
+
     @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading data...")(func), check_streamlit())
     def load_targeted_experiment(_self, mzml_files: List[str], _targeted_exp_params: TargetedDIAConfig, verbose: bool):
         """
@@ -150,37 +164,33 @@ class RawTargetedExtractionAnalysisServer:
     
     def main(self):
         
-        # Load feature file if available
-        # Check if feature file ends with a tsv
-        if self.massseer_gui.file_input_settings.feature_file_path.endswith('.tsv'):
-            self.feature_data = DiaNNLoader(self.massseer_gui.file_input_settings.feature_file_path, self.massseer_gui.file_input_settings.raw_file_path_list, self.massseer_gui.verbose)
-            self.feature_data.load_report()
-        elif self.massseer_gui.file_input_settings.feature_file_path.endswith('.osw'):
-            self.feature_data = OSWLoader(self.massseer_gui.file_input_settings.feature_file_path, self.massseer_gui.file_input_settings.raw_file_path_list, self.massseer_gui.verbose)
-            self.feature_data.load_report()
- 
+        # Initiate the mzML Loader object
+
+        with st.status("Initiating .mzML files (this may take some time)....", expanded=True) as status:
+            self.initiate_mzML_interface(self.massseer_gui.file_input_settings.raw_file_path_list, 
+                                        self.massseer_gui.file_input_settings.feature_file_path, 
+                                        self.massseer_gui.file_input_settings.raw_file_path_list, 
+                                        self.massseer_gui.verbose)
+        
         # Get and append q-values to the transition list
         self.get_transition_list()
         self.append_qvalues_to_transition_list()
         
-        # Check first mzML file for ion mobility
-        is_ion_mobility_data = check_ion_mobility(self.massseer_gui.file_input_settings.raw_file_path_list[0])
-        
         # Create a UI for the transition list and show transition information
-        transition_list_ui = RawTargetedExtractionAnalysisUI(self.transition_list, is_ion_mobility_data, self.massseer_gui.verbose)
+        transition_list_ui = RawTargetedExtractionAnalysisUI(self.transition_list, self.mzml_loader.has_im, self.massseer_gui.verbose)
         transition_list_ui.show_transition_information()
         
         # Load feature data for selected peptide and charge
-        self.feature_data.load_report_for_precursor(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+        # self.feature_data.load_report_for_precursor(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
         
-        transition_list_ui.show_search_results_information(self.feature_data.report)
+        # transition_list_ui.show_search_results_information(self.feature_data.report)
 
         # Create UI for extraction parameters
         transition_list_ui.show_extraction_parameters()
 
         # Create UI settings for chromatogram plotting, peak picking, and consensus chromatogram
         chrom_plot_settings = ChromatogramPlotUISettings()
-        chrom_plot_settings.create_ui(include_raw_data_settings=True, is_ion_mobility_data=is_ion_mobility_data)
+        chrom_plot_settings.create_ui(include_raw_data_settings=True, is_ion_mobility_data=self.mzml_loader.has_im)
 
         peak_picking_settings = PeakPickingUISettings()
         peak_picking_settings.create_ui(chrom_plot_settings)
@@ -192,52 +202,28 @@ class RawTargetedExtractionAnalysisServer:
         plot_container = st.container()
         
         # Load data from mzML files
-        start_time = timeit.default_timer()
-        with st.status("Performing targeted extraction (this may take some time on the first load)...", expanded=True) as status:
-            with time_block() as elapsed_time:
-                targeted_exp = self.load_targeted_experiment(self.massseer_gui.file_input_settings.raw_file_path_list, transition_list_ui.targeted_exp_params, self.massseer_gui.verbose)
-            st.write(f"Loading raw file... Elapsed time: {elapsed_time()}") 
+
+        with st.status("Performing Peak Extraction....", expanded=True) as status:
+            start_time = timeit.default_timer()
+            featureMaps = self.mzml_loader.loadFeatureMaps(transition_list_ui.transition_settings.selected_peptide, 
+                                            transition_list_ui.transition_settings.selected_charge,
+                                            transition_list_ui.targeted_exp_params)
             
-            with time_block() as elapsed_time:
-                self.targeted_data_access(targeted_exp)
-            st.write(f"Setting up extraction parameters... Elapsed time: {elapsed_time()}")
-            
-            with time_block() as elapsed_time:
-                peptide_coord = transition_list_ui.get_peptide_dict(self.feature_data.report)
-                targeted_extraction_params = transition_list_ui.get_targeted_extraction_params_dict()
-                if transition_list_ui.submit_extraction_params:
-                    LOGGER.debug("Clearing cached targeted extraction function.")
-                    self.targeted_extraction.clear()
-                LOGGER.debug(f"Targeted Extraction Paramters: {targeted_extraction_params}")
-                LOGGER.debug(f"Targeted Extraction Peptide Coordiantes: {peptide_coord}")
-                self.targeted_extraction(targeted_exp, peptide_coord, targeted_extraction_params)
-            st.write(f"Extracting data... Elapsed time: {elapsed_time()}")
-            
-            with time_block() as elapsed_time:
-                if transition_list_ui.submit_extraction_params:
-                    self.get_targeted_data.clear()
-                targeted_data = self.get_targeted_data(transition_list_ui, targeted_exp)
-            st.write(f'Getting data as a pandas dataframe... Elapsed time: {elapsed_time()}')
-            
-            with time_block() as elapsed_time:
-                if transition_list_ui.submit_extraction_params:
-                    self.load_transition_group.clear()
-                transition_group_dict = self.load_transition_group(targeted_exp, transition_list_ui.target_transition_list)
-            st.write(f'Creating TransitionGroup... Elapsed time: {elapsed_time()}')
-            
+            transitionGroupChromatograms = featureMaps.toChromatograms()
+                
             # Perform peak picking
             peak_picker = PeakPickingServer(peak_picking_settings, chrom_plot_settings)
-            tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data=transition_group_dict, transition_list_ui=transition_list_ui)
-            
+            tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data=transitionGroupChromatograms, transition_list_ui=transition_list_ui)
+        
             with time_block() as elapsed_time:
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
                 if chrom_plot_settings.display_plot_dimension_type == "1D":
-                    plot_obj_dict = OneDimensionPlotterServer(transition_group_dict, tr_group_feature_data, transition_list_ui, chrom_plot_settings, self.massseer_gui.verbose).generate_chromatogram_plots().plot_obj_dict
+                    plot_obj_dict = OneDimensionPlotterServer(transitionGroupChromatograms, tr_group_feature_data, transition_list_ui, chrom_plot_settings, self.massseer_gui.verbose).generate_chromatogram_plots().plot_obj_dict
                 elif chrom_plot_settings.display_plot_dimension_type == "2D":
-                    plot_obj_dict = TwoDimensionPlotterServer(targeted_data, transition_list_ui, chrom_plot_settings).generate_two_dimensional_plots().plot_obj_dict
+                    plot_obj_dict = TwoDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_two_dimensional_plots().plot_obj_dict
                 elif chrom_plot_settings.display_plot_dimension_type == "3D":
-                    plot_obj_dict = ThreeDimensionalPlotter(targeted_data, transition_list_ui, chrom_plot_settings).generate_three_dimensional_plots().plot_obj_dict
+                    plot_obj_dict = ThreeDimensionalPlotter(featureMaps, transition_list_ui, chrom_plot_settings).generate_three_dimensional_plots().plot_obj_dict
             st.write(f'Generating plot... Elapsed time: {elapsed_time()}')
             
             # Show extracted data
@@ -249,11 +235,11 @@ class RawTargetedExtractionAnalysisServer:
                 elif chrom_plot_settings.display_plot_dimension_type == "3D":
                     transition_list_ui.show_extracted_three_d_plots(plot_container, plot_obj_dict, chrom_plot_settings.num_plot_columns)
             st.write(f'Displaying plot... Elapsed time: {elapsed_time()}')
-                
-                
-        elapsed = timeit.default_timer() - start_time
-        LOGGER.info(f"Targeted extraction complete! Elapsed time: {timedelta(seconds=elapsed)}")
-        status.update(label=f"Info: Targeted extraction and plot drawing complete! Elapsed time: {timedelta(seconds=elapsed)}", state="complete", expanded=False)
-    
-        if chrom_plot_settings.display_extracted_data_as_df:
-            transition_list_ui.show_extracted_dataframes(targeted_data)
+                    
+                    
+            elapsed = timeit.default_timer() - start_time
+            LOGGER.info(f"Targeted extraction complete! Elapsed time: {timedelta(seconds=elapsed)}")
+            status.update(label=f"Info: Targeted extraction and plot drawing complete! Elapsed time: {timedelta(seconds=elapsed)}", state="complete", expanded=False)
+        
+            if chrom_plot_settings.display_extracted_data_as_df:
+                transition_list_ui.show_extracted_dataframes(featureMaps)
