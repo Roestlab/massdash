@@ -74,7 +74,7 @@ class GenericLoader(ABC):
         return out
     
     @abstractmethod
-    def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.Dataframe:
+    def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
         Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
         Args:

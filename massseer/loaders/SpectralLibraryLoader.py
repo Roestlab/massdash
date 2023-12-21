@@ -3,8 +3,8 @@ from typing import List
 import pandas as pd
 
 # Loaders
-from massseer.loaders.access.TransitionTSVAccess import TransitionTSVAccess
-from massseer.loaders.access.TransitionPQPAccess import TransitionPQPAccess
+from massseer.loaders.access.TransitionTSVDataAccess import TransitionTSVDataAccess
+from massseer.loaders.access.TransitionPQPDataAccess import TransitionPQPDataAccess
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
 from massseer.util import LOGGER
@@ -49,9 +49,9 @@ class SpectralLibraryLoader:
         LOGGER.debug(f"Loading transition file {_self.in_file}")
         _, file_extension = os.path.splitext(_self.in_file)
         if file_extension.lower() == '.tsv':
-            loader = TransitionTSVAccess(_self.in_file)
+            loader = TransitionTSVDataAccess(_self.in_file)
         elif file_extension.lower() == '.pqp' or file_extension.lower() == '.osw':
-            loader = TransitionPQPAccess(_self.in_file)
+            loader = TransitionPQPDataAccess(_self.in_file)
         else:
             raise ValueError("Unsupported file format")
 
