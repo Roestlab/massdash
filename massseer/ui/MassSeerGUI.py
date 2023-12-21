@@ -78,7 +78,7 @@ class MassSeerGUI:
 
         return self
 
-    def show_file_input_settings(self, feature_file_path=None, xic_file_path=None, transition_list_file_path=None):
+    def show_file_input_settings(self, feature_file_path=None, xic_file_path=None, transition_list_file_path=None, feature_file_type=None):
         """
         Displays the file input settings.
 
@@ -95,6 +95,6 @@ class MassSeerGUI:
             self.file_input_settings.get_sqmass_files()
         elif st.session_state.workflow == "raw_data":
             self.file_input_settings = FileInputRawDataUISettings()
-            self.file_input_settings.create_ui(transition_list_file_path, xic_file_path, feature_file_path)
+            self.file_input_settings.create_ui(transition_list_file_path, xic_file_path, feature_file_path, feature_file_type)
             self.file_input_settings.get_mzml_files()
         st.sidebar.divider()
