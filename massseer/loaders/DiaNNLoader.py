@@ -1,7 +1,7 @@
 from typing import List
 
 # Loaders
-from massseer.loaders.SearchResultsTSVAccess import SearchResultsTSVAccess
+from massseer.loaders.access.SearchResultsTSVAccess import SearchResultsTSVAccess
 # Utils
 from massseer.util import LOGGER
 

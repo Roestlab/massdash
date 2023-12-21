@@ -5,7 +5,7 @@ import pandas as pd
 # Structs
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 # Loaders
-from massseer.loaders.mzMLDataAccess import mzMLDataAccess
+from massseer.loaders.access.mzMLDataAccess import mzMLDataAccess
 # Utils
 from massseer.util import LOGGER
 

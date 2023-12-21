@@ -11,7 +11,7 @@ import itertools
 from joblib import Parallel, delayed
 
 # Internal
-from massseer.loaders.mzMLDataAccess import mzMLDataAccess
+from massseer.loaders.access.mzMLDataAccess import mzMLDataAccess
 from massseer.util import LOGGER, method_timer, code_block_timer
 
 class TargetedDIAConfig:

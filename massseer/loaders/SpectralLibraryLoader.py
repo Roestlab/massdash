@@ -3,8 +3,8 @@ from typing import List
 import pandas as pd
 
 # Loaders
-from massseer.loaders.TransitionTSVLoader import TransitionTSVLoader
-from massseer.loaders.TransitionPQPLoader import TransitionPQPLoader
+from massseer.loaders.access.TransitionTSVDataAccess import TransitionTSVLoader
+from massseer.loaders.access.TransitionPQPDataAccess import TransitionPQPLoader
 # Utils
 from massseer.util import LOGGER
 
