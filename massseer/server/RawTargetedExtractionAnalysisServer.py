@@ -181,7 +181,7 @@ class RawTargetedExtractionAnalysisServer:
         transition_list_ui.show_transition_information()
         
         # Load feature data for selected peptide and charge
-        # self.feature_data.load_report_for_precursor(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+        self.mzml_loader.loadTopTransitionGroupFeatureDf(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
         
         # transition_list_ui.show_search_results_information(self.feature_data.report)
 

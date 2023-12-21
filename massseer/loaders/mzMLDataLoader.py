@@ -1,5 +1,7 @@
 from os.path import basename
 from typing import List, Union
+import numpy as np
+import pandas as pd
 
 # Loaders
 from massseer.loaders.access.MzMLDataAccess import MzMLDataAccess
@@ -33,6 +35,7 @@ class MzMLDataLoader(GenericLoader):
         self.dataFiles = [MzMLDataAccess(f, 'ondisk') for f in dataFiles]
         self.rsltsFile = self.loadResultsFile(rsltsFile)
         self.libraryFile = SpectralLibraryLoader(libraryFile)
+        self.has_im = np.all([d.has_im for d in self.dataFiles])
                    
     def loadResultsFile(self, rsltsFile: str) -> None:
         '''
@@ -52,6 +55,22 @@ class MzMLDataLoader(GenericLoader):
             raise Exception(f"Error: Unsupported file type {rsltsFile}")
         
 
+    def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.Dataframe:
+        '''
+        Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
+        Args:
+            pep_id (str): Peptide ID
+            charge (int): Charge
+        Returns:
+            DataFrame: DataFrame containing TransitionGroupObject information across all runs 
+        '''
+        out = {}
+        for t in self.dataFiles:
+            runname = basename(t).split('.')[0]
+            out[t] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
+        
+        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        
     def loadTransitionGroups(self, pep_id: str, charge: int) -> dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files

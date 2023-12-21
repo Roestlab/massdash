@@ -71,6 +71,19 @@ class GenericLoader(ABC):
             runname = basename(t).split('.')[0]
             out[t] = self.rsltsFile.getTopTransitionGroupFeature(runname, pep_id, charge)
         return out
+    
+    @abstractmethod
+    def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.Dataframe:
+        '''
+        Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
+        Args:
+            pep_id (str): Peptide ID
+            charge (int): Charge
+        Returns:
+            DataFrame: DataFrame containing TransitionGroupObject information across all runs 
+        '''
+        pass
+
  
     def __str__(self):
         return f"{__class__.__name__}: rsltsFile={self.rsltsFile_str}, dataFiles={self.dataFiles_str}"
