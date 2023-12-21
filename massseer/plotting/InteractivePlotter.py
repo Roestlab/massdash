@@ -84,19 +84,20 @@ class InteractivePlotter(GenericPlotter):
             is_precursor (bool, optional): Whether the chromatogram is for the precursor ion. Defaults to True.
             transitionGroup (TransitionGroup, optional): TransitionGroup object containing precursor and product ion information. Defaults to None.
 
-        Returns:
-            Line: Bokeh line object representing the chromatogram.
-        """
-        rt = chrom.rt
-        intensity = chrom.intensity
-        if self.smoothing_dict['type'] == 'sgolay':
-            try:
-                intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
-            except ValueError as ve:
-                if 'window_length must be less than or equal to the size of x' in str(ve):
-                    error_message = f"Error: The specified window length for sgolay smoothing is too large for transition = {label}. Try adjusting it to a smaller value."
-                else:
-                    error_message = f"Error: {ve}"
+            Returns:
+                Line: Bokeh line object representing the chromatogram.
+            """
+            rt = chrom.data
+            intensity = chrom.intensity
+
+            if self.smoothing_dict['type'] == 'sgolay':
+                try:
+                    intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
+                except ValueError as ve:
+                    if 'window_length must be less than or equal to the size of x' in str(ve):
+                        error_message = f"Error: The specified window length for sgolay smoothing is too large for transition = {label}. Try adjusting it to a smaller value."
+                    else:
+                        error_message = f"Error: {ve}"
 
                 if check_streamlit():
                     st.error(error_message)
@@ -199,12 +200,12 @@ class InteractivePlotter(GenericPlotter):
         Args:
             transitionGroup (TransitionGroup): The TransitionGroup to plot.
 
-        Returns:
-            A Bokeh figure object representing the chromatogram plot.
-        """
-        # Extract chromatogram data from the transitionGroup
-        precursorChroms = transitionGroup.precursorChroms
-        transitionChroms = transitionGroup.transitionChroms
+            Returns:
+                A Bokeh figure object representing the chromatogram plot.
+            """
+            # Extract chromatogram data from the transitionGroup
+            precursorChroms = transitionGroup.precursorData
+            transitionChroms = transitionGroup.transitionData
 
         n_transitions = len(transitionChroms)
 
@@ -314,7 +315,7 @@ class InteractivePlotter(GenericPlotter):
         Returns:
             Line: Bokeh line object representing the mobilogram.
         """
-        im = mobilo.im
+        im = mobilo.data
         intensity = mobilo.intensity
 
         if self.smoothing_dict['type'] == 'sgolay':
@@ -371,8 +372,8 @@ class InteractivePlotter(GenericPlotter):
             figure: The matplotlib figure object containing the mobilogram plot.
         """
         # Extract mobilogram data from the transitionGroup
-        precursorMobilos = transitionGroup.precursorMobilos
-        transitionMobilos = transitionGroup.transitionMobilos
+        precursorMobilos = transitionGroup.precursorData
+        transitionMobilos = transitionGroup.transitionData
 
         n_transitions = len(transitionMobilos)
 
@@ -477,7 +478,7 @@ class InteractivePlotter(GenericPlotter):
         Returns:
             Line: Bokeh line object representing the spectrum.
         """
-        mz = spectra.mz
+        mz = spectra.data
         intensity = spectra.intensity
 
         if self.scale_intensity:
@@ -520,8 +521,8 @@ class InteractivePlotter(GenericPlotter):
             The Bokeh figure object containing the plotted spectra data.
         """
         # Extract spectra data from the transitionGroup
-        precursorSpectra = transitionGroup.precursorSpectra
-        transitionSpectra = transitionGroup.transitionSpectra
+        precursorSpectra = transitionGroup.precursorData
+        transitionSpectra = transitionGroup.transitionData
 
         n_transitions = len(transitionSpectra)
 
