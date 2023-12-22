@@ -1,4 +1,4 @@
-from os.path import basename
+from os.path import basename, splitext
 from typing import List, Union
 import numpy as np
 import pandas as pd
@@ -33,29 +33,9 @@ class MzMLDataLoader(GenericLoader):
     '''
     def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, verbose: bool=False) -> None:
         super().__init__(rsltsFile, dataFiles, libraryFile, verbose)
-        self.dataFiles = [MzMLDataAccess(f, 'ondisk') for f in dataFiles]
-        self.rsltsFile = self.loadResultsFile(rsltsFile)
-        self.libraryFile = SpectralLibraryLoader(libraryFile)
+        self.dataFiles = [MzMLDataAccess(f, 'ondisk', verbose=verbose) for f in self.dataFiles_str]
         self.has_im = np.all([d.has_im for d in self.dataFiles])
                    
-    def loadResultsFile(self, rsltsFile: str) -> None:
-        '''
-        Load the report file, currently only DIA-NN tsv files are supported
-        
-        Args:
-            rsltsFile: (str) The path to the report file
-            
-        Returns:
-            self: (reportLoader) The reportLoader object
-        '''
-        if rsltsFile.endswith('.osw'):
-            self.rsltsFile = OSWDataAccess(rsltsFile, self.dataFiles)
-        elif rsltsFile.endswith('.tsv'):
-            self.rsltsFile = ResultsTSVDataAccess(rsltsFile, self.dataFiles)
-        else:
-            raise Exception(f"Error: Unsupported file type {rsltsFile}")
-        
-
     def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
         Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
@@ -95,7 +75,7 @@ class MzMLDataLoader(GenericLoader):
             FeatureMap: FeatureMap object containing peak boundaries, intensity and confidence
         '''
         out = {}
-        top_features = [ self.rsltsFile.getTopTransitionGroupFeature(d.filename, pep_id, charge) for d in self.dataFiles]
+        top_features = [ self.rsltsFile.getTopTransitionGroupFeature(basename(splitext(d.filename)[0]), pep_id, charge) for d in self.dataFiles]
         self.libraryFile.populateTransitionGroupFeatures(top_features)
         for d, t in zip(self.dataFiles, top_features):
             if t is None:

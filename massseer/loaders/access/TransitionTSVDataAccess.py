@@ -22,21 +22,21 @@ class TransitionTSVDataAccess:
         generate_annotation: Generates an annotation for each row in the data by concatenating the 'FragmentType', 'FragmentSeriesNumber', and 'ProductCharge' columns.
     '''
     REQUIRED_TSV_COLUMNS: List[str] = ['PrecursorMz', 'ProductMz', 'PrecursorCharge', 'ProductCharge',
-                                   'LibraryIntensity', 'NormalizedRetentionTime', 'PeptideSequence',
-                                   'ModifiedPeptideSequence', 'ProteinId', 'GeneName', 'FragmentType',
-                                   'FragmentSeriesNumber', 'Annotation', 'PrecursorIonMobility']
+                                   'LibraryIntensity', 'PeptideSequence',
+                                   'ModifiedPeptideSequence', 'ProteinId', 'FragmentType',
+                                   'FragmentSeriesNumber', 'Annotation']
     
     # Column name mapping from standardized names to possible column names
     COLUMN_NAME_MAPPING = {
         'PrecursorMz': ['precursor_mz', 'mz'],
         'ProductMz': ['product_mz'],
         'PrecursorCharge': ['precursor_charge', 'charge'],
-        'ProductCharge': ['product_charge'],
+        'ProductCharge': ['product_charge', 'FragmentCharge'],
         'LibraryIntensity': ['intensity'],
         'NormalizedRetentionTime': ['retention_time', 'normalized_rt'],
         'PeptideSequence': ['peptide_sequence', 'sequence'],
-        'ModifiedPeptideSequence': ['modified_sequence'],
-        'ProteinId': ['protein_id'],
+        'ModifiedPeptideSequence': ['modified_sequence', 'ModifiedPeptide'],
+        'ProteinId': ['protein_id', 'ProteinGroup'],
         'GeneName': ['gene_name'],
         'FragmentType': ['fragment_type'],
         'FragmentSeriesNumber': ['fragment_series_number'],
@@ -54,24 +54,23 @@ class TransitionTSVDataAccess:
             raise ValueError("Unsupported file format. TransitionTSVLoader requires a tab-separated .tsv file.")
         self.filename = filename
         self.data: pd.DataFrame = pd.DataFrame()
+        self.load() ## set self.data
     
-    @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
-    def _load(_self) -> None:
+    def load(self) -> pd.DataFrame:
         '''
         Load the transition TSV file
         '''
-        _self.data = pd.read_csv(_self.filename, sep='\t')
-        # Multiply the retention time by 60 to convert from minutes to seconds
-        _self.data['NormalizedRetentionTime'] = _self.data['NormalizedRetentionTime'] * 60
-        _self._resolve_column_names()
-        if 'Annotation' not in _self.data.columns:
-            _self.generate_annotation()
+        self.data = pd.read_csv(self.filename, sep='\t')
+        self._resolve_column_names()
+        if 'Annotation' not in self.data.columns:
+            self.generate_annotation()
         # Drop the FragmentType and FragmentSeriesNumber columns
-        if _self._validate_columns():
-            _self.data.drop(columns=['FragmentType', 'FragmentSeriesNumber'], inplace=True)
-            return _self.data
+        if self._validate_columns():
+            self.data.drop(columns=['FragmentType', 'FragmentSeriesNumber'], inplace=True)
         else:
-            raise ValueError(f"The TSV file does not have the required columns.\n {TransitionTSVDataAccess.REQUIRED_TSV_COLUMNS}")
+            print(self.data.columns)
+            missing_columns = set(TransitionTSVDataAccess.REQUIRED_TSV_COLUMNS).difference(set(self.data.columns))
+            raise ValueError(f"The TSV file is missing the following required columns: {missing_columns}")
     
     def _resolve_column_names(self):
         """

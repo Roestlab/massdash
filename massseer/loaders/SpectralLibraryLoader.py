@@ -34,7 +34,7 @@ class SpectralLibraryLoader:
     """
     def __init__(self, in_file: str, verbose: bool=False) -> None:
         self.in_file = in_file
-        self.data: pd.DataFrame = pd.DataFrame()
+        self.data: pd.DataFrame = self.load()
         
         LOGGER.name = "SpectralLibraryLoader"
         if verbose:
@@ -42,20 +42,18 @@ class SpectralLibraryLoader:
         else:
             LOGGER.setLevel("INFO")
 
-    def load(_self) -> 'TransitionList':
+    def load(self) -> pd.DataFrame:
         """
         Load the transition list file
         """
-        LOGGER.debug(f"Loading transition file {_self.in_file}")
-        _, file_extension = os.path.splitext(_self.in_file)
+        LOGGER.debug(f"Loading transition file {self.in_file}")
+        _, file_extension = os.path.splitext(self.in_file)
         if file_extension.lower() == '.tsv':
-            loader = TransitionTSVDataAccess(_self.in_file)
+            return TransitionTSVDataAccess(self.in_file)
         elif file_extension.lower() == '.pqp' or file_extension.lower() == '.osw':
-            loader = TransitionPQPDataAccess(_self.in_file)
+            return TransitionPQPDataAccess(self.in_file)
         else:
             raise ValueError("Unsupported file format")
-
-        _self.data = loader._load()
 
     def save(self, file_path: str) -> None:
         """
@@ -157,7 +155,7 @@ class SpectralLibraryLoader:
         """
         peptide_sequence = transition_group_features[0].sequence
         precursor_charge = transition_group_features[0].precursor_charge
-        library_data = self.data[(self.data['ModifiedPeptideSequence'] == peptide_sequence) & (self.data['PrecursorCharge'] == precursor_charge)][['ProductMz', 'Annotation', 'PrecursorMz']]
+        library_data = self.data.data[(self.data.data['ModifiedPeptideSequence'] == peptide_sequence) & (self.data.data['PrecursorCharge'] == precursor_charge)][['ProductMz', 'Annotation', 'PrecursorMz']]
 
         for t in transition_group_features:
             t.product_annotations = library_data['Annotation'].tolist()

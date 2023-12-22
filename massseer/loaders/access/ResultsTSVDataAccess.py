@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 from typing import List
 from massseer.loaders.access.GenericResultsAccess import GenericResultsAccess
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
@@ -7,12 +8,12 @@ from massseer.util import LOGGER
 
 class ResultsTSVDataAccess(GenericResultsAccess): 
     ''' Class for generic access to TSV file containing the results, currently only supports DIA-NN tsv files'''
-    def init(self, filename: str, verbose: bool = False) -> None:
+    def __init__(self, filename: str, verbose: bool = False) -> None:
         super().__init__(filename, verbose)
         self.filename = filename
         self.peptideHash = self._initializePeptideHashTable()
-        self.df = self.loadData()
-        self.runs = self.df['filename'].drop_duplicates()
+        self.df = self.loadData() 
+        self.runs = self.df['Run'].drop_duplicates()
     
     def loadData(self) -> pd.DataFrame:
         '''
@@ -24,10 +25,9 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         df = df.rename(columns={'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge'})
         # Assign dummy Decoy column all 0
         df['Decoy'] = 0
+        return df
 
-        self.df = df
-
-    def _initializePeptideHashTable(self, ) -> List[int]:   
+    def _initializePeptideHashTable(self) -> pd.DataFrame:   
         '''
         Load Peptide and Charge for easy access
         '''
@@ -63,8 +63,10 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             TransitionGroupFeature: TransitionGroupFeature object containing peak boundaries, intensity and confidence
         '''
         runname_exact = self.getExactRunName(runname)
+        print(runname_exact)
 
         if runname_exact is None:
+            LOGGER.debug(f"Error: No matching runs found for {runname}")
             return []
         else:
             targetPeptide = self.peptideHash[(self.peptideHash['Run'] == runname_exact) & (self.peptideHash['Modified.Sequence'] == peptide) & (self.peptideHash['Precursor.Charge'] == charge)]
@@ -85,7 +87,13 @@ class ResultsTSVDataAccess(GenericResultsAccess):
                 # Multiply RT by 60 to convert from minutes to seconds
                 out = []
                 for _, row in feature_data.iterrows():
-                    out.append(TransitionGroupFeature(consensusApex=row['RT'] * 60,  leftBoundary=row['RT.Start'] * 60, rightBoundary=row['RT.Stop'] * 60, areaIntensity=row['Precursor.Quantity'], qvalue=row['Q.Value']))
+                    out.append(TransitionGroupFeature(consensusApex=row['RT'] * 60,
+                                                      leftBoundary=row['RT.Start'] * 60,
+                                                      rightBoundary=row['RT.Stop'] * 60,
+                                                      areaIntensity=row['Precursor.Quantity'],
+                                                      qvalue=row['Q.Value'],
+                                                      sequence=row['Modified.Sequence'],
+                                                      precursor_charge=row['Precursor.Charge']))
                 return out 
             else: # len(row_indices)-1==0:
                 LOGGER.debug(f"Error: No feature results found for {peptide_tmp} {charge} in {self.filename}")
@@ -97,7 +105,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         pass
         '''
-        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']
+        columns = ['Run', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']
         runname_exact = self.getExactRunName(runname)
         if runname_exact is None:
             return pd.DataFrame(columns=columns)
@@ -106,16 +114,16 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             return self.df[(self.df['Run'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
         '''
 
-    def getExactRunName(self, runname: str) -> str:
+    def getExactRunName(self, run_basename_wo_ext: str) -> str:
         '''
         Returns the run name from the filename
         '''
-        matching_runs = self.run[self.run['filename'].str.contains(runname)]
+        matching_runs = self.runs[self.runs.str.contains(run_basename_wo_ext)]
         if len(matching_runs) == 0:
-            print("Error: No matching runs found for {runname}")
+            print("Error: No matching runs found for {run_basename_wo_ext}")
             return None
         elif len(matching_runs) == 1:
-            return matching_runs['filename'].iloc[0]
+            return matching_runs.iloc[0]
         else: ## greater than 1
-            print("Warning: More than one run found for {runname}, this can lead to unpredicted behaviour")
-            return matching_runs['filename'].iloc[0]
+            print("Warning: More than one run found for {run_basename_wo_ext}, this can lead to unpredicted behaviour")
+            return matching_runs.iloc[0]

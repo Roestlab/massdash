@@ -11,6 +11,7 @@ from massseer.structs.Spectrum import Spectrum
 # Utils
 from massseer.util import LOGGER
 from massseer.structs.TransitionGroup import TransitionGroup
+from massseer.structs.TargetedDIAConfig import TargetedDIAConfig
 
 class FeatureMap:
     '''
@@ -36,9 +37,10 @@ class FeatureMap:
         get_precursor_spectra: Get a list of precursor spectra from the feature map.
         get_transition_spectra: Get a list of transition spectra from the feature map.
     '''
-    def __init__(self, feature_df: pd.DataFrame, verbose: bool=False):
+    def __init__(self, feature_df: pd.DataFrame, config: TargetedDIAConfig=None, verbose: bool=False):
         self.feature_df = feature_df
         self.has_im = 'im' in feature_df.columns and feature_df['im'].notnull().all()
+        self.config = config
         
         LOGGER.name = 'FeatureMap'
         if verbose:

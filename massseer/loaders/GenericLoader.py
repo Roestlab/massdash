@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from massseer.loaders.access.OSWDataAccess import OSWDataAccess
+from massseer.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
 from typing import List, Union
 from os.path import basename
 from massseer.util import LOGGER
@@ -11,16 +14,26 @@ class GenericLoader(ABC):
     Abstract class for loading Chromatograms and peak features
     Classes which inherit from this should contain one results file and one transition file
     '''
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], verbose: bool=False):
+    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str, verbose: bool=False):
+        ## store the file names
         self.rsltsFile_str = rsltsFile
+        self.libraryFile_str = libraryFile
+        
+        # convert dataFiles to a list if it is not already. Will be set by the child class
         if isinstance(dataFiles, str):
             self.dataFiles_str = [dataFiles]
         else:
             self.dataFiles_str = dataFiles
 
-        # These properties will be set by the child class
-        self.rsltsFile = None
-        self.tranisitonFiles = None
+        ### set the results file depending on the file ending
+        if self.rsltsFile_str.endswith('.osw'):
+            self.rsltsFile = OSWDataAccess(self.rsltsFile_str)
+        elif rsltsFile.endswith('.tsv'):
+            self.rsltsFile = ResultsTSVDataAccess(self.rsltsFile_str)
+        else:
+            raise Exception(f"Error: Unsupported file type {rsltsFile}")
+        
+        self.libraryFile = SpectralLibraryLoader(self.libraryFile_str)
  
         LOGGER.name = __class__.__name__
         if verbose:

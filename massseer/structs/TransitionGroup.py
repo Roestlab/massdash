@@ -20,7 +20,7 @@ class TransitionGroup:
         else: 
             raise ValueError("Precursor and transition data cannot both be empty")
         if len(precursorData) > 0 and len(transitionData) > 0:
-            assert (self.dataType == type(transitionData[0]), "Precursor and transition data must be of the same type")
+            assert(self.dataType == type(transitionData[0])) 
   
 
     def to_pyopenms(self, includePrecursors=True):
