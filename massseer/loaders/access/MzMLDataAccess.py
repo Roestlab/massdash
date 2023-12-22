@@ -170,6 +170,44 @@ class MzMLDataAccess():
             meta_rt_list = np.array([meta_spec.getRT()for meta_spec in self.meta_data.getSpectra()])
         return meta_rt_list
     
+    def load_spectrum(self, spec_indice: int) -> Tuple[np.array, np.array, np.array]:
+        """
+        Load a single spectrum for a given spectrum indice.
+
+        Args:
+          spec_indice: (int) an interger of the spectrum indice to extra a spectrum for
+
+        Return:
+          mz_array: mz array
+          int_array: intensity array
+          im_array: ion mobility array 
+        """
+        # Get data arrays
+        if (self.readOptions=="ondisk"):
+            with code_block_timer(f'Extracting mz, int, im data arrays...', LOGGER.debug):
+                spec = self.exp.getSpectrum(spec_indice)
+                mz_array = spec.get_peaks()[0]
+                int_array = spec.get_peaks()[1]
+                if self.has_im:
+                    im_array = spec.getFloatDataArrays()
+                else:
+                    im_array = []
+        elif (self.readOptions=="cached"):
+            spec = self.meta_data.getSpectrum(spec_indice)
+            with code_block_timer(f'Extracting mz, int, im data arrays...', LOGGER.debug):
+                das = self.exp.getSpectrumById(spec_indice).getDataArrays()
+                mz_array = das[0].getData()
+                int_array = das[1].getData()
+                if self.has_im:
+                    im_array = das[2].getData()
+                else:
+                    im_array = []
+        else:
+            LOGGER.error(f"ERROR: Unknown readOptions ({self.readOptions}) given! Has to be one of 'ondisk', 'cached'")
+        
+        return (mz_array, int_array, im_array)
+ 
+
     def filter_single_spectrum(self, 
                                spec_indice: int, 
                                feature: TransitionGroupFeature,
@@ -195,71 +233,65 @@ class MzMLDataAccess():
         target_precursor_mz_lower, target_precursor_mz_upper = config.get_upper_lower_tol(feature.precursor_mz)
         target_product_upper_lower_list = [config.get_upper_lower_tol(mz) for mz in feature.product_mz]
 
-        # Get data arrays
-        if (self.readOptions=="ondisk"):
-            with code_block_timer(f'Extracting mz, int, im data arrays...', LOGGER.debug):
-                spec = self.exp.getSpectrum(spec_indice)
-                mz_array = spec.get_peaks()[0]
-                int_array = spec.get_peaks()[1]
-                if self.has_im:
-                    im_array = spec.getFloatDataArrays()
-                else:
-                    im_array = []
-        elif (self.readOptions=="cached"):
-            spec = self.meta_data.getSpectrum(spec_indice)
-            with code_block_timer(f'Extracting mz, int, im data arrays...', LOGGER.debug):
-                das = self.exp.getSpectrumById(spec_indice).getDataArrays()
-                mz_array = das[0].getData()
-                int_array = das[1].getData()
-                if self.has_im:
-                    im_array = das[2].getData()
-                else:
-                    im_array = []
-        else:
-            LOGGER.error(f"ERROR: Unknown readOptions ({self.readOptions}) given! Has to be one of 'ondisk', 'cached'")
-        
-        if len(spec.getPrecursors()) == 0:
-            LOGGER.warn(
-                f"MS{spec.getMSLevel()} spectrum native id {spec.getNativeID()} had no precursor, skipping this spectrum")
-            return spec
+        spec_meta = self.meta_data.getSpectrum(spec_indice)
 
-        # Get SWATH windows upper and lower
-        current_prec = spec.getPrecursors()[0]
 
-        swath_mz_win_lower = current_prec.getMZ() - current_prec.getIsolationWindowLowerOffset()
-        swath_mz_win_upper = current_prec.getMZ() + current_prec.getIsolationWindowUpperOffset()
+        writeSpectrum = False # boolean flag of whether to write out filtered spectrum
 
-        if self.has_im:
-            if (self.readOptions=="ondisk"): 
-                im_match_bool = (im_array[0].get_data() > im_start) & (
-                    im_array[0].get_data() < im_end)
-            elif (self.readOptions=="cached"):
-                im_match_bool = (im_array > im_start) & (
-                    im_array < im_end)
-        else:
-            im_match_bool = np.ones(mz_array.shape)
-        
-        if spec.getMSLevel() == 1 and 1 in config.mslevel:
+        if spec_meta.getMSLevel() == 1 and 1 in config.mslevel:
+            mz_array, int_array, im_array = self.load_spectrum(spec_indice)
+            # first filter IM
+            if self.has_im:
+                if (self.readOptions=="ondisk"): 
+                    im_match_bool = (im_array[0].get_data() > im_start) & (
+                        im_array[0].get_data() < im_end)
+                elif (self.readOptions=="cached"):
+                    im_match_bool = (im_array > im_start) & (
+                        im_array < im_end)
+            else:
+                im_match_bool = np.ones(mz_array.shape)
+
             mz_match_bool = (mz_array > target_precursor_mz_lower) & (
                 mz_array < target_precursor_mz_upper)
-            if any(mz_match_bool*im_match_bool):
+
+            writeSpectrum = any(mz_match_bool*im_match_bool)
+            if writeSpectrum:
                 LOGGER.debug(
-                    f"Adding MS1 spectrum {spec.getNativeID()} with spectrum indice {spec_indice} filtered for {sum(mz_match_bool*im_match_bool)} spectra between {target_precursor_mz_lower} m/z and {target_precursor_mz_upper} m/z and IM between {im_start} and {im_end}")
-        elif spec.getMSLevel() == 2 and 2 in config.mslevel:
-            # Only extract product spectra if current spectrums isolation window contains precursor mz
+                    f"Adding MS1 spectrum {spec_meta.getNativeID()} with spectrum indice {spec_indice} filtered for {sum(mz_match_bool*im_match_bool)} spectra between {target_precursor_mz_lower} m/z and {target_precursor_mz_upper} m/z") # and IM between {im_start} and {im_end}")
+
+
+        elif spec_meta.getMSLevel() == 2 and 2 in config.mslevel:
+            # Get SWATH windows upper and lower
+            current_prec = spec_meta.getPrecursors()[0]
+
+            swath_mz_win_lower = current_prec.getMZ() - current_prec.getIsolationWindowLowerOffset()
+            swath_mz_win_upper = current_prec.getMZ() + current_prec.getIsolationWindowUpperOffset()
+
+            # Only load and extract product spectra if current spectrums isolation window contains precursor mz
             if feature.precursor_mz > swath_mz_win_lower and feature.precursor_mz < swath_mz_win_upper:
+                mz_array, int_array, im_array = self.load_spectrum(spec_indice)
+                if self.has_im:
+                    if (self.readOptions=="ondisk"): 
+                        im_match_bool = (im_array[0].get_data() > im_start) & (
+                            im_array[0].get_data() < im_end)
+                    elif (self.readOptions=="cached"):
+                        im_match_bool = (im_array > im_start) & (
+                            im_array < im_end)
+                else:
+                    im_match_bool = np.ones(mz_array.shape)
+
                 mz_match_bool = np.array(list(map(config.is_mz_in_product_mz_tol_window, mz_array, itertools.repeat(
                     target_product_upper_lower_list, len(mz_array)))))
-                if any(mz_match_bool*im_match_bool):
+                writeSpectrum = any(mz_match_bool*im_match_bool)
+                if writeSpectrum:
                     LOGGER.debug(
-                        f"Feature {feature.sequence}{feature.precursor_charge} - Adding MS2 spectrum {spec.getNativeID()} with spectrum indice {spec_indice} filtered for {sum(mz_match_bool*im_match_bool)} spectra between {target_product_upper_lower_list} m/z") #and IM between {im_start} and {im_end}")
+                        f"Feature {feature.sequence}{feature.precursor_charge} - Adding MS2 spectrum {spec_meta.getNativeID()} with spectrum indice {spec_indice} filtered for {sum(mz_match_bool*im_match_bool)} spectra between {target_product_upper_lower_list} m/z") #and IM between {im_start} and {im_end}")
             else:
-                mz_match_bool = np.zeros(mz_array.shape).astype(bool)
-                LOGGER.debug(f"Feature {feature.sequence}{feature.precursor_charge} Skipping MS2 spectrum {spec.getNativeID()} with spectrum indice {spec_indice} because current swath isolation window ({swath_mz_win_lower} m/z - {swath_mz_win_upper} m/z) does not contain target precursor m/z ({feature.consensusApex})")
-
+                LOGGER.debug(f"Feature {feature.sequence}{feature.precursor_charge} Skipping MS2 spectrum {spec_meta.getNativeID()} with spectrum indice {spec_indice} because current swath isolation window ({swath_mz_win_lower} m/z - {swath_mz_win_upper} m/z) does not contain target precursor m/z ({feature.consensusApex})")
 
         # Only write out filtered spectra if there is any fitlered spectra to write out
-        if any(mz_match_bool*im_match_bool):
+        spec_out = po.MSSpectrum()
+        if writeSpectrum:
             with code_block_timer(f'Getting filtered spectrum...', LOGGER.debug):
                 extract_target_indices = np.where(mz_match_bool * im_match_bool)
                 filtered_mz = mz_array[extract_target_indices]
@@ -273,7 +305,7 @@ class MzMLDataAccess():
                     filtered_im = []
                 LOGGER.warn(f"INFO: Adding filtered mz data of length {len(filtered_mz)} | int of length {len(filtered_int)} | im of length {len(filtered_im)}")
                 # replace peak data with filtered peak data
-                spec.set_peaks((filtered_mz, filtered_int))
+                spec_out.set_peaks((filtered_mz, filtered_int))
                 
                 if self.has_im:
                     # repalce float data arrays with filtered ion mobility data
@@ -281,9 +313,9 @@ class MzMLDataAccess():
                     filtered_im_np = np.array(filtered_im).astype(np.float32)
                     fda.set_data(filtered_im_np)
                     fda.setName("Ion Mobility")
-                    spec.setFloatDataArrays([fda])
+                    spec_out.setFloatDataArrays([fda])
             # If you have a lot of filtered spectra to return, it becomes memory heavy.
-            return spec
+            return spec_out
 
     @method_timer
     def reduce_spectra(self, feature: TransitionGroupFeature , config: TargetedDIAConfig) -> FeatureMap:
