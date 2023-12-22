@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 import numpy as np
 
@@ -43,8 +44,16 @@ class TransitionListUISettings:
         with col1:
             st.write("\n\n\n\n")
             st.write("")
-            # Add a button to the sidebar for random protein selection
-            pick_random_protein = st.button('🔀', help="Select a random protein from the list of proteins")
+            if st.session_state.perf_on and st.session_state['perf_counter'] != 0:
+                pick_random_protein = True
+                print(f"perf_counter: {st.session_state['perf_counter']}")
+                st.session_state['perf_counter'] = st.session_state['perf_counter'] - 1
+                # time.sleep(1)
+                if st.session_state['perf_counter'] == 0:
+                    st.session_state.perf_on = False
+            else:
+                # Add a button to the sidebar for random protein selection
+                pick_random_protein = st.button('🔀', help="Select a random protein from the list of proteins")
         with col2: 
             if pick_random_protein:
                 selected_protein = np.random.choice(protein_list)

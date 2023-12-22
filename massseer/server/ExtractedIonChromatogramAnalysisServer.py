@@ -26,7 +26,7 @@ from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPick
 from massseer.plotting.GenericPlotter import PlotConfig
 from massseer.plotting.InteractivePlotter import InteractivePlotter
 # Util
-from massseer.util import LOGGER, time_block
+from massseer.util import LOGGER, conditional_decorator, check_streamlit, time_block, measure_memory_block, MeasureBlock
 from massseer.server.util import get_string_mslevels_from_bool
 
 class ExtractedIonChromatogramAnalysisServer:
@@ -61,13 +61,15 @@ class ExtractedIonChromatogramAnalysisServer:
             LOGGER.setLevel("DEBUG")
         else:
             LOGGER.setLevel("INFO")
-
+            
     def get_transition_list(self):
         """
         Loads the spectral library and sets the transition list attribute.
         """
-        self.transition_list = SpectralLibraryLoader(self.massseer_gui.file_input_settings.osw_file_path)
-        self.transition_list.load()
+        with MeasureBlock("ExtractedIonChromatogramAnalysisServer::SpectralLibraryLoader", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_measure:
+            self.transition_list = SpectralLibraryLoader(self.massseer_gui.file_input_settings.osw_file_path)
+            self.transition_list.load()
+        
 
     def append_qvalues_to_transition_list(self):
         """
@@ -77,12 +79,29 @@ class ExtractedIonChromatogramAnalysisServer:
         # merge transition list with top ranked precursor features
         self.transition_list.data = pd.merge(self.transition_list.data, top_ranked_precursor_features, on=['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence', 'PrecursorMz', 'PrecursorCharge', 'Decoy'], how='left')
 
+    @conditional_decorator(lambda func: st.cache_resource(show_spinner=False)(func), check_streamlit())
+    def osw_data_access(_self):
+        """
+        Loads data from the OSW file.
+        """
+        osw_data = OSWDataAccess(_self.massseer_gui.file_input_settings.osw_file_path)
+        return osw_data
+        
+    @conditional_decorator(lambda func: st.cache_resource(show_spinner=False)(func), check_streamlit())
+    def sqmass_data_loader(_self):
+        """
+        Loads data from the SqMass file.
+        """
+        sqmass_data = SqMassLoader(_self.massseer_gui.file_input_settings.sqmass_file_path_list, _self.massseer_gui.file_input_settings.osw_file_path)
+        return sqmass_data
+
     def main(self):
         """
         Runs the main post extracted ion chromatogram analysis workflow.
         """
         # Load data from the OSW file
-        self.osw_data = OSWDataAccess(self.massseer_gui.file_input_settings.osw_file_path)
+        with MeasureBlock("ExtractedIonChromatogramAnalysisServer::OSWDataAccess", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_measure:
+            self.osw_data = self.osw_data_access()
 
         # Get and append q-values to the transition list
         self.get_transition_list()
@@ -103,7 +122,8 @@ class ExtractedIonChromatogramAnalysisServer:
         concensus_chromatogram_settings.create_ui()
 
         # Load XIC data from SQMass file
-        self.xic_data = SqMassLoader(self.massseer_gui.file_input_settings.sqmass_file_path_list, self.massseer_gui.file_input_settings.osw_file_path)
+        with MeasureBlock("ExtractedIonChromatogramAnalysisServer::SqMassLoader", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_measure:
+            self.xic_data = self.sqmass_data_loader()
 
         # Print selected peptide and charge information
         LOGGER.info(f"Selected peptide: {transition_list_ui.transition_settings.selected_peptide} Selected charge: {transition_list_ui.transition_settings.selected_charge}")
@@ -114,18 +134,18 @@ class ExtractedIonChromatogramAnalysisServer:
         # Add a status indicator and start the overall timer
         overall_start_time = timeit.default_timer()
         with st.status("Performing targeted extraction...", expanded=True) as status:
-            with time_block() as elapsed_time:
+            with MeasureBlock("ExtractedIonChromatogramAnalysisServer::SqMassLoader::loadTransitionGroups", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_measure:
                 # Load transition group data
                 tr_group_data = self.xic_data.loadTransitionGroups(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
-            st.write(f"Loading XIC data... Elapsed time: {elapsed_time()}") 
+            st.write(f"Loading XIC data... Elapsed time: {perf_measure.execution_time}") 
             
             # Perform peak picking based on user settings
             if peak_picking_settings.do_peak_picking == 'OSW-PyProphet':
-                with time_block() as elapsed_time:
+                with MeasureBlock("ExtractedIonChromatogramAnalysisServer::SqMassLoader::loadTransitionGroupFeatures", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_measure:
                     tr_group_feature_data = self.xic_data.loadTransitionGroupFeatures(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
-                st.write(f"Loading OSW-PyProphet Peak Boundaries... Elapsed time: {elapsed_time()}")
+                st.write(f"Loading OSW-PyProphet Peak Boundaries... Elapsed time: {perf_measure.execution_time}")
             elif peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
-                with time_block() as elapsed_time:
+                with MeasureBlock("ExtractedIonChromatogramAnalysisServer::pyMRMTransitionGroupPicker", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_measure:
                     # Peak picking using pyMRMTransitionGroupPicker
                     if peak_picking_settings.peak_pick_on_displayed_chrom:
                         mslevel = get_string_mslevels_from_bool({'ms1':chrom_plot_settings.include_ms1, 'ms2':chrom_plot_settings.include_ms2})
@@ -138,20 +158,20 @@ class ExtractedIonChromatogramAnalysisServer:
                         peak_picker = pyMRMTransitionGroupPicker(mslevel, peak_picker=peak_picker_param.peak_picker)
                         peak_features = peak_picker.pick(tr_group)
                         tr_group_feature_data[file.filename] = peak_features
-                st.write(f"Performing pyPeakPickerMRM Peak Picking... Elapsed time: {elapsed_time()}")
+                st.write(f"Performing pyPeakPickerMRM Peak Picking... Elapsed time: {perf_measure.execution_time}")
             elif peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
-                with time_block() as elapsed_time:
+                with MeasureBlock("ExtractedIonChromatogramAnalysisServer::MRMTransitionGroupPicker", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_measure:
                     # Peak picking using MRMTransitionGroupPicker
                     tr_group_feature_data = {}
                     for file, tr_group in tr_group_data.items():
                         peak_picker = MRMTransitionGroupPicker(peak_picking_settings.peak_picker_algo_settings.smoother)
                         peak_features = peak_picker.pick(tr_group)
                         tr_group_feature_data[file.filename] = peak_features
-                st.write(f"Performing MRMTransitionGroupPicker Peak Picking... Elapsed time: {elapsed_time()}")
+                st.write(f"Performing MRMTransitionGroupPicker Peak Picking... Elapsed time: {perf_measure.execution_time}")
             else:
                 tr_group_feature_data = {file.filename: None for file in tr_group_data.keys()}
 
-            with time_block() as elapsed_time:
+            with MeasureBlock("ExtractedIonChromatogramAnalysisServer::PlotGeneration", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_measure:
                 
                 # Initialize axis limits for plotting
                 axis_limits_dict = {'x_range' : [], 'y_range' : []}
@@ -193,15 +213,16 @@ class ExtractedIonChromatogramAnalysisServer:
                         plot_obj = plotter.plot(tr_group, feature_data)
                         plot_obj_dict[file.filename] = plot_obj
 
-            st.write(f"Generating chromatogram plots... Elapsed time: {elapsed_time()}")
+            st.write(f"Generating chromatogram plots... Elapsed time: {perf_measure.execution_time}")
 
-        with time_block() as elapsed_time:
+        with MeasureBlock("ExtractedIonChromatogramAnalysisServer::DrawingPlots", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_measure:
             # Show extracted ion chromatograms
             transition_list_ui.show_extracted_ion_chromatograms(plot_container, chrom_plot_settings, concensus_chromatogram_settings, plot_obj_dict)
-        status.write(f"Drawing extracted ion chromatograms... Elapsed time: {elapsed_time()}")
+        status.write(f"Drawing extracted ion chromatograms... Elapsed time: {perf_measure.execution_time}")
 
         # Update status indicator
         overall_elapsed_time = timeit.default_timer() - overall_start_time
         status.update(label=f"{transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge} XIC extration complete! Total elapsed time: {timedelta(seconds=overall_elapsed_time)}", state="complete", expanded=False)
         
-
+        if st.session_state['perf_on']:
+            st.rerun()

@@ -9,7 +9,7 @@ from timeit import default_timer
 from datetime import timedelta
 import logging
 from logging.handlers import TimedRotatingFileHandler
-
+import psutil
 
 
 #######################################
@@ -100,7 +100,56 @@ def time_block():
     start = end = default_timer()
     yield lambda: timedelta(seconds=end - start)
     end = default_timer()
+    
+@contextlib.contextmanager
+def measure_memory_block():
+    """
+    A context manager that measures the memory usage of a block of code.
 
+    Usage:
+    with measure_memory_block() as memory:
+        # code block to be measured
+
+    Returns:
+    A float representing the memory usage in MB.
+    """
+    start_memory = psutil.virtual_memory().used
+    yield lambda: (end_memory - start_memory) / 1024 ** 2
+    end_memory = psutil.virtual_memory().used
+
+class MeasureBlock:
+    def __init__(self, metric_name: str=None, write_out_perf: bool=False, perf_output: str='MassSeer_Performance_Report.txt'):
+        self.metric_name = metric_name
+        self.write_out_perf = write_out_perf
+        self.perf_output = perf_output
+        self.start_time = None
+        self.end_time = None
+        self.start_memory = None
+        self.end_memory = None
+        self.execution_time = None
+        self.memory_usage = None
+        
+    def __enter__(self):
+        self.start_time = default_timer()
+        self.start_memory = psutil.Process(os.getpid()).memory_info().rss
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.end_time = default_timer()
+        self.end_memory = psutil.Process(os.getpid()).memory_info().rss
+        self.execution_time = self.end_time - self.start_time
+        self.memory_usage = (self.end_memory - self.start_memory) / (1024 ** 2)  # Convert bytes to megabytes
+        # Open file and append data to it as tabular data
+        if self.write_out_perf:
+            # Check if there are headers in the file
+            if not os.path.isfile(self.perf_output):
+                with open(self.perf_output, 'w', encoding='utf-8') as f:
+                    f.write('metric_name\texecution_time_sec\tmemory_usage_MB\n')
+            # Write out the performance data
+            with open(self.perf_output, 'a', encoding='utf-8') as f:
+                f.write(f'{self.metric_name}\t{self.execution_time}\t{self.memory_usage}\n')
+
+        
 #######################################
 ## Data Handling Utils
 
