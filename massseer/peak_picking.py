@@ -2,7 +2,7 @@ import pyopenms as po
 import numpy as np
 
 # Internal modules
-from massseer.loaders.OSWDataAccess import OSWDataAccess
+from massseer.loaders.access.OSWDataAccess import OSWDataAccess
 
 def calculate_integrated_intensity(chrom_data, boundary):
     """

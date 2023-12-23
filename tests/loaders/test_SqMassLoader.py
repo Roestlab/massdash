@@ -12,12 +12,12 @@ class TestSqMassLoader(TestCase):
         # Test loading a peak feature for a valid peptide ID and charge
         fullpeptidename = "NKESPT(UniMod:21)KAIVR(UniMod:267)"
         charge = 3
-        peak_feature = self.loader.loadTransitionGroupFeature(fullpeptidename, charge)
+        peak_feature = self.loader.loadTransitionGroupFeatures(fullpeptidename, charge)
         self.assertMatchSnapshot(peak_feature)
 
         # Test loading a peak feature for an invalid peptide ID and charge
-        peak_feature = self.loader.loadTransitionGroupFeature('INVALID', 0)
-        self.assertMatchSnapshot(len(peak_feature))
+        peak_feature_2 = self.loader.loadTransitionGroupFeatures('INVALID', 0)
+        self.assertMatchSnapshot(len(peak_feature_2))
     
     def test_loadTransitionGroups(self):
         # Test loading a chromatogram for a valid peptide ID and charge

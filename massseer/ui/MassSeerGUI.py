@@ -1,8 +1,24 @@
 import streamlit as st
 
-from massseer.ui.FileInputUISettings import FileInputUISettings
+from massseer.ui.FileInputXICDataUISettings import FileInputXICDataUISettings
+from massseer.ui.FileInputRawDataUISettings import FileInputRawDataUISettings
+from massseer.ui.ExtractedIonChromatogramAnalysisFormUI import ExtractedIonChromatogramAnalysisFormUI
+from massseer.ui.RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
+
+from massseer.util import copy_attributes
 
 class MassSeerGUI:
+    """
+    Class to create the user interface for MassSeer.
+    
+    Attributes:
+        welcome_container (streamlit.container): A container for the welcome message.
+        file_input_settings (FileInputXICDataUISettings/FileInputRawDataUISettings): A container for the file input settings.
+        
+    Methods:
+        show_welcome_message: Displays a welcome message and input fields for OpenSwath and DIA-NN workflows.
+        show_file_input_settings: Displays the file input settings.
+    """
     def __init__(self):
         """
         Initializes the MassSeerGUI class.
@@ -14,29 +30,17 @@ class MassSeerGUI:
             None
         """
         self.welcome_container = st.empty()
-        self.tab1 = None
-        self.tab2 = None
-        self.load_toy_dataset = None
-        self.osw_file_path = None
-        self.sqmass_file_path_input = None
         self.file_input_settings = None
-        self.chromatogram_plot_settings = None
-        self.peak_picking_settings = None
-        self.concensus_chromatogram_settings = None
-
-
-    def clicked(self, button):
-        """
-        Updates the session state to indicate that a button has been clicked.
-
-        Args:
-            button (str): The name of the button that was clicked.
-
-        Returns:
-            None
-        """
-        st.session_state.clicked[button] = True
-
+        
+        # initialize load_toy_dataset key in clicked session state
+        # This is needed because streamlit buttons return True when clicked and then default back to False.
+        # See: https://discuss.streamlit.io/t/how-to-make-st-button-content-stick-persist-in-its-own-section/45694/2
+        if 'clicked' not in st.session_state:
+            st.session_state.clicked  = {'load_toy_dataset_xic_data':False, 'load_toy_dataset_raw_data':False}
+            
+        if 'workflow' not in st.session_state:
+            st.session_state.workflow = None
+            
     def show_welcome_message(self):
         """
         Displays a welcome message and input fields for OpenSwath and DIA-NN workflows.
@@ -48,34 +52,31 @@ class MassSeerGUI:
         sqmass_file_path_input (streamlit.text_input): A text input field for the sqMass file path.
         """
         # Add a welcome message
-        # welcome_container = st.empty()
-        with self.welcome_container:
-            with st.container():
-                st.title("Welcome to MassSeer!")
-                st.write("MassSeer is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
-                st.write("It enables the visualization of chromatograms, algorithm testing, and parameter optimization, crucial for data analysis and experimental design.")
-                st.write("This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.")
+        # welcome_container = st.empty()FileInputXICDataUISettings
+        if st.session_state.WELCOME_PAGE_STATE:
+            with self.welcome_container:
+                with st.container():
+                    st.title("Welcome to MassSeer!")
+                    st.write("MassSeer is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
+                    st.write("It enables the visualization of chromatograms, algorithm testing, and parameter optimization, crucial for data analysis and experimental design.")
+                    st.write("This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.")
 
-                # Tabs for different data workflows
-                self.tab1, self.tab2 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data"])
+                    # Tabs for different data workflows
+                    tab1, tab2 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data"])
 
-                with self.tab1:
-
-                    st.write("This workflow is designed for post-extracted ion chromatogram data. For example sqMass files generated from an OpenSwathWorkflow experiment.")
-
-                    st.subheader("OpenSwath")
-
-                    self.load_toy_dataset = st.button('Load OpenSwath Example', on_click=self.clicked , args=['load_toy_dataset'])
-
-                    st.title("Input OSW file")
-                    self.osw_file_path = st.text_input("Enter file path", "*.osw", key='osw_file_path_tmp')
-
-                    st.title("Input sqMass file")
-                    self.sqmass_file_path_input = st.text_input("Enter file path", "*.sqMass", key='sqmass_file_path_input_tmp')
+                    with tab1:
+                        xic_form = ExtractedIonChromatogramAnalysisFormUI()
+                        xic_form.create_ui()
+                        copy_attributes(xic_form, self)
+                        
+                    with tab2:
+                        raw_data_form = RawTargetedExtractionAnalysisFormUI()
+                        raw_data_form.create_ui()
+                        copy_attributes(raw_data_form, self)
 
         return self
 
-    def show_file_input_settings(self, feature_file_path=None, xic_file_path=None):
+    def show_file_input_settings(self, feature_file_path=None, xic_file_path=None, transition_list_file_path=None):
         """
         Displays the file input settings.
 
@@ -86,7 +87,11 @@ class MassSeerGUI:
         Returns:
             None
         """
-        self.file_input_settings = FileInputUISettings()
-        self.file_input_settings.create_ui(feature_file_path, xic_file_path)
-        self.file_input_settings.get_sqmass_files()
+        if st.session_state.workflow == "xic_data":
+            self.file_input_settings = FileInputXICDataUISettings()
+            self.file_input_settings.create_ui(feature_file_path, xic_file_path)
+            self.file_input_settings.get_sqmass_files()
+        elif st.session_state.workflow == "raw_data":
+            self.file_input_settings = FileInputRawDataUISettings()
+            self.file_input_settings.create_ui(transition_list_file_path, xic_file_path, feature_file_path)
         st.sidebar.divider()

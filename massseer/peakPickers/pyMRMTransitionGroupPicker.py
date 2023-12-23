@@ -32,11 +32,11 @@ class pyMRMTransitionGroupPicker:
 
     def _resolveLevel(self, transitionGroup):
         if self.level == 'ms1':
-            chroms = transitionGroup.precursorChroms
+            chroms = transitionGroup.precursorData
         elif self.level == 'ms2':
-            chroms = transitionGroup.transitionChroms
+            chroms = transitionGroup.transitionData
         elif self.level == 'ms1ms2':
-            chroms = transitionGroup.precursorChroms + transitionGroup.transitionChroms
+            chroms = transitionGroup.precursorData + transitionGroup.transitionData
         else:
             raise ValueError(f"level must be one of ['ms1', 'ms2', 'ms1ms2'], not {self.level}")
         return chroms

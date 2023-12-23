@@ -16,7 +16,7 @@ from bokeh.palettes import Category20, Viridis256
 from massseer.util import PEAK_PICKING_ALGORITHMS
 from massseer.peak_picking import perform_chromatogram_peak_picking
 from massseer.chromatogram_data_handling import compute_consensus_chromatogram, normalize
-from massseer.loaders.OSWDataAccess import OSWDataAccess
+from massseer.loaders.access.OSWDataAccess import OSWDataAccess
 
 
 class Plotter:

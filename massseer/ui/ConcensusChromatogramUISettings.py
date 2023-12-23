@@ -1,6 +1,18 @@
 import streamlit as st
 
 class ConcensusChromatogramUISettings:
+    """
+    Class to create the user interface for setting the algorithm parameters.
+    
+    Attributes:
+        do_consensus_chrom (str): A string indicating whether to generate a consensus chromatogram.
+        scale_intensity (bool): A boolean indicating whether to scale the intensity of the chromatograms.
+        consensus_chrom_mode (str): A string indicating the aggregation method to use.
+        percentile_start (float): A float indicating the percentile start value.threshold (float): A float indicating the threshold value.
+        auto_threshold (bool): A boolean indicating whether to auto-compute the threshold value.
+        
+    Methods:
+        create_ui: Creates the user interface for setting the algorithm parameters."""
     def __init__(self):
         """
         Initializes the ConcensusChromatogramUISettings class.

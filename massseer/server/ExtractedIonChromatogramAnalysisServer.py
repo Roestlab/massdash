@@ -13,7 +13,7 @@ from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
 from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 # Loaders
-from massseer.loaders.OSWDataAccess import OSWDataAccess
+from massseer.loaders.access.OSWDataAccess import OSWDataAccess
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.loaders.SqMassLoader import SqMassLoader
 # Peak Picking
@@ -135,11 +135,11 @@ class ExtractedIonChromatogramAnalysisServer:
                 # Load transition group data
                 tr_group_data = self.xic_data.loadTransitionGroups(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
             st.write(f"Loading XIC data... Elapsed time: {elapsed_time()}") 
-
+            
             # Perform peak picking based on user settings
             if peak_picking_settings.do_peak_picking == 'OSW-PyProphet':
                 with time_block() as elapsed_time:
-                    tr_group_feature_data = self.xic_data.loadTransitionGroupFeature(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+                    tr_group_feature_data = self.xic_data.loadTransitionGroupFeatures(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
                 st.write(f"Loading OSW-PyProphet Peak Boundaries... Elapsed time: {elapsed_time()}")
             elif peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
                 with time_block() as elapsed_time:
@@ -182,7 +182,7 @@ class ExtractedIonChromatogramAnalysisServer:
                 
                 # Initialize axis limits for plotting
                 axis_limits_dict = {'x_range' : [], 'y_range' : []}
-                master_rt_arr = np.concatenate([tg.flatten().rt for tg in tr_group_data.values()])
+                master_rt_arr = np.concatenate([tg.flatten().data for tg in tr_group_data.values()])
                 master_int_arr = np.concatenate([tg.flatten().intensity for tg in tr_group_data.values()])
 
                 # Set axis limits based on user settings

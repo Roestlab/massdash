@@ -1,22 +1,26 @@
 from massseer.structs.Chromatogram import Chromatogram
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 import pyopenms as po
 from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
-from massseer.structs.FeatureMap import FeatureMap
 import pandas as pd
 
 class TransitionGroup:
     '''
     Class for Storing a transition group
     '''
-    def __init__(self, precursorChroms: List[Chromatogram], transitionChroms: List[Chromatogram], precursorMobilos: Optional[List[Mobilogram]], transitionMobilos: Optional[List[Mobilogram]], precursorSpectra: Optional[List[Spectrum]], transitionSpectra: Optional[List[Spectrum]]):
-        self.precursorChroms = precursorChroms
-        self.transitionChroms = transitionChroms
-        self.precursorMobilos = precursorMobilos
-        self.transitionMobilos = transitionMobilos
-        self.precursorSpectra = precursorSpectra
-        self.transitionSpectra = transitionSpectra
+    def __init__(self, precursorData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]],
+                 transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]]):
+        self.precursorData = precursorData
+        self.transitionData = transitionData
+        if len(transitionData) > 0:
+            self.dataType = type(transitionData[0])
+        elif len(precursorData) > 0:
+            self.dataType = type(precursorData[0])
+        else: 
+            raise ValueError("Precursor and transition data cannot both be empty")
+        if len(precursorData) > 0 and len(transitionData) > 0:
+            assert (self.dataType == type(transitionData[0]), "Precursor and transition data must be of the same type")
   
 
     def to_pyopenms(self, includePrecursors=True):
@@ -24,18 +28,18 @@ class TransitionGroup:
         Converts the TransitionGroup to an OpenMS TransitionGroup
         '''
         transitionGroup = po.MRMTransitionGroupCP()
-        for i in range(len(self.transitionChroms)):
+        for i in range(len(self.transitionData)):
             transition = po.ReactionMonitoringTransition()
             transition.setNativeID(str(i))
-            chrom = self.transitionChroms[i].to_pyopenms(id=str(i))
+            chrom = self.transitionData[i].to_pyopenms(id=str(i))
             transitionGroup.addChromatogram(chrom, chrom.getNativeID())
             transitionGroup.addTransition(transition, transition.getNativeID())
 
         if includePrecursors:
-            for i in range(len(self.precursorChroms)):
+            for i in range(len(self.precursorData)):
                 precursor = po.ReactionMonitoringTransition()
                 precursor.setNativeID('p' + str(i))
-                chrom = self.precursorChroms[i].to_pyopenms(id='p' + str(i))
+                chrom = self.precursorData[i].to_pyopenms(id='p' + str(i))
                 transitionGroup.addPrecursorChromatogram(chrom, chrom.getNativeID())
         return transitionGroup
     
@@ -53,7 +57,7 @@ class TransitionGroup:
 
         highest_intensity = 0.0  # Initialize with a default value
         for c in chroms:
-            intens = c.max(boundary)
+            intens = c.max(boundary)[1]
             if intens > highest_intensity:
                 highest_intensity = intens
 
@@ -62,11 +66,11 @@ class TransitionGroup:
 
     def _resolveLevel(self, level):
         if level=='ms1':
-            return self.precursorChroms
+            return self.precursorData
         elif level=='ms2':
-            return self.transitionChroms
+            return self.transitionData
         elif level=='ms1ms2':
-            return self.precursorChroms + self.transitionChroms
+            return self.precursorData + self.transitionData
         else:
             raise ValueError("Level must be one of ['ms1', 'ms2', 'ms1ms2']")
 
@@ -87,21 +91,22 @@ class TransitionGroup:
 
         return integrated_intensity
     
-    def flatten(self, level: str = 'ms2') -> Chromatogram:
+    def flatten(self, level: str = 'ms2'):
         '''
-        Flatten the TransitionGroup into a single Chromatogram
+        Flatten the TransitionGroup into a single Data1D object
         '''
-        chroms = self._resolveLevel(level)
-        rt = []
+        data1D = self._resolveLevel(level)
+        data = []
         intensity = []
-        for c in chroms:
-            rt.extend(c.rt)
+        for c in data1D:
+            data.extend(c.data)
             intensity.extend(c.intensity)
-        return Chromatogram(rt, intensity)
+        sorted = pd.DataFrame({'data': data, 'intensity': intensity}).sort_values(by='data')
+        return self.dataType(sorted['data'], sorted['intensity'])
 
     def median(self, boundary: Optional[Tuple[float, float]] = None, level: Optional[str] = 'ms2') -> float:
         """
-        Calculate the median intensity of a given boundary in the chromatogram data.
+        Calculate the median intensity of a given boundary in the 1D data.
 
         Args:
             chrom_data (list): A list of tuples containing the retention time and intensity values of a chromatogram.
@@ -111,11 +116,12 @@ class TransitionGroup:
             float: The median intensity value of the data points within the given boundary.
         """
 
-        chrom_flattened = self.flatten(level)
+        data_flattened = self.flatten(level)
         if boundary is not None:
-            chrom_flattened = chrom_flattened.filterChromatogram(boundary)
+            data_flattened = data_flattened.filter(boundary)
 
-        return chrom_flattened.median()
+        return data_flattened.median()
+
     def __str__(self) -> str:
         '''
         Returns a string representation of the transition group.
@@ -123,7 +129,7 @@ class TransitionGroup:
         Returns:
             str: A string representation of the transition group.
         '''
-        return f"{'-'*8} TransitionGroup {'-'*8}\nprecursor chromatograms: {len(self.precursorChroms)}\ntransition chromatograms: {len(self.transitionChroms)}\nprecursor mobilograms: {len(self.precursorMobilos)}\ntransition mobilograms: {len(self.transitionMobilos)}\nprecursor spectra: {len(self.precursorSpectra)}\ntransition spectra: {len(self.transitionSpectra)}"
+        return f"{'-'*8} TransitionGroup {'-'*8}\nprecursor data: {len(self.precursorData)}\ntransition data: {len(self.transitionData)}"
 
     def empty(self) -> bool:
         """
@@ -132,28 +138,4 @@ class TransitionGroup:
         Returns:
             bool: True if all of the chromatograms, mobilograms, and spectra are empty, False otherwise.
         """
-        return not any(chrom.empty() for chrom in self.precursorChroms) and any(chrom.empty() for chrom in self.transitionChroms) and any(mobil.empty() for mobil in self.precursorMobilos) and any(mobil.empty() for mobil in self.transitionMobilos) and any(spec.empty() for spec in self.precursorSpectra) and any(spec.empty() for spec in self.transitionSpectra)
-
-
-    @classmethod
-    def from_feature_map(cls, feature_map: FeatureMap):
-        """
-        Creates a TransitionGroup object from a pandas DataFrame containing feature information.
-
-        Args:
-            feature_map (FeatureMap): A FeatureMap containing mass spec feature information.
-
-        Returns:
-            cls: A TransitionGroup object.
-        """
-        precursorChroms = feature_map.get_precursor_chromatograms()
-        transitionChroms = feature_map.get_transition_chromatograms()
-        if feature_map.has_im:
-            precursorMobilos = feature_map.get_precursor_mobilograms()
-            transitionMobilos = feature_map.get_transition_mobilograms()
-        else:
-            precursorMobilos = [Mobilogram([], [], 'precursor mobilogram')]
-            transitionMobilos = [Mobilogram([], [], 'transition mobilogram')]
-        precursorSpectra = feature_map.get_precursor_spectra()
-        transitionSpectra = feature_map.get_transition_spectra()
-        return cls(precursorChroms, transitionChroms, precursorMobilos, transitionMobilos, precursorSpectra, transitionSpectra)
+        return not any(p.empty() for p in self.precursorData) and any(t.empty() for t in self.transitionData)

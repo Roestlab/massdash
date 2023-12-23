@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.loaders.GenericLoader import GenericLoader
-from massseer.loaders.SqMassDataAccess import SqMassDataAccess
-from massseer.loaders.OSWDataAccess import OSWDataAccess
-from typing import List, Dict
+from massseer.loaders.access.SqMassDataAccess import SqMassDataAccess
+from massseer.loaders.access.OSWDataAccess import OSWDataAccess
+from typing import List, Dict, Union
 from os.path import basename
 import pandas as pd
 
@@ -16,26 +16,25 @@ class SqMassLoader(GenericLoader):
     Inherits from GenericLoader
     '''
 
-    def __init__(self, transitionFiles: List[str], rsltsFile: str):
-        self.transitionFiles = [SqMassDataAccess(f) for f in transitionFiles]
-        self.rsltsFile = OSWDataAccess(rsltsFile)
-
-        self.transitionFiles_str = transitionFiles
-        self.rsltsFile_str = rsltsFile
-
+    def __init__(self, dataFiles: Union[str, List[str]], rsltsFile: str):
+        super().__init__(rsltsFile, dataFiles)
+        self.dataFiles = [SqMassDataAccess(f) for f in self.dataFiles_str]
+        self.rsltsFile = OSWDataAccess(self.rsltsFile_str)
 
     def loadTransitionGroupsDf(self, pep_id: str, charge: int) -> pd.DataFrame:
-        metaInfo = self.rsltsFile.getPeptideTransitionInfoShort(pep_id, charge)
+        transitionMetaInfo = self.rsltsFile.getTransitionIDAnnotationFromSequence(pep_id, charge)
+        precursor_id = self.rsltsFile.getPrecursorIDFromPeptideAndCharge(pep_id, charge)
         columns=['run_name', 'rt', 'intensity', 'annotation']
-        if metaInfo.empty:
+        if transitionMetaInfo.empty:
             return pd.DataFrame(columns=columns)
         out = {}
-        for t in self.transitionFiles:
+        for t in self.dataFiles:
+
             ### Get Transition chromatogram IDs
-            transition_chroms = t.getDataForChromatogramsFromNativeIdsDf(metaInfo['TRANSITION_ID'].astype(str), metaInfo['ANNOTATION'])
+            transition_chroms = t.getDataForChromatogramsFromNativeIdsDf(transitionMetaInfo['TRANSITION_ID'], transitionMetaInfo['ANNOTATION'])
 
             ### Get Precursor chromatogram IDs
-            prec_chrom_ids = t.getPrecursorChromIDs(metaInfo['PRECURSOR_ID'].iloc[0])
+            prec_chrom_ids = t.getPrecursorChromIDs(precursor_id) 
             precursor_chroms = t.getDataForChromatogramsDf(prec_chrom_ids['chrom_ids'], prec_chrom_ids['native_ids'])
 
             # only add if there is data
@@ -46,7 +45,7 @@ class SqMassLoader(GenericLoader):
             elif precursor_chroms.empty:
                 out[t.filename] = transition_chroms
             else:
-                print(f"Warning: no data found for peptide in transition file {self.transitionFiles}")
+                print(f"Warning: no data found for peptide in transition file {self.dataFiles}")
 
         return pd.concat(out).reset_index().drop('level_1', axis=1).rename(columns=dict(level_0='filename'))
 
@@ -60,22 +59,25 @@ class SqMassLoader(GenericLoader):
             Dict[str, TransitionGroup]: Dictionary of TransitionGroups, with keys as sqMass filenames
         '''
 
-        metaInfo = self.rsltsFile.getPeptideTransitionInfoShort(pep_id, charge)
-        if metaInfo.empty:
+        transitionMetaInfo = self.rsltsFile.getTransitionIDAnnotationFromSequence(pep_id, charge)
+        precursor_id = self.rsltsFile.getPrecursorIDFromPeptideAndCharge(pep_id, charge)
+ 
+        if transitionMetaInfo.empty:
             return None
         out = {}
-        for t in self.transitionFiles:
+        for t in self.dataFiles:
             ### Get Transition chromatogram IDs
-            transition_chroms = t.getDataForChromatogramsFromNativeIds(metaInfo['TRANSITION_ID'].astype(str), metaInfo['ANNOTATION'])
+
+            transition_chroms = t.getDataForChromatogramsFromNativeIds(transitionMetaInfo['TRANSITION_ID'], transitionMetaInfo['ANNOTATION'])
 
             ### Get Precursor chromatogram IDs
-            prec_chrom_ids = t.getPrecursorChromIDs(metaInfo['PRECURSOR_ID'].iloc[0])
+            prec_chrom_ids = t.getPrecursorChromIDs(precursor_id)
             precursor_chroms = t.getDataForChromatograms(prec_chrom_ids['chrom_ids'], prec_chrom_ids['native_ids'])
 
-            out[t] = TransitionGroup(precursor_chroms, transition_chroms, [], [], [], [])
+            out[t] = TransitionGroup(precursor_chroms, transition_chroms)
         return out
 
-    def loadTransitionGroupFeature(self, pep_id: str, charge: int) -> List[TransitionGroupFeature]:
+    def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> List[TransitionGroupFeature]:
         '''
         Loads a PeakFeature object from the results file
         Args:
@@ -85,14 +87,9 @@ class SqMassLoader(GenericLoader):
             PeakFeature: PeakFeature object containing peak boundaries, intensity and confidence
         '''
         out = {}
-        for t in self.transitionFiles_str:
+        for t in self.dataFiles_str:
             runname = basename(t).split('.')[0]
-            features = self.rsltsFile.getRunPrecursorPeakBoundaries(runname, pep_id, charge)
-            tmp = []
-            for _, i in features.iterrows():
-                tmp.append(TransitionGroupFeature(i['leftWidth'], i['rightWidth'], areaIntensity=i['Intensity'], qvalue= i['ipf_mscore'] if 'ipf_mscore' in i else i['ms2_mscore'] )) 
-                
-                out[t] = tmp
+            out[t] = self.rsltsFile.getTransitionGroupFeatures(runname, pep_id, charge)
         return out
 
     def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
@@ -100,17 +97,17 @@ class SqMassLoader(GenericLoader):
         Loads a TransitionGroupFeature object from the results file to a pandas dataframe
         '''
         out = {}
-        for t in self.transitionFiles_str:
+        for t in self.dataFiles_str:
             runname = basename(t).split('.')[0]
-            features = self.rsltsFile.getRunPrecursorPeakBoundaries(runname, pep_id, charge)
+            features = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
             features = features.rename(columns={'ms2_mscore':'qvalue', 'RT':'consensusApex', 'Intensity':'consensusApexIntensity', 'leftWidth':'leftBoundary', 'rightWidth':'rightBoundary'})
             features = features[['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']]
             out[t] = features
-
-        return pd.concat(out).reset_index().drop('level_1', axis=1).rename(columns=dict(level_0='filename'))
+        
+        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
 
     def __str__(self):
-        return f"SqMassLoader(rsltsFile={self.rsltsFile_str}, transitionFiles={self.transitionFiles_str}"
+        return f"SqMassLoader(rsltsFile={self.rsltsFile_str}, dataFiles={self.dataFiles_str}"
 
     def __repr__(self):
-        return f"SqMassLoader(rsltsFile={self.rsltsFile_str}, transitionFiles={self.transitionFiles_str}"
+        return f"SqMassLoader(rsltsFile={self.rsltsFile_str}, dataFiles={self.dataFiles_str}"
