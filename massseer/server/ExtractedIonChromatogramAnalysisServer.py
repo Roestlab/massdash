@@ -172,8 +172,12 @@ class ExtractedIonChromatogramAnalysisServer:
                     for file, tr_group in tr_group_data.items():
                         tr_group.targeted_transition_list = transition_list_ui.target_transition_list
                         print(f"Pretrained model file: {peak_picking_settings.peak_picker_algo_settings.pretrained_model_file}")
-                        peak_picker = ConformerPeakPicker(tr_group, peak_picking_settings.peak_picker_algo_settings.pretrained_model_file)
-                        peak_picker.pick()
+                        
+                        peak_picker = ConformerPeakPicker(tr_group, peak_picking_settings.peak_picker_algo_settings.pretrained_model_file, window_size=peak_picking_settings.peak_picker_algo_settings.conformer_window_size, prediction_threshold=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_threshold, prediction_type=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_type)
+                        # get the trantition in tr_group with the max intensity
+                        max_int_transition = np.max([transition.intensity for transition in tr_group.transitionData])
+                        peak_features = peak_picker.pick(max_int_transition)
+                        tr_group_feature_data[file.filename] = peak_features
                 st.write(f"Performing Conformer Peak Picking... Elapsed time: {elapsed_time()}")
             else:
                 tr_group_feature_data = {file.filename: None for file in tr_group_data.keys()}
