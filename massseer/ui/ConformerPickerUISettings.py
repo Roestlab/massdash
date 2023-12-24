@@ -34,7 +34,7 @@ class ConformerPickerUISettings:
         """
         self.shipped_model = st.sidebar.checkbox("Use shipped model", value=True, help="Use the shipped model.")
         if  self.shipped_model:
-            self.pretrained_model_file = os.path.join(DIRNAME, '..', 'models', 'conformer', 'base_cape.onnx')
+            self.pretrained_model_file = os.path.join(DIRNAME, '..', 'assets', 'models', 'conformer', 'base_cape.onnx')
             print(f"HERE: {self.pretrained_model_file}")
         else:
             self.pretrained_model_file = st.sidebar.text_input("Pretrained model file", value="", help="The pretrained model file to use.")
