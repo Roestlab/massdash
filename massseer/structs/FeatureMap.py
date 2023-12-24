@@ -40,6 +40,8 @@ class FeatureMap:
     def __init__(self, feature_df: pd.DataFrame, config: TargetedDIAConfig=None, verbose: bool=False):
         self.feature_df = feature_df
         self.has_im = 'im' in feature_df.columns and feature_df['im'].notnull().all()
+        if not self.has_im:
+            self.feature_df.drop(columns=['im'], inplace=True)
         self.config = config
         
         LOGGER.name = 'FeatureMap'
@@ -163,45 +165,47 @@ class FeatureMap:
         '''
         Get a list of precursor ion mobility from the feature map
         '''
-        if self.feature_df.shape[0] == 0:
-            return [Mobilogram(np.array([]), np.array([]), 'No precursor ion mobility found')]
-        # Filter the feature map to only precursor ion mobility
-        precursor_df = self.feature_df[self.feature_df['ms_level']==1]
-        
-        if precursor_df.shape[0] == 0:
-            return [Mobilogram(np.array([]), np.array([]), 'No precursor ion mobility found')]
-        # If ion mobility data is present, compute mean of intensities across retention time for ion mobility
-        if 'rt' in precursor_df.columns:
-            im_arr, int_arr = FeatureMap.average_intensity_across_two_dimensions(precursor_df, axis=1)
+        if self.has_im:
+            # Filter the feature map to only precursor ion mobility
+            precursor_df = self.feature_df[self.feature_df['ms_level']==1]
+            
+            if precursor_df.shape[0] == 0:
+                return [Mobilogram(np.array([]), np.array([]), 'No precursor ion mobility found')]
+            # If ion mobility data is present, compute mean of intensities across retention time for ion mobility
+            if 'rt' in precursor_df.columns:
+                im_arr, int_arr = FeatureMap.average_intensity_across_two_dimensions(precursor_df, axis=1)
+            else:
+                im_arr = precursor_df['im'].to_numpy()
+                int_arr = precursor_df['int'].to_numpy()
+            precursor_ion_mobility = Mobilogram(im_arr, int_arr, f'{pd.unique(precursor_df["Annotation"].values)[0]}')
+            return [precursor_ion_mobility]
         else:
-            im_arr = precursor_df['im'].to_numpy()
-            int_arr = precursor_df['int'].to_numpy()
-        precursor_ion_mobility = Mobilogram(im_arr, int_arr, f'{pd.unique(precursor_df["Annotation"].values)[0]}')
-        return [precursor_ion_mobility]
+            return [Mobilogram(np.array([]), np.array([]), 'No precursor ion mobility found')]
 
     def get_transition_mobilograms(self) -> List[Mobilogram]:
         '''
         Get a list of transition ion mobility from the feature map
         '''
-        if self.feature_df.shape[0] == 0:
-            return [Mobilogram(np.array([]), np.array([]), 'No transition ion mobility found')]
-        # Filter the feature map to only transition ion mobility
-        transition_df = self.feature_df[self.feature_df['ms_level']==2]
-        if transition_df.shape[0] == 0:
-            return [Mobilogram(np.array([]), np.array([]), 'No transition ion mobility found')]
-        transition_ion_mobilities = []
-        for transition in pd.unique(transition_df['product_mz']):
-            transition_df_tmp = transition_df[transition_df['product_mz']==transition]
+              # Filter the feature map to only transition ion mobility
+        if self.has_im:
+            transition_df = self.feature_df[self.feature_df['ms_level']==2]
+            transition_ion_mobilities = []
+            for transition in pd.unique(transition_df['product_mz']):
+                transition_df_tmp = transition_df[transition_df['product_mz']==transition]
 
-            # If ion mobility data is present, compute mean of intensities across retention time for ion mobility
-            if self.has_im and transition_df_tmp.shape[0] > 1:
-                im_arr, int_arr = FeatureMap.average_intensity_across_two_dimensions(transition_df_tmp, axis=1)
-            else:
-                im_arr = transition_df_tmp['im'].to_numpy()
-                int_arr = transition_df_tmp['int'].to_numpy()
-            transition_ion_mobility = Mobilogram(im_arr, int_arr, f'{pd.unique(transition_df_tmp["Annotation"].values)[0]}')
-            transition_ion_mobilities.append(transition_ion_mobility)
-        return transition_ion_mobilities
+                # If ion mobility data is present, compute mean of intensities across retention time for ion mobility
+                if self.has_im and transition_df_tmp.shape[0] > 1:
+                    im_arr, int_arr = FeatureMap.average_intensity_across_two_dimensions(transition_df_tmp, axis=1)
+                else:
+                    im_arr = transition_df_tmp['im'].to_numpy()
+                    int_arr = transition_df_tmp['int'].to_numpy()
+                transition_ion_mobility = Mobilogram(im_arr, int_arr, f'{pd.unique(transition_df_tmp["Annotation"].values)[0]}')
+                transition_ion_mobilities.append(transition_ion_mobility)
+            return transition_ion_mobilities
+    
+        else:
+            return [Mobilogram(np.array([]), np.array([]), 'No transition ion mobility found')]
+
 
     def get_precursor_spectra(self) -> List[Spectrum]:
         '''
