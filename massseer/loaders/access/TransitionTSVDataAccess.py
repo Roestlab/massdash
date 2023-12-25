@@ -1,10 +1,6 @@
 from typing import List
 import os
 import pandas as pd
-import streamlit as st
-
-# Utils
-from massseer.util import check_streamlit, conditional_decorator
 
 class TransitionTSVDataAccess:
     '''
@@ -55,6 +51,15 @@ class TransitionTSVDataAccess:
         self.filename = filename
         self.data: pd.DataFrame = pd.DataFrame()
         self.load() ## set self.data
+
+    def empty(self):
+        return self.data.empty() 
+
+    def __setitem__(self, index):
+        self.data.__setitem__(index)
+ 
+    def __getitem__(self, index):
+        self.data.__getitem__(index)
     
     def load(self) -> pd.DataFrame:
         '''
