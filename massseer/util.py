@@ -1,4 +1,6 @@
 import sys
+import importlib
+from typing import Optional
 
 # Logging and performance modules
 from functools import wraps
@@ -182,6 +184,27 @@ def check_sqlite_column_in_table(con, table, column):
     c.fetchall()
 
     return(column_present)
+
+def check_package(package_name: str, module_path: Optional[str]=None):
+    """
+    Check if a Python package is installed.
+
+    Args:
+        package_name (str): The name of the package to check.
+        module_path (str, optional): The path to the module within the package. Defaults to None.
+
+    Returns:
+        bool: True if the package is installed, False otherwise.
+    """
+    try:
+        if module_path is None:
+            return importlib.import_module(package_name), True
+        else:
+            return importlib.import_module(f"{package_name}.{module_path}"), True
+    except ImportError:
+        print(f"{package_name} is not installed. Please install it using 'pip install {package_name}'.")
+        return None, False
+
 
 #######################################
 ## Decorators
