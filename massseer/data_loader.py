@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import multiprocessing
-from massseer.loaders.SqMassDataAccess import SqMassDataAccess
+from massseer.loaders.access.SqMassDataAccess import SqMassDataAccess
 
 class TraceDataLoader:
     """

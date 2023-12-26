@@ -12,7 +12,7 @@ class TestChromatogram(unittest.TestCase):
         self.chromatogram = Chromatogram(self.rt, self.intensity, self.label)
 
     def test_str(self):
-        self.assertEqual(f"{'-'*8} Chromatogram {'-'*8}\nlabel: {self.chromatogram.label}\nlength of chromatogram: {len(self.chromatogram.rt)}", str(self.chromatogram))
+        self.assertEqual(f"{'-'*8} Chromatogram {'-'*8}\nlabel: {self.chromatogram.label}\nlength of Chromatogram: {len(self.chromatogram.data)}", str(self.chromatogram))
 
     def test_to_pyopenms(self):
         pyopenms_chromatogram = self.chromatogram.to_pyopenms()
@@ -25,8 +25,8 @@ class TestChromatogram(unittest.TestCase):
         self.assertEqual(self.chromatogram.max((1.5, 2.5)), (2, 20.0))
 
     def test_filterChromatogram(self):
-        filtered_chromatogram = self.chromatogram.filterChromatogram((1.5, 2.5))
-        self.assertTrue(np.array_equal(filtered_chromatogram.rt, np.array([2.0])))
+        filtered_chromatogram = self.chromatogram.filter((1.5, 2.5))
+        self.assertTrue(np.array_equal(filtered_chromatogram.data, np.array([2.0])))
         self.assertTrue(np.array_equal(filtered_chromatogram.intensity, np.array([20.0])))
 
     def test_sum(self):

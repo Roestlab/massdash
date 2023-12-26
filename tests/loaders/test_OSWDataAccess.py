@@ -1,7 +1,7 @@
 import unittest
 from snapshottest import TestCase
 import pandas as pd
-from massseer.loaders.OSWDataAccess import OSWDataAccess
+from massseer.loaders.access.OSWDataAccess import OSWDataAccess
 from massseer.structs.TransitionGroup import TransitionGroup
 import numpy as np
 

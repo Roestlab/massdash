@@ -13,12 +13,13 @@ from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
 from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 # Loaders
-from massseer.loaders.OSWDataAccess import OSWDataAccess
+from massseer.loaders.access.OSWDataAccess import OSWDataAccess
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.loaders.SqMassLoader import SqMassLoader
 # Peak Picking
 from massseer.peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
 from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
+from massseer.peakPickers.ConformerPeakPicker import ConformerPeakPicker
 # Plotting
 from massseer.plotting.GenericPlotter import PlotConfig
 from massseer.plotting.InteractivePlotter import InteractivePlotter
@@ -134,11 +135,11 @@ class ExtractedIonChromatogramAnalysisServer:
                 # Load transition group data
                 tr_group_data = self.xic_data.loadTransitionGroups(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
             st.write(f"Loading XIC data... Elapsed time: {elapsed_time()}") 
-
+            
             # Perform peak picking based on user settings
             if peak_picking_settings.do_peak_picking == 'OSW-PyProphet':
                 with time_block() as elapsed_time:
-                    tr_group_feature_data = self.xic_data.loadTransitionGroupFeature(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+                    tr_group_feature_data = self.xic_data.loadTransitionGroupFeatures(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
                 st.write(f"Loading OSW-PyProphet Peak Boundaries... Elapsed time: {elapsed_time()}")
             elif peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
                 with time_block() as elapsed_time:
@@ -164,6 +165,20 @@ class ExtractedIonChromatogramAnalysisServer:
                         peak_features = peak_picker.pick(tr_group)
                         tr_group_feature_data[file.filename] = peak_features
                 st.write(f"Performing MRMTransitionGroupPicker Peak Picking... Elapsed time: {elapsed_time()}")
+            elif peak_picking_settings.do_peak_picking == 'Conformer':
+                with time_block() as elapsed_time:
+                    # Peak picking using Conformer
+                    tr_group_feature_data = {}
+                    for file, tr_group in tr_group_data.items():
+                        tr_group.targeted_transition_list = transition_list_ui.target_transition_list
+                        print(f"Pretrained model file: {peak_picking_settings.peak_picker_algo_settings.pretrained_model_file}")
+                        
+                        peak_picker = ConformerPeakPicker(tr_group, peak_picking_settings.peak_picker_algo_settings.pretrained_model_file, window_size=peak_picking_settings.peak_picker_algo_settings.conformer_window_size, prediction_threshold=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_threshold, prediction_type=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_type)
+                        # get the trantition in tr_group with the max intensity
+                        max_int_transition = np.max([transition.intensity for transition in tr_group.transitionData])
+                        peak_features = peak_picker.pick(max_int_transition)
+                        tr_group_feature_data[file.filename] = peak_features
+                st.write(f"Performing Conformer Peak Picking... Elapsed time: {elapsed_time()}")
             else:
                 tr_group_feature_data = {file.filename: None for file in tr_group_data.keys()}
 
@@ -171,7 +186,7 @@ class ExtractedIonChromatogramAnalysisServer:
                 
                 # Initialize axis limits for plotting
                 axis_limits_dict = {'x_range' : [], 'y_range' : []}
-                master_rt_arr = np.concatenate([tg.flatten().rt for tg in tr_group_data.values()])
+                master_rt_arr = np.concatenate([tg.flatten().data for tg in tr_group_data.values()])
                 master_int_arr = np.concatenate([tg.flatten().intensity for tg in tr_group_data.values()])
 
                 # Set axis limits based on user settings
