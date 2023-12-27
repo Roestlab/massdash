@@ -15,6 +15,8 @@ import plotly.express as px
 
 # Plotting
 from massseer.plotting.GenericPlotter import PlotConfig
+# Structs
+from massseer.structs.FeatureMap import FeatureMap
 # Utils
 from massseer.util import check_streamlit
 
@@ -35,11 +37,10 @@ class InteractiveThreeDimensionPlotter:
         plot_individual_3d_surface: Plot individual 3D surface plots for each precursor and each product ion.
         plot_individual_3d_mesh_cube: Plot individual 3D surface plots for each precursor and each product ion. (EXPERIMENTAL)
     """
-    def __init__(self, df: pd.DataFrame, config: PlotConfig):
-        self.df = df
+    def __init__(self, config: PlotConfig):
         self.config = config
         
-    def plot(self):
+    def plot(self, featureMap: FeatureMap):
         """
         Plot the data based on the configuration settings.
 
@@ -47,16 +48,16 @@ class InteractiveThreeDimensionPlotter:
             plots (list): List of plots generated based on the configuration settings.
         """
         if self.config.type_of_3d_plot == "3D Scatter Plot" and self.config.aggregate_mslevels:
-            plots = self.plot_3d_scatter()
+            plots = self.plot_3d_scatter(featureMap, num_rows=1, num_cols=1)
         elif self.config.type_of_3d_plot == "3D Scatter Plot" and not self.config.aggregate_mslevels:
-            plots = self.plot_individual_3d_scatter(self.config.num_plot_columns)
+            plots = self.plot_3d_scatter(featureMap, num_cols = self.config.num_plot_columns)
         elif self.config.type_of_3d_plot == "3D Surface Plot" and not self.config.aggregate_mslevels:
-            plots = self.plot_individual_3d_surface(self.config.num_plot_columns)
+            plots = self.plot_individual_3d_surface(featureMap, self.config.num_plot_columns)
         elif self.config.type_of_3d_plot == "3D Line Plot" and not self.config.aggregate_mslevels:
             plots = self.plot_3d_vline()
         return plots
     
-    def plot_3d_scatter_general(self, df: pd.DataFrame, num_rows: int = -1, num_cols: int = 2, include_ms1: bool = True, include_ms2: bool = True) -> go.Figure:
+    def plot_3d_scatter(self, featureMap: FeatureMap, num_rows: int = -1, num_cols: int = 2) -> go.Figure:
         """
         Make a general 3D scatter plot with options for individual or overall plots.
 
@@ -71,8 +72,8 @@ class InteractiveThreeDimensionPlotter:
         """
         if num_rows == -1:
             # Determine the number of unique annotations
-            num_rows = num_annotations = len(df['Annotation'].unique())
-            subplot_titles = df['Annotation'].unique()
+            num_rows = num_annotations = len(featureMap['Annotation'].unique())
+            subplot_titles = featureMap['Annotation'].unique()
             specs = [[{'type': 'scatter3d'}] * num_cols for _ in range(num_annotations)]
         elif num_rows == 1 and num_cols == 1:
             num_annotations = 1
@@ -88,16 +89,17 @@ class InteractiveThreeDimensionPlotter:
         )
 
         # Create a 3D scatter plot for each group
-        for i, (group_key, group_df) in enumerate(df.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz'])):
-            if not include_ms1 and group_key[0] == 1:
+        for i, (group_key, group_df) in enumerate(featureMap.feature_df.sort_values(by=['ms_level', 'Annotation']).groupby(['ms_level', 'Annotation'])):
+            if not self.config.include_ms1 and group_key[0] == 1:
                 continue
 
-            if not include_ms2 and group_key[0] == 2:
+            if not self.config.include_ms2 and group_key[0] == 2:
                 continue
 
             x = group_df['rt'].values
             y = group_df['mz'].values
-            z = group_df['im'].values
+            if featureMap.has_im:
+                z = group_df['im'].values
             intensity = group_df['int'].values  
 
             # Define color scale based on ms_level
@@ -140,28 +142,7 @@ class InteractiveThreeDimensionPlotter:
 
         return subfig
 
-    def plot_individual_3d_scatter(self, num_cols: int = 2) -> go.Figure:
-        """
-        Make individual 3D scatter plots for each precursor and each product ion.
-
-        Args:
-            num_cols (int, optional): Number of columns in the subplot grid. Defaults to 2.
-
-        Returns:
-            go.Figure: The Plotly Figure object.
-        """
-        return self.plot_3d_scatter_general(self.df, num_cols = num_cols, include_ms1=self.config.include_ms1, include_ms2=self.config.include_ms2)
-
-    def plot_3d_scatter(self) -> go.Figure:
-        """
-        Make a 3D scatter plot with all MS data on the same plot.
-
-        Returns:
-            go.Figure: The Plotly Figure object.
-        """
-        return self.plot_3d_scatter_general(self.df, num_rows=1, num_cols=1, include_ms1=self.config.include_ms1, include_ms2=self.config.include_ms2)
-
-    def plot_3d_vline(self) -> go.Figure:
+    def plot_3d_vline(self, featureMap: FeatureMap) -> go.Figure:
         """
         Plot a 3D spectrum-chromatogram vertical line plot.
 
@@ -169,10 +150,10 @@ class InteractiveThreeDimensionPlotter:
             fig (plotly.graph_objs._figure.Figure): The generated 3D vertical line plot.
         """
         # Step 1: Group DataFrame by 'Annotation' column
-        grouped_df = self.df.groupby('Annotation')
+        grouped_df = featureMap.feature_df.groupby('Annotation')
         
         # Get unique values in 'Annotation' column
-        unique_annotations = self.df['Annotation'].unique()
+        unique_annotations = featureMap['Annotation'].unique()
 
         # Generate a list of unique colors using a Plotly color scale
         colors = px.colors.qualitative.Set1[:len(unique_annotations)]
@@ -236,7 +217,7 @@ class InteractiveThreeDimensionPlotter:
 
         return fig
     
-    def plot_individual_3d_surface(self, num_cols: int=2) -> go.Figure:
+    def plot_individual_3d_surface(self, featureMap: FeatureMap, num_cols: int=2) -> go.Figure:
         """
         Plot individual 3D surface plots for each precursor and each product ion.
         
@@ -247,13 +228,14 @@ class InteractiveThreeDimensionPlotter:
             go.Figure: The Plotly Figure object.
         """
         # Create a subplot with 3D surface plots for each group
-        subfig = make_subplots(rows=len(self.df['Annotation'].unique()), cols=num_cols,
-                            subplot_titles=self.df['Annotation'].unique(),
-                            specs=[[{'type': 'surface'}] * num_cols for _ in range(len(self.df['Annotation'].unique()))],
+        df = featureMap.feature_df
+        subfig = make_subplots(rows=len(df['Annotation'].unique()), cols=num_cols,
+                            subplot_titles=df['Annotation'].unique(),
+                            specs=[[{'type': 'surface'}] * num_cols for _ in range(len(df['Annotation'].unique()))],
                             horizontal_spacing=0.05, vertical_spacing=0.05)
 
         # Iterate over groups and create subplots
-        for i, (group_key, group_df) in enumerate(self.df.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz'])):
+        for i, (group_key, group_df) in enumerate(df.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz'])):
             if not self.config.include_ms1 and group_key[0] == 1:
                 continue
             
@@ -333,31 +315,32 @@ class InteractiveThreeDimensionPlotter:
             subfig.update_scenes(scene, row=row_num, col=col_num)
 
         # Update the layout of the overall figure
-        subfig.update_layout(height=len(self.df['Annotation'].unique()) * 800,
-                            width=len(self.df['Annotation'].unique()) * 800, showlegend=False)
+        subfig.update_layout(height=len(df['Annotation'].unique()) * 800,
+                            width=len(df['Annotation'].unique()) * 800, showlegend=False)
         
         subfig.update_coloraxes(showscale=False)
 
         return subfig
     
-    def plot_individual_3d_mesh_cube(self, num_cols: int=2) -> go.Figure:
+    def plot_individual_3d_mesh_cube(self, featureMap: FeatureMap, num_cols: int=2) -> go.Figure:
         """
         Plot individual 3D surface plots for each precursor and each product ion. (EXPERIMENTAL)
         
         Args:
+            featureMap (FeatureMap): The FeatureMap object containing the data.
             num_cols (int, optional): Number of columns in the subplot grid. Defaults to 2.
             
         Returns:
             go.Figure: The Plotly Figure object.
         """
         # Create a subplot with 3D surface plots for each group
-        subfig = make_subplots(rows=len(self.df['Annotation'].unique()), cols=num_cols,
-                            subplot_titles=self.df['Annotation'].unique(),
-                            specs=[[{'type': 'surface'}] * num_cols for _ in range(len(self.df['Annotation'].unique()))],
+        subfig = make_subplots(rows=len(featureMap['Annotation'].unique()), cols=num_cols,
+                            subplot_titles=featureMap['Annotation'].unique(),
+                            specs=[[{'type': 'surface'}] * num_cols for _ in range(len(featureMap['Annotation'].unique()))],
                             horizontal_spacing=0.05, vertical_spacing=0.05)
 
         # Iterate over groups and create subplots
-        for i, (group_key, group_df) in enumerate(self.df.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz'])):
+        for i, (group_key, group_df) in enumerate(featureMap.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz'])):
             if not self.config.include_ms1 and group_key[0] == 1:
                 continue
             
@@ -390,8 +373,8 @@ class InteractiveThreeDimensionPlotter:
             subfig.update_scenes(scene, row=row_num, col=col_num)
 
         # Update the layout of the overall figure
-        subfig.update_layout(height=len(self.df['Annotation'].unique()) * 800,
-                            width=len(self.df['Annotation'].unique()) * 800, showlegend=False)
+        subfig.update_layout(height=len(featureMap['Annotation'].unique()) * 800,
+                            width=len(featureMap['Annotation'].unique()) * 800, showlegend=False)
         
         subfig.update_coloraxes(showscale=False)
 
