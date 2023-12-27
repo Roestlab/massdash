@@ -8,7 +8,7 @@ from massseer.ui.TransitionListUISettings import TransitionListUISettings
 from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
 
-class ThreeDimensionalPlotter:
+class ThreeDimensionPlotterServer:
     """
     Class for generating three-dimensional plots based on targeted data.
 
