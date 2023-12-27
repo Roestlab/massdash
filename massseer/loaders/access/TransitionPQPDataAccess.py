@@ -38,7 +38,8 @@ class TransitionPQPDataAccess:
             raise ValueError("Unsupported file format. TransitionPQPLoader requires an sqlite-based .pqp file or .osw file.")
         self.conn = sqlite3.connect(filename)
         self.c = self.conn.cursor()
-        self.data: pd.DataFrame = pd.DataFrame()
+        self.data: pd.DataFrame = self._load()
+        self.has_im = 'PrecursorIonMobility' in self.data.columns and self.data['PrecursorIonMobility'].notnull().any()
     
     @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
     def _load(_self) -> None:
@@ -127,3 +128,13 @@ class TransitionPQPDataAccess:
         Validate the PQP file has the required columns
         '''
         return all(col in self.data.columns for col in TransitionPQPDataAccess.REQUIRED_PQP_COLUMNS)
+    
+    def empty(self):
+        return self.data.empty() 
+
+    def __setitem__(self, index, value):
+        self.data.__setitem__(index, value)
+ 
+    def __getitem__(self, index):
+        self.data.__getitem__(index)
+ 

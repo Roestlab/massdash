@@ -35,6 +35,7 @@ class SpectralLibraryLoader:
     def __init__(self, in_file: str, verbose: bool=False) -> None:
         self.in_file = in_file
         self.data: pd.DataFrame = self.load()
+        self.has_im = self.data.has_im 
         
         LOGGER.name = "SpectralLibraryLoader"
         if verbose:
@@ -138,7 +139,7 @@ class SpectralLibraryLoader:
         Returns:
             TransitionGroupFeature: The TransitionGroupFeature object with appended library information.
         """
-        library_data = self.data[(self.data['ModifiedPeptideSequence'] == transition_group_feature.sequence) & (self.data['PrecursorCharge'] == transition_group_feature.precursor_charge)][['ProductMz', 'Annotation', 'PrecursorMz']]
+        library_data = self.data[(self.data['ModifiedPeptideSequence'] == transition_group_feature.sequence) & (self.data['PrecursorCharge'] == transition_group_feature.precursor_charge)]
 
         if library_data.empty:
             LOGGER.warning(f"No library data found for {transition_group_feature.sequence} {transition_group_feature.precursor_charge}")
@@ -155,13 +156,15 @@ class SpectralLibraryLoader:
         """
         peptide_sequence = transition_group_features[0].sequence
         precursor_charge = transition_group_features[0].precursor_charge
-        library_data = self.data.data[(self.data.data['ModifiedPeptideSequence'] == peptide_sequence) & (self.data.data['PrecursorCharge'] == precursor_charge)][['ProductMz', 'Annotation', 'PrecursorMz']]
+        library_data = self.data.data[(self.data.data['ModifiedPeptideSequence'] == peptide_sequence) & (self.data.data['PrecursorCharge'] == precursor_charge)]
 
         for t in transition_group_features:
             t.product_annotations = library_data['Annotation'].tolist()
             t.product_mz = library_data['ProductMz'].tolist()
             t.precursor_mz = library_data['PrecursorMz'].iloc[0]
-        
+            if self.has_im:
+                t.consensusApexIM = library_data['PrecursorIonMobility'].iloc[0]
+
     def get_peptide_product_charge_list(self, peptide: str, charge: int) -> List[int]:
         """
         Retrieve a list of product charges for a given peptide and charge.

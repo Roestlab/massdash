@@ -134,9 +134,11 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         
         stmt = f"""SELECT 
                 FEATURE.ID AS feature_id,
-                PRECURSOR_ID,
+                FEATURE.PRECURSOR_ID as PRECURSOR_ID,
+                PRECURSOR.CHARGE AS Charge,
                 FEATURE_MS2.AREA_INTENSITY AS areaIntensity,
                 FEATURE_MS2.APEX_INTENSITY AS Intensity,
+                PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
                 FEATURE.EXP_RT AS RT,
                 FEATURE.LEFT_WIDTH AS leftWidth,
                 FEATURE.RIGHT_WIDTH AS rightWidth,
@@ -147,9 +149,12 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 FROM FEATURE
                 INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
                 INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
+                INNER JOIN PRECURSOR ON PRECURSOR.ID = FEATURE.PRECURSOR_ID
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
                 {join_score_ms2}
                 {join_score_ipf}
-                WHERE RUN_ID = {run_id} AND PRECURSOR_ID = {precursor_id}
+                WHERE RUN_ID = {run_id} AND FEATURE.PRECURSOR_ID = {precursor_id}
                 """
 
         return pd.read_sql(stmt, self.conn)
@@ -167,7 +172,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
             df = df[df['peakgroup_rank'] == 1].iloc[0]
         else:
             raise ValueError("SCORE_MS2 table not found, cannot get top feature")
-        return TransitionGroupFeature(df['leftWidth'], df['rightWidth'], areaIntensity=df['Intensity'], qvalue= df['ipf_mscore'] if 'ipf_mscore' in df else df['ms2_mscore'], consensusApex=df['RT']) 
+        return TransitionGroupFeature(df['leftWidth'], df['rightWidth'], areaIntensity=df['Intensity'], qvalue= df['ipf_mscore'] if 'ipf_mscore' in df else df['ms2_mscore'], consensusApex=df['RT'], precursor_charge=df['Charge'], sequence=df['ModifiedPeptideSequence']) 
  
     def _getTopFeatureFromPrecursorIdAndRunDf(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
         df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)

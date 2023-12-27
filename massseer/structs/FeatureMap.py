@@ -58,6 +58,12 @@ class FeatureMap:
             bool: True if the feature_df is empty, False otherwise.
         """
         return self.feature_df.empty
+    
+    def __setitem__(self, key, value):
+        self.feature_df[key] = value
+    
+    def __getitem__(self, key):
+        return self.feature_df[key]
 
     @staticmethod
     def average_intensity_across_two_dimensions(df: pd.DataFrame, index: str='im', columns: str='rt', values: str='int', axis: int=0) -> Tuple[np.ndarray, np.ndarray]:

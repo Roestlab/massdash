@@ -402,9 +402,16 @@ class MzMLDataAccess():
             add_df = pd.DataFrame({'native_id': spec.getNativeID(), 'ms_level': spec.getMSLevel(), 'precursor_mz': feature.precursor_mz,
                                    'mz': mz, 'rt': rt, 'im': im, 'int': intensity})
             results_df = pd.concat([results_df, add_df])
-        print(results_df)
+        
+        ## Add annotation and column
         results_df['Annotation'] = results_df.apply(self._apply_mz_mapping, args=(feature.product_mz, feature.product_annotations) , axis=1)
-        print(results_df)
+        
+        ## Add product/precursor mz column
+        annotation_mz_mapping = pd.DataFrame({'Annotation': feature.product_annotations, 'product_mz': feature.product_mz})
+        annotation_mz_mapping = pd.concat([annotation_mz_mapping, pd.DataFrame({'Annotation': ['prec'], 'product_mz': [feature.precursor_mz]})])
+        results_df = results_df.merge(annotation_mz_mapping, on='Annotation', how='left')
+
+
         return FeatureMap(results_df, config)
     
     def _find_closest_reference_mz(self, given_mz: np.array, reference_mz_values: np.array, peptide_product_annotation_list: np.array) -> np.array:

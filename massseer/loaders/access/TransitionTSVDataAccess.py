@@ -51,12 +51,13 @@ class TransitionTSVDataAccess:
         self.filename = filename
         self.data: pd.DataFrame = pd.DataFrame()
         self.load() ## set self.data
+        self.has_im = 'PrecursorIonMobility' in self.data.columns and self.data['PrecursorIonMobility'].notnull().any()
 
     def empty(self):
         return self.data.empty() 
 
-    def __setitem__(self, index):
-        self.data.__setitem__(index)
+    def __setitem__(self, index, value):
+        self.data.__setitem__(index, value)
  
     def __getitem__(self, index):
         self.data.__getitem__(index)

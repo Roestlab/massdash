@@ -34,6 +34,7 @@ class GenericLoader(ABC):
             raise Exception(f"Error: Unsupported file type {rsltsFile}")
         
         self.libraryFile = SpectralLibraryLoader(self.libraryFile_str)
+        self.libraryFile.load()
  
         LOGGER.name = __class__.__name__
         if verbose:
