@@ -20,12 +20,14 @@ class MassSeerGUI:
         show_welcome_message: Displays a welcome message and input fields for OpenSwath and DIA-NN workflows.
         show_file_input_settings: Displays the file input settings.
     """
-    def __init__(self, verbose):
+    def __init__(self, verbose, perf, perf_output="MassSeer_Performance_Report.txt"):
         """
         Initializes the MassSeerGUI class.
 
         Args:
             verbose (bool): Enables verbose mode.
+            perf (bool): Enables performance mode.
+            perf_output (str): The path to the performance output file.
 
         Returns:
             None
@@ -33,6 +35,8 @@ class MassSeerGUI:
         self.welcome_container = st.empty()
         self.file_input_settings = None
         self.verbose = verbose
+        self.perf = perf
+        self.perf_output = perf_output
         
         # initialize load_toy_dataset key in clicked session state
         # This is needed because streamlit buttons return True when clicked and then default back to False.

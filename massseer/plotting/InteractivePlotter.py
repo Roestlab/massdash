@@ -204,7 +204,7 @@ class InteractivePlotter(GenericPlotter):
         """
         # Extract chromatogram data from the transitionGroup
         precursorChroms = transitionGroup.precursorData
-        transitionChroms = transitionGroup.precursorData
+        transitionChroms = transitionGroup.transitionData
 
         n_transitions = len(transitionChroms)
 

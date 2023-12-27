@@ -13,16 +13,25 @@ from massseer.ui.MassSeerGUI import MassSeerGUI
 from massseer.util import LOGGER
 
 @click.command()
-@click.argument('verbose', default='verbose', type=str)
-def main(verbose):     
+# @click.argument('args', default='args', type=str)
+@click.option('--verbose', '-v', is_flag=True, help="Enables verbose mode.")
+@click.option('--perf', '-t', is_flag=True, help="Enables measuring and tracking of performance.")
+@click.option('--perf_output', '-o', default='MassSeer_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
+def main(verbose, perf, perf_output):     
+
     ###########################
     ## Logging
     LOGGER.name = 'MassSeerGUIMain'
-    if verbose==' -- verbose':
+    if verbose:
         log_level = logging.DEBUG
     else:
         log_level = logging.INFO
     LOGGER.setLevel(log_level) 
+    
+    if 'perf_on' not in st.session_state:
+        st.session_state['perf_on'] = perf 
+    if 'perf_counter' not in st.session_state:
+        st.session_state['perf_counter'] = 200
     
     # Confit
     # There currently is warning with the icon size for some reason, not sure why
@@ -40,7 +49,7 @@ def main(verbose):
 
     st.session_state.WELCOME_PAGE_STATE = True
 
-    massseer_gui = MassSeerGUI(verbose==' -- verbose')
+    massseer_gui = MassSeerGUI(verbose==verbose, perf==perf, perf_output=perf_output)
     if st.session_state.WELCOME_PAGE_STATE:
         massseer_gui.show_welcome_message()
 
