@@ -43,6 +43,7 @@ import pyopenms as po
 import sqlite3
 import zlib
 import pandas as pd
+import struct
 
 class SqMassDataAccess:
 
@@ -199,6 +200,10 @@ class SqMassDataAccess:
 
         for chr_id, compr, data_type, d in data:
             result = []
+
+            if compr == 1:
+                tmp = zlib.decompress(d)
+                result = struct.unpack("<%sd" % (len(tmp) // 8), tmp)
 
             if compr == 5:
                 # tmp = [ord(q) for q in zlib.decompress(d)]
