@@ -47,8 +47,8 @@ class ThreeDimensionalPlotter:
                 plot_settings_dict = self._get_plot_settings(file.filename)
                 plot_config = PlotConfig()
                 plot_config.update(plot_settings_dict)
-                plotter = InteractiveThreeDimensionPlotter(tr_df, plot_config)
-                three_d_plots = plotter.plot()
+                plotter = InteractiveThreeDimensionPlotter(plot_config)
+                three_d_plots = plotter.plot(tr_df)
                 self.plot_obj_dict[file] = three_d_plots
         return self
 
