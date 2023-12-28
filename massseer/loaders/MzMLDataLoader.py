@@ -39,9 +39,11 @@ class MzMLDataLoader(GenericLoader):
     def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
         Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
+
         Args:
             pep_id (str): Peptide ID
             charge (int): Charge
+
         Returns:
             DataFrame: DataFrame containing TransitionGroupObject information across all runs 
         '''

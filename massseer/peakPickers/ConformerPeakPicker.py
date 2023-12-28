@@ -23,11 +23,6 @@ class ConformerPeakPicker:
         prediction_type (str, optional): The prediction type for peak picking. Defaults to "logits".
         onnx_session (onnxruntime.InferenceSession): The onnx session.
         
-    Methods:
-        _validate_model: Validate the pretrained model is valid and an onnx model.
-        load_model: Load the pretrained model.
-        pick: Perform peak picking.
-        _convertConformerFeatureToTransitionGroupFeatures: Convert conformer predicted feature to TransitionGroupFeatures.
     """
     
     def __init__(self, transition_group: TransitionGroup, pretrained_model_file: str, window_size: int = 175, prediction_threshold: float = 0.5, prediction_type: str = "logits"):
