@@ -14,7 +14,7 @@ class GenericLoader(ABC):
     Abstract class for loading Chromatograms and peak features
     Classes which inherit from this should contain one results file and one transition file
     '''
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str, verbose: bool=False):
+    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, verbose: bool=False):
         ## store the file names
         self.rsltsFile_str = rsltsFile
         self.libraryFile_str = libraryFile
@@ -33,8 +33,18 @@ class GenericLoader(ABC):
         else:
             raise Exception(f"Error: Unsupported file type {rsltsFile}")
         
-        self.libraryFile = SpectralLibraryLoader(self.libraryFile_str)
-        self.libraryFile.load()
+        
+        if self.libraryFile_str is None:
+            if self.rsltsFile_str.endswith('.osw'): 
+                self.libraryFile = SpectralLibraryLoader(self.rsltsFile_str)
+                self.libraryFile.load()
+            else:
+                raise ValueError("Error: Library file must be specified for .tsv results files")
+        else:
+            self.libraryFile = SpectralLibraryLoader(self.libraryFile_str)
+            self.libraryFile.load()
+ 
+
  
         LOGGER.name = __class__.__name__
         if verbose:

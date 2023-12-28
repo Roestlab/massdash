@@ -1,4 +1,5 @@
 
+import pandas as pd
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.loaders.GenericLoader import GenericLoader
@@ -25,6 +26,9 @@ class SqMassLoader(GenericLoader):
         super().__init__(rsltsFile, dataFiles)
         self.dataFiles = [SqMassDataAccess(f) for f in self.dataFiles_str]
         self.rsltsFile = OSWDataAccess(self.rsltsFile_str)
+
+    def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
+        raise NotImplementedError("This function is not implemented for SqMass files")
 
     def loadTransitionGroupsDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         transitionMetaInfo = self.rsltsFile.getTransitionIDAnnotationFromSequence(pep_id, charge)
@@ -118,12 +122,13 @@ class SqMassLoader(GenericLoader):
             sgolay_polynomial_order (int, optional): Order of the polynomial to use for smoothing. Defaults to 3.
             sgolay_frame_length (int, optional): Frame length to use for smoothing. Defaults to 11.
             scale_intensity (bool, optional): Whether to scale the intensity of the chromatogram such that all chromatograms are individually normalized to 1. Defaults to False.
+
         Returns: 
             bokeh.plotting.figure.Figure: Bokeh figure object
         '''
 
         ## TODO allow plotting of multiple chromatograms
-        if len(self.transitionFiles_str) > 1:
+        if len(self.dataFiles_str) > 1:
             raise NotImplementedError("Only one transition file is supported")
         
         # Initiate Plotting in Jupyter Notebook
@@ -131,7 +136,7 @@ class SqMassLoader(GenericLoader):
 
         # Load the peptide sequence and charge state into the SqlLoader
         # Take the transitions from the first instance of the dictionary returned by the loadTransitionGroupFeature function since there is only run
-        transitionGroupFeatures = list(self.loadTransitionGroupFeature(seq, charge).values())[0]
+        transitionGroupFeatures = list(self.loadTransitionGroupFeatures(seq, charge).values())[0]
         transitionGroup = list(self.loadTransitionGroups(seq, charge).values())[0]
 
         # Create an instance of the InteractivePlotter class and set appropriate config

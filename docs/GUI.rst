@@ -1,4 +1,4 @@
 GUI
 ===
 
-Stub
+MassSeer uses a stremlit backend for GUI.

@@ -9,6 +9,7 @@ from .Chromatogram import Chromatogram
 from .FeatureMap import FeatureMap
 from .Mobilogram import Mobilogram
 from .Spectrum import Spectrum
+from .TargetedDIAConfig import TargetedDIAConfig
 
 __all__ = [ "TransitionGroupFeature", 
             "TransitionGroup", 
@@ -16,4 +17,5 @@ __all__ = [ "TransitionGroupFeature",
             "Chromatogram", 
             "FeatureMap", 
             "Mobilogram", 
-            "Spectrum" ]
+            "Spectrum",
+             "TargetedDIAConfig" ]

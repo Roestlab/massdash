@@ -63,7 +63,6 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             TransitionGroupFeature: TransitionGroupFeature object containing peak boundaries, intensity and confidence
         '''
         runname_exact = self.getExactRunName(runname)
-        print(runname_exact)
 
         if runname_exact is None:
             LOGGER.debug(f"Error: No matching runs found for {runname}")
