@@ -47,7 +47,7 @@ class MzMLDataLoader(GenericLoader):
         '''
         out = {}
         for t in self.dataFiles:
-            runname = basename(t).split('.')[0]
+            runname = basename(t.filename).split('.')[0]
             out[t] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
         
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
