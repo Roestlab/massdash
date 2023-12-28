@@ -56,7 +56,7 @@ class RawTargetedExtractionAnalysisServer:
         Appends q-values to the transition list.
         """
         # top_ranked_precursor_features = self.feature_data.get_top_rank_precursor_features_across_runs()
-        top_ranked_precursor_features = self.feature_data.report.search_data[['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence',  'PrecursorCharge', 'Qvalue']]
+        top_ranked_precursor_features = self.mzml_loader.rsltsFile.df[['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence',  'PrecursorCharge', 'Qvalue']]
         # If Decoy column not in transition list add it to top_ranked_precursor_features
         if 'Decoy' not in self.transition_list.data.columns:
             top_ranked_precursor_features['Decoy'] = 0
@@ -71,7 +71,7 @@ class RawTargetedExtractionAnalysisServer:
         self.transition_list.data['Decoy'] = self.transition_list.data['Decoy'].fillna(0)
     
     # @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading data...")(func), check_streamlit())
-    def initiate_mzML_interface(self, mzml_files, resultsFile, dataFile, verbose) -> None:
+    def initiate_mzML_interface(self, mzml_files, resultsFile, dataFile, resultsFileType, verbose) -> None:
         """
         Initiate an mzMLLoader Object.
 
@@ -79,11 +79,12 @@ class RawTargetedExtractionAnalysisServer:
             mzml_files (List[str]): List of paths to the mzML files.
             resultsFile (str): Path to the results file.
             dataFile (str): Path to the data file.
+            resultsFileType (str): The type of the results file.
             verbose (bool): Whether or not to print verbose output.
         
         """
         st.write(resultsFile)
-        self.mzml_loader = MzMLDataLoader(resultsFile, mzml_files, dataFile, verbose)
+        self.mzml_loader = MzMLDataLoader(resultsFile, mzml_files, dataFile, resultsFileType, verbose)
 
     @conditional_decorator(lambda func: st.cache_resource(show_spinner="Extracting data...")(func), check_streamlit())
     def targeted_extraction(_self, transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[FeatureMap]:
@@ -128,8 +129,9 @@ class RawTargetedExtractionAnalysisServer:
             self.initiate_mzML_interface(self.massseer_gui.file_input_settings.raw_file_path_list, 
                                         self.massseer_gui.file_input_settings.feature_file_path, 
                                         self.massseer_gui.file_input_settings.transition_list_file_path, 
+                                        self.massseer_gui.file_input_settings.feature_file_type,
                                         self.massseer_gui.verbose)
-        
+                
         # Get and append q-values to the transition list
         self.get_transition_list()
         self.append_qvalues_to_transition_list()
