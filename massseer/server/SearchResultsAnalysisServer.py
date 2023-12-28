@@ -10,7 +10,9 @@ from datetime import timedelta
 from massseer.ui.MassSeerGUI import MassSeerGUI
 from massseer.ui.SearchResultsAnalysisUI import SearchResultsAnalysisUI
 # Loaders
-from massseer.loaders.OSWDataAccess import OSWDataAccess
+from massseer.loaders.access.OSWDataAccess import OSWDataAccess
+from massseer.loaders.DiaNNLoader import DiaNNLoader
+from massseer.loaders.DreamDIALoader import DreamDIALoader
 # Plotting
 from massseer.plotting.SearchResultAnalysisPlots import SearchResultAnalysisPlots
 # Utils
@@ -34,7 +36,8 @@ class SearchResultsAnalysisServer:
         self.analysis_settings = None
         self.analysis = None
 
-    def load_search_result_entries(self, feature_file_entries: dict) -> None:
+    @conditional_decorator(st.cache_resource, check_streamlit)
+    def load_search_result_entries(_self, _feature_file_entries: dict) -> None:
         """
         Loads the search result entries from the file input settings.
 
@@ -43,12 +46,26 @@ class SearchResultsAnalysisServer:
             A dictionary containing the search result entries.
         """
         data_access_dict = {}
-        for entry, entry_data in feature_file_entries.items():
+        for entry, entry_data in _feature_file_entries.items():
             print(f"Loading search results from {entry_data['search_results_file_path']}")
             if entry_data['search_results_file_type'] == "OpenSwath":
                 data_access = OSWDataAccess(entry_data['search_results_file_path'])
                 data_access_dict[entry] = data_access   
+            elif entry_data['search_results_file_type'] == "DIA-NN":
+                data_access = DiaNNLoader(entry_data['search_results_file_path'], [entry_data['search_results_file_path']])
+            elif entry_data['search_results_file_type'] == "DreamDIA":
+                data_access = DreamDIALoader(entry_data['search_results_file_path'], [entry_data['search_results_file_path']])
+            else:
+                raise ValueError(f"Search results file type {entry_data['search_results_file_type']} not supported.")
         return data_access_dict
+    
+    @conditional_decorator(st.cache_resource, check_streamlit)
+    def get_data(_self, _data_access_dict, biological_level, qvalue_threshold):
+        data_dict = {}
+        for entry, data_access in _data_access_dict.items():
+            if isinstance(data_access, OSWDataAccess):
+                data_dict[entry] = data_access.get_top_rank_identfications(biological_level, qvalue_threshold)
+        return data_dict
     
     @conditional_decorator(st.cache_resource, check_streamlit)
     def load_score_distribution_data(_self, _data_access_dict, score_column=None, score_table_context=None):
@@ -82,6 +99,12 @@ class SearchResultsAnalysisServer:
         # Create a UI for the analysis
         if self.analysis_type.analysis == "Identifications":
             print("In development, coming soon!")
+            self.analysis_type.show_identification_settings()
+            ident_data_dict = self.get_data(search_results_access_dict, self.analysis_type.biological_level, self.analysis_type.qvalue_threshold)
+            for entry, ident_data in ident_data_dict.items():
+                print(ident_data)
+                if ident_data is not None:
+                    st.dataframe(ident_data.head(10))
             pass
         elif self.analysis_type.analysis == "Quantifications":
             print("In development, coming soon!")

@@ -36,6 +36,7 @@ $Authors: Hannes Roest, Justin Sing$
 """
 import pandas as pd
 import sqlite3
+from functools import reduce
 from massseer.util import check_sqlite_column_in_table, check_sqlite_table
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from typing import List, Literal
@@ -62,6 +63,7 @@ class OSWDataAccess:
         # hashtable, each run is its own data 
         self._initializePeptideHashtable()
         self._initializeRunHashtable()
+        self._initializeFeatureScoreHashtable()
 
 
     ###### INDICES CREATOR ######
@@ -69,6 +71,7 @@ class OSWDataAccess:
         # Create indices if they do not exist
         idx_query = ''' CREATE INDEX IF NOT EXISTS idx_transition_precursor_mapping_transition_id on TRANSITION_PRECURSOR_MAPPING(Transition_id);'''
         idx_query += ''' CREATE INDEX IF NOT EXISTS idx_transition_precursor_mapping_precursor_id on TRANSITION_PRECURSOR_MAPPING(Precursor_id);'''
+        idx_query += ''' CREATE INDEX IF NOT EXISTS idx_feature_precursor_id ON FEATURE (PRECURSOR_ID); '''
         self.conn.executescript(idx_query)
 
     ###### HASHTABLE INITIALIZERS ######
@@ -85,6 +88,86 @@ class OSWDataAccess:
         tmp = pd.read_sql(stmt, self.conn)
         self.peptideHash = tmp.set_index(['MODIFIED_SEQUENCE', 'CHARGE'])
 
+    def _initializeFeatureScoreHashtable(self):
+        if check_sqlite_table(self.conn, "SCORE_MS2"):
+            join_score_ms2 = "INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID"
+            select_score_ms2 = """SCORE_MS2.RANK AS peakgroup_rank,
+SCORE_MS2.QVALUE AS ms2_mscore,"""
+        else:
+            join_score_ms2 = ""
+            select_score_ms2 = ""
+                       
+        stmt = f"""
+        SELECT FEATURE.ID AS FEATURE_ID,
+        {select_score_ms2}
+        FEATURE.PRECURSOR_ID,
+        PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID,
+        PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID,
+        FEATURE.RUN_ID
+        FROM FEATURE
+        {join_score_ms2}
+        INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = FEATURE.PRECURSOR_ID
+        INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+        """
+        tmp = pd.read_sql(stmt, self.conn)
+        
+        extra_scores_dfs = {}
+        # augment with peptide, protein and gene scores if available
+        if check_sqlite_table(self.conn, "SCORE_PEPTIDE"):
+            stmt = "SELECT CONTEXT, RUN_ID, PEPTIDE_ID, QVALUE FROM SCORE_PEPTIDE WHERE CONTEXT != 'global'"
+            tmp_tbl = pd.read_sql(stmt, self.conn)
+            if self.c.execute("SELECT CONTEXT FROM SCORE_PEPTIDE WHERE CONTEXT == 'global'").fetchone() is not None:
+                tmp_tbl_global = pd.read_sql("SELECT PEPTIDE_ID, QVALUE FROM SCORE_PEPTIDE WHERE CONTEXT == 'global'", self.conn)
+                # Rename columns to "SCORE_global", "PVALUE_global", "QVALUE_global", "PEP_global"
+                tmp_tbl_global.rename(columns={'QVALUE': 'PEPTIDE_QVALUE_global'}, inplace=True)
+
+            pivoted_tbl = tmp_tbl.pivot_table(
+                                                index=['RUN_ID', 'PEPTIDE_ID'],
+                                                columns='CONTEXT',
+                                                values=['QVALUE']
+                                            ).reset_index()
+                        
+            # Flatten the MultiIndex columns
+            pivoted_tbl.columns = [ "PEPTIDE_" + col[0] + "_" + col[1] if col[1] != "" else col[0] for col in pivoted_tbl.columns.values ]
+
+            # # Rename columns to match the desired format
+            # pivoted_tbl.rename(columns={'PEPTIDE_ID_': 'PEPTIDE_ID'}, inplace=True)
+
+            # Merge pivoted_tbl with tmp_tbl_global
+            tmp_tbl = pd.merge(pivoted_tbl, tmp_tbl_global, on=['PEPTIDE_ID'], how='left')
+            extra_scores_dfs["PEPTIDE_ID"] =  tmp_tbl
+        
+        if check_sqlite_table(self.conn, "SCORE_PROTEIN"):
+            stmt = "SELECT CONTEXT, RUN_ID, PROTEIN_ID, QVALUE  FROM SCORE_PROTEIN WHERE CONTEXT != 'global'"
+            tmp_tbl = pd.read_sql(stmt, self.conn)
+            if self.c.execute("SELECT CONTEXT FROM SCORE_PROTEIN WHERE CONTEXT == 'global'").fetchone() is not None:
+                tmp_tbl_global = pd.read_sql("SELECT PROTEIN_ID, QVALUE FROM SCORE_PROTEIN WHERE CONTEXT == 'global'", self.conn)
+                # Rename columns to "SCORE_global", "PVALUE_global", "QVALUE_global", "PEP_global"
+                tmp_tbl_global.rename(columns={'SCORE': 'PROTEIN_SCORE_global', 'PVALUE': 'PROTEIN_PVALUE_global', 'QVALUE': 'PROTEIN_QVALUE_global', 'PEP': 'PROTEIN_PEP_global'}, inplace=True)
+
+            pivoted_tbl = tmp_tbl.pivot_table(
+                                                index=['RUN_ID', 'PROTEIN_ID'],
+                                                columns='CONTEXT',
+                                                values=['QVALUE']
+                                            ).reset_index()
+                        
+            # Flatten the MultiIndex columns
+            pivoted_tbl.columns = [ "PROTEIN_" + col[0] + "_" + col[1] if col[1] != "" else col[0] for col in pivoted_tbl.columns.values ]
+
+            # # Rename columns to match the desired format
+            # pivoted_tbl.rename(columns={'PROTEIN_ID_': 'PROTEIN_ID'}, inplace=True)
+
+            # Merge pivoted_tbl with tmp_tbl_global
+            tmp_tbl = pd.merge(pivoted_tbl, tmp_tbl_global, on=['PROTEIN_ID'], how='left')
+            extra_scores_dfs['PROTEIN_ID'] = tmp_tbl
+        
+        if len(extra_scores_dfs) > 0:
+            if check_sqlite_table(self.conn, "SCORE_PEPTIDE"):
+                tmp = pd.merge(tmp, extra_scores_dfs['PEPTIDE_ID'], on=['RUN_ID', 'PEPTIDE_ID'], how='left')
+            if check_sqlite_table(self.conn, "SCORE_PROTEIN"):
+                tmp = pd.merge(tmp, extra_scores_dfs['PROTEIN_ID'], on=['RUN_ID', 'PROTEIN_ID'], how='left')
+        
+        self.featureScoreHash = tmp.set_index(['FEATURE_ID', 'PRECURSOR_ID', 'PEPTIDE_ID', 'PROTEIN_ID', 'RUN_ID'])
 
     ###### INTERNAL ACCESSORS ######
 
@@ -403,6 +486,41 @@ class OSWDataAccess:
         data = pd.read_sql_query(stmt, self.conn)
 
         return data
+
+    def get_top_rank_identfications(self, biological_level: Literal['Protein', 'Peptide', 'Precursor']='Peptide', qvalue_cutoff: float=0.01):
+        """
+        Retrieves the identifications from the database.
+        """
+        if biological_level == "Peptide":
+            if "PEPTIDE_QVALUE_global" in self.featureScoreHash.columns:
+                peptide_ids = self.featureScoreHash[ (self.featureScoreHash["PEPTIDE_QVALUE_global"] <= qvalue_cutoff) & (self.featureScoreHash['peakgroup_rank'] == 1)].reset_index()["PEPTIDE_ID"].unique()
+                stmt = f"""
+                SELECT
+                    RUN.FILENAME as filename,
+                    PEPTIDE.ID AS PEPTIDE_ID,
+                    PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
+                    PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
+                    PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
+                    PRECURSOR.CHARGE AS PrecursorCharge,
+                    FEATURE.EXP_RT AS RT,
+                    FEATURE_MS2.AREA_INTENSITY AS Intensity
+                FROM FEATURE
+                INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
+                INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = FEATURE.PRECURSOR_ID
+                INNEr JOIN PRECURSOR ON PRECURSOR.ID = FEATURE.PRECURSOR_ID
+                INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+                INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                WHERE SCORE_MS2.RANK = 1 AND PEPTIDE.ID IN ({','.join([str(i) for i in peptide_ids])}) AND PEPTIDE.DECOY = 0
+                """
+                tmp = pd.read_sql(stmt, self.conn)
+                
+                # Augment with qvalues from featureScoreHash
+                # Get Peptide related columns from featureScoreHash
+                peptide_qvalue_cols = [c for c in self.featureScoreHash.columns if c.startswith("PEPTIDE_")]
+                tmp = pd.merge(tmp, self.featureScoreHash.reset_index()[["PEPTIDE_ID"] + peptide_qvalue_cols], on="PEPTIDE_ID", how="left")
+                
+                return tmp
 
     ##### UNUSED #####
     def get_top_rank_precursor_features_across_runs(self):

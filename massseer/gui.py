@@ -53,10 +53,18 @@ elif st.session_state.workflow == "raw_data" and st.session_state.clicked['load_
 
 if st.session_state.workflow == "search_results_analysis" and st.session_state.clicked['load_toy_dataset_search_results_analysis']:
     # feature_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
-    feature_file_path = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/spyogenes/openswath/osw/merged.osw"
+    feature_file_path = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/spyogenes_full/openswath/osw/merged.osw"
     feature_file_type = "OpenSwath"
     
-    search_results_entries_dict = {'entry_1': {'search_results_file_path': feature_file_path, 'search_results_exp_name': 'test_data', 'search_results_file_type': feature_file_type}}
+    feature_file_path_2 = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/spyogenes_full/diann/report/spyogenes_diann_two_runs.tsv"
+    feature_file_type_2 = "DIA-NN"
+    
+    feature_file_path_3 = "/media/justincsing/ExtraDrive1/Documents2/Roest_Lab/Github/MassSeer/tests/test_data/spyogenes_full/dreamdia/score_df_precursor.tsv"
+    feature_file_type_3 = "DreamDIA"
+    
+    search_results_entries_dict = {'entry_1': {'search_results_file_path':          feature_file_path, 'search_results_exp_name': 'test_data', 'search_results_file_type': feature_file_type}, 
+                                    'entry_2': {'search_results_file_path': feature_file_path_2, 'search_results_exp_name': 'test_data_2', 'search_results_file_type': feature_file_type_2}, 
+                                    'entry_3': {'search_results_file_path': feature_file_path_3, 'search_results_exp_name': 'test_data_3', 'search_results_file_type': feature_file_type_3}}
     
     massseer_gui.show_file_input_settings(feature_file_entries_dict=search_results_entries_dict)
     

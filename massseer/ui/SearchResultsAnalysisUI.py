@@ -23,7 +23,17 @@ class SearchResultsAnalysisUI:
         Displays the transition list UI and filters the transition list based on user input.
         """
         # Create a UI for the transition list
-        self.analysis = st.sidebar.selectbox("Analysis type", ["Identifications", "Quantifications", "Score Distributions"])
+        self.analysis = st.sidebar.selectbox("Analysis type", ["Identifications", "Quantifications", "Score Distributions"], help="Select the type of analysis to perform.")
+    
+    def show_identification_settings(self):
+        """
+        Displays the identification settings.
+        """
+        st.sidebar.divider()
+        st.sidebar.subheader("Identification settings")
+        self.biological_level = st.sidebar.selectbox("Biological level", ["Protein", "Peptide", "Precursor"], index=1, help="Select the composition level for the identifications.")
+        
+        self.qvalue_threshold = st.sidebar.number_input("Qvalue threshold", value=0.01, min_value=0.0, max_value=1.0, step=0.01, key=f'identification_settings_fdr_threshold', help="FDR threshold for identifications.")
         
     def show_score_tables(self, data_access_dict):
         """
