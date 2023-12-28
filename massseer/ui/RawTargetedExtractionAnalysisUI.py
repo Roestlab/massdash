@@ -8,7 +8,7 @@ from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 # Loaders
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from massseer.loaders.access.TargetedDIADataAccess import TargetedDIAConfig
+from massseer.structs.TargetedDIAConfig import TargetedDIAConfig
 
 
 class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
