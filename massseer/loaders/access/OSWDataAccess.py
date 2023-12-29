@@ -136,6 +136,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         stmt = f"""SELECT 
                 FEATURE.ID AS feature_id,
                 FEATURE.PRECURSOR_ID as PRECURSOR_ID,
+                PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
                 PRECURSOR.CHARGE AS Charge,
                 FEATURE_MS2.AREA_INTENSITY AS areaIntensity,
                 FEATURE_MS2.APEX_INTENSITY AS Intensity,
@@ -177,8 +178,18 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
  
     def _getTopFeatureFromPrecursorIdAndRunDf(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
         df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
+        df = df.rename(columns={'leftWidth': 'leftBoundary', 
+                                    'rightWidth': 'rightBoundary', 
+                                    'Intensity': 'consensusApexIntensity', 
+                                    'RT': 'consensusApex', 
+                                    'ms2_mscore' : 'qvalue',
+                                    'Charge': 'precursor_charge',
+                                    'ModifiedPeptideSequence': 'sequence',
+                                    'PrecursorMz': 'precursor_mz',
+                                    'IM': 'consensusApexIM'})    
+        
         if 'peakgroup_rank' in df.columns:
-            return df[df['peakgroup_rank'] == 1].iloc[0]
+            return df[df['peakgroup_rank'] == 1].iloc[[0]]
         else:
             raise ValueError("SCORE_MS2 table not found, cannot get top feature")
 
