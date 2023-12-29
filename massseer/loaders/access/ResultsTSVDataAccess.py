@@ -15,6 +15,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         self.peptideHash = self._initializePeptideHashTable()
         self.df = self.loadData() 
         self.runs = self.df['Run'].drop_duplicates()
+        self.has_im = 'IM' in self.df.columns
     
     def loadData(self) -> pd.DataFrame:
         '''
@@ -73,7 +74,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
 
             # return the row indices and add 1 to each index to account for the header row
             rows_to_load = [0] + [idx + 1 for idx in targetPeptide.index.tolist()]
-
+                
             # remove any periods from the peptide sequence i.e. for N terminal modifications
             # i.e. Convert .(UniMod:1)SEGDSVGESVHGKPSVVYR to (UniMod:1)SEGDSVGESVHGKPSVVYR
             peptide_tmp = peptide.replace('.', '')
@@ -92,6 +93,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
                                                       rightBoundary=row['RT.Stop'] * 60,
                                                       areaIntensity=row['Precursor.Quantity'],
                                                       qvalue=row['Q.Value'],
+                                                      consensusApexIM=row['IM'] if self.has_im else None,
                                                       sequence=row['Modified.Sequence'],
                                                       precursor_charge=row['Precursor.Charge']))
                 return out 
@@ -117,6 +119,8 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             pd.DataFrame: Dataframe with the TransitionGroupFeatures
         '''
         columns = ['Run', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence']
+        if self.has_im:
+            columns.append('consensusApexIM')
         runname_exact = self.getExactRunName(runname)
         if runname_exact is None:
             return pd.DataFrame(columns=columns)
@@ -131,7 +135,9 @@ class ResultsTSVDataAccess(GenericResultsAccess):
                                     'PrecursorCharge': 'precursor_charge',
                                     'ModifiedPeptideSequence': 'sequence',
                                     'PrecursorMz': 'precursor_mz'})
-
+            
+            if self.has_im:
+                df = df.rename(columns={'IM': 'consensusApexIM'})
 
             df['consensusApex'] = df['consensusApex'] * 60
             df['leftBoundary'] = df['leftBoundary'] * 60
