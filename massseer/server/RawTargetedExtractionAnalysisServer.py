@@ -101,7 +101,8 @@ class RawTargetedExtractionAnalysisServer:
         Returns:
             None
         """
-        return _self.mzml_loader.loadFeatureMaps(_transition_list_ui.transition_settings.selected_peptide, 
+        return _self.mzml_loader.loadFeatureMaps(_transition_list_ui.
+                                                 transition_settings.selected_peptide, 
                                             _transition_list_ui.transition_settings.selected_charge,
                                             _transition_list_ui.targeted_exp_params)
           
@@ -171,7 +172,7 @@ class RawTargetedExtractionAnalysisServer:
             
             transitionGroupChromatograms = { f:fm.to_chromatograms() for f, fm in featureMaps.items()}
             st.write(transitionGroupChromatograms)
-                
+            st.dataframe([fm.feature_df for fm in featureMaps.values()][0])
             # Perform peak picking
             peak_picker = PeakPickingServer(peak_picking_settings, chrom_plot_settings)
             tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data=transitionGroupChromatograms, transition_list_ui=transition_list_ui)
@@ -202,5 +203,5 @@ class RawTargetedExtractionAnalysisServer:
             LOGGER.info("Targeted extraction complete! Elapsed time: %s", timedelta(seconds=elapsed))
             status.update(label=f"Info: Targeted extraction and plot drawing complete! Elapsed time: {timedelta(seconds=elapsed)}", state="complete", expanded=False)
         
-            if chrom_plot_settings.display_extracted_data_as_df:
-                transition_list_ui.show_extracted_dataframes(featureMaps)
+        if chrom_plot_settings.display_extracted_data_as_df:
+            transition_list_ui.show_extracted_dataframes(featureMaps)
