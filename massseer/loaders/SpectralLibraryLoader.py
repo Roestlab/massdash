@@ -156,7 +156,7 @@ class SpectralLibraryLoader:
         """
         peptide_sequence = transition_group_features[0].sequence
         precursor_charge = transition_group_features[0].precursor_charge
-        library_data = self.data.data[(self.data.data['ModifiedPeptideSequence'] == peptide_sequence) & (self.data.data['PrecursorCharge'] == precursor_charge)]
+        library_data = self.data[(self.data['ModifiedPeptideSequence'] == peptide_sequence) & (self.data['PrecursorCharge'] == precursor_charge)]
 
         for t in transition_group_features:
             t.product_annotations = library_data['Annotation'].tolist()
