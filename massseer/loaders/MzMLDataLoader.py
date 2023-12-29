@@ -62,7 +62,7 @@ class MzMLDataLoader(GenericLoader):
         '''
         out_feature_map = self.loadFeatureMaps(pep_id, charge)
 
-        return { run: data.toChromatograms() for run, data in out_feature_map.items() }
+        return { run: data.to_chromatograms() for run, data in out_feature_map.items() }
 
     def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> dict[str, FeatureMap]:
         '''
