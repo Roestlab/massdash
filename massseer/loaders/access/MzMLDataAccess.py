@@ -62,10 +62,10 @@ class MzMLDataAccess():
         self.load_data()
 
     def __str__(self):
-        return f"mzMLLoader(filename={self.filename}, has_im={self.has_im})"
+        return f"MzMLDataAccess(filename={self.filename}, has_im={self.has_im})"
  
     def __repr__(self):
-        return f"mzMLLoader(filename={self.filename}, has_im={self.has_im})"
+        return f"MzMLDataAccess(filename={self.filename}, has_im={self.has_im})"
     
     def check_ion_mobility(self, num_lines_to_check=10_000_000):
         """
