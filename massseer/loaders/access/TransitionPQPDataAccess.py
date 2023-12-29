@@ -41,7 +41,7 @@ class TransitionPQPDataAccess:
         self.data: pd.DataFrame = self._load()
         self.has_im = 'PrecursorIonMobility' in self.data.columns and self.data['PrecursorIonMobility'].notnull().any()
     
-    @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
+    # @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
     def _load(_self) -> None:
         '''
         Load the transition PQP file
@@ -70,7 +70,13 @@ class TransitionPQPDataAccess:
             gene_select_stmt = "'' AS GeneName,"
             gene_join_stmt = ""
 
-        if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"):
+        # Check the first value in ANNOTATION column in TRANSITION table, if NA set generate_annotation to True
+        generate_annotation = False
+        annotation_data = pd.read_sql("SELECT ANNOTATION FROM TRANSITION LIMIT 1", self.conn)
+        if annotation_data['ANNOTATION'].isnull().values.any() or annotation_data['ANNOTATION'].values[0] == "NA":
+            generate_annotation = True
+
+        if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION") and not generate_annotation:
             stmt = f"""SELECT 
                 {gene_select_stmt}
                 PROTEIN.PROTEIN_ACCESSION AS ProteinId,
