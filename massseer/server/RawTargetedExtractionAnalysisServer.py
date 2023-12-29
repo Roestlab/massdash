@@ -48,8 +48,9 @@ class RawTargetedExtractionAnalysisServer:
         """
         Loads the spectral library and sets the transition list attribute.
         """
-        self.transition_list = SpectralLibraryLoader(self.massseer_gui.file_input_settings.transition_list_file_path, self.massseer_gui.verbose)
-        self.transition_list.load()
+        self.transition_list = self.mzml_loader.libraryFile
+        self.transition_list.has_im = self.mzml_loader.libraryFile.data.has_im
+        self.transition_list.data = self.mzml_loader.libraryFile.data.data
 
     def append_qvalues_to_transition_list(self):
         """
@@ -87,7 +88,7 @@ class RawTargetedExtractionAnalysisServer:
         self.mzml_loader = MzMLDataLoader(resultsFile, mzml_files, dataFile, resultsFileType, verbose)
 
     @conditional_decorator(lambda func: st.cache_resource(show_spinner="Extracting data...")(func), check_streamlit())
-    def targeted_extraction(_self, transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[FeatureMap]:
+    def targeted_extraction(_self, _transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[FeatureMap]:
         """
         Perform targeted extraction on the given targeted experiment using the provided peptide coordinates and configuration.
 
@@ -100,12 +101,12 @@ class RawTargetedExtractionAnalysisServer:
         Returns:
             None
         """
-        return _self.mzml_loader.loadFeatureMaps(transition_list_ui.transition_settings.selected_peptide, 
-                                            transition_list_ui.transition_settings.selected_charge,
-                                            transition_list_ui.targeted_exp_params)
+        return _self.mzml_loader.loadFeatureMaps(_transition_list_ui.transition_settings.selected_peptide, 
+                                            _transition_list_ui.transition_settings.selected_charge,
+                                            _transition_list_ui.targeted_exp_params)
           
     @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading into transition group...")(func), check_streamlit())
-    def load_transition_group_feature(_self, transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[TransitionGroupFeature]:
+    def load_transition_group_feature(_self, _transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[TransitionGroupFeature]:
         """
         Load the transition group from the targeted experiment.
 
@@ -119,7 +120,7 @@ class RawTargetedExtractionAnalysisServer:
             The loaded transition group feature.
         """
 
-        return _self.mzml_loader.loadTopTransitionGroupFeatureDf(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+        return _self.mzml_loader.loadTopTransitionGroupFeatureDf(_transition_list_ui.transition_settings.selected_peptide, _transition_list_ui.transition_settings.selected_charge)
     
     def main(self):
         
@@ -141,6 +142,7 @@ class RawTargetedExtractionAnalysisServer:
         transition_list_ui.show_transition_information()
         
         # Load feature data for selected peptide and charge
+        self.load_transition_group_feature.clear()
         features = self.load_transition_group_feature(transition_list_ui)
         
         transition_list_ui.show_search_results_information(features) 
@@ -164,8 +166,11 @@ class RawTargetedExtractionAnalysisServer:
         # Load data from mzML files
         with st.status("Performing Peak Extraction....", expanded=True) as status:
             start_time = timeit.default_timer()
+            self.targeted_extraction.clear()
             featureMaps = self.targeted_extraction(transition_list_ui)
-            transitionGroupChromatograms = featureMaps.toChromatograms()
+            
+            transitionGroupChromatograms = { f:fm.to_chromatograms() for f, fm in featureMaps.items()}
+            st.write(transitionGroupChromatograms)
                 
             # Perform peak picking
             peak_picker = PeakPickingServer(peak_picking_settings, chrom_plot_settings)
