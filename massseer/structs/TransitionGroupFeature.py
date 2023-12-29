@@ -34,10 +34,12 @@ class TransitionGroupFeature(GenericFeature):
         self.sequence = sequence
 
     def __str__(self):
-        return f"{'-'*8} TransitionGroupFeature {'-'*8}\nApex: {self.consensusApex}\nLeftWidth: {self.leftBoundary}\nRightWidth: {self.rightBoundary}\nArea: {self.areaIntensity}\nQvalue: {self.qvalue}"
+        attribute_strings = [f"{key}: {getattr(self, key)}" for key in vars(self)]
+        return f"{'-'*8} TransitionGroupFeature {'-'*8}\n" + "\n".join(attribute_strings)
 
     def __repr__(self):
-        return f"TransitionGroupFeature Apex: {self.consensusApex} LeftWidth: {self.leftBoundary} RightWidth: {self.rightBoundary} Area: {self.areaIntensity} Qvalue: {self.qvalue}"
+        attribute_strings = [f"{key}: {getattr(self, key)}" for key in vars(self)]
+        return f"{'-'*8} TransitionGroupFeature {'-'*8}\n" + "\n".join(attribute_strings)
     
     def getBoundaries(self) -> Tuple[float, float]:
         return super().getBoundaries()
