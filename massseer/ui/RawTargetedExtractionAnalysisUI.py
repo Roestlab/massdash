@@ -1,5 +1,6 @@
 from os.path import basename
 import streamlit as st
+import numpy as np
 from typing import Literal, Dict
 
 # UI
@@ -117,33 +118,35 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
 
         st.sidebar.divider()
         st.sidebar.subheader("Search results")
+        st.write(search_results)
         
         # Check to see if chromatogram peak feature apex is not none and mobilogram peak feature apex is not none to enable the use search results checkbox otherwise disable it
-        if len(search_results.precursor_search_data) > 0:
-            enable_use_search_results_checkbox = search_results.precursor_search_data[list(search_results.precursor_search_data.keys())[0]]['chromatogram_peak_feature'].consensusApex is not None
+        if len(search_results.shape) > 0:
+            enable_use_search_results_checkbox = search_results['consensusApex'] is not np.nan
             
             # Checkbox to use search results RT apex and IM apex for extraction parameters
             self.use_search_results_in_extraction = st.sidebar.checkbox("Use search result coordinates for extraction", value=True, disabled=not enable_use_search_results_checkbox)
             
-            # Create tabs to display search results per file in search_results.precursor_search_data
-            search_results_tabs = st.sidebar.tabs([f"Run{i}" for i in range(1, len(search_results.precursor_search_data) + 1)])
-            for search_results_tab, (file, search_result) in zip(search_results_tabs, search_results.precursor_search_data.items()):
+            # Create tabs to display search results per file in search_results
+            search_results_tabs = st.sidebar.tabs([f"Run{i}" for i in range(1, search_results.shape[0] + 1)])
+            grouped_df = search_results.groupby('filename')
+            for search_results_tab, (file, search_result) in zip(search_results_tabs, grouped_df):
                 with search_results_tab:
                     with st.expander("Expand for search results", expanded=False):
                         # Get chromatogram peak feature RT and boundaries from search results
-                        chrom_rt_apex = search_result['chromatogram_peak_feature'].consensusApex
-                        chrom_rt_start = search_result['chromatogram_peak_feature'].leftBoundary
-                        chrom_rt_end = search_result['chromatogram_peak_feature'].rightBoundary
+                        chrom_rt_apex = search_result['consensusApex'].values[0]
+                        chrom_rt_start = search_result['leftBoundary'].values[0]
+                        chrom_rt_end = search_result['rightBoundary'].values[0]
                         # Get chromatogram intensity and qvalue from search results
-                        chrom_intensity = search_result['chromatogram_peak_feature'].areaIntensity
-                        chrom_qvalue = search_result['chromatogram_peak_feature'].qvalue
+                        chrom_intensity = search_result['areaIntensity'].values[0]
+                        chrom_qvalue = search_result['qvalue'].values[0]
                         
                         if self.is_ion_mobility_data:
                             # Get mobilogram peak feature Im apex from search results
-                            mobilogram_im_apex = search_result['mobilogram_peak_feature'].consensusApex
+                            mobilogram_im_apex = search_result['consensusApex'].values[0]
 
                         # Display in sidebar
-                        st.markdown(f"**{basename(file.filename)}**")
+                        st.markdown(f"**{basename(file)}**")
                         st.markdown("**Chromatogram peak feature**")
                         st.code(f"RT: {chrom_rt_apex}\nRT start: {chrom_rt_start}\nRT end: {chrom_rt_end}\nIntensity: {chrom_intensity}\nQvalue: {chrom_qvalue}", language="markdown")
                         if self.is_ion_mobility_data:
@@ -194,7 +197,7 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
                     'rt_boundaries': [1718.036865234375, 1751.983642578125]}}
         """
         file_peptide_dict = {}
-        for file, file_search_results in search_results.precursor_search_data.items():
+        for file, file_search_results in search_results.items():
             # Use search results RT and IM apexs if available
             if file_search_results['chromatogram_peak_feature'].consensusApex is not None:
                 use_rt_apex = file_search_results['chromatogram_peak_feature'].consensusApex
@@ -372,8 +375,8 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         # Display the extracted dataframes in tabs per file key in targeted_df_dict
         
         # Create streamlit tabs to store the extracted dataframes
-        df_tabs = st.tabs([basename(f.filename) for f in targeted_df_dict.keys()])
+        df_tabs = st.tabs([basename(f) for f in targeted_df_dict.keys()])
         
-        for df_tab, df in zip(df_tabs, targeted_df_dict.values()):
+        for df_tab, feature_map in zip(df_tabs, targeted_df_dict.values()):
             with df_tab:
-                st.dataframe(df, hide_index=True, column_order =('native_id', 'ms_level', 'precursor_mz', 'product_mz', 'mz', 'rt', 'im', 'int', 'rt_apex', 'rt_left_width', 'rt_right_width', 'im_apex', 'PrecursorCharge', 'ProductCharge', 'LibraryIntensity', 'NormalizedRetentionTime', 'PeptideSequence', 'ModifiedPeptideSequence', 'ProteinId', 'GeneName', 'Annotation', 'PrecursorIonMobility'))
+                st.dataframe(feature_map.feature_df, hide_index=True, column_order =('native_id', 'ms_level', 'precursor_mz', 'product_mz', 'mz', 'rt', 'im', 'int', 'rt_apex', 'rt_left_width', 'rt_right_width', 'im_apex', 'PrecursorCharge', 'ProductCharge', 'LibraryIntensity', 'NormalizedRetentionTime', 'PeptideSequence', 'ModifiedPeptideSequence', 'ProteinId', 'GeneName', 'Annotation', 'PrecursorIonMobility'))
