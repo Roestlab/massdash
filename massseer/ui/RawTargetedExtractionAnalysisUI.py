@@ -143,7 +143,7 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
                         
                         if self.is_ion_mobility_data:
                             # Get mobilogram peak feature Im apex from search results
-                            mobilogram_im_apex = search_result['consensusApex'].values[0]
+                            mobilogram_im_apex = search_result['consensusApexIM'].values[0]
 
                         # Display in sidebar
                         st.markdown(f"**{basename(file)}**")
