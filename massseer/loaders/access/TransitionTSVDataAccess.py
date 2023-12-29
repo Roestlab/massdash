@@ -68,13 +68,18 @@ class TransitionTSVDataAccess:
         '''
         self.data = pd.read_csv(self.filename, sep='\t')
         self._resolve_column_names()
-        if 'Annotation' not in self.data.columns:
+        
+        # Check the first value in ANNOTATION column, if NA set generate_annotation to True
+        generate_annotation = False
+        if ('Annotation' not in self.data.columns) or (self.data['Annotation'].isnull().values.any() or self.data['Annotation'].values[0] == "NA"):
+            generate_annotation = True
+            
+        if generate_annotation:
             self.generate_annotation()
         # Drop the FragmentType and FragmentSeriesNumber columns
         if self._validate_columns():
             self.data.drop(columns=['FragmentType', 'FragmentSeriesNumber'], inplace=True)
         else:
-            print(self.data.columns)
             missing_columns = set(TransitionTSVDataAccess.REQUIRED_TSV_COLUMNS).difference(set(self.data.columns))
             raise ValueError(f"The TSV file is missing the following required columns: {missing_columns}")
     
@@ -122,8 +127,7 @@ class TransitionTSVDataAccess:
         Returns:
             None
         """
-        if 'Annotation' not in self.data.columns:
-            self.data['Annotation'] = self.data['FragmentType'] + self.data['FragmentSeriesNumber'].astype(str) + '^' + self.data['ProductCharge'].astype(str)
+        self.data['Annotation'] = self.data['FragmentType'] + self.data['FragmentSeriesNumber'].astype(str) + '^' + self.data['ProductCharge'].astype(str)
 
     def _validate_columns(self) -> bool:
         '''
