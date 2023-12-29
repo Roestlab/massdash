@@ -24,7 +24,7 @@ from massseer.structs.FeatureMap import FeatureMap
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.loaders.MzMLDataLoader import MzMLDataLoader
 # Util
-from massseer.util import LOGGER, conditional_decorator, check_streamlit, time_block
+from massseer.util import LOGGER, conditional_decorator, check_streamlit, time_block, MeasureBlock
 
 class RawTargetedExtractionAnalysisServer:
     
