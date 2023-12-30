@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import re
 from typing import List
 from massseer.loaders.access.GenericResultsAccess import GenericResultsAccess
@@ -14,6 +15,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         self.peptideHash = self._initializePeptideHashTable()
         self.df = self.loadData() 
         self.runs = self.df['Run'].drop_duplicates()
+        self.has_im = 'IM' in self.df.columns
     
     def loadData(self) -> pd.DataFrame:
         '''
@@ -32,7 +34,6 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         Load Peptide and Charge for easy access
         '''
         return pd.read_csv(self.filename, sep='\t', usecols=['Modified.Sequence', 'Precursor.Charge', 'Run'])
-
 
     def getTopTransitionGroupFeature(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:
         '''
@@ -72,7 +73,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
 
             # return the row indices and add 1 to each index to account for the header row
             rows_to_load = [0] + [idx + 1 for idx in targetPeptide.index.tolist()]
-
+                
             # remove any periods from the peptide sequence i.e. for N terminal modifications
             # i.e. Convert .(UniMod:1)SEGDSVGESVHGKPSVVYR to (UniMod:1)SEGDSVGESVHGKPSVVYR
             peptide_tmp = peptide.replace('.', '')
@@ -91,6 +92,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
                                                       rightBoundary=row['RT.Stop'] * 60,
                                                       areaIntensity=row['Precursor.Quantity'],
                                                       qvalue=row['Q.Value'],
+                                                      consensusApexIM=row['IM'] if self.has_im else None,
                                                       sequence=row['Modified.Sequence'],
                                                       precursor_charge=row['Precursor.Charge']))
                 return out 
@@ -100,18 +102,47 @@ class ResultsTSVDataAccess(GenericResultsAccess):
 
     def getTransitionGroupFeaturesDf(self, runname: str, pep_id: str, charge: int) -> pd.DataFrame:
         '''
-        Loads a TransitionGroupFeature object from the results file to a pandas dataframe
+        Loads a TransitionGroupFeature object from the results file to a pandas dataframe. Since there is only one feature this is the same as getTopTransitionGroupFeatureDf()
         '''
-        pass
+        return self.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
+
+    def getTopTransitionGroupFeatureDf(self, runname: str, pep_id: str, charge: int) -> pd.DataFrame:
         '''
-        columns = ['Run', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']
+        Get a pandas dataframe with the top TransitionGroupFeatures found in the results file. Since there is only one feature this is the same as getTransitionGroupFeaturesDf
+        
+        Args:
+            pep_id (str): Peptide ID
+            charge (int): Charge
+        
+        Returns:
+            pd.DataFrame: Dataframe with the TransitionGroupFeatures
+        '''
+        columns = ['Run', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence']
+        if self.has_im:
+            columns.append('consensusApexIM')
         runname_exact = self.getExactRunName(runname)
         if runname_exact is None:
             return pd.DataFrame(columns=columns)
         else:
-            # TODO renaming or filtering columns needed?
-            return self.df[(self.df['Run'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
-        '''
+            df = self.df[(self.df['Run'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
+
+            df = df.rename(columns={'RT.Start': 'leftBoundary', 
+                                    'RT.Stop': 'rightBoundary', 
+                                    'Precursor.Quantity': 'areaIntensity', 
+                                    'RT': 'consensusApex', 
+                                    'Qvalue' : 'qvalue',
+                                    'PrecursorCharge': 'precursor_charge',
+                                    'ModifiedPeptideSequence': 'sequence',
+                                    'PrecursorMz': 'precursor_mz'})
+            
+            if self.has_im:
+                df = df.rename(columns={'IM': 'consensusApexIM'})
+
+            df['consensusApex'] = df['consensusApex'] * 60
+            df['leftBoundary'] = df['leftBoundary'] * 60
+            df['rightBoundary'] = df['rightBoundary'] * 60
+            df['consensusApexIntensity'] = np.nan
+            return df[columns]
 
     def getExactRunName(self, run_basename_wo_ext: str) -> str:
         '''

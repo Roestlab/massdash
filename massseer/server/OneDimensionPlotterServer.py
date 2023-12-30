@@ -48,23 +48,23 @@ class OneDimensionPlotterServer:
         """
         for file, tr_group in self.transition_group_dict.items():
             run_plots_list = []
-            tr_group_feature = self.transition_group_feature_data[file.filename]
+            tr_group_feature = self.transition_group_feature_data[file]
 
             # Generate Spectrum Plot 
             if self.chrom_plot_settings.display_spectrum:
-                plot_settings_dict = self._get_plot_settings('m/z', 'Intensity', file.filename, 'spectra')
+                plot_settings_dict = self._get_plot_settings('m/z', 'Intensity', file, 'spectra')
                 plot_spectrum_obj = self._generate_plot(tr_group, plot_settings_dict)
                 run_plots_list.append(plot_spectrum_obj)
 
             # Generate Chromatogram Plot
             if self.chrom_plot_settings.display_chromatogram:
-                plot_settings_dict = self._get_plot_settings('Retention Time (s)', 'Intensity', file.filename, 'chromatogram')
+                plot_settings_dict = self._get_plot_settings('Retention Time (s)', 'Intensity', file, 'chromatogram')
                 plot_obj = self._generate_plot(tr_group, plot_settings_dict, tr_group_feature)
                 run_plots_list.append(plot_obj)
 
             # Generate Mobilogram Plot
             if self.chrom_plot_settings.display_mobilogram:
-                plot_settings_dict = self._get_plot_settings('Ion Mobility (1/K0)', 'Intensity', file.filename, 'mobilogram')
+                plot_settings_dict = self._get_plot_settings('Ion Mobility (1/K0)', 'Intensity', file, 'mobilogram')
                 plot_mobilo_obj = self._generate_plot(tr_group, plot_settings_dict)
                 run_plots_list.append(plot_mobilo_obj)
 

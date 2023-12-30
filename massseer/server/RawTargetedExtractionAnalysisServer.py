@@ -24,7 +24,7 @@ from massseer.structs.FeatureMap import FeatureMap
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.loaders.MzMLDataLoader import MzMLDataLoader
 # Util
-from massseer.util import LOGGER, conditional_decorator, check_streamlit, time_block
+from massseer.util import LOGGER, conditional_decorator, check_streamlit, time_block, MeasureBlock
 
 class RawTargetedExtractionAnalysisServer:
     
@@ -48,15 +48,16 @@ class RawTargetedExtractionAnalysisServer:
         """
         Loads the spectral library and sets the transition list attribute.
         """
-        self.transition_list = SpectralLibraryLoader(self.massseer_gui.file_input_settings.transition_list_file_path, self.massseer_gui.verbose)
-        self.transition_list.load()
+        self.transition_list = self.mzml_loader.libraryFile
+        self.transition_list.has_im = self.mzml_loader.libraryFile.data.has_im
+        self.transition_list.data = self.mzml_loader.libraryFile.data.data
 
     def append_qvalues_to_transition_list(self):
         """
         Appends q-values to the transition list.
         """
         # top_ranked_precursor_features = self.feature_data.get_top_rank_precursor_features_across_runs()
-        top_ranked_precursor_features = self.feature_data.report.search_data[['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence',  'PrecursorCharge', 'Qvalue']]
+        top_ranked_precursor_features = self.mzml_loader.rsltsFile.df[['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence',  'PrecursorCharge', 'Qvalue']]
         # If Decoy column not in transition list add it to top_ranked_precursor_features
         if 'Decoy' not in self.transition_list.data.columns:
             top_ranked_precursor_features['Decoy'] = 0
@@ -71,7 +72,7 @@ class RawTargetedExtractionAnalysisServer:
         self.transition_list.data['Decoy'] = self.transition_list.data['Decoy'].fillna(0)
     
     # @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading data...")(func), check_streamlit())
-    def initiate_mzML_interface(self, mzml_files, resultsFile, dataFile, verbose) -> None:
+    def initiate_mzML_interface(self, mzml_files, resultsFile, dataFile, resultsFileType, verbose) -> None:
         """
         Initiate an mzMLLoader Object.
 
@@ -79,14 +80,15 @@ class RawTargetedExtractionAnalysisServer:
             mzml_files (List[str]): List of paths to the mzML files.
             resultsFile (str): Path to the results file.
             dataFile (str): Path to the data file.
+            resultsFileType (str): The type of the results file.
             verbose (bool): Whether or not to print verbose output.
         
         """
         st.write(resultsFile)
-        self.mzml_loader = MzMLDataLoader(resultsFile, mzml_files, dataFile, verbose)
+        self.mzml_loader = MzMLDataLoader(resultsFile, mzml_files, dataFile, resultsFileType, verbose)
 
     @conditional_decorator(lambda func: st.cache_resource(show_spinner="Extracting data...")(func), check_streamlit())
-    def targeted_extraction(_self, transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[FeatureMap]:
+    def targeted_extraction(_self, _transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[FeatureMap]:
         """
         Perform targeted extraction on the given targeted experiment using the provided peptide coordinates and configuration.
 
@@ -99,12 +101,13 @@ class RawTargetedExtractionAnalysisServer:
         Returns:
             None
         """
-        return _self.mzml_loader.loadFeatureMaps(transition_list_ui.transition_settings.selected_peptide, 
-                                            transition_list_ui.transition_settings.selected_charge,
-                                            transition_list_ui.targeted_exp_params)
+        return _self.mzml_loader.loadFeatureMaps(_transition_list_ui.
+                                                 transition_settings.selected_peptide, 
+                                            _transition_list_ui.transition_settings.selected_charge,
+                                            _transition_list_ui.targeted_exp_params)
           
     @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading into transition group...")(func), check_streamlit())
-    def load_transition_group_feature(_self, transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[TransitionGroupFeature]:
+    def load_transition_group_feature(_self, _transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[TransitionGroupFeature]:
         """
         Load the transition group from the targeted experiment.
 
@@ -118,7 +121,7 @@ class RawTargetedExtractionAnalysisServer:
             The loaded transition group feature.
         """
 
-        return _self.mzml_loader.loadTopTransitionGroupFeatureDf(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+        return _self.mzml_loader.loadTopTransitionGroupFeatureDf(_transition_list_ui.transition_settings.selected_peptide, _transition_list_ui.transition_settings.selected_charge)
     
     def main(self):
         
@@ -128,8 +131,9 @@ class RawTargetedExtractionAnalysisServer:
             self.initiate_mzML_interface(self.massseer_gui.file_input_settings.raw_file_path_list, 
                                         self.massseer_gui.file_input_settings.feature_file_path, 
                                         self.massseer_gui.file_input_settings.transition_list_file_path, 
+                                        self.massseer_gui.file_input_settings.feature_file_type,
                                         self.massseer_gui.verbose)
-        
+                
         # Get and append q-values to the transition list
         self.get_transition_list()
         self.append_qvalues_to_transition_list()
@@ -139,6 +143,7 @@ class RawTargetedExtractionAnalysisServer:
         transition_list_ui.show_transition_information()
         
         # Load feature data for selected peptide and charge
+        self.load_transition_group_feature.clear()
         features = self.load_transition_group_feature(transition_list_ui)
         
         transition_list_ui.show_search_results_information(features) 
@@ -162,9 +167,12 @@ class RawTargetedExtractionAnalysisServer:
         # Load data from mzML files
         with st.status("Performing Peak Extraction....", expanded=True) as status:
             start_time = timeit.default_timer()
+            self.targeted_extraction.clear()
             featureMaps = self.targeted_extraction(transition_list_ui)
-            transitionGroupChromatograms = featureMaps.toChromatograms()
-                
+            
+            transitionGroupChromatograms = { f:fm.to_chromatograms() for f, fm in featureMaps.items()}
+            st.write(transitionGroupChromatograms)
+            st.dataframe([fm.feature_df for fm in featureMaps.values()][0])
             # Perform peak picking
             peak_picker = PeakPickingServer(peak_picking_settings, chrom_plot_settings)
             tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data=transitionGroupChromatograms, transition_list_ui=transition_list_ui)
@@ -195,5 +203,5 @@ class RawTargetedExtractionAnalysisServer:
             LOGGER.info("Targeted extraction complete! Elapsed time: %s", timedelta(seconds=elapsed))
             status.update(label=f"Info: Targeted extraction and plot drawing complete! Elapsed time: {timedelta(seconds=elapsed)}", state="complete", expanded=False)
         
-            if chrom_plot_settings.display_extracted_data_as_df:
-                transition_list_ui.show_extracted_dataframes(featureMaps)
+        if chrom_plot_settings.display_extracted_data_as_df:
+            transition_list_ui.show_extracted_dataframes(featureMaps)

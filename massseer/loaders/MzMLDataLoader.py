@@ -1,5 +1,5 @@
 from os.path import basename, splitext
-from typing import List, Union, Optional
+from typing import List, Union, Literal, Optional
 import numpy as np
 import pandas as pd
 from bokeh.plotting import show
@@ -37,8 +37,8 @@ class MzMLDataLoader(GenericLoader):
         load_report_for_precursor: Load the report file for a precursor
         load_report: Load the report file
     '''
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, verbose: bool=False) -> None:
-        super().__init__(rsltsFile, dataFiles, libraryFile, verbose)
+    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, rsltsFileType: Literal['OpenSwath', 'DIA-NN', 'Spectronaut', 'DreamDIA'] = 'OpenSwath', verbose: bool=False) -> None:
+        super().__init__(rsltsFile, dataFiles, libraryFile, rsltsFileType, verbose)
         self.dataFiles = [MzMLDataAccess(f, 'ondisk', verbose=verbose) for f in self.dataFiles_str]
         self.has_im = np.all([d.has_im for d in self.dataFiles])
                    
@@ -55,9 +55,8 @@ class MzMLDataLoader(GenericLoader):
         '''
         out = {}
         for t in self.dataFiles:
-            runname = basename(t).split('.')[0]
-            out[t] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
-        
+            runname = basename(t.filename).split('.')[0]
+            out[t.filename] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
         
     def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> dict[str, TransitionGroup]:

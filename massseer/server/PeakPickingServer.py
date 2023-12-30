@@ -70,7 +70,7 @@ class PeakPickingServer:
             for file, tr_group in tr_group_data.items():
                 peak_picker = pyMRMTransitionGroupPicker(mslevel, peak_picker=peak_picker_param.peak_picker)
                 peak_features = peak_picker.pick(tr_group)
-                tr_group_feature_data[file.filename] = peak_features
+                tr_group_feature_data[file] = peak_features
 
         st.write(f"Performing pyPeakPickerMRM Peak Picking... Elapsed time: {elapsed_time()}")
         return tr_group_feature_data
@@ -90,7 +90,7 @@ class PeakPickingServer:
             for file, tr_group in tr_group_data.items():
                 peak_picker = MRMTransitionGroupPicker(self.peak_picking_settings.peak_picker_algo_settings.smoother)
                 peak_features = peak_picker.pick(tr_group)
-                tr_group_feature_data[file.filename] = peak_features
+                tr_group_feature_data[file] = peak_features
 
         st.write(f"Performing MRMTransitionGroupPicker Peak Picking... Elapsed time: {elapsed_time()}")
         return tr_group_feature_data
@@ -117,7 +117,7 @@ class PeakPickingServer:
         elif self.peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
             tr_group_feature_data = self.perform_mrmtransitiongrouppicker_peak_picking(tr_group_data)
         else:
-            tr_group_feature_data = {file.filename: None for file in tr_group_data.keys()}
+            tr_group_feature_data = {file: None for file in tr_group_data.keys()}
 
         return tr_group_feature_data
 
