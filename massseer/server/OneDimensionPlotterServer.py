@@ -4,6 +4,8 @@ import streamlit as st
 # Plotting
 from massseer.plotting.GenericPlotter import PlotConfig
 from massseer.plotting.InteractivePlotter import InteractivePlotter
+# Server
+from massseer.server.PeakPickingServer import PeakPickingServer
 # Structs
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
@@ -11,6 +13,7 @@ from massseer.structs.FeatureMap import FeatureMap
 # UI
 from massseer.ui.TransitionListUISettings import TransitionListUISettings
 from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
 
 class OneDimensionPlotterServer:
     """
@@ -18,7 +21,6 @@ class OneDimensionPlotterServer:
 
     Args:
         feature_map_dict (dict): A dictionary containing transition groups.
-        transition_group_feature_data (dict): A dictionary containing transition group feature data.
         transition_list_ui (TransitionListUISettings): An object representing the transition list UI.
         chrom_plot_settings (ChromatogramPlotUISettings): An object representing the chromatogram plot settings.
 
@@ -35,11 +37,15 @@ class OneDimensionPlotterServer:
 
     """
 
-    def __init__(self, feature_map_dict: dict[FeatureMap], transition_group_feature_data: dict[TransitionGroupFeature], transition_list_ui: TransitionListUISettings, chrom_plot_settings: ChromatogramPlotUISettings, verbose: bool=False):
-        self.feature_map_dict = feature_map_dict
-        self.transition_group_feature_data = transition_group_feature_data  
+    def __init__(self, 
+                 feature_map_dict: dict[FeatureMap], 
+                 transition_list_ui: TransitionListUISettings, chrom_plot_settings: ChromatogramPlotUISettings, 
+                 peak_picking_settings: PeakPickingUISettings,
+                 verbose: bool=False):
+        self.feature_map_dict = feature_map_dict 
         self.transition_list_ui = transition_list_ui
         self.chrom_plot_settings = chrom_plot_settings
+        self.peak_picking_settings = peak_picking_settings
         self.plot_obj_dict = {}
         self.verbose = verbose
 
@@ -49,8 +55,7 @@ class OneDimensionPlotterServer:
         """
         for file, feature_map in self.feature_map_dict.items():
             run_plots_list = []
-            tr_group_feature = self.transition_group_feature_data[file]
-
+            
             # Generate Spectrum Plot 
             if self.chrom_plot_settings.display_spectrum:
                 tr_group = feature_map.to_spectra()
@@ -61,8 +66,11 @@ class OneDimensionPlotterServer:
             # Generate Chromatogram Plot
             if self.chrom_plot_settings.display_chromatogram:
                 tr_group = feature_map.to_chromatograms()
+                # Perform peak picking if enabled
+                peak_picker = PeakPickingServer(self.peak_picking_settings, self.chrom_plot_settings)
+                tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data={'tmp':tr_group}, transition_list_ui=self.transition_list_ui)
                 plot_settings_dict = self._get_plot_settings('Retention Time (s)', 'Intensity', file, 'chromatogram')
-                plot_obj = self._generate_plot(tr_group, plot_settings_dict, tr_group_feature)
+                plot_obj = self._generate_plot(tr_group, plot_settings_dict, tr_group_feature_data['tmp'])
                 run_plots_list.append(plot_obj)
 
             # Generate Mobilogram Plot
