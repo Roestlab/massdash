@@ -31,7 +31,7 @@ class MzMLDataLoader(GenericLoader):
         load_report_for_precursor: Load the report file for a precursor
         load_report: Load the report file
     '''
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, rsltsFileType: Literal['OpenSwath', 'DIA-NN', 'Spectronaut', 'DreamDIA'] = 'OpenSwath', verbose: bool=False) -> None:
+    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'OpenSWATH', verbose: bool=False) -> None:
         super().__init__(rsltsFile, dataFiles, libraryFile, rsltsFileType, verbose)
         self.dataFiles = [MzMLDataAccess(f, 'ondisk', verbose=verbose) for f in self.dataFiles_str]
         self.has_im = np.all([d.has_im for d in self.dataFiles])
