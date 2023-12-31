@@ -70,37 +70,35 @@ class TransitionPQPDataAccess:
             gene_select_stmt = "'' AS GeneName,"
             gene_join_stmt = ""
 
-        # Check the first value in ANNOTATION column in TRANSITION table, if NA set generate_annotation to True
-        generate_annotation = False
-        annotation_data = pd.read_sql("SELECT ANNOTATION FROM TRANSITION LIMIT 1", self.conn)
-        if annotation_data['ANNOTATION'].isnull().values.any() or annotation_data['ANNOTATION'].values[0] == "NA":
-            generate_annotation = True
+        if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"): # check annotation table present 
 
-        if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION") and not generate_annotation:
-            stmt = f"""SELECT 
-                {gene_select_stmt}
-                PROTEIN.PROTEIN_ACCESSION AS ProteinId,
-                PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
-                PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
-                PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
-                PRECURSOR.CHARGE AS PrecursorCharge,
-                PRECURSOR.LIBRARY_RT AS NormalizedRetentionTime,
-                {prec_lib_drift_time_query}
-                TRANSITION.PRODUCT_MZ AS ProductMz,
-                TRANSITION.CHARGE AS ProductCharge,
-                TRANSITION.ANNOTATION AS Annotation,
-                TRANSITION.LIBRARY_INTENSITY AS LibraryIntensity,
-                TRANSITION.DETECTING AS Detecting,
-                PRECURSOR.DECOY AS Decoy
-                FROM PRECURSOR
-                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
-                INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
-                INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
-                {gene_join_stmt}
-                INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                INNER JOIN (SELECT * FROM TRANSITION WHERE DETECTING = 1) AS TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID"""
-        else:
+            # Check the first value in ANNOTATION column in TRANSITION table, if NA do not get annotation table 
+            annotation_data = pd.read_sql("SELECT ANNOTATION FROM TRANSITION LIMIT 1", self.conn)
+            if annotation_data['ANNOTATION'].isnull().values.any() or annotation_data['ANNOTATION'].values[0] == "NA":
+                stmt = f"""SELECT 
+                    {gene_select_stmt}
+                    PROTEIN.PROTEIN_ACCESSION AS ProteinId,
+                    PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
+                    PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
+                    PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
+                    PRECURSOR.CHARGE AS PrecursorCharge,
+                    PRECURSOR.LIBRARY_RT AS NormalizedRetentionTime,
+                    {prec_lib_drift_time_query}
+                    TRANSITION.PRODUCT_MZ AS ProductMz,
+                    TRANSITION.CHARGE AS ProductCharge,
+                    TRANSITION.ANNOTATION AS Annotation,
+                    TRANSITION.LIBRARY_INTENSITY AS LibraryIntensity,
+                    TRANSITION.DETECTING AS Detecting,
+                    PRECURSOR.DECOY AS Decoy
+                    FROM PRECURSOR
+                    INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                    INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+                    INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                    INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+                    {gene_join_stmt}
+                    INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                    INNER JOIN (SELECT * FROM TRANSITION WHERE DETECTING = 1) AS TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID"""
+        else: # Generate Annotation column
             stmt = f"""SELECT 
                 {gene_select_stmt}
                 PROTEIN.PROTEIN_ACCESSION AS ProteinId,
