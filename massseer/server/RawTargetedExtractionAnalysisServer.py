@@ -57,7 +57,7 @@ class RawTargetedExtractionAnalysisServer:
         Appends q-values to the transition list.
         """
         # top_ranked_precursor_features = self.feature_data.get_top_rank_precursor_features_across_runs()
-        top_ranked_precursor_features = self.mzml_loader.rsltsFile.df[['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence',  'PrecursorCharge', 'Qvalue']]
+        top_ranked_precursor_features = self.mzml_loader.rsltsFile.getAllTopTransitionGroupFeaturesDf()[['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence',  'PrecursorCharge', 'Qvalue']]
         # If Decoy column not in transition list add it to top_ranked_precursor_features
         if 'Decoy' not in self.transition_list.data.columns:
             top_ranked_precursor_features['Decoy'] = 0
