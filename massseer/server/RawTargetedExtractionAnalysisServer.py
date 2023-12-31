@@ -11,7 +11,6 @@ from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
 from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 # Server
-from massseer.server.PeakPickingServer import PeakPickingServer
 from massseer.server.OneDimensionPlotterServer import OneDimensionPlotterServer
 from massseer.server.TwoDimensionPlotterServer import TwoDimensionPlotterServer
 from massseer.server.ThreeDimensionPlotterServer import ThreeDimensionalPlotter
@@ -43,14 +42,15 @@ class RawTargetedExtractionAnalysisServer:
             LOGGER.setLevel("DEBUG")
         else:
             LOGGER.setLevel("INFO")
-        
-    def get_transition_list(self):
+    # @conditional_decorator(lambda func: st.cache_resource(show_spinner=False)(func), check_streamlit())
+    def get_transition_list(_self):
         """
         Loads the spectral library and sets the transition list attribute.
         """
-        self.transition_list = self.mzml_loader.libraryFile
-        self.transition_list.has_im = self.mzml_loader.libraryFile.data.has_im
-        self.transition_list.data = self.mzml_loader.libraryFile.data.data
+        _self.transition_list = _self.mzml_loader.libraryFile
+        _self.transition_list.has_im = _self.mzml_loader.libraryFile.data.has_im
+        _self.transition_list.data = _self.mzml_loader.libraryFile.data.data
+        return _self.transition_list
 
     def append_qvalues_to_transition_list(self):
         """
@@ -71,8 +71,8 @@ class RawTargetedExtractionAnalysisServer:
         # Decoy column is NaN replace with 0
         self.transition_list.data['Decoy'] = self.transition_list.data['Decoy'].fillna(0)
     
-    # @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading data...")(func), check_streamlit())
-    def initiate_mzML_interface(self, mzml_files, resultsFile, dataFile, resultsFileType, verbose) -> None:
+    @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading data...")(func), check_streamlit())
+    def initiate_mzML_interface(_self, mzml_files, resultsFile, dataFile, resultsFileType, verbose) -> None:
         """
         Initiate an mzMLLoader Object.
 
@@ -84,8 +84,25 @@ class RawTargetedExtractionAnalysisServer:
             verbose (bool): Whether or not to print verbose output.
         
         """
-        st.write(resultsFile)
-        self.mzml_loader = MzMLDataLoader(resultsFile, mzml_files, dataFile, resultsFileType, verbose)
+        _self.mzml_loader = MzMLDataLoader(resultsFile, mzml_files, dataFile, resultsFileType, verbose)
+        return _self.mzml_loader
+
+    @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading into transition group...")(func), check_streamlit())
+    def load_transition_group_feature(_self, _transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[TransitionGroupFeature]:
+        """
+        Load the transition group from the targeted experiment.
+
+        Args:
+            _self (RawTargetedExtractionAnalysisServer): The instance of the server.
+            _
+            _targeted_exp (TargetedDIALoader): The targeted experiment loader.
+            target_transition_list (pd.DataFrame): The target transition list.
+
+        Returns:
+            The loaded transition group feature.
+        """
+
+        return _self.mzml_loader.loadTopTransitionGroupFeatureDf(_transition_list_ui.transition_settings.selected_peptide, _transition_list_ui.transition_settings.selected_charge)
 
     @conditional_decorator(lambda func: st.cache_resource(show_spinner="Extracting data...")(func), check_streamlit())
     def targeted_extraction(_self, _transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[FeatureMap]:
@@ -105,37 +122,22 @@ class RawTargetedExtractionAnalysisServer:
                                                  transition_settings.selected_peptide, 
                                             _transition_list_ui.transition_settings.selected_charge,
                                             _transition_list_ui.targeted_exp_params)
-          
-    @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading into transition group...")(func), check_streamlit())
-    def load_transition_group_feature(_self, _transition_list_ui: RawTargetedExtractionAnalysisUI) -> List[TransitionGroupFeature]:
-        """
-        Load the transition group from the targeted experiment.
-
-        Args:
-            _self (RawTargetedExtractionAnalysisServer): The instance of the server.
-            _
-            _targeted_exp (TargetedDIALoader): The targeted experiment loader.
-            target_transition_list (pd.DataFrame): The target transition list.
-
-        Returns:
-            The loaded transition group feature.
-        """
-
-        return _self.mzml_loader.loadTopTransitionGroupFeatureDf(_transition_list_ui.transition_settings.selected_peptide, _transition_list_ui.transition_settings.selected_charge)
-    
+        
     def main(self):
         
         # Initiate the mzML Loader object
-
+        self.initiate_mzML_interface.clear()
         with st.status("Initiating .mzML files (this may take some time)....", expanded=True) as status:
-            self.initiate_mzML_interface(self.massseer_gui.file_input_settings.raw_file_path_list, 
-                                        self.massseer_gui.file_input_settings.feature_file_path, 
-                                        self.massseer_gui.file_input_settings.transition_list_file_path, 
-                                        self.massseer_gui.file_input_settings.feature_file_type,
-                                        self.massseer_gui.verbose)
+            with MeasureBlock() as perf_metrics:
+                self.mzml_loader = self.initiate_mzML_interface(self.massseer_gui.file_input_settings.raw_file_path_list, 
+                                            self.massseer_gui.file_input_settings.feature_file_path, 
+                                            self.massseer_gui.file_input_settings.transition_list_file_path, 
+                                            self.massseer_gui.file_input_settings.feature_file_type,
+                                            self.massseer_gui.verbose)
+        status.update(label=f"Info: Initiating .mzML files complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}", state="complete", expanded=False)
                 
         # Get and append q-values to the transition list
-        self.get_transition_list()
+        self.transition_list = self.get_transition_list()
         self.append_qvalues_to_transition_list()
         
         # Create a UI for the transition list and show transition information
@@ -145,7 +147,7 @@ class RawTargetedExtractionAnalysisServer:
         # Load feature data for selected peptide and charge
         self.load_transition_group_feature.clear()
         features = self.load_transition_group_feature(transition_list_ui)
-        
+        # st.dataframe(features)
         transition_list_ui.show_search_results_information(features) 
 
         # Create UI for extraction parameters
@@ -169,19 +171,12 @@ class RawTargetedExtractionAnalysisServer:
             start_time = timeit.default_timer()
             self.targeted_extraction.clear()
             featureMaps = self.targeted_extraction(transition_list_ui)
-            
-            transitionGroupChromatograms = { f:fm.to_chromatograms() for f, fm in featureMaps.items()}
-            st.write(transitionGroupChromatograms)
-            st.dataframe([fm.feature_df for fm in featureMaps.values()][0])
-            # Perform peak picking
-            peak_picker = PeakPickingServer(peak_picking_settings, chrom_plot_settings)
-            tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data=transitionGroupChromatograms, transition_list_ui=transition_list_ui)
-        
+
             with time_block() as elapsed_time:
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
                 if chrom_plot_settings.display_plot_dimension_type == "1D":
-                    plot_obj_dict = OneDimensionPlotterServer(transitionGroupChromatograms, tr_group_feature_data, transition_list_ui, chrom_plot_settings, self.massseer_gui.verbose).generate_chromatogram_plots().plot_obj_dict
+                    plot_obj_dict = OneDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings, peak_picking_settings, self.massseer_gui.verbose).generate_chromatogram_plots().plot_obj_dict
                 elif chrom_plot_settings.display_plot_dimension_type == "2D":
                     plot_obj_dict = TwoDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_two_dimensional_plots().plot_obj_dict
                 elif chrom_plot_settings.display_plot_dimension_type == "3D":

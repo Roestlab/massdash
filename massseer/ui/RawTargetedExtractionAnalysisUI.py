@@ -118,7 +118,6 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
 
         st.sidebar.divider()
         st.sidebar.subheader("Search results")
-        st.write(search_results)
         
         # Check to see if chromatogram peak feature apex is not none and mobilogram peak feature apex is not none to enable the use search results checkbox otherwise disable it
         if len(search_results.shape) > 0:
