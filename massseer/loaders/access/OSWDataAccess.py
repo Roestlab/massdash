@@ -66,8 +66,6 @@ class OSWDataAccess(GenericResultsAccess):
         self._initializeRunHashtable()
         self._initializeFeatureScoreHashtable()
         
-        # load base report df
-        self.df = self.load_data()
 
     ###### INDICES CREATOR ######
     def _initialize_indices(self):
@@ -225,9 +223,42 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
             return df.values[0]
    
     #### PUBLIC ACCESSORS ####
-    def load_data(self) -> pd.DataFrame:
+    def getAllTopTransitionGroupFeaturesDf(self) -> pd.DataFrame:
         """
-        Retrieves the top ranking features from the database.
+        Retrieves all the top ranking features from the database.
+
+        Returns:
+            pandas.DataFrame: The top ranking features per assay.
+        """
+        # Get top ranking feature ids from featureScoreHash
+        if 'ms2_mscore' in self.featureScoreHash.columns:
+            feature_ids = self.featureScoreHash.loc[self.featureScoreHash["peakgroup_rank"]==1].index.get_level_values("FEATURE_ID")
+        else:
+            raise KeyError("No ms2_mscore column found in featureScoreHash! You need to perform PyProphet ms2 / ms1ms2 scoring first.")
+        
+        stmt = f"""SELECT
+            PROTEIN.PROTEIN_ACCESSION AS ProteinId,
+            PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
+            PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
+            PRECURSOR.CHARGE AS PrecursorCharge,
+            SCORE_MS2.QVALUE AS Qvalue
+            from 
+            FEATURE
+            INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+            INNER JOIN PRECURSOR ON PRECURSOR.ID = FEATURE.PRECURSOR_ID
+            INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+            INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+            INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+            INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+            WHERE FEATURE.ID IN ({','.join(map(str, feature_ids))})"""
+        data = pd.read_sql(stmt, self.conn)
+        
+        return data
+            
+    #### PUBLIC ACCESSORS ####
+    def load_data(self) -> pd.DataFrame: ##TODO remove?
+        """
+        Retrieves all the top ranking features from the database.
 
         Returns:
             pandas.DataFrame: The top ranking features per assay.
