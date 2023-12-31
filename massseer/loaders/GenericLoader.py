@@ -14,7 +14,7 @@ class GenericLoader(ABC):
     Abstract class for loading Chromatograms and peak features
     Classes which inherit from this should contain one results file and one transition file
     '''
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str, rsltsFileType: Literal['OpenSWATH', 'DIA-NN'], verbose: bool=False):
+    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str, rsltsFileType: Literal['OpenSWATH', 'DIA-NN'], verbose: bool=False, mode: Literal['module', 'gui'] = 'module'):
         ## store the file names
         self.rsltsFile_str = rsltsFile
         self.libraryFile_str = libraryFile
@@ -27,7 +27,7 @@ class GenericLoader(ABC):
 
         ### set the results file depending on the file ending
         if self.rsltsFile_str.endswith('.osw') and rsltsFileType == 'OpenSWATH':
-            self.rsltsFile = OSWDataAccess(self.rsltsFile_str)
+            self.rsltsFile = OSWDataAccess(self.rsltsFile_str, mode=mode)
         elif rsltsFile.endswith('.tsv') and rsltsFileType == 'DIA-NN':
             self.rsltsFile = ResultsTSVDataAccess(self.rsltsFile_str)
         else:

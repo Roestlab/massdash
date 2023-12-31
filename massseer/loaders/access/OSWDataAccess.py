@@ -39,7 +39,7 @@ import sqlite3
 from massseer.util import check_sqlite_column_in_table, check_sqlite_table
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.loaders.access.GenericResultsAccess import GenericResultsAccess
-from typing import List
+from typing import List, Literal
 
 class OSWDataAccess(GenericResultsAccess):
     """
@@ -48,9 +48,11 @@ class OSWDataAccess(GenericResultsAccess):
     Attributes:
         conn (sqlite3.Connection): A connection to the SQLite database.
         c (sqlite3.Cursor): A cursor for executing SQL statements on the database.
+        verbose (bool): Whether to print verbose output.
+        mode (str): The mode to use when intiating the data access object, to control which attributes get initialized.
     """
 
-    def __init__(self, filename: str, verbose: bool=False):
+    def __init__(self, filename: str, verbose: bool=False, mode: Literal['module', 'gui'] = 'module'):
         """
         Initializes a new instance of the OSWDataAccess class.
 
@@ -65,6 +67,9 @@ class OSWDataAccess(GenericResultsAccess):
         self._initializePeptideHashtable()
         self._initializeRunHashtable()
         self._initializeFeatureScoreHashtable()
+        
+        if mode == 'gui':
+            self.df = self.getAllTopTransitionGroupFeaturesDf()
         
 
     ###### INDICES CREATOR ######
