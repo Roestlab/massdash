@@ -137,8 +137,8 @@ class TransitionPQPDataAccess:
         return self.data.empty() 
 
     def __setitem__(self, index, value):
-        self.data.__setitem__(index, value)
+        return self.data.__setitem__(index, value)
  
     def __getitem__(self, index):
-        self.data.__getitem__(index)
+        return self.data.__getitem__(index)
  
