@@ -54,7 +54,7 @@ class InteractiveThreeDimensionPlotter:
         elif self.config.type_of_3d_plot == "3D Surface Plot" and not self.config.aggregate_mslevels:
             plots = self.plot_individual_3d_surface(featureMap, self.config.num_plot_columns)
         elif self.config.type_of_3d_plot == "3D Line Plot" and not self.config.aggregate_mslevels:
-            plots = self.plot_3d_vline()
+            plots = self.plot_3d_vline(featureMap)
         return plots
     
     def plot_3d_scatter(self, featureMap: FeatureMap, num_rows: int = -1, num_cols: int = 2) -> go.Figure:

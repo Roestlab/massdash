@@ -118,7 +118,6 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
 
         st.sidebar.divider()
         st.sidebar.subheader("Search results")
-        st.write(search_results)
         
         # Check to see if chromatogram peak feature apex is not none and mobilogram peak feature apex is not none to enable the use search results checkbox otherwise disable it
         if len(search_results.shape) > 0:
@@ -360,7 +359,7 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         with plot_container:
             cols = st.columns(num_cols)
             for col, (file, p) in zip(cols, plot_dict.items()):
-                p.update_layout(title_text = basename(file.filename))
+                p.update_layout(title_text = basename(file))
                 with col:
                     st.plotly_chart(p, theme="streamlit", use_container_width=True)
                 

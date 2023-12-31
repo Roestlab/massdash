@@ -28,7 +28,7 @@ class TransitionGroupFeature(GenericFeature):
         self.qvalue = qvalue
         self.consensusApexIM = consensusApexIM
         self.precursor_mz = precursor_mz
-        self.precursor_charge = None if precursor_charge is None else int(precursor_charge)
+        self.precursor_charge = int(precursor_charge) if precursor_charge is not None else None
         self.product_annotations = product_annotations
         self.product_mz = product_mz
         self.sequence = sequence
