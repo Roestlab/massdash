@@ -8,7 +8,7 @@ from bokeh.models import Range1d
 
 # Loaders
 from massseer.loaders.access.MzMLDataAccess import MzMLDataAccess
-from massseer.loaders.GenericLoader import GenericLoader
+from massseer.loaders.GenericSpectrumLoader import GenericSpectrumLoader
 from massseer.loaders.access.OSWDataAccess import OSWDataAccess
 from massseer.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
@@ -23,7 +23,7 @@ from massseer.plotting.InteractivePlotter import InteractivePlotter
 from massseer.plotting.GenericPlotter import PlotConfig
 
 
-class MzMLDataLoader(GenericLoader):
+class MzMLDataLoader(GenericSpectrumLoader):
     '''
     Class to load data from MzMLFiles using a .osw output file or .tsv report file
     
