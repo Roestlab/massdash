@@ -43,8 +43,8 @@ class ThreeDimensionalPlotter:
             None
         """
         for file, tr_df in self.targeted_data.items():
-            if not tr_df.empty:
-                plot_settings_dict = self._get_plot_settings(file.filename)
+            if not tr_df.empty():
+                plot_settings_dict = self._get_plot_settings(file)
                 plot_config = PlotConfig()
                 plot_config.update(plot_settings_dict)
                 plotter = InteractiveThreeDimensionPlotter(plot_config)

@@ -359,7 +359,7 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         with plot_container:
             cols = st.columns(num_cols)
             for col, (file, p) in zip(cols, plot_dict.items()):
-                p.update_layout(title_text = basename(file.filename))
+                p.update_layout(title_text = basename(file))
                 with col:
                     st.plotly_chart(p, theme="streamlit", use_container_width=True)
                 
