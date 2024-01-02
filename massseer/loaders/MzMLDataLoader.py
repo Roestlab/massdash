@@ -51,6 +51,23 @@ class MzMLDataLoader(GenericLoader):
             out[t.filename] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
         
+    def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
+        '''
+        Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
+
+        Args:
+            pep_id (str): Peptide ID
+            charge (int): Charge
+
+        Returns:
+            DataFrame: DataFrame containing TransitionGroupObject information across all runs 
+        '''
+        out = {}
+        for t in self.dataFiles:
+            runname = basename(t.filename).split('.')[0]
+            out[t.filename] = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
+        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        
     def loadTransitionGroups(self, pep_id: str, charge: int) -> dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files

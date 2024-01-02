@@ -162,13 +162,33 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 WHERE RUN_ID = {run_id} AND FEATURE.PRECURSOR_ID = {precursor_id}
                 """
 
-        return pd.read_sql(stmt, self.conn)
+        out = pd.read_sql(stmt, self.conn)
+        out = out.rename(columns={'leftWidth': 'leftBoundary', 
+                                    'rightWidth': 'rightBoundary', 
+                                    'Intensity': 'consensusApexIntensity', 
+                                    'RT': 'consensusApex', 
+                                    'ms2_mscore' : 'qvalue',
+                                    'Charge': 'precursor_charge',
+                                    'ModifiedPeptideSequence': 'sequence',
+                                    'PrecursorMz': 'precursor_mz',
+                                    'IM': 'consensusApexIM',
+                                    'PRECURSOR_ID': 'precursor_id',
+                                    'RUN_ID': 'run_id'})
+        return out
     
     def _getFeaturesFromPrecursorIdAndRun(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
         df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
         out = []
         for _, i in df.iterrows():
-            out.append(TransitionGroupFeature(i['leftWidth'], i['rightWidth'], areaIntensity=i['Intensity'], qvalue= i['ipf_mscore'] if 'ipf_mscore' in i else i['ms2_mscore'] )) 
+            out.append(TransitionGroupFeature(i['leftBoundary'], 
+                                              i['rightBoundary'], 
+                                              areaIntensity=i['consensusApexIntensity'], 
+                                              qvalue= i['ipf_mscore'] if 'ipf_mscore' in i else i['qvalue'], 
+                                              precursor_charge=i['precursor_charge'], 
+                                              sequence=i['sequence'], 
+                                              consensusApexIntensity=i['consensusApexIntensity'],
+                                              consensusApexIM=i['consensusApexIM'] if 'consensusApexIM' in i else None )) 
+    
         return out
     
     def _getTopFeatureFromPrecursorIdAndRun(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
@@ -177,7 +197,14 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
             df = df[df['peakgroup_rank'] == 1].iloc[0]
         else:
             raise ValueError("SCORE_MS2 table not found, cannot get top feature")
-        return TransitionGroupFeature(df['leftWidth'], df['rightWidth'], areaIntensity=df['Intensity'], qvalue= df['ipf_mscore'] if 'ipf_mscore' in df else df['ms2_mscore'], consensusApex=df['RT'], precursor_charge=df['Charge'], sequence=df['ModifiedPeptideSequence']) 
+        return TransitionGroupFeature(df['leftBoundary'], 
+                                            df['rightBoundary'], 
+                                            areaIntensity=df['consensusApexIntensity'], 
+                                            qvalue= df['ipf_mscore'] if 'ipf_mscore' in df else df['qvalue'], 
+                                            precursor_charge=df['precursor_charge'], 
+                                            sequence=df['sequence'], 
+                                            consensusApexIntensity=df['consensusApexIntensity'],
+                                            consensusApexIM=df['consensusApexIM'] if 'consensusApexIM' in df else None )
  
     def _getTopFeatureFromPrecursorIdAndRunDf(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
         df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
@@ -189,7 +216,9 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                                     'Charge': 'precursor_charge',
                                     'ModifiedPeptideSequence': 'sequence',
                                     'PrecursorMz': 'precursor_mz',
-                                    'IM': 'consensusApexIM'})    
+                                    'IM': 'consensusApexIM',
+                                    'PRECURSOR_ID': 'precursor_id',
+                                    'RUN_ID': 'run_id'})
         
         if 'peakgroup_rank' in df.columns:
             return df[df['peakgroup_rank'] == 1].iloc[[0]]
