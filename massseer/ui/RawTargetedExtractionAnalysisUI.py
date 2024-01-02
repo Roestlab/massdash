@@ -106,6 +106,10 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         # Filter the transition list based on the selected protein, peptide and charge state
         self.target_transition_list =  self.transition_list.filter_for_target_transition_list(self.transition_settings.selected_protein, self.transition_settings.selected_peptide, self.transition_settings.selected_charge)
         
+        if "selected_precursor" not in st.session_state:
+            st.session_state.selected_precursor = f"{self.transition_settings.selected_protein}_{self.transition_settings.selected_peptide}_{self.transition_settings.selected_charge}"
+            st.write(f"Selected precursor: {st.session_state.selected_precursor}")
+        
     def show_search_results_information(self, search_results: Literal['DiaNNLoader', 'OSWLoader']) -> None:
         """
         Display the search results information in the sidebar.
@@ -277,6 +281,13 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
                 self.targeted_exp_params.im_window = 0.0
                 
             self.submit_extraction_params = extraction_param_form.form_submit_button("Extract Data")
+            
+            st.write(f"button clicked: {self.submit_extraction_params}")
+
+            if self.submit_extraction_params:
+                st.session_state.extraction_param_button_clicked = True
+            else:
+                st.session_state.extraction_param_button_clicked = False
             
     def get_targeted_extraction_params_dict(self) -> Dict:
         """
