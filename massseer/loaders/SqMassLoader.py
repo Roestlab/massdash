@@ -1,5 +1,7 @@
 
-import pandas as pd
+from abc import ABC, abstractmethod
+
+from pandas.core.api import DataFrame as DataFrame
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.loaders.GenericChromatogramLoader import GenericChromatogramLoader
 from massseer.loaders.access.SqMassDataAccess import SqMassDataAccess
@@ -22,7 +24,7 @@ class SqMassLoader(GenericChromatogramLoader):
     '''
 
     def __init__(self, dataFiles: Union[str, List[str]], rsltsFile: str):
-        super().__init__(rsltsFile, dataFiles)
+        super().__init__(rsltsFile, dataFiles, rsltsFile, 'OpenSWATH')
         self.dataFiles = [SqMassDataAccess(f) for f in self.dataFiles_str]
         self.rsltsFile = OSWDataAccess(self.rsltsFile_str)
 
@@ -98,6 +100,21 @@ class SqMassLoader(GenericChromatogramLoader):
             out[t] = features
         
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+
+    def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
+        '''
+        Loads a TransitionGroupFeature object from the results file to a pandas dataframe
+        '''
+        out = {}
+        for t in self.dataFiles_str:
+            runname = basename(t).split('.')[0]
+            features = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
+            features = features.rename(columns={'ms2_mscore':'qvalue', 'RT':'consensusApex', 'Intensity':'consensusApexIntensity', 'leftWidth':'leftBoundary', 'rightWidth':'rightBoundary'})
+            features = features[['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']]
+            out[t] = features
+        
+        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+
 
     def plotChromatogram(self,
                         seq: str, 
