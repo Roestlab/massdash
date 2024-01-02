@@ -79,6 +79,25 @@ class MzMLDataLoader(GenericLoader):
         out_feature_map = self.loadFeatureMaps(pep_id, charge, config)
 
         return { run: data.to_chromatograms() for run, data in out_feature_map.items() }
+    
+    def loadTransitionGroupsDf(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> dict[str, pd.DataFrame]:
+        '''
+        Loads the transition group for a given peptide ID and charge across all files into a pandas DataFrame
+        
+        Args:
+            pep_id (str): Peptide ID
+            charge (int): Charge
+            config (TargetedDIAConfig): Configuration object containing the extraction parameters
+        
+        Return:
+            dict[str, pd.DataFrame]: Dictionary of TransitionGroups, with keys as filenames
+        '''
+        out_feature_map = self.loadFeatureMaps(pep_id, charge, config)
+
+        # for each run, groupby intensity and rt to get chromatogram
+        out_transitions = { run:df.feature_df[['Annotation', 'int', 'rt']].groupby(['Annotation', 'rt']).sum().reset_index() for run, df in out_feature_map.items() }
+
+        return pd.concat(out_transitions).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
 
     def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> dict[str, FeatureMap]:
         '''
