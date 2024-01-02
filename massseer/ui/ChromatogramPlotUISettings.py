@@ -100,7 +100,7 @@ class ChromatogramPlotUISettings:
                 self.set_y_range = st.checkbox("Share y-range", value=self.set_y_range, help="Share the y-range of the plots.")
 
             # Perform Smoothing of the chromatograms
-            self.do_smoothing = st.selectbox("Smoothing", ['sgolay', 'none'], help="The type of smoothing to apply to the chromatograms.")
+            self.do_smoothing = st.selectbox("Smoothing", ['none', 'sgolay'], help="The type of smoothing to apply to the chromatograms.")
 
             self.smoothing_dict['type'] = self.do_smoothing
             if self.do_smoothing == 'sgolay':
