@@ -148,8 +148,6 @@ class SpectralLibraryLoader:
             t.product_annotations = library_data['Annotation'].tolist()
             t.product_mz = library_data['ProductMz'].tolist()
             t.precursor_mz = library_data['PrecursorMz'].iloc[0]
-            if self.has_im:
-                t.consensusApexIM = library_data['PrecursorIonMobility'].iloc[0]
 
     def get_peptide_product_charge_list(self, peptide: str, charge: int) -> List[int]:
         """

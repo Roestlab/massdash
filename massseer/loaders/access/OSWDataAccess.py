@@ -142,7 +142,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
                 PRECURSOR.CHARGE AS Charge,
                 FEATURE_MS2.AREA_INTENSITY AS areaIntensity,
-                FEATURE_MS2.APEX_INTENSITY AS Intensity,
+                FEATURE_MS2.APEX_INTENSITY AS apexIntensity,
                 PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
                 FEATURE.EXP_RT AS RT,
                 FEATURE.LEFT_WIDTH AS leftWidth,
@@ -165,7 +165,8 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         out = pd.read_sql(stmt, self.conn)
         out = out.rename(columns={'leftWidth': 'leftBoundary', 
                                     'rightWidth': 'rightBoundary', 
-                                    'Intensity': 'consensusApexIntensity', 
+                                    'Intensity': 'areaIntensity', 
+                                    'apexIntensity' : 'consensusApexIntensity',
                                     'RT': 'consensusApex', 
                                     'ms2_mscore' : 'qvalue',
                                     'Charge': 'precursor_charge',
@@ -182,13 +183,13 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         for _, i in df.iterrows():
             out.append(TransitionGroupFeature(i['leftBoundary'], 
                                               i['rightBoundary'], 
-                                              areaIntensity=i['consensusApexIntensity'], 
+                                              areaIntensity=i['areaIntensity'], 
+                                              consensusApex=i['consensusApex'],
                                               qvalue= i['ipf_mscore'] if 'ipf_mscore' in i else i['qvalue'], 
                                               precursor_charge=i['precursor_charge'], 
                                               sequence=i['sequence'], 
                                               consensusApexIntensity=i['consensusApexIntensity'],
-                                              consensusApexIM=i['consensusApexIM'] if 'consensusApexIM' in i else None )) 
-    
+                                              consensusApexIM=i['consensusApexIM'])) # will be -1 if IM is not present
         return out
     
     def _getTopFeatureFromPrecursorIdAndRun(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
@@ -203,8 +204,9 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                                             qvalue= df['ipf_mscore'] if 'ipf_mscore' in df else df['qvalue'], 
                                             precursor_charge=df['precursor_charge'], 
                                             sequence=df['sequence'], 
+                                            consensusApex=df['consensusApex'],
                                             consensusApexIntensity=df['consensusApexIntensity'],
-                                            consensusApexIM=df['consensusApexIM'] if 'consensusApexIM' in df else None )
+                                            consensusApexIM=df['consensusApexIM']) # will be -1 if IM is not present
  
     def _getTopFeatureFromPrecursorIdAndRunDf(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
         df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
