@@ -402,15 +402,17 @@ class MzMLDataAccess():
             add_df = pd.DataFrame({'native_id': spec.getNativeID(), 'ms_level': spec.getMSLevel(), 'precursor_mz': feature.precursor_mz,
                                    'mz': mz, 'rt': rt, 'im': im, 'int': intensity})
             results_df = pd.concat([results_df, add_df])
-        
-        ## Add annotation and column
-        results_df['Annotation'] = results_df.apply(self._apply_mz_mapping, args=(feature.product_mz, feature.product_annotations) , axis=1)
-        
-        ## Add product/precursor mz column
-        annotation_mz_mapping = pd.DataFrame({'Annotation': feature.product_annotations, 'product_mz': feature.product_mz})
-        annotation_mz_mapping = pd.concat([annotation_mz_mapping, pd.DataFrame({'Annotation': ['prec'], 'product_mz': [feature.precursor_mz]})])
-        results_df = results_df.merge(annotation_mz_mapping, on='Annotation', how='left')
 
+        if not results_df.empty:
+            ## Add annotation and column
+            results_df['Annotation'] = results_df.apply(self._apply_mz_mapping, args=(feature.product_mz, feature.product_annotations) , axis=1)
+            
+            ## Add product/precursor mz column
+            annotation_mz_mapping = pd.DataFrame({'Annotation': feature.product_annotations, 'product_mz': feature.product_mz})
+            annotation_mz_mapping = pd.concat([annotation_mz_mapping, pd.DataFrame({'Annotation': ['prec'], 'product_mz': [feature.precursor_mz]})])
+            results_df = results_df.merge(annotation_mz_mapping, on='Annotation', how='left')
+        else:
+            LOGGER.warn(f"No spectra found for peptide: {feature.sequence}{feature.precursor_charge}. Try adjusting the extraction parameters")
 
         return FeatureMap(results_df, config)
     
