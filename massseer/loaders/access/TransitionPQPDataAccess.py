@@ -69,13 +69,44 @@ class TransitionPQPDataAccess:
         else:
             gene_select_stmt = "'' AS GeneName,"
             gene_join_stmt = ""
-
-        if check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"): # check annotation table present 
-
-            # Check the first value in ANNOTATION column in TRANSITION table, if NA do not get annotation table 
+        
+        generate_annotation = False
+        if not check_sqlite_column_in_table(self.conn, "TRANSITION", "ANNOTATION"):
+            generate_annotation = True
+        else:
+            # Read a small portion of the data to check for null values or specific values
             annotation_data = pd.read_sql("SELECT ANNOTATION FROM TRANSITION LIMIT 1", self.conn)
-            if annotation_data['ANNOTATION'].isnull().values.any() or annotation_data['ANNOTATION'].values[0] == "NA":
-                stmt = f"""SELECT 
+
+            # Check if any null values or a specific value ("NA") is present
+            if annotation_data['ANNOTATION'].isin([None, "NA"]).any():
+                generate_annotation = True
+        
+        if generate_annotation: 
+            stmt = f"""SELECT 
+            {gene_select_stmt}
+            PROTEIN.PROTEIN_ACCESSION AS ProteinId,
+            PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
+            PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
+            PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
+            PRECURSOR.CHARGE AS PrecursorCharge,
+            PRECURSOR.LIBRARY_RT AS NormalizedRetentionTime,
+            {prec_lib_drift_time_query}
+            TRANSITION.PRODUCT_MZ AS ProductMz,
+            TRANSITION.CHARGE AS ProductCharge,
+            TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE AS Annotation,
+            TRANSITION.LIBRARY_INTENSITY AS LibraryIntensity,
+            TRANSITION.DETECTING AS Detecting,
+            PRECURSOR.DECOY AS Decoy
+            FROM PRECURSOR
+            INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+            INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+            INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+            INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+            {gene_join_stmt}
+            INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+            INNER JOIN (SELECT * FROM TRANSITION WHERE DETECTING = 1) AS TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID"""  
+        else: 
+            stmt = f"""SELECT 
                     {gene_select_stmt}
                     PROTEIN.PROTEIN_ACCESSION AS ProteinId,
                     PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
@@ -98,31 +129,7 @@ class TransitionPQPDataAccess:
                     {gene_join_stmt}
                     INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
                     INNER JOIN (SELECT * FROM TRANSITION WHERE DETECTING = 1) AS TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID"""
-        else: # Generate Annotation column
-            stmt = f"""SELECT 
-                {gene_select_stmt}
-                PROTEIN.PROTEIN_ACCESSION AS ProteinId,
-                PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
-                PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
-                PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
-                PRECURSOR.CHARGE AS PrecursorCharge,
-                PRECURSOR.LIBRARY_RT AS NormalizedRetentionTime,
-                {prec_lib_drift_time_query}
-                TRANSITION.PRODUCT_MZ AS ProductMz,
-                TRANSITION.CHARGE AS ProductCharge,
-                TRANSITION.TYPE || TRANSITION.ORDINAL || '^' || TRANSITION.CHARGE AS Annotation,
-                TRANSITION.LIBRARY_INTENSITY AS LibraryIntensity,
-                TRANSITION.DETECTING AS Detecting,
-                PRECURSOR.DECOY AS Decoy
-                FROM PRECURSOR
-                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
-                INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
-                INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
-                {gene_join_stmt}
-                INNER JOIN TRANSITION_PRECURSOR_MAPPING ON TRANSITION_PRECURSOR_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-                INNER JOIN (SELECT * FROM TRANSITION WHERE DETECTING = 1) AS TRANSITION ON TRANSITION.ID = TRANSITION_PRECURSOR_MAPPING.TRANSITION_ID"""
-
+        
         data = pd.read_sql(stmt, self.conn)
 
         return data
