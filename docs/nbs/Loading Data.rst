@@ -1,20 +1,21 @@
 Loading Data
 ############
-
+.. currentmodule:: massseer.loaders
 
 To load data into MassSeer, a loader object must be initiated. There are two types of loader classes
-1. Chromatogram Loaders: Raw data stores chromatograms, this allows for faster loading however since extraction has already been performed by the upstream analysis tool.
+1. :py:class:Chromatogram Loaders: Raw data stores chromatograms, this allows for faster loading however since extraction has already been performed by the upstream analysis tool.
 2. Spectrum Loaders: These data types are slower to load however it leads to more customization since raw data can be extracted on the fly and parameters such as ion mobility, m/z or retention time extraction window can be adjusted.
 
 Currently avaliable loaders are:
 
 Chromatogram Loaders
 --------------------
-:py:class:`~massseer.loaders.SqMassLoader`
+
+:py:class:`SqMassLoader`
 
 Spectrum Loaders
 ----------------
-:py:class:`~massseer.loaders.MzMLDataLoader`
+:py:class:`MzMLDataLoader`
 
 Since each loader type is linked with a results file each loader can be used to extract information on the features the DIA algorithms found. For more information on extracting features, :doc:`here<Loading Feature Information>` 
 

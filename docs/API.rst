@@ -37,6 +37,7 @@ Classes
    structs.TransitionGroup
    structs.TransitionGroupFeature
    structs.TransitionFeature
+   structs.FeatureMap
    structs.TargetedDIAConfig
 
 
