@@ -32,10 +32,6 @@ class MzMLDataLoader(GenericSpectrumLoader):
         dataFiles: (str/List[str]) The path to the mzML file(s)
         libraryFile: (str) The path to the library file (.tsv or .pqp)
         
-    Methods:
-        get_row_indices_for_peptide: Get the row indices in the report for a peptide and charge state
-        load_report_for_precursor: Load the report file for a precursor
-        load_report: Load the report file
     '''
     def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'OpenSWATH', verbose: bool=False, mode: Literal['module', 'gui'] = 'module') -> None:
         super().__init__(rsltsFile, dataFiles, libraryFile, rsltsFileType, verbose, mode)
@@ -76,12 +72,14 @@ class MzMLDataLoader(GenericSpectrumLoader):
             out[t.filename] = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
         
-    def loadTransitionGroups(self, pep_id: str, charge: int) -> dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
+
         Args:
             pep_id (str): Peptide ID
             charge (int): Charge
+            config (TargetedDIAConfig): Configuration object containing the extraction parameters
         Return:
             dict[str, TransitionGroup]: Dictionary of TransitionGroups, with keys as filenames
         '''
@@ -92,6 +90,7 @@ class MzMLDataLoader(GenericSpectrumLoader):
     def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> dict[str, FeatureMap]:
         '''
         Loads a dictionary of FeatureMaps (where the keys are the filenames) from the results file
+
         Args:
             pep_id (str): Peptide ID
             charge (int): Charge
