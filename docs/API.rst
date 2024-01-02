@@ -10,7 +10,19 @@ Note: This section provides a comprehensive overview of all methods and classes 
    :no-members:
    :no-inherited-members:
 
-Classes
+Abstract Classes
+----------------
+
+.. currentmodule:: massseer
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   structs.Data1D
+ 
+Classes 
 -------
 .. currentmodule:: massseer
 
@@ -25,6 +37,7 @@ Classes
    structs.TransitionGroup
    structs.TransitionGroupFeature
    structs.TransitionFeature
+   structs.TargetedDIAConfig
 
 
 :mod:`masseer.loaders`: Classes for loading data 
@@ -34,16 +47,28 @@ Classes
    :no-members:
    :no-inherited-members:
 
+.. currentmodule:: massseer.loaders
+
+Abstract Classes
+----------------
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   GenericLoader
+   GenericChromatogramLoader
+   GenericSpectrumLoader
+
 Classes
 -------
-
-.. currentmodule:: massseer
 
 .. autosummary::
    :nosignatures:
    :toctree: generated/
    :template: class.rst
    
-   loaders.MzMLDataLoader
-   loaders.SqMassLoader
-   loaders.SpectralLibraryLoader
+   MzMLDataLoader
+   SqMassLoader
+   SpectralLibraryLoader

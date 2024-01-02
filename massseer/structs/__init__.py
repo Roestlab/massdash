@@ -10,6 +10,7 @@ from .FeatureMap import FeatureMap
 from .Mobilogram import Mobilogram
 from .Spectrum import Spectrum
 from .TargetedDIAConfig import TargetedDIAConfig
+from .Data1D import Data1D
 
 __all__ = [ "TransitionGroupFeature", 
             "TransitionGroup", 
@@ -18,4 +19,5 @@ __all__ = [ "TransitionGroupFeature",
             "FeatureMap", 
             "Mobilogram", 
             "Spectrum",
+            "Data1D",
              "TargetedDIAConfig" ]
