@@ -10,6 +10,8 @@ from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUIS
 # Loaders
 from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massseer.structs.TargetedDIAConfig import TargetedDIAConfig
+# Structs
+from massseer.structs.FeatureMap import FeatureMap
 
 
 class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
@@ -241,7 +243,6 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
             file_peptide_dict[file.filename] = peptide_dict
         return file_peptide_dict
 
-
     def show_extraction_parameters(self) -> None:
         """
         Displays the extraction parameters in the sidebar UI.
@@ -298,6 +299,11 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         }
         return extraction_params_dict
    
+    def validate_extraction(self, featureMap: FeatureMap, plot_container: st.container):
+        fm_states = [fm.empty() for fm in featureMap.values()]
+        if any(fm_states):
+            plot_container.error("No spectra found/extracted for the selected precursor. Try adjusting the extraction parameters.")
+       
     def show_extracted_one_d_plots(self, plot_container: st.container, chrom_plot_settings: ChromatogramPlotUISettings, concensus_chromatogram_settings: ConcensusChromatogramUISettings, plot_dict: Dict) -> None:
         """
         Displays the extracted ion chromatograms based on user input.

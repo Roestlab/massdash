@@ -172,6 +172,8 @@ class RawTargetedExtractionAnalysisServer:
             self.targeted_extraction.clear()
             featureMaps = self.targeted_extraction(transition_list_ui)
 
+            transition_list_ui.validate_extraction(featureMaps, plot_container)
+
             with time_block() as elapsed_time:
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
