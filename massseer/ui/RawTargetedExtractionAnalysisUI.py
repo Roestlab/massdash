@@ -108,7 +108,6 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
         
         if "selected_precursor" not in st.session_state:
             st.session_state.selected_precursor = f"{self.transition_settings.selected_protein}_{self.transition_settings.selected_peptide}_{self.transition_settings.selected_charge}"
-            st.write(f"Selected precursor: {st.session_state.selected_precursor}")
         
     def show_search_results_information(self, search_results: Literal['DiaNNLoader', 'OSWLoader']) -> None:
         """

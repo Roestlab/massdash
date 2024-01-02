@@ -130,7 +130,7 @@ class RawTargetedExtractionAnalysisServer:
         plot_container = st.container()
         
         # Initiate the mzML Loader object
-        with st.status("Performing Peak Extraction....", expanded=True) as status:
+        with st.status("Performing Targeted Extraction....", expanded=True) as status:
             start_time = timeit.default_timer()
             st_log_writer = st_mutable_write("Initiating mzML files (this may take some time)...")
             with MeasureBlock(f"{self.__class__.__name__}::initiate_mzML_interface") as perf_metrics:
