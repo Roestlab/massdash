@@ -130,7 +130,6 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
             
             # Checkbox to use search results RT apex and IM apex for extraction parameters
             self.use_search_results_in_extraction = st.sidebar.checkbox("Use search result coordinates for extraction", value=True, disabled=not enable_use_search_results_checkbox)
-            
             # Create tabs to display search results per file in search_results
             search_results_tabs = st.sidebar.tabs([f"Run{i}" for i in range(1, search_results.shape[0] + 1)])
             grouped_df = search_results.groupby('filename')
@@ -281,8 +280,6 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
                 
             self.submit_extraction_params = extraction_param_form.form_submit_button("Extract Data")
             
-            st.write(f"button clicked: {self.submit_extraction_params}")
-
             if self.submit_extraction_params:
                 st.session_state.extraction_param_button_clicked = True
             else:
