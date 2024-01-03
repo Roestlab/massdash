@@ -10,6 +10,7 @@ from massseer.ui.RawTargetedExtractionAnalysisUI import RawTargetedExtractionAna
 from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
 from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
+from massseer.ui.util import st_mutable_write
 # Server
 from massseer.server.OneDimensionPlotterServer import OneDimensionPlotterServer
 from massseer.server.TwoDimensionPlotterServer import TwoDimensionPlotterServer
@@ -42,37 +43,37 @@ class RawTargetedExtractionAnalysisServer:
             LOGGER.setLevel("DEBUG")
         else:
             LOGGER.setLevel("INFO")
-    # @conditional_decorator(lambda func: st.cache_resource(show_spinner=False)(func), check_streamlit())
+            
+    @conditional_decorator(lambda func: st.cache_resource(show_spinner=False)(func), check_streamlit())
     def get_transition_list(_self):
         """
-        Loads the spectral library and sets the transition list attribute.
+        Loads the spectral library and sets the transition list attribute and append q-values to the transition list.
         """
-        _self.transition_list = _self.mzml_loader.libraryFile
-        _self.transition_list.has_im = _self.mzml_loader.libraryFile.data.has_im
-        _self.transition_list.data = _self.mzml_loader.libraryFile.data.data
-        return _self.transition_list
 
-    def append_qvalues_to_transition_list(self):
-        """
-        Appends q-values to the transition list.
-        """
+        _self.transition_list = _self.mzml_loader.libraryFile
+        _self.transition_list.has_im = _self.mzml_loader.libraryFile.has_im
+        _self.transition_list.data = _self.mzml_loader.libraryFile.data
+
         # top_ranked_precursor_features = self.feature_data.get_top_rank_precursor_features_across_runs()
-        top_ranked_precursor_features = self.mzml_loader.rsltsFile.df[['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence',  'PrecursorCharge', 'Qvalue']]
+        top_ranked_precursor_features = _self.mzml_loader.rsltsFile.df[['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence',  'PrecursorCharge', 'Qvalue']]
+        
         # If Decoy column not in transition list add it to top_ranked_precursor_features
-        if 'Decoy' not in self.transition_list.data.columns:
+        if 'Decoy' not in _self.transition_list.data.columns:
             top_ranked_precursor_features['Decoy'] = 0
         # i.e. Convert .(UniMod:1)SEGDSVGESVHGKPSVVYR to (UniMod:1)SEGDSVGESVHGKPSVVYR
         top_ranked_precursor_features['ModifiedPeptideSequence'] = top_ranked_precursor_features['ModifiedPeptideSequence'].str.replace('.', '')
-        self.transition_list.data['ModifiedPeptideSequence'] = self.transition_list.data['ModifiedPeptideSequence'].str.replace('.', '')
+        _self.transition_list.data['ModifiedPeptideSequence'] = _self.transition_list.data['ModifiedPeptideSequence'].str.replace('.', '')
         # merge transition list with top ranked precursor features
-        self.transition_list.data = pd.merge(self.transition_list.data, top_ranked_precursor_features, on=['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence', 'PrecursorCharge'], how='left')
+        _self.transition_list.data = pd.merge(_self.transition_list.data, top_ranked_precursor_features, on=['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence', 'PrecursorCharge'], how='left')
         # Qvalue column is NaN replace with 1
-        self.transition_list.data['Qvalue'] = self.transition_list.data['Qvalue'].fillna(1)
+        _self.transition_list.data['Qvalue'] = _self.transition_list.data['Qvalue'].fillna(1)
         # Decoy column is NaN replace with 0
-        self.transition_list.data['Decoy'] = self.transition_list.data['Decoy'].fillna(0)
+        _self.transition_list.data['Decoy'] = _self.transition_list.data['Decoy'].fillna(0)
+        
+        return _self.transition_list
     
     @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading data...")(func), check_streamlit())
-    def initiate_mzML_interface(_self, mzml_files, resultsFile, dataFile, resultsFileType, verbose) -> None:
+    def initiate_mzML_interface(_self, mzml_files, resultsFile, dataFile, resultsFileType, verbose) -> MzMLDataLoader:
         """
         Initiate an mzMLLoader Object.
 
@@ -111,9 +112,7 @@ class RawTargetedExtractionAnalysisServer:
 
         Args:
             _self (object): The instance of the class.
-            _targeted_exp (TargetedDIALoader): The targeted experiment to perform extraction on.
-            _peptide_coord (Dict): The peptide coordinates to use for extraction.
-            config: The configuration for the extraction.
+            _transition_list_ui (RawTargetedExtractionAnalysisUI): The UI for the transition list. Contains the selected peptide and charge and the targeted confif experiment extraction parameters.
 
         Returns:
             None
@@ -124,55 +123,76 @@ class RawTargetedExtractionAnalysisServer:
                                             _transition_list_ui.targeted_exp_params)
         
     def main(self):
+        if "extraction_param_button_clicked" not in st.session_state:
+            st.session_state.extraction_param_button_clicked = False
+    
+        # Create a container for the plots
+        plot_container = st.container()
         
         # Initiate the mzML Loader object
-        self.initiate_mzML_interface.clear()
-        with st.status("Initiating .mzML files (this may take some time)....", expanded=True) as status:
-            with MeasureBlock() as perf_metrics:
+        with st.status("Performing Targeted Extraction....", expanded=True) as status:
+            start_time = timeit.default_timer()
+            st_log_writer = st_mutable_write("Initiating mzML files (this may take some time)...")
+            with MeasureBlock(f"{self.__class__.__name__}::initiate_mzML_interface") as perf_metrics:
+                # self.initiate_mzML_interface.clear()
                 self.mzml_loader = self.initiate_mzML_interface(self.massseer_gui.file_input_settings.raw_file_path_list, 
                                             self.massseer_gui.file_input_settings.feature_file_path, 
                                             self.massseer_gui.file_input_settings.transition_list_file_path, 
                                             self.massseer_gui.file_input_settings.feature_file_type,
                                             self.massseer_gui.verbose)
-        status.update(label=f"Info: Initiating .mzML files complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}", state="complete", expanded=False)
-                
-        # Get and append q-values to the transition list
-        self.transition_list = self.get_transition_list()
-        self.append_qvalues_to_transition_list()
+            st_log_writer.write(f"Initiating mzML files complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
+                            
+            # Get and append q-values to the transition list
+            self.transition_list = self.get_transition_list()
+            
+            # Create a UI for the transition list and show transition information
+            transition_list_ui = RawTargetedExtractionAnalysisUI(self.transition_list, self.mzml_loader.has_im, self.massseer_gui.verbose)
+            transition_list_ui.show_transition_information()
+            
+            current_selected_precursor = f"{transition_list_ui.transition_settings.selected_protein}_{transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
+            
+            clear_caches = False
+            if current_selected_precursor != st.session_state.selected_precursor or st.session_state.extraction_param_button_clicked:
+                st.info(f"Info: Selected precursor changed from {st.session_state.selected_precursor} to {current_selected_precursor}. Clearing caches...")
+                st.info(f"Info: Extraction parameters changed ({st.session_state.extraction_param_button_clicked}). Clearing caches...")
+                clear_caches = True
+                st.session_state.selected_precursor = current_selected_precursor
+            
+            st_log_writer = st_mutable_write("Loading transition group feature...")
+            with MeasureBlock(f"{self.__class__.__name__}::load_transition_group_feature") as perf_metrics:
+                # Load feature data for selected peptide and charge
+                if clear_caches:
+                    self.load_transition_group_feature.clear()
+                features = self.load_transition_group_feature(transition_list_ui)
+            st_log_writer.write(f"Loading transition group feature complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
+            
+            # st.dataframe(features)
+            transition_list_ui.show_search_results_information(features) 
+
+            # Create UI for extraction parameters
+            transition_list_ui.show_extraction_parameters()
+
+            # Create UI settings for chromatogram plotting, peak picking, and consensus chromatogram
+            chrom_plot_settings = ChromatogramPlotUISettings()
+            chrom_plot_settings.create_ui(include_raw_data_settings=True, is_ion_mobility_data=self.mzml_loader.has_im)
+
+            peak_picking_settings = PeakPickingUISettings()
+            peak_picking_settings.create_ui(chrom_plot_settings)
+
+            concensus_chromatogram_settings = ConcensusChromatogramUISettings()
+            concensus_chromatogram_settings.create_ui()
         
-        # Create a UI for the transition list and show transition information
-        transition_list_ui = RawTargetedExtractionAnalysisUI(self.transition_list, self.mzml_loader.has_im, self.massseer_gui.verbose)
-        transition_list_ui.show_transition_information()
-        
-        # Load feature data for selected peptide and charge
-        self.load_transition_group_feature.clear()
-        features = self.load_transition_group_feature(transition_list_ui)
-        # st.dataframe(features)
-        transition_list_ui.show_search_results_information(features) 
+            st_log_writer = st_mutable_write("Extracting spectra...")
+            with MeasureBlock(f"{self.__class__.__name__}::targeted_extraction") as perf_metrics:
+                if clear_caches:
+                    self.targeted_extraction.clear()
+                featureMaps = self.targeted_extraction(transition_list_ui)
+            st_log_writer.write(f"Extracting spectra complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
 
-        # Create UI for extraction parameters
-        transition_list_ui.show_extraction_parameters()
+            transition_list_ui.validate_extraction(featureMaps, plot_container)
 
-        # Create UI settings for chromatogram plotting, peak picking, and consensus chromatogram
-        chrom_plot_settings = ChromatogramPlotUISettings()
-        chrom_plot_settings.create_ui(include_raw_data_settings=True, is_ion_mobility_data=self.mzml_loader.has_im)
-
-        peak_picking_settings = PeakPickingUISettings()
-        peak_picking_settings.create_ui(chrom_plot_settings)
-
-        concensus_chromatogram_settings = ConcensusChromatogramUISettings()
-        concensus_chromatogram_settings.create_ui()
-        
-        # Create a container for the plots
-        plot_container = st.container()
-        
-        # Load data from mzML files
-        with st.status("Performing Peak Extraction....", expanded=True) as status:
-            start_time = timeit.default_timer()
-            self.targeted_extraction.clear()
-            featureMaps = self.targeted_extraction(transition_list_ui)
-
-            with time_block() as elapsed_time:
+            st_log_writer = st_mutable_write("Generating plot...")
+            with MeasureBlock(f"{self.__class__.__name__}::PlotGeneration") as perf_metrics:
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
                 if chrom_plot_settings.display_plot_dimension_type == "1D":
@@ -181,22 +201,22 @@ class RawTargetedExtractionAnalysisServer:
                     plot_obj_dict = TwoDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_two_dimensional_plots().plot_obj_dict
                 elif chrom_plot_settings.display_plot_dimension_type == "3D":
                     plot_obj_dict = ThreeDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_three_dimensional_plots().plot_obj_dict
-            st.write(f'Generating plot... Elapsed time: {elapsed_time()}')
+            st_log_writer.write(f"Generating plot complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
             
             # Show extracted data
-            with time_block() as elapsed_time:
+            st_log_writer = st_mutable_write("Rendering plot...")
+            with MeasureBlock(f"{self.__class__.__name__}::DrawingPlots") as perf_metrics:
                 if chrom_plot_settings.display_plot_dimension_type == "1D":
                     transition_list_ui.show_extracted_one_d_plots(plot_container, chrom_plot_settings, concensus_chromatogram_settings, plot_obj_dict)
                 elif chrom_plot_settings.display_plot_dimension_type == "2D":
                     transition_list_ui.show_extracted_two_d_plots(plot_container, plot_obj_dict)
                 elif chrom_plot_settings.display_plot_dimension_type == "3D":
                     transition_list_ui.show_extracted_three_d_plots(plot_container, plot_obj_dict, chrom_plot_settings.num_plot_columns)
-            st.write(f'Displaying plot... Elapsed time: {elapsed_time()}')
-                    
+            st_log_writer.write(f"Rendering plot complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
                     
             elapsed = timeit.default_timer() - start_time
             LOGGER.info("Targeted extraction complete! Elapsed time: %s", timedelta(seconds=elapsed))
-            status.update(label=f"Info: Targeted extraction and plot drawing complete! Elapsed time: {timedelta(seconds=elapsed)}", state="complete", expanded=False)
+            status.update(label=f"Info: Targeted extraction and plot rendering complete! Elapsed time: {timedelta(seconds=elapsed)}", state="complete", expanded=False)
         
         if chrom_plot_settings.display_extracted_data_as_df:
             transition_list_ui.show_extracted_dataframes(featureMaps)

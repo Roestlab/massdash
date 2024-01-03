@@ -1,8 +1,11 @@
 from massseer.structs.Chromatogram import Chromatogram
-from typing import List, Tuple, Optional, Union
+from typing import List, Tuple, Optional, Union, Literal
 import pyopenms as po
 from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
+from massseer.plotting.GenericPlotter import PlotConfig
+from massseer.plotting.InteractivePlotter import InteractivePlotter
+from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 import pandas as pd
 
 class TransitionGroup:
@@ -13,6 +16,7 @@ class TransitionGroup:
                  transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]]):
         self.precursorData = precursorData
         self.transitionData = transitionData
+        self.type = type(precursorData[0])
         if len(transitionData) > 0:
             self.dataType = type(transitionData[0])
         elif len(precursorData) > 0:
@@ -139,3 +143,35 @@ class TransitionGroup:
             bool: True if all of the chromatograms, mobilograms, and spectra are empty, False otherwise.
         """
         return not any(p.empty() for p in self.precursorData) and any(t.empty() for t in self.transitionData)
+    
+    def plot(self, 
+             transitionGroupFeatures: Optional[List[TransitionGroupFeature]] = None, 
+             smoothing: Optional[Literal['none', 'sgolay']] = 'none',
+             sgolay_polynomial_order: int = 3,
+             sgolay_frame_length: int = 11) -> None:
+        '''
+        Plot the 1D data, meant for jupyter notebook context
+        '''
+        config = PlotConfig()
+        if self.type == Chromatogram:
+            config.plot_type = "chromatogram"
+        elif self.type == Mobilogram:
+            config.plot_type = "mobilogram"
+        elif self.type == Spectrum:
+            config.plot_type = "spectrum"
+        else:
+            raise ValueError("Unknown type of 1D data")
+
+        config.smoothing_dict = {'type': smoothing, 'sgolay_polynomial_order': sgolay_polynomial_order, 'sgolay_frame_length': sgolay_frame_length}
+
+        plotter = InteractivePlotter(config)
+
+        plotter.plot(self)
+
+        if transitionGroupFeatures is not None:
+            if self.type == Chromatogram:
+                plotter.add_peak_boundaries(plotter.fig, transitionGroupFeatures)
+            else:
+                raise NotImplementedError("Peak boundaries are only implemented for chromatograms")
+
+        plotter.show()

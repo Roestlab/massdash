@@ -49,9 +49,6 @@ class TransitionTSVDataAccess:
         if file_extension.lower() not in ['.tsv']:
             raise ValueError("Unsupported file format. TransitionTSVLoader requires a tab-separated .tsv file.")
         self.filename = filename
-        self.data: pd.DataFrame = pd.DataFrame()
-        self.load() ## set self.data
-        self.has_im = 'PrecursorIonMobility' in self.data.columns and self.data['PrecursorIonMobility'].notnull().any()
 
     def empty(self):
         return self.data.empty() 
@@ -79,6 +76,7 @@ class TransitionTSVDataAccess:
         # Drop the FragmentType and FragmentSeriesNumber columns
         if self._validate_columns():
             self.data.drop(columns=['FragmentType', 'FragmentSeriesNumber'], inplace=True)
+            return self.data
         else:
             missing_columns = set(TransitionTSVDataAccess.REQUIRED_TSV_COLUMNS).difference(set(self.data.columns))
             raise ValueError(f"The TSV file is missing the following required columns: {missing_columns}")

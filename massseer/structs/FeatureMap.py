@@ -31,7 +31,7 @@ class FeatureMap:
     def __init__(self, feature_df: pd.DataFrame, config: TargetedDIAConfig=None, verbose: bool=False):
         self.feature_df = feature_df
         self.has_im = 'im' in feature_df.columns and feature_df['im'].notnull().all()
-        if not self.has_im:
+        if not self.has_im and not self.feature_df.empty:
             self.feature_df.drop(columns=['im'], inplace=True)
         self.config = config
         

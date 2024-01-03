@@ -60,6 +60,7 @@ class InteractiveTwoDimensionPlotter:
             config (PlotConfig): The configuration for plotting.
         """
         self.config = config
+        self.fig = None # set by the plot method
 
     def plot(self, featureMap: FeatureMap):
         """
@@ -239,4 +240,19 @@ class InteractiveTwoDimensionPlotter:
 
         plot.grid.visible = False
 
+        self.fig = plot
         return plot
+
+    def show(self):
+        """
+        Show the plots.
+        """
+        from bokeh.plotting import show
+        from bokeh.io import output_notebook 
+        output_notebook()
+        if isinstance(self.fig, list):
+            for fig in self.fig:
+                show(fig)
+        else:
+            show(self.fig)
+

@@ -21,7 +21,7 @@ class SpectralLibraryLoader:
     def __init__(self, in_file: str, verbose: bool=False) -> None:
         self.in_file = in_file
         self.data: pd.DataFrame = self.load()
-        self.has_im = self.data.has_im 
+        self.has_im = 'PrecursorIonMobility' in self.data.columns and self.data['PrecursorIonMobility'].notnull().any()
         
         LOGGER.name = "SpectralLibraryLoader"
         if verbose:
@@ -36,9 +36,9 @@ class SpectralLibraryLoader:
         LOGGER.debug(f"Loading transition file {self.in_file}")
         _, file_extension = os.path.splitext(self.in_file)
         if file_extension.lower() == '.tsv':
-            return TransitionTSVDataAccess(self.in_file)
+            return TransitionTSVDataAccess(self.in_file).load()
         elif file_extension.lower() == '.pqp' or file_extension.lower() == '.osw':
-            return TransitionPQPDataAccess(self.in_file)
+            return TransitionPQPDataAccess(self.in_file).load()
         else:
             raise ValueError("Unsupported file format")
 
