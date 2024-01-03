@@ -2,9 +2,11 @@ Contents
 ========
 
 .. toctree::
-   :maxdepth: 6
+   :maxdepth: 3
+   :glob:
 
    Getting Started
    Python Interface
    GUI
    API
+   Plotting Gallery
