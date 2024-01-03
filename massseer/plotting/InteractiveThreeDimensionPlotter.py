@@ -50,10 +50,8 @@ class InteractiveThreeDimensionPlotter:
         """
         if self.config.type_of_3d_plot == "3D Scatter Plot" and self.config.aggregate_mslevels:
             plots = self.plot_3d_scatter(featureMap, num_rows=1, num_cols=1)
-        elif self.config.type_of_3d_plot == "3D Scatter Plot" and not self.config.aggregate_mslevels and self.config.context == "streamlit":
+        elif self.config.type_of_3d_plot == "3D Scatter Plot" and not self.config.aggregate_mslevels:
             plots = self.plot_3d_scatter(featureMap, num_cols = self.config.num_plot_columns)
-        elif self.config.type_of_3d_plot == "3D Scatter Plot" and not self.config.aggregate_mslevels and self.config.context == "jupyter":
-            plots = self.plot_3d_scatter(featureMap, num_cols=1)
         elif self.config.type_of_3d_plot == "3D Surface Plot" and not self.config.aggregate_mslevels:
             plots = self.plot_individual_3d_surface(featureMap, self.config.num_plot_columns)
         elif self.config.type_of_3d_plot == "3D Line Plot" and not self.config.aggregate_mslevels:
@@ -77,16 +75,16 @@ class InteractiveThreeDimensionPlotter:
         if self.config.context == "streamlit":
             marker_size = 5
             height_scale_factor = width_scale_factor = 800
-            scale_factor = 800
             spacing = 0.05
+            ratio = 1
         elif self.config.context == "jupyter": 
-            print("jupyter context")
             marker_size = 2
+            ratio = 0.75
             if num_rows == 1:
                 height_scale_factor = width_scale_factor = 800
-                spacing = 0.05
+                spacing = 0.01
             else: # num_rows == -1
-                height_scale_factor = 800
+                height_scale_factor = 400
                 width_scale_factor = 150
                 spacing = 0.01
         else:
@@ -102,13 +100,6 @@ class InteractiveThreeDimensionPlotter:
             subplot_titles = ['']
             specs = [[{'type': 'scatter3d'}]]
 
-
-        if num_cols == 1:
-            # Determine the number of unique annotations
-            num_rows = num_annotations = len(featureMap['Annotation'].unique())
-            subplot_titles = featureMap['Annotation'].unique()
-            specs = [[{'type': 'scatter3d'}] * num_cols for _ in range(num_annotations)]
- 
         # Create a subplot with 3D scatter plots for each group
         subfig = make_subplots(
             rows=num_rows, cols=num_cols,
@@ -154,7 +145,7 @@ class InteractiveThreeDimensionPlotter:
             subfig.add_trace(trace, row=row_num, col=col_num)  
             
             scene = dict(aspectmode='manual',
-                        aspectratio=dict(x=1, y=1, z=1),
+                        aspectratio=dict(x=ratio, y=ratio, z=ratio),
                         camera=dict(eye=dict(x=1.25, y=1.25, z=1.25)),
                         xaxis_title = "RT",
                         yaxis_title = "MZ",
@@ -257,11 +248,24 @@ class InteractiveThreeDimensionPlotter:
             go.Figure: The Plotly Figure object.
         """
         # Create a subplot with 3D surface plots for each group
+        if self.config.context == "streamlit":
+            horizontal_spacing = 0.05
+            vertical_spacing = 0.05
+            height_scale_factor = width_scale_factor = 800
+        elif self.config.context == "jupyter":
+            horizontal_spacing = 0.03
+            vertical_spacing = 0.03
+            height_scale_factor = 400
+            num_cols = 2
+            width_scale_factor = 150
+        else:
+            raise ValueError(f"Error: Invalid context type: {self.config.context}, must be either 'streamlit' or 'jupyter'")
+
         df = featureMap.feature_df
         subfig = make_subplots(rows=len(df['Annotation'].unique()), cols=num_cols,
                             subplot_titles=df['Annotation'].unique(),
                             specs=[[{'type': 'surface'}] * num_cols for _ in range(len(df['Annotation'].unique()))],
-                            horizontal_spacing=0.05, vertical_spacing=0.05)
+                            horizontal_spacing=horizontal_spacing, vertical_spacing=vertical_spacing)
 
         # Iterate over groups and create subplots
         for i, (group_key, group_df) in enumerate(df.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz'])):
@@ -344,8 +348,8 @@ class InteractiveThreeDimensionPlotter:
             subfig.update_scenes(scene, row=row_num, col=col_num)
 
         # Update the layout of the overall figure
-        subfig.update_layout(height=len(df['Annotation'].unique()) * 800,
-                            width=len(df['Annotation'].unique()) * 800, showlegend=False)
+        subfig.update_layout(height=len(df['Annotation'].unique()) * height_scale_factor,
+                            width=len(df['Annotation'].unique()) * width_scale_factor, showlegend=False)
         
         subfig.update_coloraxes(showscale=False)
 
