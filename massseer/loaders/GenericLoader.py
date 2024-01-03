@@ -14,7 +14,13 @@ class GenericLoader(ABC):
     Abstract class for loading Chromatograms and peak features
     Classes which inherit from this should contain one results file and one transition file
     '''
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'DIA-NN', verbose: bool=False, mode: Literal['module', 'gui'] = 'module'):
+    def __init__(self, 
+                 rsltsFile: str, 
+                 dataFiles: Union[str, List[str]], 
+                 libraryFile: str = None, 
+                 rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'DIA-NN', 
+                 verbose: bool=False, 
+                 mode: Literal['module', 'gui'] = 'module'):
         ## store the file names
         self.rsltsFile_str = rsltsFile
         self.libraryFile_str = libraryFile

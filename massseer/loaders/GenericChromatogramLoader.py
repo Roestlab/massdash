@@ -17,8 +17,13 @@ class GenericChromatogramLoader(GenericLoader):
         mode: (str) Whether to run in module or GUI mode
     '''
 
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'DIA-NN', verbose: bool=False, mode: Literal['module', 'gui'] = 'module'):
-        super().__init__(rsltsFile=rsltsFile, dataFiles=dataFiles, libraryFile=None, rsltsFileType=rsltsFileType, verbose=verbose, mode=mode)
+    def __init__(self, 
+                 rsltsFile: str, 
+                 dataFiles: Union[str, List[str]], 
+                 rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'DIA-NN', 
+                 verbose: bool=False, 
+                 mode: Literal['module', 'gui'] = 'module'):
+        super().__init__(rsltsFile, dataFiles, None, rsltsFileType, verbose, mode)
     
     @abstractmethod
     def loadTransitionGroups(self, pep_id: str, charge: int) -> dict[str, TransitionGroup]:

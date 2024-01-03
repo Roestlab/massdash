@@ -6,7 +6,7 @@ from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.loaders.GenericChromatogramLoader import GenericChromatogramLoader
 from massseer.loaders.access.SqMassDataAccess import SqMassDataAccess
 from massseer.loaders.access.OSWDataAccess import OSWDataAccess
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Literal
 from os.path import basename
 import pandas as pd
 
@@ -23,8 +23,8 @@ class SqMassLoader(GenericChromatogramLoader):
     Inherits from GenericLoader
     '''
 
-    def __init__(self, dataFiles: Union[str, List[str]], rsltsFile: str):
-        super().__init__(rsltsFile, dataFiles, rsltsFile, 'OpenSWATH')
+    def __init__(self, rsltsFile: str ,dataFiles: Union[str, List[str]],  verbose: bool = False, mode: Literal['module', 'gui'] = 'module'):
+        super().__init__(rsltsFile, dataFiles, 'OpenSWATH', verbose, mode)
         self.dataFiles = [SqMassDataAccess(f) for f in self.dataFiles_str]
         self.rsltsFile = OSWDataAccess(self.rsltsFile_str)
 
