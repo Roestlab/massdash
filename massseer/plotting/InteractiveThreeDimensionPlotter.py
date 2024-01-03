@@ -39,6 +39,7 @@ class InteractiveThreeDimensionPlotter:
     """
     def __init__(self, config: PlotConfig):
         self.config = config
+        self.fig = None # set by plot method
         
     def plot(self, featureMap: FeatureMap):
         """
@@ -49,12 +50,15 @@ class InteractiveThreeDimensionPlotter:
         """
         if self.config.type_of_3d_plot == "3D Scatter Plot" and self.config.aggregate_mslevels:
             plots = self.plot_3d_scatter(featureMap, num_rows=1, num_cols=1)
-        elif self.config.type_of_3d_plot == "3D Scatter Plot" and not self.config.aggregate_mslevels:
+        elif self.config.type_of_3d_plot == "3D Scatter Plot" and not self.config.aggregate_mslevels and self.config.context == "streamlit":
             plots = self.plot_3d_scatter(featureMap, num_cols = self.config.num_plot_columns)
+        elif self.config.type_of_3d_plot == "3D Scatter Plot" and not self.config.aggregate_mslevels and self.config.context == "jupyter":
+            plots = self.plot_3d_scatter(featureMap, num_cols=1)
         elif self.config.type_of_3d_plot == "3D Surface Plot" and not self.config.aggregate_mslevels:
             plots = self.plot_individual_3d_surface(featureMap, self.config.num_plot_columns)
         elif self.config.type_of_3d_plot == "3D Line Plot" and not self.config.aggregate_mslevels:
             plots = self.plot_3d_vline(featureMap)
+        self.fig = plots
         return plots
     
     def plot_3d_scatter(self, featureMap: FeatureMap, num_rows: int = -1, num_cols: int = 2) -> go.Figure:
@@ -70,6 +74,24 @@ class InteractiveThreeDimensionPlotter:
         Returns:
             go.Figure: The Plotly Figure object.
         """
+        if self.config.context == "streamlit":
+            marker_size = 5
+            height_scale_factor = width_scale_factor = 800
+            scale_factor = 800
+            spacing = 0.05
+        elif self.config.context == "jupyter": 
+            print("jupyter context")
+            marker_size = 2
+            if num_rows == 1:
+                height_scale_factor = width_scale_factor = 800
+                spacing = 0.05
+            else: # num_rows == -1
+                height_scale_factor = 800
+                width_scale_factor = 150
+                spacing = 0.01
+        else:
+            raise ValueError(f"Error: Invalid context type: {self.config.context}, must be either 'streamlit' or 'jupyter'")
+
         if num_rows == -1:
             # Determine the number of unique annotations
             num_rows = num_annotations = len(featureMap['Annotation'].unique())
@@ -80,12 +102,19 @@ class InteractiveThreeDimensionPlotter:
             subplot_titles = ['']
             specs = [[{'type': 'scatter3d'}]]
 
+
+        if num_cols == 1:
+            # Determine the number of unique annotations
+            num_rows = num_annotations = len(featureMap['Annotation'].unique())
+            subplot_titles = featureMap['Annotation'].unique()
+            specs = [[{'type': 'scatter3d'}] * num_cols for _ in range(num_annotations)]
+ 
         # Create a subplot with 3D scatter plots for each group
         subfig = make_subplots(
             rows=num_rows, cols=num_cols,
             subplot_titles=subplot_titles,
             specs=specs,
-            horizontal_spacing=0.05, vertical_spacing=0.05
+            horizontal_spacing=spacing, vertical_spacing=spacing
         )
 
         # Create a 3D scatter plot for each group
@@ -110,7 +139,7 @@ class InteractiveThreeDimensionPlotter:
             trace = go.Scatter3d(
                 x=x, y=y, z=z,
                 mode='markers',
-                marker=dict(size=5, color=intensity, colorscale=colorscale),
+                marker=dict(size=marker_size, color=intensity, colorscale=colorscale),
                 name=group_key[1]
             )
 
@@ -135,8 +164,8 @@ class InteractiveThreeDimensionPlotter:
 
         # Update the layout of the overall figure
         subfig.update_layout(
-            height=num_annotations * 800,
-            width=num_annotations * 800,
+            height=num_annotations * height_scale_factor,
+            width=num_annotations * width_scale_factor,
             showlegend=False
         )
 
@@ -379,4 +408,11 @@ class InteractiveThreeDimensionPlotter:
         subfig.update_coloraxes(showscale=False)
 
         return subfig
+    
+    def show(self):
+        """
+        Show the plot.
+        """
+        px.init_notebook_mode()
+        self.fig.show()
     
