@@ -3,8 +3,6 @@ from typing import List, Tuple, Optional, Union, Literal
 import pyopenms as po
 from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
-from massseer.plotting.GenericPlotter import PlotConfig
-from massseer.plotting.InteractivePlotter import InteractivePlotter
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 import pandas as pd
 
@@ -152,6 +150,9 @@ class TransitionGroup:
         '''
         Plot the 1D data, meant for jupyter notebook context
         '''
+        from massseer.plotting.GenericPlotter import PlotConfig
+        from massseer.plotting.InteractivePlotter import InteractivePlotter
+
         config = PlotConfig()
         if self.type == Chromatogram:
             config.plot_type = "chromatogram"
