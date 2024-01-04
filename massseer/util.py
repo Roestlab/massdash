@@ -202,15 +202,13 @@ def check_sqlite_table(con, table):
         bool: True if the table exists, False otherwise.
     """
     table_present = False
-    c = con.cursor()
-    c.execute('SELECT count(name) FROM sqlite_master WHERE type="table" AND name="%s"' % table)
-    if c.fetchone()[0] == 1:
-        table_present = True
-    else:
-        table_present = False
-    c.fetchall()
 
-    return(table_present)
+    result = con.execute('SELECT count(name) FROM sqlite_master WHERE type="table" AND name=?', (table,))
+
+    if result.fetchone()[0] == 1:
+        table_present = True
+
+    return table_present
 
 def check_sqlite_column_in_table(con, table, column):
     """
