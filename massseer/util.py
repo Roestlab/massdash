@@ -1,3 +1,4 @@
+import os
 import sys
 import importlib
 from typing import Optional
@@ -10,7 +11,7 @@ from timeit import default_timer
 from datetime import timedelta
 import logging
 from logging.handlers import TimedRotatingFileHandler
-
+import psutil
 
 
 #######################################
@@ -42,7 +43,7 @@ def get_file_handler():
     file_handler.setFormatter(FORMATTER)
     return file_handler
 
-def get_logger(logger_name):
+def get_logger(logger_name, log_level=logging.INFO):
     """
     Get a logger with the specified name.
 
@@ -54,7 +55,7 @@ def get_logger(logger_name):
 
     """
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG) # better to have too much log than not enough
+    logger.setLevel(log_level) # better to have too much log than not enough
     logger.addHandler(get_console_handler())
     logger.addHandler(get_file_handler())
     # with this pattern, it's rarely necessary to propagate the error up to parent
@@ -101,7 +102,56 @@ def time_block():
     start = end = default_timer()
     yield lambda: timedelta(seconds=end - start)
     end = default_timer()
+    
+@contextlib.contextmanager
+def measure_memory_block():
+    """
+    A context manager that measures the memory usage of a block of code.
 
+    Usage:
+    with measure_memory_block() as memory:
+        # code block to be measured
+
+    Returns:
+    A float representing the memory usage in MB.
+    """
+    start_memory = psutil.virtual_memory().used
+    yield lambda: (end_memory - start_memory) / 1024 ** 2
+    end_memory = psutil.virtual_memory().used
+
+class MeasureBlock:
+    def __init__(self, metric_name: str=None, write_out_perf: bool=False, perf_output: str='MassSeer_Performance_Report.txt'):
+        self.metric_name = metric_name
+        self.write_out_perf = write_out_perf
+        self.perf_output = perf_output
+        self.start_time = None
+        self.end_time = None
+        self.start_memory = None
+        self.end_memory = None
+        self.execution_time = None
+        self.memory_usage = None
+        
+    def __enter__(self):
+        self.start_time = default_timer()
+        self.start_memory = psutil.Process(os.getpid()).memory_info().rss
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.end_time = default_timer()
+        self.end_memory = psutil.Process(os.getpid()).memory_info().rss
+        self.execution_time = self.end_time - self.start_time
+        self.memory_usage = (self.end_memory - self.start_memory) / (1024 ** 2)  # Convert bytes to megabytes
+        # Open file and append data to it as tabular data
+        if self.write_out_perf:
+            # Check if there are headers in the file
+            if not os.path.isfile(self.perf_output):
+                with open(self.perf_output, 'w', encoding='utf-8') as f:
+                    f.write('metric_name\texecution_time_sec\tmemory_usage_MB\n')
+            # Write out the performance data
+            with open(self.perf_output, 'a', encoding='utf-8') as f:
+                f.write(f'{self.metric_name}\t{self.execution_time}\t{self.memory_usage}\n')
+
+        
 #######################################
 ## Data Handling Utils
 
@@ -152,15 +202,13 @@ def check_sqlite_table(con, table):
         bool: True if the table exists, False otherwise.
     """
     table_present = False
-    c = con.cursor()
-    c.execute('SELECT count(name) FROM sqlite_master WHERE type="table" AND name="%s"' % table)
-    if c.fetchone()[0] == 1:
-        table_present = True
-    else:
-        table_present = False
-    c.fetchall()
 
-    return(table_present)
+    result = con.execute('SELECT count(name) FROM sqlite_master WHERE type="table" AND name=?', (table,))
+
+    if result.fetchone()[0] == 1:
+        table_present = True
+
+    return table_present
 
 def check_sqlite_column_in_table(con, table, column):
     """
@@ -205,6 +253,31 @@ def check_package(package_name: str, module_path: Optional[str]=None):
         print(f"{package_name} is not installed. Please install it using 'pip install {package_name}'.")
         return None, False
 
+
+def file_basename_without_extension(file_path):
+    """
+    Returns the basename of a file without the extension including archive extensions.
+
+    Args:
+        file_path (str): Path to the file.
+
+    Returns:
+        str: Basename of the file without the extension.
+    """
+    # Get the base name of the file
+    base_name = os.path.basename(file_path)
+    
+    # Remove known archive extensions (gz, xz, tar, etc.)
+    archive_extensions = ['.gz', '.xz', '.tar', '.zip', '.rar', '.7z']
+    for ext in archive_extensions:
+        if base_name.endswith(ext):
+            base_name = base_name[:-len(ext)]
+    
+    # Remove other extensions
+    base_name, _ = os.path.splitext(base_name)
+    
+    return base_name
+    
 
 #######################################
 ## Decorators

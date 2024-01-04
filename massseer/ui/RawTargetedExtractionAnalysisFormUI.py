@@ -22,8 +22,8 @@ class RawTargetedExtractionAnalysisFormUI:
         """
         self.transition_list_file_path = None
         self.raw_file_path_input = None
-        self.osw_file_path_raw_workflow = None
-        self.diann_report_file_path_input = None
+        self.feature_file_path = None
+        self.feature_file_type = None
         
     def create_ui(self):    
         """
@@ -55,13 +55,11 @@ class RawTargetedExtractionAnalysisFormUI:
             self.raw_file_path_input = st.text_input("Enter file path", value=None, placeholder="*.mzML", key='raw_data_file_path_tmp', help="Path to the raw file (*.mzML)")
 
             # Tabs for different data workflows
-            st.subheader("Input Search Results (Optional)")
-            raw_data_osw, raw_data_diann = st.tabs(["OpenSwath", "DIA-NN"])
-            with raw_data_osw:
-                self.osw_file_path_raw_workflow = st.text_input("Enter file path of the PyProphet scored OSW file", value=None, placeholder="*.osw", key='raw_data_osw_file_pat_tmp', help="Path to the PyProphet scored OSW file (*.osw)")
+            st.subheader("Input Search Results")
 
-            with raw_data_diann:
-                self.diann_report_file_path_input = st.text_input("Enter file path of DIA-NNs report file", value=None, placeholder="*.tsv", key='diann_report_file_path_tmp', help="Path to the DIA-NN report file (*.tsv)")
+            cols = st.columns([0.7, 0.3])
+            self.feature_file_path = cols[0].text_input("Enter file path of the feature file", value=None, placeholder="*.osw / *.tsv", key='feature_file_path_tmp', help="Path to the feature file (*.osw / *.tsv) from an OpenSwath or DIA-NN workflow")
+            self.feature_file_type = cols[1].selectbox("Select file type", options=["OpenSWATH", "DIA-NN"], key='feature_file_type_tmp', help="Select the file type of the feature file")
                 
             # Submit button for form
             begin_button = st.form_submit_button('Begin Targeted Extraction')

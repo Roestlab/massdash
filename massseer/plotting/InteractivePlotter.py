@@ -1,28 +1,55 @@
+from typing import List, Optional, Literal
 import streamlit as st
+
+# Data modules
 import numpy as np
 from scipy.signal import savgol_filter
 
-import matplotlib.pyplot as plt
+# Plotting modules
 from bokeh.plotting import figure
-from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, DataRange1d, HoverTool, Label
+from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, HoverTool
 from bokeh.palettes import Category20, Viridis256
 
+# Plotting
 from massseer.plotting.GenericPlotter import GenericPlotter, PlotConfig
+# Structs
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from massseer.structs.Chromatogram import Chromatogram
 from massseer.structs.Mobilogram import Mobilogram
 from massseer.structs.Spectrum import Spectrum
-from massseer.chromatogram_data_handling import normalize
-from massseer.util import check_streamlit
-from typing import List, Optional, Literal
-
-
+# Data processing
+from massseer.dataProcessing.transformations import normalize
+# Utils
+from massseer.util import LOGGER, check_streamlit
 
 class InteractivePlotter(GenericPlotter):
+    """
+    Class for generating interactive plots using Bokeh.
     
-    def __init__(self, config: PlotConfig):
+    Attributes:
+        config (PlotConfig): The configuration object for the plot.
+        verbose (bool): Enables verbose mode.
+        
+    Methods:
+        plot: Plots the given transitionGroup using the specified plot type.
+        process_chrom: Process a chromatogram and add it to a Bokeh figure.
+        add_peak_boundaries: Adds peak boundaries to a Bokeh figure.
+        plot_chromatogram: Plots a chromatogram for a given TransitionGroup.
+        process_mobilo: Process a mobilogram and add it to a Bokeh figure.
+        plot_mobilogram: Plots the mobilogram for a given TransitionGroup.
+        process_spectra: Process a spectrum and add it to a Bokeh figure.
+        plot_spectra: Plots the spectra data for a given transition group.
+    """
+    def __init__(self, config: PlotConfig, verbose: bool=False):
         super().__init__(config)
+        self.fig = None
+        
+        LOGGER.name = "InteractivePlotter"
+        if verbose:
+            LOGGER.setLevel("DEBUG")
+        else:
+            LOGGER.setLevel("INFO")
 
     def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectra'] = 'chromatogram') -> figure:
         """
@@ -37,76 +64,79 @@ class InteractivePlotter(GenericPlotter):
             figure: The generated plot as a Bokeh figure object.
         """
         if plot_type == 'chromatogram':
-            return self.plot_chromatogram(transitionGroup, features)
+            plot =  self.plot_chromatogram(transitionGroup, features)
         elif plot_type == 'mobilogram':
-            return self.plot_mobilogram(transitionGroup)
+            plot =  self.plot_mobilogram(transitionGroup)
         elif plot_type == 'spectra':
-            return self.plot_spectra(transitionGroup)
+            plot =  self.plot_spectra(transitionGroup)
         else:
             raise ValueError("Unsupported plot plot_type")
+        
+        self.fig = plot
+        return plot
 
     def process_chrom(self, p: figure, chrom: Chromatogram, label: str, color: str='black', line_type: str="dashed", is_precursor: bool=True, transitionGroup: TransitionGroup=None) -> Line:
-            """
-            Process a chromatogram and add it to a Bokeh figure.
+        """
+        Process a chromatogram and add it to a Bokeh figure.
 
-            Args:
-                p (figure): Bokeh figure to add the chromatogram to.
-                chrom (Chromatogram): Chromatogram object to process.
-                label (str): Label for the chromatogram.
-                color (str, optional): Color for the chromatogram line. Defaults to 'black'.
-                line_type (str, optional): Line type for the chromatogram line. Defaults to "dashed".
-                is_precursor (bool, optional): Whether the chromatogram is for the precursor ion. Defaults to True.
-                transitionGroup (TransitionGroup, optional): TransitionGroup object containing precursor and product ion information. Defaults to None.
+        Args:
+            p (figure): Bokeh figure to add the chromatogram to.
+            chrom (Chromatogram): Chromatogram object to process.
+            label (str): Label for the chromatogram.
+            color (str, optional): Color for the chromatogram line. Defaults to 'black'.
+            line_type (str, optional): Line type for the chromatogram line. Defaults to "dashed".
+            is_precursor (bool, optional): Whether the chromatogram is for the precursor ion. Defaults to True.
+            transitionGroup (TransitionGroup, optional): TransitionGroup object containing precursor and product ion information. Defaults to None.
 
-            Returns:
-                Line: Bokeh line object representing the chromatogram.
-            """
-            rt = chrom.data
-            intensity = chrom.intensity
+        Returns:
+            Line: Bokeh line object representing the chromatogram.
+        """
+        rt = chrom.data
+        intensity = chrom.intensity
+        if self.smoothing_dict['type'] == 'sgolay':
+            try:
+                intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
+            except ValueError as ve:
+                if 'window_length must be less than or equal to the size of x' in str(ve):
+                    error_message = f"Error: The specified window length for sgolay smoothing is too large for transition = {label}. Try adjusting it to a smaller value."
+                else:
+                    error_message = f"Error: {ve}"
 
-            if self.smoothing_dict['type'] == 'sgolay':
-                try:
-                    intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
-                except ValueError as ve:
-                    if 'window_length must be less than or equal to the size of x' in str(ve):
-                        error_message = f"Error: The specified window length for sgolay smoothing is too large for transition = {label}. Try adjusting it to a smaller value."
-                    else:
-                        error_message = f"Error: {ve}"
+                if check_streamlit():
+                    st.error(error_message)
+                else:
+                    raise ValueError(error_message)
+        elif self.smoothing_dict['type'] == 'none':
+            pass
+        else:
+            raise ValueError("Unsupported smoothing type")
 
-                    if check_streamlit():
-                        print(error_message)
-                        # st.error(error_message)
-                    else:
-                        raise ValueError(error_message)
-            elif self.smoothing_dict['type'] == 'none':
-                pass
-            else:
-                raise ValueError("Unsupported smoothing type")
+        if self.scale_intensity:
+            intensity = np.array(normalize(intensity.tolist()))
 
-            if self.scale_intensity:
-                intensity = np.array(normalize(intensity.tolist()))
+        intensity = np.where(intensity < 0, 0, intensity)
 
-            intensity = np.where(intensity < 0, 0, intensity)
+        # Get precursor and product info
+        precursor_mz = None
+        product_mz = None
+        product_charge = None
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
 
-            # Get precursor and product info
-            precursor_mz = None
-            product_mz = None
-            product_charge = None
-            if hasattr(transitionGroup, 'targeted_transition_list'):
-                precursor_mz = transitionGroup.targeted_transition_list['PrecursorMz'].values[0]
-
-                if not is_precursor:
-                    label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
+            if not is_precursor:
+                label_info = transitionGroup.targeted_transition_list[transitionGroup.targeted_transition_list['Annotation'] == label]
+                if len(np.unique(label_info['ProductMz'].values)) > 1:
                     product_mz = np.unique(label_info['ProductMz'].values)[0]
+                if len(np.unique(label_info['ProductCharge'].values)) > 1:
                     product_charge = np.unique(label_info['ProductCharge'].values)[0]
 
-            source_data = {'x': rt, 'y': intensity, 'precursor_mz': [precursor_mz] * len(rt),
-                        'product_mz': [product_mz] * len(rt), 'product_charge': [product_charge] * len(rt)}
+        source_data = {'x': rt, 'y': intensity, 'precursor_mz': [precursor_mz] * len(rt),
+                    'product_mz': [product_mz] * len(rt), 'product_charge': [product_charge] * len(rt)}
 
-            source = ColumnDataSource(data=source_data)
-            line = p.line('x', 'y', source=source, line_width=2, line_color=color, line_alpha=0.5, line_dash=line_type)
+        source = ColumnDataSource(data=source_data)
+        line = p.line('x', 'y', source=source, line_width=2, line_color=color, line_alpha=0.5, line_dash=line_type)
 
-            return line
+        return line
 
     def add_peak_boundaries(self, p: figure, features: List[TransitionGroupFeature]) -> None:
         """
@@ -167,110 +197,110 @@ class InteractivePlotter(GenericPlotter):
         return p
 
     def plot_chromatogram(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]]) -> figure:
-            """
-            Plots a chromatogram for a given TransitionGroup.
+        """
+        Plots a chromatogram for a given TransitionGroup.
 
-            Args:
-                transitionGroup (TransitionGroup): The TransitionGroup to plot.
+        Args:
+            transitionGroup (TransitionGroup): The TransitionGroup to plot.
 
-            Returns:
-                A Bokeh figure object representing the chromatogram plot.
-            """
-            # Extract chromatogram data from the transitionGroup
-            precursorChroms = transitionGroup.precursorData
-            transitionChroms = transitionGroup.transitionData
+        Returns:
+            A Bokeh figure object representing the chromatogram plot.
+        """
+        # Extract chromatogram data from the transitionGroup
+        precursorChroms = transitionGroup.precursorData
+        transitionChroms = transitionGroup.transitionData
 
-            n_transitions = len(transitionChroms)
+        n_transitions = len(transitionChroms)
 
-            # Define a list of distinct colors
-            if n_transitions <=20 and n_transitions > 2:
-                colors = Category20[len(transitionChroms)]
-            elif n_transitions <=2 and n_transitions > 0:
-                colors = Category20[3]
-            elif n_transitions == 1:
-                colors = ['black']
-            else:
-                colors = Viridis256[0:len(transitionChroms)]
+        # Define a list of distinct colors
+        if n_transitions <=20 and n_transitions > 2:
+            colors = Category20[len(transitionChroms)]
+        elif n_transitions <=2 and n_transitions > 0:
+            colors = Category20[3]
+        elif n_transitions == 1:
+            colors = ['black']
+        else:
+            colors = Viridis256[0:len(transitionChroms)]
 
-            if hasattr(transitionGroup, 'targeted_transition_list'):
-                # Tooltips for interactive information
-                TOOLTIPS = [
-                        ("index", "$index"),
-                        ("(rt,int)", "(@x{0.00}, @y)"),
-                        ("precursor_mz", "@precursor_mz"),
-                        ("product_mz", "@product_mz"),
-                        ("product_charge", "@product_charge")
-                    ]
-            else:
-                # Tooltips for interactive information
-                TOOLTIPS = [
-                        ("index", "$index"),
-                        ("(rt,int)", "(@x{0.00}, @y)"),
-                    ]
+        if hasattr(transitionGroup, 'targeted_transition_list'):
+            # Tooltips for interactive information
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(rt,int)", "(@x{0.00}, @y)"),
+                    ("precursor_mz", "@precursor_mz"),
+                    ("product_mz", "@product_mz"),
+                    ("product_charge", "@product_charge")
+                ]
+        else:
+            # Tooltips for interactive information
+            TOOLTIPS = [
+                    ("index", "$index"),
+                    ("(rt,int)", "(@x{0.00}, @y)"),
+                ]
 
-            # Create a Bokeh figure
-            p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+        # Create a Bokeh figure
+        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
 
-            # Add title
-            if self.title is not None:
-                p.title.text = self.title
-                p.title.text_font_size = "16pt"
-                p.title.align = "center"
+        # Add title
+        if self.title is not None:
+            p.title.text = self.title
+            p.title.text_font_size = "16pt"
+            p.title.align = "center"
 
-            if self.subtitle is not None:
-                # Create a subtitle
-                p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
+        if self.subtitle is not None:
+            # Create a subtitle
+            p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
-            # Limit axes ranges
-            if self.x_range is not None and isinstance(self.x_range, list):
-                print(f"Info: Setting x-axis range to: {self.x_range}")
-                p.x_range = Range1d(self.x_range[0], self.x_range[1])
+        # Limit axes ranges
+        if self.x_range is not None and isinstance(self.x_range, list):
+            LOGGER.info(f"Setting x-axis range to: {self.x_range}")
+            p.x_range = Range1d(self.x_range[0], self.x_range[1])
 
-            if self.y_range is not None and isinstance(self.y_range, list):
-                print(f"Info: Setting y-axis range to: {self.y_range}")
-                p.y_range = Range1d(self.y_range[0], self.y_range[1])
+        if self.y_range is not None and isinstance(self.y_range, list):
+            LOGGER.info(f"Setting y-axis range to: {self.y_range}")
+            p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
-            p.sizing_mode = 'scale_width'
+        p.sizing_mode = 'scale_width'
 
-            # Create a legend
-            legend = Legend()
+        # Create a legend
+        legend = Legend()
 
-            # Create a list to store legend items
-            legend_items = []
+        # Create a list to store legend items
+        legend_items = []
 
-            if self.include_ms1:
-                for precursorChrom in precursorChroms:
-                    label = precursorChrom.label
-                    line = self.process_chrom(p, precursorChrom, label, transitionGroup=transitionGroup)
-                    legend_items.append((label, [line]))
+        if self.include_ms1:
+            for precursorChrom in precursorChroms:
+                label = precursorChrom.label
+                line = self.process_chrom(p, precursorChrom, label, transitionGroup=transitionGroup)
+                legend_items.append((label, [line]))
 
-            if self.include_ms2:
-                for i, transitionChrom in enumerate(transitionChroms):
-                    label = transitionChrom.label
-                    line = self.process_chrom(p, transitionChrom, label, color=colors[i], line_type='solid', is_precursor=False, transitionGroup=transitionGroup)
-                    legend_items.append((label, [line]))
-            
-            # Add legend items to the legend
-            legend.items = legend_items
+        if self.include_ms2:
+            for i, transitionChrom in enumerate(transitionChroms):
+                label = transitionChrom.label
+                line = self.process_chrom(p, transitionChrom, label, color=colors[i], line_type='solid', is_precursor=False, transitionGroup=transitionGroup)
+                legend_items.append((label, [line]))
+        
+        # Add legend items to the legend
+        legend.items = legend_items
 
-            # Add the legend to the plot
-            p.add_layout(legend, 'right')
+        # Add the legend to the plot
+        p.add_layout(legend, 'right')
 
-            p.legend.location = "top_left"
-            # p.legend.click_policy="hide"
-            p.legend.click_policy="mute"
+        p.legend.location = "top_left"
+        # p.legend.click_policy="hide"
+        p.legend.click_policy="mute"
 
-            # Customize the plot
-            p.legend.title = "Transition"
-            p.legend.label_text_font_size = "10pt"
-            p.grid.visible = True
-            p.toolbar_location = "above"
+        # Customize the plot
+        p.legend.title = "Transition"
+        p.legend.label_text_font_size = "10pt"
+        p.grid.visible = True
+        p.toolbar_location = "above"
 
-            # Add peak boundaries if available
-            if features is not None:
-                p = self.add_peak_boundaries(p, features)
+        # Add peak boundaries if available
+        if features is not None:
+            p = self.add_peak_boundaries(p, features)
 
-            return p
+        return p
 
     def process_mobilo(self, p: figure, mobilo: Mobilogram, label: str, color: str='black', line_type: str="dashed", is_precursor: bool=True, transitionGroup: TransitionGroup=None) -> Line:
         """
@@ -301,8 +331,7 @@ class InteractivePlotter(GenericPlotter):
                     error_message = f"Error: {ve}"
 
                 if check_streamlit():
-                    print(error_message)
-                    # st.error(error_message)
+                    st.error(error_message)
                 else:
                     raise ValueError(error_message)
         elif self.smoothing_dict['type'] == 'none':
@@ -391,17 +420,14 @@ class InteractivePlotter(GenericPlotter):
 
         # Limit axes ranges
         if self.x_range is not None:
-            print(f"Info: Setting x-axis range to: {self.x_range}")
+            LOGGER.info(f"Setting x-axis range to: {self.x_range}")
             p.x_range = Range1d(self.x_range[0], self.x_range[1])
         
         if self.y_range is not None:
-            print(f"Info: Setting y-axis range to: {self.y_range}")
+            LOGGER.info(f"Setting y-axis range to: {self.y_range}")
             p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
         p.sizing_mode = 'scale_width'
-
-        # Create a subtitle
-        p.add_layout(Title(text=self.subtitle, text_font_style="italic"), 'above')
 
         # Create a legend
         legend = Legend()
@@ -543,11 +569,11 @@ class InteractivePlotter(GenericPlotter):
 
         # Limit axes ranges
         if self.x_range is not None:
-            print(f"Info: Setting x-axis range to: {self.x_range}")
+            LOGGER.info(f"Setting x-axis range to: {self.x_range}")
             p.x_range = Range1d(self.x_range[0], self.x_range[1])
         
         if self.y_range is not None:
-            print(f"Info: Setting y-axis range to: {self.y_range}")
+            LOGGER.info(f"Setting y-axis range to: {self.y_range}")
             p.y_range = Range1d(self.y_range[0], self.y_range[1])
 
         p.sizing_mode = 'scale_width'
@@ -587,3 +613,13 @@ class InteractivePlotter(GenericPlotter):
         p.toolbar_location = "above"
 
         return p
+    
+    def show(self):
+        '''
+        Show the plot.
+        '''
+        from bokeh.io import output_notebook
+        from bokeh.plotting import show
+
+        output_notebook()
+        show(self.fig)

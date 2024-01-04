@@ -1,12 +1,13 @@
 import streamlit as st
 
+# UI
 from massseer.ui.FileInputXICDataUISettings import FileInputXICDataUISettings
 from massseer.ui.FileInputRawDataUISettings import FileInputRawDataUISettings
 from massseer.ui.FileInputSearchResultsAnalysisUISettings import FileInputSearchResultsAnalysisUISettings
 from massseer.ui.ExtractedIonChromatogramAnalysisFormUI import ExtractedIonChromatogramAnalysisFormUI
 from massseer.ui.RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
 from massseer.ui.SearchResultsAnalysisFormUI import SearchResultsAnalysisFormUI
-
+# Utils
 from massseer.util import copy_attributes
 
 class MassSeerGUI:
@@ -21,18 +22,23 @@ class MassSeerGUI:
         show_welcome_message: Displays a welcome message and input fields for OpenSwath and DIA-NN workflows.
         show_file_input_settings: Displays the file input settings.
     """
-    def __init__(self):
+    def __init__(self, verbose, perf, perf_output="MassSeer_Performance_Report.txt"):
         """
         Initializes the MassSeerGUI class.
 
         Args:
-            None
+            verbose (bool): Enables verbose mode.
+            perf (bool): Enables performance mode.
+            perf_output (str): The path to the performance output file.
 
         Returns:
             None
         """
         self.welcome_container = st.empty()
         self.file_input_settings = None
+        self.verbose = verbose
+        self.perf = perf
+        self.perf_output = perf_output
         
         # initialize load_toy_dataset key in clicked session state
         # This is needed because streamlit buttons return True when clicked and then default back to False.
@@ -83,7 +89,7 @@ class MassSeerGUI:
 
         return self
 
-    def show_file_input_settings(self, feature_file_path=None, xic_file_path=None, transition_list_file_path=None, feature_file_entries_dict: dict=None):
+    def show_file_input_settings(self, feature_file_path=None, xic_file_path=None, transition_list_file_path=None, feature_file_type=None, feature_file_entries_dict: dict=None):
         """
         Displays the file input settings.
 
@@ -100,7 +106,8 @@ class MassSeerGUI:
             self.file_input_settings.get_sqmass_files()
         elif st.session_state.workflow == "raw_data":
             self.file_input_settings = FileInputRawDataUISettings()
-            self.file_input_settings.create_ui(transition_list_file_path, xic_file_path, feature_file_path)     
+            self.file_input_settings.create_ui(transition_list_file_path, xic_file_path, feature_file_path, feature_file_type)
+            self.file_input_settings.get_mzml_files()     
         elif st.session_state.workflow == "search_results_analysis":
             self.file_input_settings = FileInputSearchResultsAnalysisUISettings()
             self.file_input_settings.create_ui(feature_file_entries_dict)

@@ -27,8 +27,9 @@ class ChromatogramPlotSettings:
         self.set_y_range = False
         self.do_smoothing = 'none'
         self.smoothing_dict = {}
+        
 
-    def create_sidebar(self):
+    def create_sidebar(self, include_raw_data_settings=False):
         """
         Creates a sidebar in Streamlit for adjusting the plot settings.
 
@@ -40,6 +41,14 @@ class ChromatogramPlotSettings:
         self.include_ms1 = st.sidebar.checkbox("Include MS1 Traces", value=self.include_ms1)
         self.include_ms2 = st.sidebar.checkbox("Include MS2 Traces", value=self.include_ms2)
 
+        # If raw data, add checkboxes to display spectrum, chromatogram and mobilgoram plots
+        if include_raw_data_settings:
+            self.display_plot_dimension_type = st.sidebar.selectbox("Display Plot Type", ['1D', '2D', '3D'])
+            if self.display_plot_dimension_type == '1D':
+                    self.display_spectrum = st.sidebar.checkbox("Display Spectrum", value=True)
+                    self.display_chromatogram = st.sidebar.checkbox("Display Chromatogram", value=True)
+                    self.display_mobilogram = st.sidebar.checkbox("Display Mobilogram", value=True)            
+
         with st.sidebar.expander("Advanced Settings"):
             # Display plots in N columns
             self.num_plot_columns = st.number_input("Number of Columns", min_value=1, value=self.num_plot_columns)
@@ -49,7 +58,7 @@ class ChromatogramPlotSettings:
             self.set_y_range = st.checkbox("Link y-range", value=self.set_y_range)
 
             # Perform Smoothing of the chromatograms
-            self.do_smoothing = st.selectbox("Smoothing", ['sgolay', 'none'])
+            self.do_smoothing = st.selectbox("Smoothing", ['sgolay', 'gaussian','none'])
 
             self.smoothing_dict['type'] = self.do_smoothing
             if self.do_smoothing == 'sgolay':
@@ -61,6 +70,17 @@ class ChromatogramPlotSettings:
 
                 # Add widget for sgolay_frame_length in the second column
                 self.smoothing_dict['sgolay_frame_length'] = col2.number_input("Frame Length", min_value=1, max_value=50, value=11, step=1)
+
+            if self.do_smoothing == 'gaussian':
+                # Create two columns for side-by-side widgets
+                col1, col2 = st.columns(2)
+
+                # Add widget for gaussian in the first column
+                self.smoothing_dict['gaussian_window_size'] = col1.number_input("Gaussian Window Size", min_value=1, max_value=100, value=11, step=1)
+
+                # Add widget for gaussian sigma in the second column
+                self.smoothing_dict['gaussian_sigma'] = col2.number_input("Gaussian Sigma", min_value=0.1, max_value=10.0, value=4.0, step=0.1)
+            
             
             self.scale_intensity = st.checkbox("Scale Intensity", value=False, key='plotting_settings_scale_intensity')
         return self  # Return self for method chaining
