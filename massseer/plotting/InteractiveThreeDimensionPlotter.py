@@ -253,6 +253,7 @@ class InteractiveThreeDimensionPlotter:
             vertical_spacing = 0.05
             height_scale_factor = width_scale_factor = 800
         elif self.config.context == "jupyter":
+            ratio = 0.75
             horizontal_spacing = 0.03
             vertical_spacing = 0.03
             height_scale_factor = 400
@@ -339,7 +340,7 @@ class InteractiveThreeDimensionPlotter:
                             showlegend = False, showscale=False)
 
             scene = dict(aspectmode='manual',
-                        aspectratio=dict(x=1, y=1, z=1),
+                        aspectratio=dict(x=ratio, y=ratio, z=ratio),
                         camera=dict(eye=dict(x=1.25, y=1.25, z=1.25)),
                         xaxis_title = x_title,
                         yaxis_title = y_title,
