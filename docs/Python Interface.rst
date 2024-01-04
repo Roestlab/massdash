@@ -8,4 +8,5 @@ Python Interface
    nbs/Loading Data
    nbs/Plotting1D
    nbs/Advanced Plotting
+   nbs/Peak Picking
 
