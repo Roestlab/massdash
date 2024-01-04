@@ -6,4 +6,6 @@ Python Interface
 
    nbs/Quick Start
    nbs/Loading Data
+   nbs/Plotting1D
+   nbs/Advanced Plotting
 
