@@ -60,6 +60,7 @@ class InteractiveTwoDimensionPlotter:
             config (PlotConfig): The configuration for plotting.
         """
         self.config = config
+        self.fig = None # set by the plot method
 
     def plot(self, featureMap: FeatureMap):
         """
@@ -73,6 +74,7 @@ class InteractiveTwoDimensionPlotter:
             plots = self.plot_aggregated_heatmap(featureMap)
         else:
             plots = self.plot_individual_heatmaps(featureMap)
+        self.fig = plots
         return plots
 
     def plot_individual_heatmaps(self, featureMap: FeatureMap):
@@ -87,8 +89,6 @@ class InteractiveTwoDimensionPlotter:
         elif self.config.type_of_heatmap == "retention time vs ion mobility":
             arr = df.pivot_table(index='im', columns='rt', values='int', aggfunc="sum")
 
-        im_arr, rt_arr, dw_main, dh_main, rt_min, rt_max, im_min, im_max = self.get_plot_parameters(arr)
-
         linked_crosshair = CrosshairTool(dimensions="both")
 
         two_d_plots = []
@@ -98,13 +98,15 @@ class InteractiveTwoDimensionPlotter:
             
             if not self.config.include_ms2 and ms_level == 2:
                 continue
-            
+
             if self.config.type_of_heatmap == "m/z vs retention time":
                 arr = group_df.pivot_table(index='mz', columns='rt', values='int', aggfunc="sum")
             elif self.config.type_of_heatmap == "m/z vs ion mobility":
                 arr = group_df.pivot_table(index='mz', columns='im', values='int', aggfunc="sum")
             elif self.config.type_of_heatmap == "retention time vs ion mobility":
                 arr = group_df.pivot_table(index='im', columns='rt', values='int', aggfunc="sum")
+
+            im_arr, rt_arr, dw_main, dh_main, rt_min, rt_max, im_min, im_max = self.get_plot_parameters(arr)
             arr = self.prepare_array(arr)
 
             title_text = f"MS{ms_level} | {Annotation} | {product_mz} m/z"
@@ -240,3 +242,17 @@ class InteractiveTwoDimensionPlotter:
         plot.grid.visible = False
 
         return plot
+
+    def show(self):
+        """
+        Show the plots.
+        """
+        from bokeh.plotting import show
+        from bokeh.io import output_notebook 
+        output_notebook()
+        if isinstance(self.fig, list):
+            for fig in self.fig:
+                show(fig)
+        else:
+            show(self.fig)
+

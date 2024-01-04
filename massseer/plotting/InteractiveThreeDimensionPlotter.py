@@ -39,6 +39,7 @@ class InteractiveThreeDimensionPlotter:
     """
     def __init__(self, config: PlotConfig):
         self.config = config
+        self.fig = None # set by plot method
         
     def plot(self, featureMap: FeatureMap):
         """
@@ -55,6 +56,7 @@ class InteractiveThreeDimensionPlotter:
             plots = self.plot_individual_3d_surface(featureMap, self.config.num_plot_columns)
         elif self.config.type_of_3d_plot == "3D Line Plot" and not self.config.aggregate_mslevels:
             plots = self.plot_3d_vline(featureMap)
+        self.fig = plots
         return plots
     
     def plot_3d_scatter(self, featureMap: FeatureMap, num_rows: int = -1, num_cols: int = 2) -> go.Figure:
@@ -70,6 +72,24 @@ class InteractiveThreeDimensionPlotter:
         Returns:
             go.Figure: The Plotly Figure object.
         """
+        if self.config.context == "streamlit":
+            marker_size = 5
+            height_scale_factor = width_scale_factor = 800
+            spacing = 0.05
+            ratio = 1
+        elif self.config.context == "jupyter": 
+            marker_size = 2
+            ratio = 0.75
+            if num_rows == 1:
+                height_scale_factor = width_scale_factor = 800
+                spacing = 0.01
+            else: # num_rows == -1
+                height_scale_factor = 400
+                width_scale_factor = 150
+                spacing = 0.01
+        else:
+            raise ValueError(f"Error: Invalid context type: {self.config.context}, must be either 'streamlit' or 'jupyter'")
+
         if num_rows == -1:
             # Determine the number of unique annotations
             num_rows = num_annotations = len(featureMap['Annotation'].unique())
@@ -85,7 +105,7 @@ class InteractiveThreeDimensionPlotter:
             rows=num_rows, cols=num_cols,
             subplot_titles=subplot_titles,
             specs=specs,
-            horizontal_spacing=0.05, vertical_spacing=0.05
+            horizontal_spacing=spacing, vertical_spacing=spacing
         )
 
         # Create a 3D scatter plot for each group
@@ -110,7 +130,7 @@ class InteractiveThreeDimensionPlotter:
             trace = go.Scatter3d(
                 x=x, y=y, z=z,
                 mode='markers',
-                marker=dict(size=5, color=intensity, colorscale=colorscale),
+                marker=dict(size=marker_size, color=intensity, colorscale=colorscale),
                 name=group_key[1]
             )
 
@@ -125,7 +145,7 @@ class InteractiveThreeDimensionPlotter:
             subfig.add_trace(trace, row=row_num, col=col_num)  
             
             scene = dict(aspectmode='manual',
-                        aspectratio=dict(x=1, y=1, z=1),
+                        aspectratio=dict(x=ratio, y=ratio, z=ratio),
                         camera=dict(eye=dict(x=1.25, y=1.25, z=1.25)),
                         xaxis_title = "RT",
                         yaxis_title = "MZ",
@@ -135,8 +155,8 @@ class InteractiveThreeDimensionPlotter:
 
         # Update the layout of the overall figure
         subfig.update_layout(
-            height=num_annotations * 800,
-            width=num_annotations * 800,
+            height=num_annotations * height_scale_factor,
+            width=num_annotations * width_scale_factor,
             showlegend=False
         )
 
@@ -228,11 +248,25 @@ class InteractiveThreeDimensionPlotter:
             go.Figure: The Plotly Figure object.
         """
         # Create a subplot with 3D surface plots for each group
+        if self.config.context == "streamlit":
+            horizontal_spacing = 0.05
+            vertical_spacing = 0.05
+            height_scale_factor = width_scale_factor = 800
+        elif self.config.context == "jupyter":
+            ratio = 0.75
+            horizontal_spacing = 0.03
+            vertical_spacing = 0.03
+            height_scale_factor = 400
+            num_cols = 2
+            width_scale_factor = 150
+        else:
+            raise ValueError(f"Error: Invalid context type: {self.config.context}, must be either 'streamlit' or 'jupyter'")
+
         df = featureMap.feature_df
         subfig = make_subplots(rows=len(df['Annotation'].unique()), cols=num_cols,
                             subplot_titles=df['Annotation'].unique(),
                             specs=[[{'type': 'surface'}] * num_cols for _ in range(len(df['Annotation'].unique()))],
-                            horizontal_spacing=0.05, vertical_spacing=0.05)
+                            horizontal_spacing=horizontal_spacing, vertical_spacing=vertical_spacing)
 
         # Iterate over groups and create subplots
         for i, (group_key, group_df) in enumerate(df.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz'])):
@@ -306,7 +340,7 @@ class InteractiveThreeDimensionPlotter:
                             showlegend = False, showscale=False)
 
             scene = dict(aspectmode='manual',
-                        aspectratio=dict(x=1, y=1, z=1),
+                        aspectratio=dict(x=ratio, y=ratio, z=ratio),
                         camera=dict(eye=dict(x=1.25, y=1.25, z=1.25)),
                         xaxis_title = x_title,
                         yaxis_title = y_title,
@@ -315,8 +349,8 @@ class InteractiveThreeDimensionPlotter:
             subfig.update_scenes(scene, row=row_num, col=col_num)
 
         # Update the layout of the overall figure
-        subfig.update_layout(height=len(df['Annotation'].unique()) * 800,
-                            width=len(df['Annotation'].unique()) * 800, showlegend=False)
+        subfig.update_layout(height=len(df['Annotation'].unique()) * height_scale_factor,
+                            width=len(df['Annotation'].unique()) * width_scale_factor, showlegend=False)
         
         subfig.update_coloraxes(showscale=False)
 
@@ -379,4 +413,11 @@ class InteractiveThreeDimensionPlotter:
         subfig.update_coloraxes(showscale=False)
 
         return subfig
+    
+    def show(self):
+        """
+        Show the plot.
+        """
+        px.init_notebook_mode()
+        self.fig.show()
     
