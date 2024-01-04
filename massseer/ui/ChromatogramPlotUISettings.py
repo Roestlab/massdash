@@ -27,10 +27,24 @@ class ChromatogramPlotUISettings:
         self.do_smoothing = 'none'
         self.smoothing_dict = {}
         self.scale_intensity = False
+        self.display_plot_dimension_type = '1D'
+        self.display_spectrum = False
+        self.display_chromatogram = True
+        self.display_mobilogram = True
+        self.display_extracted_data_as_df = True
+        self.aggregate_mslevels = False
+        self.type_of_heatmap = "m/z vs retention time"
+        self.type_of_3d_plot = "3D Scatter Plot"
+        self.type_of_comparison = "retention time vs ion mobility"
+        
 
-    def create_ui(self):
+    def create_ui(self, include_raw_data_settings: bool=False, is_ion_mobility_data: bool=False):
         """
         Creates a sidebar in Streamlit for adjusting the plot settings.
+
+        Args:
+            include_raw_data_settings (bool): Whether to include raw data settings in the sidebar. Defaults to False.
+            is_ion_mobility_data (bool): Whether the data is ion mobility data. Defaults to False.
 
         Returns:
             self (ChromatogramPlotSettings): The current instance of the ChromatogramPlotSettings class.
@@ -43,6 +57,34 @@ class ChromatogramPlotUISettings:
             self.include_ms1 = st.checkbox("Show MS1 Traces", value=self.include_ms1, help="Show MS1 traces in the chromatogram plot.")
         with col2:
             self.include_ms2 = st.checkbox("Show MS2 Traces", value=self.include_ms2, help="Show MS2 traces in the chromatogram plot.")
+
+        # If raw data, add checkboxes to display spectrum, chromatogram and mobilgoram plots
+        if include_raw_data_settings:
+            self.display_plot_dimension_type = st.sidebar.selectbox("Display Plot Type", ['1D', '2D', '3D'])
+            if self.display_plot_dimension_type == '1D':
+                    self.display_spectrum = st.sidebar.checkbox("Display Spectrum", value=False)
+                    self.display_chromatogram = st.sidebar.checkbox("Display Chromatogram", value=True)
+                    if is_ion_mobility_data:
+                        self.display_mobilogram = st.sidebar.checkbox("Display Mobilogram", value=True)
+                    else:
+                        self.display_mobilogram = False
+            if self.display_plot_dimension_type == '2D':
+                self.aggregate_mslevels = st.sidebar.checkbox("Aggregate MS Levels", value=False, help="Aggregate MS1 and MS2 data into a single feature map.")
+                if is_ion_mobility_data:
+                    self.type_of_heatmap = st.sidebar.selectbox("Type of Heatmap", ["m/z vs retention time", "m/z vs ion mobility", "retention time vs ion mobility"], index=2, help="The type of heatmap to display.")
+                else:
+                    self.type_of_heatmap = st.sidebar.selectbox("Type of Heatmap", ["m/z vs retention time"], index=0, help="The type of heatmap to display.")
+            if self.display_plot_dimension_type == '3D':
+                self.aggregate_mslevels = st.sidebar.checkbox("Aggregate MS Levels", value=False, help="Aggregate MS1 and MS2 data into a single feature map.")
+                if is_ion_mobility_data:
+                    self.type_of_3d_plot = st.sidebar.selectbox("Type of 3D Plot", ["3D Line Plot", "3D Scatter Plot", "3D Surface Plot"], help="The type of 3D plot to display.")
+                else:
+                    self.type_of_3d_plot = st.sidebar.selectbox("Type of 3D Plot", ["3D Line Plot"], help="The type of 3D plot to display.")
+                
+                if self.type_of_3d_plot == "3D Surface Plot":
+                    self.type_of_comparison = st.sidebar.selectbox("Type of Comparison", ["retention time vs ion mobility", "retention time vs m/z", "ion mobility vs m/z", "retention time vs ion mobility vs m/z"], help="The type of heatmap to display.")
+                    
+            self.display_extracted_data_as_df = st.sidebar.checkbox("Display Extracted Data as DataFrame", value=True, help="Display the extracted data as a DataFrame.")
 
         with st.sidebar.expander("Advanced Settings"):
             # Display plots in N columns
@@ -58,7 +100,7 @@ class ChromatogramPlotUISettings:
                 self.set_y_range = st.checkbox("Share y-range", value=self.set_y_range, help="Share the y-range of the plots.")
 
             # Perform Smoothing of the chromatograms
-            self.do_smoothing = st.selectbox("Smoothing", ['sgolay', 'none'], help="The type of smoothing to apply to the chromatograms.")
+            self.do_smoothing = st.selectbox("Smoothing", ['none', 'sgolay'], help="The type of smoothing to apply to the chromatograms.")
 
             self.smoothing_dict['type'] = self.do_smoothing
             if self.do_smoothing == 'sgolay':
@@ -89,4 +131,9 @@ class ChromatogramPlotUISettings:
             "set_y_range": self.set_y_range,
             "do_smoothing": self.do_smoothing,
             "smoothing_dict": self.smoothing_dict,
+            "scale_intensity": self.scale_intensity,
+            "aggregate_mslevels": self.aggregate_mslevels,
+            "type_of_heatmap": self.type_of_heatmap,
+            "type_of_3d_plot": self.type_of_3d_plot,
+            "type_of_comparison": self.type_of_comparison
         }

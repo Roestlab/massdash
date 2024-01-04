@@ -64,3 +64,31 @@ pip install -r requirements.txt
 MassSeer gui
 ```
 
+# Running MassSeer GUI from a Remote Machine
+
+Login to your remote machine
+
+```
+your_user_name@remote_ip_address
+```
+
+Navigate to MassSeer directory and start GUI. 
+
+```
+MassSeer gui
+```
+
+You will receive a message letting you know you can view Streamlit app in your browser with two URLs. 
+
+```
+  Network URL: http://192.168.142.176:8501
+  External URL: http://142.150.84.40:8501
+```
+
+In your local machine, start a fresh terminal window. And enter the following command. Replace '----' with the last 4 digits from the URLs above. In this example, '----' would be 8501.
+
+```
+ssh -NfL localhost:----:localhost:---- your_user_name@remote_ip_address
+```
+
+Now you can copy Network/External url to your local machine browser and use MassSeer. 

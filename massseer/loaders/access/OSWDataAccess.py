@@ -38,31 +38,39 @@ import pandas as pd
 import sqlite3
 from massseer.util import check_sqlite_column_in_table, check_sqlite_table
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from typing import List
+from massseer.loaders.access.GenericResultsAccess import GenericResultsAccess
+from typing import List, Literal
 
-class OSWDataAccess:
+class OSWDataAccess(GenericResultsAccess):
     """
     A class for accessing data from an OpenSWATH SQLite database.
 
     Attributes:
         conn (sqlite3.Connection): A connection to the SQLite database.
         c (sqlite3.Cursor): A cursor for executing SQL statements on the database.
+        verbose (bool): Whether to print verbose output.
+        mode (str): The mode to use when intiating the data access object, to control which attributes get initialized.
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename: str, verbose: bool=False, mode: Literal['module', 'gui'] = 'module'):
         """
         Initializes a new instance of the OSWDataAccess class.
 
         Args:
             filename (str): The path to the SQLite database file.
         """
+        super().__init__(filename, verbose)
         self.conn = sqlite3.connect(filename)
         self.c = self.conn.cursor()
         
         # hashtable, each run is its own data 
         self._initializePeptideHashtable()
         self._initializeRunHashtable()
-
+        self._initializeFeatureScoreHashtable()
+        
+        if mode == 'gui':
+            self.df = self.getAllTopTransitionGroupFeaturesDf()
+        
 
     ###### INDICES CREATOR ######
     def _initialize_indices(self):
@@ -84,10 +92,28 @@ class OSWDataAccess:
             INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID'''
         tmp = pd.read_sql(stmt, self.conn)
         self.peptideHash = tmp.set_index(['MODIFIED_SEQUENCE', 'CHARGE'])
-
+    
+    def _initializeFeatureScoreHashtable(self):
+        if check_sqlite_table(self.conn, "SCORE_MS2"):
+            join_score_ms2 = "INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID"
+            select_score_ms2 = """SCORE_MS2.RANK AS peakgroup_rank,
+SCORE_MS2.QVALUE AS ms2_mscore,"""
+        else:
+            join_score_ms2 = ""
+            select_score_ms2 = ""
+            
+        stmt = f"""
+        SELECT FEATURE.ID AS FEATURE_ID,
+        {select_score_ms2}
+        FEATURE.PRECURSOR_ID,
+        FEATURE.RUN_ID
+        FROM FEATURE
+        {join_score_ms2}
+        """
+        tmp = pd.read_sql(stmt, self.conn)
+        self.featureScoreHash = tmp.set_index(['FEATURE_ID', 'PRECURSOR_ID', 'RUN_ID'])
 
     ###### INTERNAL ACCESSORS ######
-
     def _getFeaturesFromPrecursorIdAndRunDf(self, run_id: str, precursor_id: int) -> pd.DataFrame:
         if check_sqlite_table(self.conn, "SCORE_MS2"):
             join_score_ms2 = "INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID"
@@ -112,9 +138,12 @@ class OSWDataAccess:
         
         stmt = f"""SELECT 
                 FEATURE.ID AS feature_id,
-                PRECURSOR_ID,
+                FEATURE.PRECURSOR_ID as PRECURSOR_ID,
+                PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
+                PRECURSOR.CHARGE AS Charge,
                 FEATURE_MS2.AREA_INTENSITY AS areaIntensity,
-                FEATURE_MS2.APEX_INTENSITY AS Intensity,
+                FEATURE_MS2.APEX_INTENSITY AS apexIntensity,
+                PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
                 FEATURE.EXP_RT AS RT,
                 FEATURE.LEFT_WIDTH AS leftWidth,
                 FEATURE.RIGHT_WIDTH AS rightWidth,
@@ -125,20 +154,78 @@ class OSWDataAccess:
                 FROM FEATURE
                 INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
                 INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
+                INNER JOIN PRECURSOR ON PRECURSOR.ID = FEATURE.PRECURSOR_ID
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
                 {join_score_ms2}
                 {join_score_ipf}
-                WHERE RUN_ID = {run_id} AND PRECURSOR_ID = {precursor_id}
+                WHERE RUN_ID = {run_id} AND FEATURE.PRECURSOR_ID = {precursor_id}
                 """
 
-        return pd.read_sql(stmt, self.conn)
-   
-
+        out = pd.read_sql(stmt, self.conn)
+        out = out.rename(columns={'leftWidth': 'leftBoundary', 
+                                    'rightWidth': 'rightBoundary', 
+                                    'Intensity': 'areaIntensity', 
+                                    'apexIntensity' : 'consensusApexIntensity',
+                                    'RT': 'consensusApex', 
+                                    'ms2_mscore' : 'qvalue',
+                                    'Charge': 'precursor_charge',
+                                    'ModifiedPeptideSequence': 'sequence',
+                                    'PrecursorMz': 'precursor_mz',
+                                    'IM': 'consensusApexIM',
+                                    'PRECURSOR_ID': 'precursor_id',
+                                    'RUN_ID': 'run_id'})
+        return out
+    
     def _getFeaturesFromPrecursorIdAndRun(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
         df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
         out = []
         for _, i in df.iterrows():
-            out.append(TransitionGroupFeature(i['leftWidth'], i['rightWidth'], areaIntensity=i['Intensity'], qvalue= i['ipf_mscore'] if 'ipf_mscore' in i else i['ms2_mscore'] )) 
+            out.append(TransitionGroupFeature(i['leftBoundary'], 
+                                              i['rightBoundary'], 
+                                              areaIntensity=i['areaIntensity'], 
+                                              consensusApex=i['consensusApex'],
+                                              qvalue= i['ipf_mscore'] if 'ipf_mscore' in i else i['qvalue'], 
+                                              precursor_charge=i['precursor_charge'], 
+                                              sequence=i['sequence'], 
+                                              consensusApexIntensity=i['consensusApexIntensity'],
+                                              consensusApexIM=i['consensusApexIM'])) # will be -1 if IM is not present
         return out
+    
+    def _getTopFeatureFromPrecursorIdAndRun(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
+        df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
+        if 'peakgroup_rank' in df.columns:
+            df = df[df['peakgroup_rank'] == 1].iloc[0]
+        else:
+            raise ValueError("SCORE_MS2 table not found, cannot get top feature")
+        return TransitionGroupFeature(df['leftBoundary'], 
+                                            df['rightBoundary'], 
+                                            areaIntensity=df['consensusApexIntensity'], 
+                                            qvalue= df['ipf_mscore'] if 'ipf_mscore' in df else df['qvalue'], 
+                                            precursor_charge=df['precursor_charge'], 
+                                            sequence=df['sequence'], 
+                                            consensusApex=df['consensusApex'],
+                                            consensusApexIntensity=df['consensusApexIntensity'],
+                                            consensusApexIM=df['consensusApexIM']) # will be -1 if IM is not present
+ 
+    def _getTopFeatureFromPrecursorIdAndRunDf(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
+        df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
+        df = df.rename(columns={'leftWidth': 'leftBoundary', 
+                                    'rightWidth': 'rightBoundary', 
+                                    'Intensity': 'consensusApexIntensity', 
+                                    'RT': 'consensusApex', 
+                                    'ms2_mscore' : 'qvalue',
+                                    'Charge': 'precursor_charge',
+                                    'ModifiedPeptideSequence': 'sequence',
+                                    'PrecursorMz': 'precursor_mz',
+                                    'IM': 'consensusApexIM',
+                                    'PRECURSOR_ID': 'precursor_id',
+                                    'RUN_ID': 'run_id'})
+        
+        if 'peakgroup_rank' in df.columns:
+            return df[df['peakgroup_rank'] == 1].iloc[[0]]
+        else:
+            raise ValueError("SCORE_MS2 table not found, cannot get top feature")
 
     def _getTransitionsFromPrecursorId(self, precursor_id:int) -> pd.DataFrame:
         '''
@@ -172,6 +259,96 @@ class OSWDataAccess:
             return df.values[0]
    
     #### PUBLIC ACCESSORS ####
+    def getAllTopTransitionGroupFeaturesDf(self) -> pd.DataFrame:
+        """
+        Retrieves all the top ranking features from the database.
+
+        Returns:
+            pandas.DataFrame: The top ranking features per assay.
+        """
+        # Get top ranking feature ids from featureScoreHash
+        if 'ms2_mscore' in self.featureScoreHash.columns:
+            feature_ids = self.featureScoreHash.loc[self.featureScoreHash["peakgroup_rank"]==1].index.get_level_values("FEATURE_ID")
+        else:
+            raise KeyError("No ms2_mscore column found in featureScoreHash! You need to perform PyProphet ms2 / ms1ms2 scoring first.")
+        
+        stmt = f"""SELECT
+            PROTEIN.PROTEIN_ACCESSION AS ProteinId,
+            PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
+            PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
+            PRECURSOR.CHARGE AS PrecursorCharge,
+            SCORE_MS2.QVALUE AS Qvalue
+            from 
+            FEATURE
+            INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+            INNER JOIN PRECURSOR ON PRECURSOR.ID = FEATURE.PRECURSOR_ID
+            INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+            INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
+            INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+            INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+            WHERE FEATURE.ID IN ({','.join(map(str, feature_ids))})"""
+        data = pd.read_sql(stmt, self.conn)
+        
+        return data
+            
+    #### PUBLIC ACCESSORS ####
+    def load_data(self) -> pd.DataFrame: ##TODO remove?
+        """
+        Retrieves all the top ranking features from the database.
+
+        Returns:
+            pandas.DataFrame: The top ranking features per assay.
+        """
+        # Check if EXP_IM in FEATURE table
+        if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
+            select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
+        else:
+            select_feature_exp_im = "-1 AS IM,"
+        
+        # Get top ranking feature ids from featureScoreHash
+        if 'ms2_mscore' in self.featureScoreHash.columns:
+            feature_ids = self.featureScoreHash.loc[self.featureScoreHash["peakgroup_rank"]==1].index.get_level_values("FEATURE_ID")
+        else:
+            raise KeyError("No ms2_mscore column found in featureScoreHash! You need to perform PyProphet ms2 / ms1ms2 scoring first.")
+            
+        stmt = f"""SELECT 
+            RUN.FILENAME AS filename,
+            FEATURE.EXP_RT AS RT,
+            {select_feature_exp_im}
+            FEATURE.EXP_RT - FEATURE.DELTA_RT AS assay_rt,
+            FEATURE.DELTA_RT AS delta_rt,
+            FEATURE.NORM_RT AS iRT,
+            PRECURSOR.LIBRARY_RT AS assay_iRT,
+            FEATURE.NORM_RT - PRECURSOR.LIBRARY_RT AS delta_iRT,
+            PROTEIN.PROTEIN_ACCESSION AS ProteinId,
+            PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
+            PEPTIDE.MODIFIED_SEQUENCE AS ModifiedPeptideSequence,
+            PRECURSOR.CHARGE AS PrecursorCharge,
+            PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
+            FEATURE_MS2.AREA_INTENSITY AS Intensity,
+            FEATURE_MS1.AREA_INTENSITY AS aggr_prec_Peak_Area,
+            FEATURE_MS1.APEX_INTENSITY AS aggr_prec_Peak_Apex,
+            FEATURE.LEFT_WIDTH AS leftWidth,
+            FEATURE.RIGHT_WIDTH AS rightWidth,
+            SCORE_MS2.RANK AS peak_group_rank,
+            SCORE_MS2.SCORE AS d_score,
+            SCORE_MS2.QVALUE AS Qvalue,
+            PRECURSOR.DECOY AS Decoy
+        FROM PRECURSOR
+        INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+        INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+        INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+        INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+        INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+        INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
+        LEFT JOIN FEATURE_MS1 ON FEATURE_MS1.FEATURE_ID = FEATURE.ID
+        LEFT JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+        LEFT JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+        WHERE FEATURE.ID IN ({','.join(map(str, feature_ids))})"""
+        data = pd.read_sql(stmt, self.conn)
+        
+        return data
+    
     def getPrecursorIDFromPeptideAndCharge(self, fullpeptidename: str, charge: int) -> int:
         try:
             return self.peptideHash.loc[fullpeptidename, charge]['PRECURSOR_ID']
@@ -188,6 +365,16 @@ class OSWDataAccess:
             return pd.DataFrame(columns=columns)
         else:
             return self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
+        
+    def getTopTransitionGroupFeatureDf(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> pd.DataFrame:
+        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']
+        run_id = self._runIDFromRunName(run_basename_wo_ext)
+        precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
+        
+        if run_id is None or precursor_id is None:
+            return pd.DataFrame(columns=columns)
+        else:
+            return self._getTopFeatureFromPrecursorIdAndRunDf(run_id, precursor_id)
 
     def getTransitionGroupFeatures(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> List[TransitionGroupFeature]:
         run_id = self._runIDFromRunName(run_basename_wo_ext)
@@ -197,8 +384,16 @@ class OSWDataAccess:
             return []
         else:
             return self._getFeaturesFromPrecursorIdAndRun(run_id, precursor_id)
-    
 
+    def getTopTransitionGroupFeature(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> List[TransitionGroupFeature]:
+        run_id = self._runIDFromRunName(run_basename_wo_ext)
+        precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
+        
+        if run_id is None or precursor_id is None:
+            return None
+        else:
+            return self._getTopFeatureFromPrecursorIdAndRun(run_id, precursor_id)
+    
     def getTransitionIDAnnotationFromSequence(self, fullpeptidename, charge):
         """
         Retrieves transition information for a given peptide and charge.
@@ -224,7 +419,13 @@ class OSWDataAccess:
         Returns:
             pandas.DataFrame: The top ranking precursor features.
         """
-        stmt = """SELECT 
+        # Get top ranking feature ids from featureScoreHash
+        if 'ms2_mscore' in self.featureScoreHash.columns:
+            feature_ids = self.featureScoreHash.reset_index().set_index(['FEATURE_ID']).groupby(['PRECURSOR_ID'])[['peakgroup_rank']].idxmin().values.flatten()
+        else:
+            raise KeyError("No ms2_mscore column found in featureScoreHash! You need to perform PyProphet ms2 / ms1ms2 scoring first.")
+        
+        stmt = f"""SELECT 
                 RUN.FILENAME as filename,
                 PROTEIN.PROTEIN_ACCESSION AS ProteinId,
                 PEPTIDE.UNMODIFIED_SEQUENCE AS PeptideSequence,
@@ -232,16 +433,16 @@ class OSWDataAccess:
                 PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
                 PRECURSOR.CHARGE AS PrecursorCharge,
                 PRECURSOR.DECOY AS Decoy,
-                MIN(DISTINCT SCORE_MS2.QVALUE) as Qvalue
+                SCORE_MS2.QVALUE as Qvalue
                 FROM FEATURE
                 INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
-                INNER JOIN (SELECT * FROM SCORE_MS2 WHERE SCORE_MS2.RANK = 1) AS SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
                 INNER JOIN PRECURSOR ON PRECURSOR.ID = FEATURE.PRECURSOR_ID
                 INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
                 INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID
                 INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
                 INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
-                GROUP BY ProteinId, PeptideSequence, ModifiedPeptideSequence, PrecursorMz, PrecursorCharge;"""
+                WHERE FEATURE.ID IN ({','.join(map(str, feature_ids))})"""
 
         data = pd.read_sql(stmt, self.conn)
 
@@ -402,6 +603,75 @@ class OSWDataAccess:
                         INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
                         WHERE PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID = {protein_id}"""
 
+        data = pd.read_sql(stmt, self.conn)
+
+        return data
+
+    def get_top_rank_precursor_feature(self, fullpeptidename, charge):
+        """
+        Retrieves the top ranking precursor feature for a given peptide and charge.
+
+        Args:
+            fullpeptidename (str): The full modified sequence of the peptide.
+            charge (int): The precursor charge.
+
+        Returns:
+            pandas.DataFrame: The top ranking precursor feature.
+        """
+        # Check if fullpeptidename contains a unimod modification at the beginning of the sequence
+        if fullpeptidename[0] == "(":
+            # If there is a (UniMod:#) at the beginning of the sequence, add a period (.) at the front 
+            fullpeptidename = "." + fullpeptidename
+        # Check if EXP_IM in FEATURE table
+        if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
+            select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
+        else:
+            select_feature_exp_im = "-1 AS IM,"
+            
+        precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
+        
+        # Get top ranking feature ids from featureScoreHash
+        if 'ms2_mscore' in self.featureScoreHash.columns:
+            prec_feature = self.featureScoreHash.loc[(slice(None), precursor_id, slice(None)), :]
+            feature_ids = prec_feature.loc[prec_feature["peakgroup_rank"]==1].index.get_level_values("FEATURE_ID")
+
+        else:
+            raise KeyError("No ms2_mscore column found in featureScoreHash! You need to perform PyProphet ms2 / ms1ms2 scoring first.")
+            
+        stmt = f"""SELECT 
+            RUN.FILENAME AS filename,
+            FEATURE.EXP_RT AS RT,
+            {select_feature_exp_im}
+            FEATURE.EXP_RT - FEATURE.DELTA_RT AS assay_rt,
+            FEATURE.DELTA_RT AS delta_rt,
+            FEATURE.NORM_RT AS iRT,
+            PRECURSOR.LIBRARY_RT AS assay_iRT,
+            FEATURE.NORM_RT - PRECURSOR.LIBRARY_RT AS delta_iRT,
+            PROTEIN.PROTEIN_ACCESSION AS ProteinId,
+            PEPTIDE.UNMODIFIED_SEQUENCE AS Sequence,
+            PEPTIDE.MODIFIED_SEQUENCE AS FullPeptideName,
+            PRECURSOR.CHARGE AS PrecursorCharge,
+            PRECURSOR.PRECURSOR_MZ AS PrecursorMz,
+            FEATURE_MS2.AREA_INTENSITY AS Intensity,
+            FEATURE_MS1.AREA_INTENSITY AS aggr_prec_Peak_Area,
+            FEATURE_MS1.APEX_INTENSITY AS aggr_prec_Peak_Apex,
+            FEATURE.LEFT_WIDTH AS leftWidth,
+            FEATURE.RIGHT_WIDTH AS rightWidth,
+            SCORE_MS2.RANK AS peak_group_rank,
+            SCORE_MS2.SCORE AS d_score,
+            SCORE_MS2.QVALUE AS Qvalue,
+            PRECURSOR.DECOY AS Decoy
+        FROM PRECURSOR
+        INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+        INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+        INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+        INNER JOIN PROTEIN ON PROTEIN.ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+        INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+        INNER JOIN RUN ON RUN.ID = FEATURE.RUN_ID
+        LEFT JOIN FEATURE_MS1 ON FEATURE_MS1.FEATURE_ID = FEATURE.ID
+        LEFT JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+        LEFT JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+        WHERE PRECURSOR.ID = {precursor_id} AND FEATURE.ID IN ({','.join(map(str, feature_ids))})"""
         data = pd.read_sql(stmt, self.conn)
 
         return data

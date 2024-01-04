@@ -13,7 +13,6 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
     Inherits from TransitionListUISettings.
 
     Attributes:
-    -----------
     massseer_gui : MassSeerGUI
         An instance of the MassSeerGUI class.
     transition_list : SpectralLibraryLoader
@@ -28,8 +27,7 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
         """
          Initializes the ExtractedIonChromatogramAnalysisServer object.
 
-        Parameters:
-        -----------
+        Args:
         massseer_gui : object
             An object representing the MassSeer GUI.
         transition_list : object
@@ -81,8 +79,7 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
         """
         Displays the extracted ion chromatograms based on user input.
 
-        Parameters:
-        -----------
+        Args:
         plot_container : st.container
             A container for the plots.
         chrom_plot_settings : ChromatogramPlotSettings
