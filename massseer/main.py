@@ -21,6 +21,10 @@ def gui(verbose, perf, perf_output):
     """
 
     click.echo("Starting MassSeer GUI...")
+    click.echo("Arguments:")
+    click.echo(f"verbose: {verbose}")
+    click.echo(f"perf: {perf}")
+    click.echo(f"perf_output: {perf_output}")
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, 'gui.py')
     
@@ -29,7 +33,7 @@ def gui(verbose, perf, perf_output):
         add_args.append('--verbose')
     if perf:
         add_args.append('--perf')
-    if perf_output:
+    if perf_output and perf:
         add_args.append('--perf_output')
         add_args.append(perf_output)
         # if perf_out exists, get user to type y or n to delete the existing file

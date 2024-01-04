@@ -3,8 +3,9 @@ from typing import List
 import pandas as pd
 
 # Loaders
-from massseer.loaders.access.TransitionTSVDataAccess import TransitionTSVLoader
-from massseer.loaders.access.TransitionPQPDataAccess import TransitionPQPLoader
+from massseer.loaders.access.TransitionTSVDataAccess import TransitionTSVDataAccess
+from massseer.loaders.access.TransitionPQPDataAccess import TransitionPQPDataAccess
+from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
 from massseer.util import LOGGER
 
@@ -33,7 +34,8 @@ class SpectralLibraryLoader:
     """
     def __init__(self, in_file: str, verbose: bool=False) -> None:
         self.in_file = in_file
-        self.data: pd.DataFrame = pd.DataFrame()
+        self.data: pd.DataFrame = self.load()
+        self.has_im = 'PrecursorIonMobility' in self.data.columns and self.data['PrecursorIonMobility'].notnull().any()
         
         LOGGER.name = "SpectralLibraryLoader"
         if verbose:
@@ -41,20 +43,18 @@ class SpectralLibraryLoader:
         else:
             LOGGER.setLevel("INFO")
 
-    def load(_self) -> 'TransitionList':
+    def load(self) -> pd.DataFrame:
         """
         Load the transition list file
         """
-        LOGGER.debug(f"Loading transition file {_self.in_file}")
-        _, file_extension = os.path.splitext(_self.in_file)
+        LOGGER.debug(f"Loading transition file {self.in_file}")
+        _, file_extension = os.path.splitext(self.in_file)
         if file_extension.lower() == '.tsv':
-            loader = TransitionTSVLoader(_self.in_file)
+            return TransitionTSVDataAccess(self.in_file).load()
         elif file_extension.lower() == '.pqp' or file_extension.lower() == '.osw':
-            loader = TransitionPQPLoader(_self.in_file)
+            return TransitionPQPDataAccess(self.in_file).load()
         else:
             raise ValueError("Unsupported file format")
-
-        _self.data = loader._load()
 
     def save(self, file_path: str) -> None:
         """
@@ -127,7 +127,42 @@ class SpectralLibraryLoader:
 
         """
         return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['ProductMz'].tolist()
-        
+    
+    # TODO not used remove?
+    def populateTransitionGroupFeature(self, transition_group_feature: TransitionGroupFeature) -> TransitionGroupFeature:
+        """
+        Appends library information to a TransitionGroupFeature object
+
+        Args:
+            transition_group_feature (TransitionGroupFeature): The TransitionGroupFeature object to append library information to.
+
+        Returns:
+            TransitionGroupFeature: The TransitionGroupFeature object with appended library information.
+        """
+        library_data = self.data[(self.data['ModifiedPeptideSequence'] == transition_group_feature.sequence) & (self.data['PrecursorCharge'] == transition_group_feature.precursor_charge)]
+
+        if library_data.empty:
+            LOGGER.warning(f"No library data found for {transition_group_feature.sequence} {transition_group_feature.precursor_charge}")
+            return transition_group_feature
+        transition_group_feature.product_annotations = library_data['Annotation'].tolist()
+        transition_group_feature.product_mz = library_data['ProductMz'].tolist()
+        transition_group_feature.precursor_mz = library_data['PrecursorMz'].iloc[0]
+        return transition_group_feature
+    
+    def populateTransitionGroupFeatures(self, transition_group_features: List[TransitionGroupFeature]) -> List[TransitionGroupFeature]:
+        """
+        Populates library information for a list of TransitionGroupFeature objects.
+        ***Important:*** Assumes that all TransitionGroupFeature objects have the same peptide sequence and precursor charge.
+        """
+        peptide_sequence = transition_group_features[0].sequence
+        precursor_charge = transition_group_features[0].precursor_charge
+        library_data = self.data[(self.data['ModifiedPeptideSequence'] == peptide_sequence) & (self.data['PrecursorCharge'] == precursor_charge)]
+
+        for t in transition_group_features:
+            t.product_annotations = library_data['Annotation'].tolist()
+            t.product_mz = library_data['ProductMz'].tolist()
+            t.precursor_mz = library_data['PrecursorMz'].iloc[0]
+
     def get_peptide_product_charge_list(self, peptide: str, charge: int) -> List[int]:
         """
         Retrieve a list of product charges for a given peptide and charge.

@@ -12,6 +12,9 @@ from matplotlib import cm
 # Plotting
 from massseer.plotting.GenericPlotter import PlotConfig
 
+# Structs
+from massseer.structs.FeatureMap import FeatureMap
+
 def rgb_to_hex(rgb):
     """
     Converts an RGB color value to its corresponding hexadecimal representation.
@@ -49,18 +52,17 @@ class InteractiveTwoDimensionPlotter:
     # Convert the Matplotlib colormap to a list of RGB hex colors
     AFMHOT_CMAP = [rgb_to_hex(cm.afmhot_r(i)[:3]) for i in range(256)]
 
-    def __init__(self, df: pd.DataFrame, config: PlotConfig):
+    def __init__(self, config: PlotConfig):
         """
         Initialize the InteractiveTwoDimensionPlotter instance.
 
         Args:
-            df (pd.DataFrame): The input DataFrame containing the data for plotting.
             config (PlotConfig): The configuration for plotting.
         """
-        self.df = df
         self.config = config
+        self.fig = None # set by the plot method
 
-    def plot(self):
+    def plot(self, featureMap: FeatureMap):
         """
         Plot the data.
 
@@ -69,40 +71,42 @@ class InteractiveTwoDimensionPlotter:
             Whether to aggregate the data before plotting.
         """
         if self.config.aggregate_mslevels:
-            plots = self.plot_aggregated_heatmap()
+            plots = self.plot_aggregated_heatmap(featureMap)
         else:
-            plots = self.plot_individual_heatmaps()
+            plots = self.plot_individual_heatmaps(featureMap)
+        self.fig = plots
         return plots
 
-    def plot_individual_heatmaps(self):
+    def plot_individual_heatmaps(self, featureMap: FeatureMap):
         """
-        Plot a heatmap based on the provided DataFrame.
+        Plot a heatmap based on the provided featureMap
         """
+        df = featureMap.feature_df
         if self.config.type_of_heatmap == "m/z vs retention time":
-            arr = self.df.pivot_table(index='mz', columns='rt', values='int', aggfunc=np.sum)
+            arr = df.pivot_table(index='mz', columns='rt', values='int', aggfunc="sum")
         elif self.config.type_of_heatmap == "m/z vs ion mobility":
-            arr = self.df.pivot_table(index='mz', columns='im', values='int', aggfunc=np.sum)
+            arr = df.pivot_table(index='mz', columns='im', values='int', aggfunc="sum")
         elif self.config.type_of_heatmap == "retention time vs ion mobility":
-            arr = self.df.pivot_table(index='im', columns='rt', values='int', aggfunc=np.sum)
-
-        im_arr, rt_arr, dw_main, dh_main, rt_min, rt_max, im_min, im_max = self.get_plot_parameters(arr)
+            arr = df.pivot_table(index='im', columns='rt', values='int', aggfunc="sum")
 
         linked_crosshair = CrosshairTool(dimensions="both")
 
         two_d_plots = []
-        for (ms_level, Annotation, product_mz), group_df in self.df.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz']):
+        for (ms_level, Annotation, product_mz), group_df in df.sort_values(by=['ms_level', 'Annotation', 'product_mz']).groupby(['ms_level', 'Annotation', 'product_mz']):
             if not self.config.include_ms1 and ms_level == 1:
                 continue
             
             if not self.config.include_ms2 and ms_level == 2:
                 continue
-            
+
             if self.config.type_of_heatmap == "m/z vs retention time":
-                arr = group_df.pivot_table(index='mz', columns='rt', values='int', aggfunc=np.sum)
+                arr = group_df.pivot_table(index='mz', columns='rt', values='int', aggfunc="sum")
             elif self.config.type_of_heatmap == "m/z vs ion mobility":
-                arr = group_df.pivot_table(index='mz', columns='im', values='int', aggfunc=np.sum)
+                arr = group_df.pivot_table(index='mz', columns='im', values='int', aggfunc="sum")
             elif self.config.type_of_heatmap == "retention time vs ion mobility":
-                arr = group_df.pivot_table(index='im', columns='rt', values='int', aggfunc=np.sum)
+                arr = group_df.pivot_table(index='im', columns='rt', values='int', aggfunc="sum")
+
+            im_arr, rt_arr, dw_main, dh_main, rt_min, rt_max, im_min, im_max = self.get_plot_parameters(arr)
             arr = self.prepare_array(arr)
 
             title_text = f"MS{ms_level} | {Annotation} | {product_mz} m/z"
@@ -113,21 +117,28 @@ class InteractiveTwoDimensionPlotter:
 
         return two_d_plots
 
-    def plot_aggregated_heatmap(self):
+    def plot_aggregated_heatmap(self, featureMap: FeatureMap):
         """
         Plot an aggregated heatmap based on the provided DataFrame.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame.
+        
+        Returns:
+            List[figure]: A list of two-dimensional plots.
         """
+        df = featureMap.feature_df
         if not self.config.include_ms1:
             self.df = self.df[self.df['ms_level'] != 1]
         if not self.config.include_ms2:
             self.df = self.df[self.df['ms_level'] != 2]
             
         if self.config.type_of_heatmap == "m/z vs retention time":
-            arr = self.df.pivot_table(index='mz', columns='rt', values='int', aggfunc=np.sum)
+            arr = df.pivot_table(index='mz', columns='rt', values='int', aggfunc="sum")
         elif self.config.type_of_heatmap == "m/z vs ion mobility":
-            arr = self.df.pivot_table(index='mz', columns='im', values='int', aggfunc=np.sum)
+            arr = df.pivot_table(index='mz', columns='im', values='int', aggfunc="sum")
         elif self.config.type_of_heatmap == "retention time vs ion mobility":
-            arr = self.df.pivot_table(index='im', columns='rt', values='int', aggfunc=np.sum)
+            arr = df.pivot_table(index='im', columns='rt', values='int', aggfunc="sum")
 
         im_arr, rt_arr, dw_main, dh_main, rt_min, rt_max, im_min, im_max = self.get_plot_parameters(arr)
 
@@ -231,3 +242,17 @@ class InteractiveTwoDimensionPlotter:
         plot.grid.visible = False
 
         return plot
+
+    def show(self):
+        """
+        Show the plots.
+        """
+        from bokeh.plotting import show
+        from bokeh.io import output_notebook 
+        output_notebook()
+        if isinstance(self.fig, list):
+            for fig in self.fig:
+                show(fig)
+        else:
+            show(self.fig)
+

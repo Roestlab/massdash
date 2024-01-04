@@ -1,12 +1,8 @@
 from typing import List
 import os
 import pandas as pd
-import streamlit as st
 
-# Utils
-from massseer.util import check_streamlit, conditional_decorator
-
-class TransitionTSVLoader:
+class TransitionTSVDataAccess:
     '''
     Class to load a transition TSV file
     
@@ -22,21 +18,21 @@ class TransitionTSVLoader:
         generate_annotation: Generates an annotation for each row in the data by concatenating the 'FragmentType', 'FragmentSeriesNumber', and 'ProductCharge' columns.
     '''
     REQUIRED_TSV_COLUMNS: List[str] = ['PrecursorMz', 'ProductMz', 'PrecursorCharge', 'ProductCharge',
-                                   'LibraryIntensity', 'NormalizedRetentionTime', 'PeptideSequence',
-                                   'ModifiedPeptideSequence', 'ProteinId', 'GeneName', 'FragmentType',
-                                   'FragmentSeriesNumber', 'Annotation', 'PrecursorIonMobility']
+                                   'LibraryIntensity', 'PeptideSequence',
+                                   'ModifiedPeptideSequence', 'ProteinId', 'FragmentType',
+                                   'FragmentSeriesNumber', 'Annotation']
     
     # Column name mapping from standardized names to possible column names
     COLUMN_NAME_MAPPING = {
         'PrecursorMz': ['precursor_mz', 'mz'],
         'ProductMz': ['product_mz'],
         'PrecursorCharge': ['precursor_charge', 'charge'],
-        'ProductCharge': ['product_charge'],
+        'ProductCharge': ['product_charge', 'FragmentCharge'],
         'LibraryIntensity': ['intensity'],
         'NormalizedRetentionTime': ['retention_time', 'normalized_rt'],
         'PeptideSequence': ['peptide_sequence', 'sequence'],
-        'ModifiedPeptideSequence': ['modified_sequence'],
-        'ProteinId': ['protein_id'],
+        'ModifiedPeptideSequence': ['modified_sequence', 'ModifiedPeptide'],
+        'ProteinId': ['protein_id', 'ProteinGroup'],
         'GeneName': ['gene_name'],
         'FragmentType': ['fragment_type'],
         'FragmentSeriesNumber': ['fragment_series_number'],
@@ -53,25 +49,37 @@ class TransitionTSVLoader:
         if file_extension.lower() not in ['.tsv']:
             raise ValueError("Unsupported file format. TransitionTSVLoader requires a tab-separated .tsv file.")
         self.filename = filename
-        self.data: pd.DataFrame = pd.DataFrame()
+
+    def empty(self):
+        return self.data.empty() 
+
+    def __setitem__(self, index, value):
+        return self.data.__setitem__(index, value)
+ 
+    def __getitem__(self, index):
+        return self.data.__getitem__(index)
     
-    @conditional_decorator(lambda func: st.cache_data(show_spinner=False)(func), check_streamlit())
-    def _load(_self) -> None:
+    def load(self) -> pd.DataFrame:
         '''
         Load the transition TSV file
         '''
-        _self.data = pd.read_csv(_self.filename, sep='\t')
-        # Multiply the retention time by 60 to convert from minutes to seconds
-        _self.data['NormalizedRetentionTime'] = _self.data['NormalizedRetentionTime'] * 60
-        _self._resolve_column_names()
-        if 'Annotation' not in _self.data.columns:
-            _self.generate_annotation()
+        self.data = pd.read_csv(self.filename, sep='\t')
+        self._resolve_column_names()
+        
+        # Check the first value in ANNOTATION column, if NA set generate_annotation to True
+        generate_annotation = False
+        if ('Annotation' not in self.data.columns) or (self.data['Annotation'].isnull().values.any() or self.data['Annotation'].values[0] == "NA"):
+            generate_annotation = True
+            
+        if generate_annotation:
+            self.generate_annotation()
         # Drop the FragmentType and FragmentSeriesNumber columns
-        if _self._validate_columns():
-            _self.data.drop(columns=['FragmentType', 'FragmentSeriesNumber'], inplace=True)
-            return _self.data
+        if self._validate_columns():
+            self.data.drop(columns=['FragmentType', 'FragmentSeriesNumber'], inplace=True)
+            return self.data
         else:
-            raise ValueError(f"The TSV file does not have the required columns.\n {TransitionTSVLoader.REQUIRED_TSV_COLUMNS}")
+            missing_columns = set(TransitionTSVDataAccess.REQUIRED_TSV_COLUMNS).difference(set(self.data.columns))
+            raise ValueError(f"The TSV file is missing the following required columns: {missing_columns}")
     
     def _resolve_column_names(self):
         """
@@ -117,11 +125,10 @@ class TransitionTSVLoader:
         Returns:
             None
         """
-        if 'Annotation' not in self.data.columns:
-            self.data['Annotation'] = self.data['FragmentType'] + self.data['FragmentSeriesNumber'].astype(str) + '^' + self.data['ProductCharge'].astype(str)
+        self.data['Annotation'] = self.data['FragmentType'] + self.data['FragmentSeriesNumber'].astype(str) + '^' + self.data['ProductCharge'].astype(str)
 
     def _validate_columns(self) -> bool:
         '''
         Validate the TSV file has the required columns
         '''
-        return all(col in self.data.columns for col in TransitionTSVLoader.REQUIRED_TSV_COLUMNS)
+        return all(col in self.data.columns for col in TransitionTSVDataAccess.REQUIRED_TSV_COLUMNS)

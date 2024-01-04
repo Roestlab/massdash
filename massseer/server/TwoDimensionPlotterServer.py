@@ -1,5 +1,6 @@
 from os.path import basename
 from bokeh.layouts import gridplot
+from typing import Dict
 
 # Plotting
 from massseer.plotting.GenericPlotter import PlotConfig
@@ -7,13 +8,15 @@ from massseer.plotting.InteractiveTwoDimensionPlotter import InteractiveTwoDimen
 # UI
 from massseer.ui.TransitionListUISettings import TransitionListUISettings
 from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+# structs
+from massseer.structs.FeatureMap import FeatureMap
 
 class TwoDimensionPlotterServer:
     """
     Class for generating two-dimensional plots based on targeted data.
 
     Args:
-        targeted_data (dict): A dictionary containing targeted data.
+        targeted_data dict[FeatureMap]: A dictionary of feature maps, each entry corresponds with one run
         transition_list_ui (TransitionListUISettings): An instance of TransitionListUISettings class.
         chrom_plot_settings (ChromatogramPlotUISettings): An instance of ChromatogramPlotUISettings class.
 
@@ -29,7 +32,7 @@ class TwoDimensionPlotterServer:
 
     """
 
-    def __init__(self, targeted_data, transition_list_ui: TransitionListUISettings, chrom_plot_settings: ChromatogramPlotUISettings):
+    def __init__(self, targeted_data: dict[FeatureMap], transition_list_ui: TransitionListUISettings, chrom_plot_settings: ChromatogramPlotUISettings):
         self.targeted_data = targeted_data
         self.transition_list_ui = transition_list_ui
         self.chrom_plot_settings = chrom_plot_settings
@@ -47,12 +50,12 @@ class TwoDimensionPlotterServer:
             None
         """
         for file, tr_df in self.targeted_data.items():
-            if not tr_df.empty:
-                plot_settings_dict = self._get_plot_settings(file.filename)
+            if not tr_df.empty():
+                plot_settings_dict = self._get_plot_settings(file)
                 plot_config = PlotConfig()
                 plot_config.update(plot_settings_dict)
-                plotter = InteractiveTwoDimensionPlotter(tr_df, plot_config)
-                two_d_plots = plotter.plot()
+                plotter = InteractiveTwoDimensionPlotter(plot_config)
+                two_d_plots = plotter.plot(tr_df)
                 p = gridplot(two_d_plots, ncols=self.chrom_plot_settings.num_plot_columns, sizing_mode='stretch_width')
                 self.plot_obj_dict[file] = p
         return self

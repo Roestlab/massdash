@@ -43,6 +43,7 @@ class InteractivePlotter(GenericPlotter):
     """
     def __init__(self, config: PlotConfig, verbose: bool=False):
         super().__init__(config)
+        self.fig = None
         
         LOGGER.name = "InteractivePlotter"
         if verbose:
@@ -63,13 +64,16 @@ class InteractivePlotter(GenericPlotter):
             figure: The generated plot as a Bokeh figure object.
         """
         if plot_type == 'chromatogram':
-            return self.plot_chromatogram(transitionGroup, features)
+            plot =  self.plot_chromatogram(transitionGroup, features)
         elif plot_type == 'mobilogram':
-            return self.plot_mobilogram(transitionGroup)
+            plot =  self.plot_mobilogram(transitionGroup)
         elif plot_type == 'spectra':
-            return self.plot_spectra(transitionGroup)
+            plot =  self.plot_spectra(transitionGroup)
         else:
             raise ValueError("Unsupported plot plot_type")
+        
+        self.fig = plot
+        return plot
 
     def process_chrom(self, p: figure, chrom: Chromatogram, label: str, color: str='black', line_type: str="dashed", is_precursor: bool=True, transitionGroup: TransitionGroup=None) -> Line:
         """
@@ -84,12 +88,11 @@ class InteractivePlotter(GenericPlotter):
             is_precursor (bool, optional): Whether the chromatogram is for the precursor ion. Defaults to True.
             transitionGroup (TransitionGroup, optional): TransitionGroup object containing precursor and product ion information. Defaults to None.
 
-            Returns:
-                Line: Bokeh line object representing the chromatogram.
+        Returns:
+            Line: Bokeh line object representing the chromatogram.
         """
         rt = chrom.data
         intensity = chrom.intensity
-
         if self.smoothing_dict['type'] == 'sgolay':
             try:
                 intensity = savgol_filter(intensity, window_length=self.smoothing_dict['sgolay_frame_length'], polyorder=self.smoothing_dict['sgolay_polynomial_order'])
@@ -610,3 +613,13 @@ class InteractivePlotter(GenericPlotter):
         p.toolbar_location = "above"
 
         return p
+    
+    def show(self):
+        '''
+        Show the plot.
+        '''
+        from bokeh.io import output_notebook
+        from bokeh.plotting import show
+
+        output_notebook()
+        show(self.fig)

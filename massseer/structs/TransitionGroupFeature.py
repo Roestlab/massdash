@@ -8,17 +8,38 @@ class TransitionGroupFeature(GenericFeature):
     This is a Transition group level feature object PeakFeature Object. All Peak Picking algorithms should output an object of this class 
     '''
 
-    def __init__(self, leftBoundary, rightBoundary, areaIntensity: Optional[float] =None, qvalue: Optional[float]=None, consensusApex: Optional[float]=None, consensusApexIntensity: Optional[float]=None):
+    def __init__(self,
+                 leftBoundary: float,
+                 rightBoundary: float,
+                 areaIntensity: Optional[float] =None, 
+                 qvalue: Optional[float]=None,
+                 consensusApex: Optional[float]=None, 
+                 consensusApexIntensity: Optional[float]=None,
+                 consensusApexIM: Optional[float]=None,
+                 precursor_mz: Optional[float]=None,
+                 precursor_charge: Optional[int]=None,
+                 product_annotations: Optional[list[str]]=None,
+                 product_mz: Optional[list[float]]=None,
+                 sequence: Optional[str]=None,
+                 ):
         super().__init__(leftBoundary, rightBoundary, areaIntensity=areaIntensity)
         self.consensusApex = consensusApex
         self.consensusApexIntensity = consensusApexIntensity
         self.qvalue = qvalue
+        self.consensusApexIM = consensusApexIM
+        self.precursor_mz = precursor_mz
+        self.precursor_charge = int(precursor_charge) if precursor_charge is not None else None
+        self.product_annotations = product_annotations
+        self.product_mz = product_mz
+        self.sequence = sequence
 
     def __str__(self):
-        return f"{'-'*8} TransitionGroupFeature {'-'*8}\nApex: {self.consensusApex}\nLeftWidth: {self.leftBoundary}\nRightWidth: {self.rightBoundary}\nArea: {self.areaIntensity}\nQvalue: {self.qvalue}"
+        attribute_strings = [f"{key}: {getattr(self, key)}" for key in vars(self)]
+        return f"{'-'*8} TransitionGroupFeature {'-'*8}\n" + "\n".join(attribute_strings)
 
     def __repr__(self):
-        return f"TransitionGroupFeature Apex: {self.consensusApex} LeftWidth: {self.leftBoundary} RightWidth: {self.rightBoundary} Area: {self.areaIntensity} Qvalue: {self.qvalue}"
+        attribute_strings = [f"{key}: {getattr(self, key)}" for key in vars(self)]
+        return f"{'-'*8} TransitionGroupFeature {'-'*8}\n" + "\n".join(attribute_strings)
     
     def getBoundaries(self) -> Tuple[float, float]:
         return super().getBoundaries()
