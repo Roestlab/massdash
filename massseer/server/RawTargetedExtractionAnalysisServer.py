@@ -133,7 +133,7 @@ class RawTargetedExtractionAnalysisServer:
         with st.status("Performing Targeted Extraction....", expanded=True) as status:
             start_time = timeit.default_timer()
             st_log_writer = st_mutable_write("Initiating mzML files (this may take some time)...")
-            with MeasureBlock(f"{self.__class__.__name__}::initiate_mzML_interface") as perf_metrics:
+            with MeasureBlock(f"{self.__class__.__name__}::initiate_mzML_interface", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_metrics:
                 # self.initiate_mzML_interface.clear()
                 self.mzml_loader = self.initiate_mzML_interface(self.massseer_gui.file_input_settings.raw_file_path_list, 
                                             self.massseer_gui.file_input_settings.feature_file_path, 
@@ -159,7 +159,7 @@ class RawTargetedExtractionAnalysisServer:
                 st.session_state.selected_precursor = current_selected_precursor
             
             st_log_writer = st_mutable_write("Loading transition group feature...")
-            with MeasureBlock(f"{self.__class__.__name__}::load_transition_group_feature") as perf_metrics:
+            with MeasureBlock(f"{self.__class__.__name__}::load_transition_group_feature", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_metrics:
                 # Load feature data for selected peptide and charge
                 if clear_caches:
                     self.load_transition_group_feature.clear()
@@ -183,7 +183,7 @@ class RawTargetedExtractionAnalysisServer:
             concensus_chromatogram_settings.create_ui()
         
             st_log_writer = st_mutable_write("Extracting spectra...")
-            with MeasureBlock(f"{self.__class__.__name__}::targeted_extraction") as perf_metrics:
+            with MeasureBlock(f"{self.__class__.__name__}::targeted_extraction", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_metrics:
                 if clear_caches:
                     self.targeted_extraction.clear()
                 featureMaps = self.targeted_extraction(transition_list_ui)
@@ -192,7 +192,7 @@ class RawTargetedExtractionAnalysisServer:
             transition_list_ui.validate_extraction(featureMaps, plot_container)
 
             st_log_writer = st_mutable_write("Generating plot...")
-            with MeasureBlock(f"{self.__class__.__name__}::PlotGeneration") as perf_metrics:
+            with MeasureBlock(f"{self.__class__.__name__}::PlotGeneration", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_metrics:
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
                 if chrom_plot_settings.display_plot_dimension_type == "1D":
@@ -205,7 +205,7 @@ class RawTargetedExtractionAnalysisServer:
             
             # Show extracted data
             st_log_writer = st_mutable_write("Rendering plot...")
-            with MeasureBlock(f"{self.__class__.__name__}::DrawingPlots") as perf_metrics:
+            with MeasureBlock(f"{self.__class__.__name__}::DrawingPlots", self.massseer_gui.perf, self.massseer_gui.perf_output) as perf_metrics:
                 if chrom_plot_settings.display_plot_dimension_type == "1D":
                     transition_list_ui.show_extracted_one_d_plots(plot_container, chrom_plot_settings, concensus_chromatogram_settings, plot_obj_dict)
                 elif chrom_plot_settings.display_plot_dimension_type == "2D":
@@ -220,3 +220,6 @@ class RawTargetedExtractionAnalysisServer:
         
         if chrom_plot_settings.display_extracted_data_as_df:
             transition_list_ui.show_extracted_dataframes(featureMaps)
+            
+        if st.session_state['perf_on']:
+            st.rerun()
