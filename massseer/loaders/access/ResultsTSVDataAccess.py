@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import re
-from typing import List
+from typing import List, Literal
 from massseer.loaders.access.GenericResultsAccess import GenericResultsAccess
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 
@@ -9,9 +9,24 @@ from massseer.util import LOGGER
 
 class ResultsTSVDataAccess(GenericResultsAccess): 
     ''' Class for generic access to TSV file containing the results, currently only supports DIA-NN tsv files'''
-    def __init__(self, filename: str, verbose: bool = False) -> None:
+    def __init__(self, filename: str, results_type: Literal["OpenSWATH", "DIA-NN", "DreamDIA"] = "DIA-NN", verbose: bool = False) -> None:
         super().__init__(filename, verbose)
         self.filename = filename
+        self.results_type = results_type
+
+        import streamlit as st
+        st.write(f"results_type: {self.results_type}")
+        
+        if self.results_type == "OpenSWATH":
+            self.column_mapping = ""
+            raise ValueError("OpenSWATH results not supported yet")
+        elif self.results_type == "DIA-NN":
+            self.column_mapping = {'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge'}
+            self.hash_table_columns = ['Modified.Sequence', 'Precursor.Charge', 'Run']
+        elif self.results_type == "DreamDIA":
+            self.column_mapping = {'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'Run'}
+            self.hash_table_columns = ['full_sequence', 'sequence', 'filename']
+            
         self.peptideHash = self._initializePeptideHashTable()
         self.df = self.loadData() 
         self.runs = self.df['Run'].drop_duplicates()
@@ -24,7 +39,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         df = pd.read_csv(self.filename, sep='\t')
 
         # rename columns, assuming this is a DIA-NN file
-        df = df.rename(columns={'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge'})
+        df = df.rename(columns=self.column_mapping)
         # Assign dummy Decoy column all 0
         df['Decoy'] = 0
         return df
@@ -33,7 +48,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         Load Peptide and Charge for easy access
         '''
-        return pd.read_csv(self.filename, sep='\t', usecols=['Modified.Sequence', 'Precursor.Charge', 'Run'])
+        return pd.read_csv(self.filename, sep='\t', usecols=self.hash_table_columns)
 
     def getTopTransitionGroupFeature(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:
         '''
