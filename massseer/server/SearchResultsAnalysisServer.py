@@ -11,8 +11,9 @@ from massseer.ui.MassSeerGUI import MassSeerGUI
 from massseer.ui.SearchResultsAnalysisUI import SearchResultsAnalysisUI
 # Loaders
 from massseer.loaders.access.OSWDataAccess import OSWDataAccess
-from massseer.loaders.DiaNNLoader import DiaNNLoader
-from massseer.loaders.DreamDIALoader import DreamDIALoader
+# from massseer.loaders.DiaNNLoader import DiaNNLoader
+# from massseer.loaders.DreamDIALoader import DreamDIALoader
+from massseer.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
 # Plotting
 from massseer.plotting.SearchResultAnalysisPlots import SearchResultAnalysisPlots
 # Utils
@@ -52,9 +53,9 @@ class SearchResultsAnalysisServer:
                 data_access = OSWDataAccess(entry_data['search_results_file_path'])
                 data_access_dict[entry] = data_access   
             elif entry_data['search_results_file_type'] == "DIA-NN":
-                data_access = DiaNNLoader(entry_data['search_results_file_path'], [entry_data['search_results_file_path']])
+                data_access = ResultsTSVDataAccess(entry_data['search_results_file_path'], [entry_data['search_results_file_path']])
             elif entry_data['search_results_file_type'] == "DreamDIA":
-                data_access = DreamDIALoader(entry_data['search_results_file_path'], [entry_data['search_results_file_path']])
+                data_access = ResultsTSVDataAccess(entry_data['search_results_file_path'], [entry_data['search_results_file_path']])
             else:
                 raise ValueError(f"Search results file type {entry_data['search_results_file_type']} not supported.")
         return data_access_dict
