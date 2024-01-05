@@ -153,19 +153,13 @@ class FeatureMap:
 
         # Filter the feature map to only transition chromatograms
         transition_df = self.feature_df[self.feature_df['ms_level']==2]
+        
+        # pivot table so rt is index and each row is the transition's intensity at that retention time (if not present than 0)
+        transition_df = transition_df.pivot_table(index='rt', columns='Annotation', values='int', aggfunc='sum').fillna(0)
+
         transition_chromatograms = []
-        for transition in pd.unique(transition_df['product_mz']):
-            transition_df_tmp = transition_df[transition_df['product_mz']==transition]
-
-            # If ion mobility data is present, compute mean of intensities across ion mobility for retention time
-            if self.has_im  and transition_df_tmp.shape[0] > 1:
-                rt_arr, int_arr = FeatureMap.integrate_intensity_across_two_dimensions(transition_df_tmp)
-            else:
-                rt_arr = transition_df_tmp['rt'].to_numpy()
-                int_arr = transition_df_tmp['int'].to_numpy()
-
-            transition_chromatogram = Chromatogram(rt_arr, int_arr, f'{pd.unique(transition_df_tmp["Annotation"].values)[0]}')
-            transition_chromatograms.append(transition_chromatogram)
+        for t in transition_df.columns:
+            transition_chromatograms.append(Chromatogram(transition_df.index.to_numpy(), transition_df[t].to_numpy(), t))
         return transition_chromatograms
 
     def get_precursor_mobilograms(self) -> List[Mobilogram]:
@@ -196,20 +190,14 @@ class FeatureMap:
               # Filter the feature map to only transition ion mobility
         if self.has_im:
             transition_df = self.feature_df[self.feature_df['ms_level']==2]
-            transition_ion_mobilities = []
-            for transition in pd.unique(transition_df['product_mz']):
-                transition_df_tmp = transition_df[transition_df['product_mz']==transition]
-
-                # If ion mobility data is present, compute mean of intensities across retention time for ion mobility
-                if self.has_im and transition_df_tmp.shape[0] > 1:
-                    im_arr, int_arr = FeatureMap.integrate_intensity_across_two_dimensions(transition_df_tmp, axis=1)
-                else:
-                    im_arr = transition_df_tmp['im'].to_numpy()
-                    int_arr = transition_df_tmp['int'].to_numpy()
-                transition_ion_mobility = Mobilogram(im_arr, int_arr, f'{pd.unique(transition_df_tmp["Annotation"].values)[0]}')
-                transition_ion_mobilities.append(transition_ion_mobility)
-            return transition_ion_mobilities
     
+            # pivot table so im is index and each row is the transition's intensity at that ion mobility (across retention time) time 
+            transition_df = transition_df.pivot_table(index='im', columns='Annotation', values='int', aggfunc='sum').fillna(0)
+
+            transition_ion_mobilities = []
+            for t in transition_df.columns:
+                transition_ion_mobilities.append(Mobilogram(transition_df.index.to_numpy(), transition_df[t].to_numpy(), t))
+            return transition_ion_mobilities
         else:
             return [Mobilogram(np.array([]), np.array([]), 'No transition ion mobility found')]
 
