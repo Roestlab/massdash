@@ -20,14 +20,34 @@ class PlotConfig:
         The label for the y-axis.
     smoothing_dict : dict
         A dictionary containing the parameters for smoothing the data.
+        e.g. {'type': 'sgolay', 'sgolay_polynomial_order': 3, 'sgolay_frame_length': 11}
+        e.g. {'type': 'none'}
     x_range : tuple or None
         The range of values to be displayed on the x-axis.
     y_range : tuple or None
         The range of values to be displayed on the y-axis.
     scale_intensity : bool
         A flag indicating whether to scale the intensity of the data.
+    aggregate_mslevels : bool
+        A flag indicating whether to aggregate the data within an MS level.
+    context : str (valid: "streamlit", "jupyter")
+        The context in which the plot is being displayed.
+    type_of_heatmap : str (valid: "m/z vs retention time", "m/z vs ion mobility", "retention time vs ion mobility")
+        The type of heatmap to be displayed. (Only used for InteractiveTwoDimensionalPlotter)
+    type_of_3d_plot : str (valid: "3D Scatter Plot", "3D Surface Plot", "3D Line Plot")
+        The type of 3D plot to be displayed. (Only used for InteractiveThreeDimensionalPlotter)
+    type_of_comparison : str (valid: "retention time vs ion mobility", "retention time vs m/z", "ion mobility vs m/z")
+        The type of comparison to be displayed. (Only used for InteractivePlotter)
     """
     def __init__(self):
+        """
+        A class representing the configuration for a plot.
+
+        Attributes:
+           
+
+        
+        """
         self.include_ms1 = True
         self.include_ms2 = True
         self.num_plot_columns = 2

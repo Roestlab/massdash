@@ -73,3 +73,36 @@ Classes
    MzMLDataLoader
    SqMassLoader
    SpectralLibraryLoader
+
+:mod:`masseer.plotting`: Classes for plotting data 
+==================================================
+
+.. automodule:: massseer.plotting
+   :no-members:
+   :no-inherited-members:
+
+.. currentmodule:: massseer.plotting
+
+Abstract Classes
+----------------
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   GenericPlotter
+
+Classes
+-------
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+   
+   PlotConfig
+   InteractivePlotter
+   InteractiveTwoDimensionPlotter
+   InteractiveThreeDimensionPlotter
+
