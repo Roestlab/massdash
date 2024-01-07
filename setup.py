@@ -37,7 +37,8 @@ setup(name='MassSeer',
           "pyopenms",
           "bokeh==2.4.3",
           "matplotlib",
-          "matplotlib-venn"
+          "matplotlib-venn",
+          "upsetplot"
       ],
       entry_points={
           'console_scripts': [
