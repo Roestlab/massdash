@@ -44,7 +44,7 @@ def main(verbose, perf, perf_output):
 
     dirname = os.path.dirname(__file__)
 
-    MASSDASH_LOGO = os.path.join(dirname, 'assets/img/MassDash_Logo.png')
+    MASSDASH_LOGO = os.path.join(dirname, 'assets/img/MassDash_Logo_Dark.png')
     OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
 
     ###########################
