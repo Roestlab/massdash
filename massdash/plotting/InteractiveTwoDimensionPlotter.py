@@ -1,3 +1,8 @@
+"""
+massdash/plotting/InteractiveTwoDimensionPlotter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from typing import List, Tuple
 
 # Data modules

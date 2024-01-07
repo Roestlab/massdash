@@ -1,3 +1,8 @@
+"""
+massdash/preprocess/GenericPreprocessor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 
 from structs.TransitionGroup import TransitionGroup
 

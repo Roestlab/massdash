@@ -1,3 +1,8 @@
+"""
+massdash/plotting/GenericPlotter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 
 from abc import ABC, abstractmethod
 from typing import List, Optional, Literal

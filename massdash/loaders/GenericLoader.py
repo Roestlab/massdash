@@ -1,3 +1,8 @@
+"""
+massdash/loaders/GenericLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from abc import ABC, abstractmethod
 from typing import List, Union, Literal
 from os.path import basename

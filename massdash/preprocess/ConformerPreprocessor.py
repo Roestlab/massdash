@@ -1,3 +1,8 @@
+"""
+massdash/preprocess/ConformerPreprocessor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import numpy as np
 from typing import List, Literal
 

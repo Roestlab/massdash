@@ -1,3 +1,8 @@
+"""
+tests/loaders/test_SqMassDataAccess
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from snapshottest import TestCase
 from massseer.loaders.access.SqMassDataAccess import SqMassDataAccess
 from massseer.structs.Chromatogram import Chromatogram

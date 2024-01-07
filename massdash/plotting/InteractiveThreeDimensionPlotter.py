@@ -1,3 +1,8 @@
+"""
+massdash/plotting/InteractiveThreeDimensionPlotter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from typing import List, Tuple
 import streamlit as st
 

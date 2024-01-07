@@ -1,3 +1,8 @@
+"""
+massdash/server/ThreeDimensionPlotterServer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from os.path import basename
 
 # Plotting

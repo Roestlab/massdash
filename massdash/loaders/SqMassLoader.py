@@ -1,3 +1,8 @@
+"""
+massdash/loaders/SqMassLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 
 from abc import ABC, abstractmethod
 from typing import List, Dict, Union

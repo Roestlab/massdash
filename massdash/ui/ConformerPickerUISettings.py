@@ -1,3 +1,8 @@
+"""
+massdash/ui/ConformerPickerUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import os
 import streamlit as st
 

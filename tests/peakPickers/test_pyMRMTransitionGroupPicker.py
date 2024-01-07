@@ -1,3 +1,8 @@
+"""
+tests/peakPickers/test_pyMRMTransitionGroupPicker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 
 import unittest
 from snapshottest import TestCase

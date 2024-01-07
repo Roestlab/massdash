@@ -1,3 +1,8 @@
+"""
+massdash/ui/PeakPickingUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 
 # UI

@@ -1,3 +1,8 @@
+"""
+massdash/loaders/access/OSWDataAccess
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """

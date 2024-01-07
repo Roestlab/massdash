@@ -1,3 +1,8 @@
+"""
+massdash/loaders/access/GenericResultsAccess
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from abc import ABC, abstractmethod
 import pandas as pd
 

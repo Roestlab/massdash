@@ -1,3 +1,8 @@
+"""
+massdash/server/TwoDimensionPlotterServer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from os.path import basename
 from bokeh.layouts import gridplot
 from typing import Dict

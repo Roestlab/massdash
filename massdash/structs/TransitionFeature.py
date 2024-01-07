@@ -1,3 +1,8 @@
+"""
+massdash/structs/TransitionFeature
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from typing import Optional, Tuple, List
 import pandas as pd
 import numpy as np

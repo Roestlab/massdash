@@ -1,3 +1,8 @@
+"""
+massdash/plotting/StaticPlotter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 # Plotting
 from .GenericPlotter import GenericPlotter
 

@@ -1,3 +1,8 @@
+"""
+tests/structs/test_TransitionGroupFeature
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import unittest
 from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 

@@ -1,3 +1,8 @@
+"""
+massdash/ui/pyPeakPickerMRMUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 import pyopenms as po
 

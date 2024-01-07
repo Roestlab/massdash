@@ -1,3 +1,8 @@
+"""
+massdash/ui/ExtractedIonChromatogramAnalysisFormUI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st 
 
 # Internal

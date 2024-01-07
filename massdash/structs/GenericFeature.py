@@ -1,3 +1,8 @@
+"""
+massdash/structs/GenericFeature
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from abc import ABC, abstractmethod
 from typing import Tuple, Optional
 

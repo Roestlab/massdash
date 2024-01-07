@@ -1,3 +1,8 @@
+"""
+tests/loaders/test_SqMassLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from snapshottest import TestCase
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.loaders.SqMassLoader import SqMassLoader

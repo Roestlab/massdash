@@ -1,3 +1,8 @@
+"""
+tests/structs/test_Chromatogram
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 
 import unittest
 import numpy as np

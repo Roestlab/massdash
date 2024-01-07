@@ -1,3 +1,8 @@
+"""
+massdash/ui/FileInputRawDataUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import os
 import fnmatch
 

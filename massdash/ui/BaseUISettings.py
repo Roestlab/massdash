@@ -1,3 +1,8 @@
+"""
+massdash/ui/BaseUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from abc import ABC, abstractmethod
 
 class BaseUISettings(ABC):

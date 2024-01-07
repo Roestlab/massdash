@@ -1,3 +1,8 @@
+"""
+massdash/loaders/SpectralLibraryLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import os
 from typing import List
 import pandas as pd

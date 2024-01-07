@@ -1,3 +1,8 @@
+"""
+massdash/structs/Chromatogram
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import pyopenms as po
 from typing import Optional, Tuple, List
 import pandas as pd
