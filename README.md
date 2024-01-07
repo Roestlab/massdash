@@ -22,8 +22,6 @@ Key Features:
 
 This tool empowers researchers to take control of their mass spectrometry data, experiment with algorithms, and optimize parameters to enhance the accuracy and efficiency of their research. It's a valuable resource for laboratories and researchers working in the field of mass spectrometry, streamlining their workflows and contributing to scientific advancements.
 
-![image](https://github.com/Roestlab/massdash/assets/32938975/215db9e9-0322-4cd4-8472-ad7897290daa)
-
 # Installing MassDash
 
 ## Installing from cloned directory
