@@ -4,7 +4,7 @@ massdash/loaders/MzMLDataLoader
 """
 
 from os.path import basename, splitext
-from typing import List, Union, Literal
+from typing import Dict, List, Union, Literal
 import numpy as np
 import pandas as pd
 
@@ -70,7 +70,7 @@ class MzMLDataLoader(GenericLoader):
             out[t.filename] = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
         
-    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
 
@@ -85,7 +85,7 @@ class MzMLDataLoader(GenericLoader):
 
         return { run: data.to_chromatograms() for run, data in out_feature_map.items() }
     
-    def loadTransitionGroupsDf(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> dict[str, pd.DataFrame]:
+    def loadTransitionGroupsDf(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, pd.DataFrame]:
         '''
         Loads the transition group for a given peptide ID and charge across all files into a pandas DataFrame
         
@@ -104,7 +104,7 @@ class MzMLDataLoader(GenericLoader):
 
         return pd.concat(out_transitions).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
 
-    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> dict[str, FeatureMap]:
+    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> Dict[str, FeatureMap]:
         '''
         Loads a dictionary of FeatureMaps (where the keys are the filenames) from the results file
 

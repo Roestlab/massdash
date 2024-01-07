@@ -4,7 +4,7 @@ massdash/loaders/GenericLoader
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Union, Literal
+from typing import Dict, List, Union, Literal
 from os.path import basename
 import pandas as pd
 
@@ -66,7 +66,7 @@ class GenericLoader(ABC):
         pass
 
     @abstractmethod
-    def loadTransitionGroups(self, pep_id: str, charge: int) -> dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
         Args:
@@ -77,7 +77,7 @@ class GenericLoader(ABC):
         '''
         pass
 
-    def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> dict[str, List[TransitionGroupFeature]]:
+    def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> Dict[str, List[TransitionGroupFeature]]:
         '''
         Loads a PeakFeature object from the results file
         Args:
@@ -93,7 +93,7 @@ class GenericLoader(ABC):
         return out
     
 
-    def loadTopTransitionGroupFeature(self, pep_id: str, charge: int) -> dict[str, TransitionGroup]:
+    def loadTopTransitionGroupFeature(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
         '''
         Loads a PeakFeature object from the results file
         Args:

@@ -19,6 +19,7 @@ class TransitionGroup:
     '''
     def __init__(self, precursorData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]],
                  transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]]):
+        print(precursorData)
         self.precursorData = precursorData
         self.transitionData = transitionData
         self.type = type(precursorData[0])
