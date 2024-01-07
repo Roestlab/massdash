@@ -8,9 +8,9 @@ import unittest
 from snapshottest import TestCase
 import numpy as np
 import pyopenms as po
-from massseer.peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
-from massseer.structs.Chromatogram import Chromatogram
-from massseer.structs.TransitionGroup import TransitionGroup
+from massdash.peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
+from massdash.structs.Chromatogram import Chromatogram
+from massdash.structs.TransitionGroup import TransitionGroup
 
 class TestFindPeakBoundaries(TestCase):
     def setUp(self):

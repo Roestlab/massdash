@@ -4,8 +4,8 @@ tests/loaders/test_SqMassDataAccess
 """
 
 from snapshottest import TestCase
-from massseer.loaders.access.SqMassDataAccess import SqMassDataAccess
-from massseer.structs.Chromatogram import Chromatogram
+from massdash.loaders.access.SqMassDataAccess import SqMassDataAccess
+from massdash.structs.Chromatogram import Chromatogram
 import unittest
 import pandas as pd
 

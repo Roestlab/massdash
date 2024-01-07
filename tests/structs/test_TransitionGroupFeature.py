@@ -4,7 +4,7 @@ tests/structs/test_TransitionGroupFeature
 """
 
 import unittest
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
 
 class TestTransitionGroupFeature(unittest.TestCase):
 

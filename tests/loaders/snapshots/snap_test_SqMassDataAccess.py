@@ -23,11 +23,11 @@ snapshots['TestSqMassDataAccess::test_getDataForChromatogramsDf 3'] = GenericRep
 snapshots['TestSqMassDataAccess::test_getDataForChromatogramsFromNativeIds 1'] = 5
 
 snapshots['TestSqMassDataAccess::test_getDataForChromatogramsFromNativeIds 2'] = [
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>'),
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>'),
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>'),
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>'),
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>')
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>'),
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>'),
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>'),
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>'),
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>')
 ]
 
 snapshots['TestSqMassDataAccess::test_getDataForChromatogramsFromNativeIdsDf 1'] = GenericRepr('         rt   intensity annotation\n0    1454.9   62.999251       y4^1\n1    1458.6  105.000825       y4^1\n2    1462.2   84.002376       y4^1\n3    1465.8  166.992557       y4^1\n4    1469.5  272.996798       y4^1\n..      ...         ...        ...\n188  2138.3   62.998062       y7^1\n189  2141.9   83.999054       y7^1\n190  2145.6   83.999054       y7^1\n191  2149.2  210.005839       y7^1\n192  2152.8  104.999710       y7^1\n\n[965 rows x 3 columns]')

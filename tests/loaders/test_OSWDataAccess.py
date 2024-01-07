@@ -6,8 +6,8 @@ tests/loaders/test_OSWDataAccess
 import unittest
 from snapshottest import TestCase
 import pandas as pd
-from massseer.loaders.access.OSWDataAccess import OSWDataAccess
-from massseer.structs.TransitionGroup import TransitionGroup
+from massdash.loaders.access.OSWDataAccess import OSWDataAccess
+from massdash.structs.TransitionGroup import TransitionGroup
 import numpy as np
 
 class TestOSWDataAccess(TestCase):
