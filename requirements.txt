@@ -3,6 +3,7 @@ Click
 matplotlib
 numpy
 pandas
+plotly
 psutil
 pyopenms
 scipy
