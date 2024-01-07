@@ -10,12 +10,12 @@ import streamlit as st
 from PIL import Image
 
 # Server
-from .server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
-from .server.RawTargetedExtractionAnalysisServer import RawTargetedExtractionAnalysisServer
+from massdash.server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
+from massdash.server.RawTargetedExtractionAnalysisServer import RawTargetedExtractionAnalysisServer
 # UI 
-from .ui.MassDashGUI import MassDashGUI
+from massdash.ui.MassDashGUI import MassDashGUI
 # Utils
-from .util import LOGGER
+from massdash.util import LOGGER
 
 @click.command()
 # @click.argument('args', default='args', type=str)
@@ -66,8 +66,8 @@ def main(verbose, perf, perf_output):
     st.sidebar.divider()
 
     if st.session_state.workflow == "xic_data" and st.session_state.clicked['load_toy_dataset_xic_data']:
-        sqmass_file_path_input = os.path.join(dirname, '..', 'tests', 'test_data', 'xics')
-        osw_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
+        sqmass_file_path_input = os.path.join(dirname, '..', 'test', 'test_data', 'xics')
+        osw_file_path = os.path.join(dirname, '..', 'test', 'test_data', 'osw', 'test_data.osw')
         
         massdash_gui.show_file_input_settings(osw_file_path, sqmass_file_path_input)
         
