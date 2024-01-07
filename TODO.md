@@ -3,7 +3,7 @@
 - [ ] Add peak picking using pyopenms 
 - [ ] Add public base conformer model
 - [ ] Add DreamDIA scoring model
-- [ ] Add gauss smoothing to visualization display. See [plotter.py#L169](https://github.com/Roestlab/massseer/blob/ebae2f529262e5b1a435f23432d1b4c30b7ec456/massseer/plotter.py#L169) and [plotting_ui.py#L52](https://github.com/Roestlab/massseer/blob/ebae2f529262e5b1a435f23432d1b4c30b7ec456/massseer/plotting_ui.py#L52)
+- [ ] Add gauss smoothing to visualization display. See [plotter.py#L169](https://github.com/Roestlab/massdash/blob/ebae2f529262e5b1a435f23432d1b4c30b7ec456/massdash/plotter.py#L169) and [plotting_ui.py#L52](https://github.com/Roestlab/massdash/blob/ebae2f529262e5b1a435f23432d1b4c30b7ec456/massdash/plotting_ui.py#L52)
 - [ ] Generate concensus chrom traces per transition
 - [ ] Docker / or just ssh port
 - [ ] Make available on PyPi closer to time of publication
