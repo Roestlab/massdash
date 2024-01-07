@@ -46,9 +46,9 @@ from typing import List, Literal
 # Loaders
 from .GenericResultsAccess import GenericResultsAccess
 # Structs
-from structs.TransitionGroupFeature import TransitionGroupFeature
+from ...structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from util import check_sqlite_column_in_table, check_sqlite_table
+from ...util import check_sqlite_column_in_table, check_sqlite_table
 
 class OSWDataAccess(GenericResultsAccess):
     """

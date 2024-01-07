@@ -13,10 +13,10 @@ from .SpectralLibraryLoader import SpectralLibraryLoader
 from .access.OSWDataAccess import OSWDataAccess
 from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
 # Structs
-from structs.TransitionGroup import TransitionGroup
-from structs.TransitionGroupFeature import TransitionGroupFeature
+from ..structs.TransitionGroup import TransitionGroup
+from ..structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from util import LOGGER
+from ..util import LOGGER
 
 class GenericLoader(ABC):
     ''' 

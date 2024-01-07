@@ -7,9 +7,9 @@ from abc import ABC, abstractmethod
 import pandas as pd
 
 # Structs
-from structs.TransitionGroupFeature import TransitionGroupFeature
+from ...structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from util import LOGGER
+from ...util import LOGGER
 
 class GenericResultsAccess(ABC):
     def __init__(self, filename: str, verbose: bool = False) -> None:
