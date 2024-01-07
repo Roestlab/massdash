@@ -6,12 +6,11 @@ massdash/server/ThreeDimensionPlotterServer
 from os.path import basename
 
 # Plotting
-from plotting.GenericPlotter import PlotConfig
-from plotting.InteractiveThreeDimensionPlotter import InteractiveThreeDimensionPlotter
+from ..plotting.GenericPlotter import PlotConfig
+from ..plotting.InteractiveThreeDimensionPlotter import InteractiveThreeDimensionPlotter
 # UI
-from ui.TransitionListUISettings import TransitionListUISettings
-from ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-
+from ..ui.TransitionListUISettings import TransitionListUISettings
+from ..ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
 class ThreeDimensionalPlotter:
     """

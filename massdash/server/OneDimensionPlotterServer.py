@@ -8,18 +8,18 @@ from os.path import basename
 import streamlit as st
 
 # Plotting
-from plotting.GenericPlotter import PlotConfig
-from plotting.InteractivePlotter import InteractivePlotter
+from ..plotting.GenericPlotter import PlotConfig
+from ..plotting.InteractivePlotter import InteractivePlotter
 # Server
 from .PeakPickingServer import PeakPickingServer
 # Structs
-from structs.TransitionGroup import TransitionGroup
-from structs.TransitionGroupFeature import TransitionGroupFeature
-from structs.FeatureMap import FeatureMap
+from ..structs.TransitionGroup import TransitionGroup
+from ..structs.TransitionGroupFeature import TransitionGroupFeature
+from ..structs.FeatureMap import FeatureMap
 # UI
-from ui.TransitionListUISettings import TransitionListUISettings
-from ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from ui.PeakPickingUISettings import PeakPickingUISettings
+from ..ui.TransitionListUISettings import TransitionListUISettings
+from ..ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from ..ui.PeakPickingUISettings import PeakPickingUISettings
 
 class OneDimensionPlotterServer:
     """

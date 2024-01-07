@@ -15,25 +15,25 @@ import numpy as np
 import pandas as pd
 
 # UI
-from ui.MassDashGUI import MassDashGUI
-from ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
-from ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from ui.PeakPickingUISettings import PeakPickingUISettings
-from ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
+from ..ui.MassDashGUI import MassDashGUI
+from ..ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
+from ..ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from ..ui.PeakPickingUISettings import PeakPickingUISettings
+from ..ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 # Loaders
-from loaders.access.OSWDataAccess import OSWDataAccess
-from loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from loaders.SqMassLoader import SqMassLoader
+from ..loaders.access.OSWDataAccess import OSWDataAccess
+from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from ..loaders.SqMassLoader import SqMassLoader
 # Peak Picking
-from peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
-from peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
-from peakPickers.ConformerPeakPicker import ConformerPeakPicker
+from ..peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
+from ..peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
+from ..peakPickers.ConformerPeakPicker import ConformerPeakPicker
 # Plotting
-from plotting.GenericPlotter import PlotConfig
-from plotting.InteractivePlotter import InteractivePlotter
+from ..plotting.GenericPlotter import PlotConfig
+from ..plotting.InteractivePlotter import InteractivePlotter
 # Util
-from util import LOGGER, time_block
-from server.util import get_string_mslevels_from_bool
+from ..util import LOGGER, time_block
+from .util import get_string_mslevels_from_bool
 
 class ExtractedIonChromatogramAnalysisServer:
     """

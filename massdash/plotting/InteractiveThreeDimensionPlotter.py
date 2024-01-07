@@ -21,9 +21,9 @@ import plotly.express as px
 # Plotting
 from .GenericPlotter import PlotConfig
 # Structs
-from structs.FeatureMap import FeatureMap
+from ..structs.FeatureMap import FeatureMap
 # Utils
-from util import check_streamlit
+from ..util import check_streamlit
 
 class InteractiveThreeDimensionPlotter:
     """

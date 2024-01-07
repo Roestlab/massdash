@@ -11,7 +11,7 @@ from .FileInputRawDataUISettings import FileInputRawDataUISettings
 from .ExtractedIonChromatogramAnalysisFormUI import ExtractedIonChromatogramAnalysisFormUI
 from .RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
 # Utils
-from util import copy_attributes
+from ..util import copy_attributes
 
 class MassDashGUI:
     """
