@@ -36,7 +36,8 @@ setup(name='MassSeer',
           "scipy",
           "pyopenms",
           "bokeh==2.4.3",
-          "matplotlib"
+          "matplotlib",
+          "matplotlib-venn"
       ],
       entry_points={
           'console_scripts': [
