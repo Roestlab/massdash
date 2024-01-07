@@ -1,6 +1,6 @@
 """
-tests/loaders/test_OSWDataAccess
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/loaders/test_OSWDataAccess
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 import unittest

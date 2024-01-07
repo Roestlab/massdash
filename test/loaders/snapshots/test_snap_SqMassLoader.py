@@ -1,6 +1,6 @@
 """
-tests/loaders/snapshots/snap_test_SqMassLoader
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/loaders/snapshots/test_snap_SqMassLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 # -*- coding: utf-8 -*-

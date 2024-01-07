@@ -1,6 +1,6 @@
 """
-tests/snapshots/snap_test_chromatogram_data_handling
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/snapshots/test_snap_chromatogram_data_handling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 # -*- coding: utf-8 -*-
