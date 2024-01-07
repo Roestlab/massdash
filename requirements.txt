@@ -1,5 +1,6 @@
 bokeh==2.4.3
 Click
+joblib
 matplotlib
 numpy
 pandas
@@ -8,3 +9,4 @@ psutil
 pyopenms
 scipy
 streamlit
+tqdm
