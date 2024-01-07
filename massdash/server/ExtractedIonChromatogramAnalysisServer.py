@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 # UI
-from massdash.ui.MassSeerGUI import MassSeerGUI
+from massdash.ui.MassDashGUI import MassDashGUI
 from massdash.ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
 from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 from massdash.ui.PeakPickingUISettings import PeakPickingUISettings
@@ -35,7 +35,7 @@ class ExtractedIonChromatogramAnalysisServer:
     A class representing a server for extracted ion chromatogram analysis.
 
     Attributes:
-        massseer_gui (MassSeerGUI): An object representing the MassSeer GUI.
+        massdash_gui (MassDashGUI): An object representing the MassSeer GUI.
         transition_list (SpectralLibraryLoader): An object representing the transition list.
         osw_data (OSWDataAccess): An object representing the OSW data.
         xic_data (SqMassLoader): An object representing the XIC data.
@@ -45,20 +45,20 @@ class ExtractedIonChromatogramAnalysisServer:
         append_qvalues_to_transition_list: Appends q-values to the transition list.
         main: Runs the main post extracted ion chromatogram analysis workflow.
     """
-    def __init__(self, massseer_gui: MassSeerGUI):
+    def __init__(self, massdash_gui: MassDashGUI):
         """
         Initializes the ExtractedIonChromatogramAnalysisServer object.
 
         Args:
-            massseer_gui (MassSeerGUI): An object representing the MassSeer GUI.
+            massdash_gui (MassDashGUI): An object representing the MassSeer GUI.
         """
-        self.massseer_gui = massseer_gui
+        self.massdash_gui = massdash_gui
         self.transition_list = None
         self.osw_data = None
         self.xic_data = None
         
         LOGGER.name = "ExtractedIonChromatogramAnalysisServer"
-        if massseer_gui.verbose:
+        if massdash_gui.verbose:
             LOGGER.setLevel("DEBUG")
         else:
             LOGGER.setLevel("INFO")
@@ -67,7 +67,7 @@ class ExtractedIonChromatogramAnalysisServer:
         """
         Loads the spectral library and sets the transition list attribute.
         """
-        self.transition_list = SpectralLibraryLoader(self.massseer_gui.file_input_settings.osw_file_path)
+        self.transition_list = SpectralLibraryLoader(self.massdash_gui.file_input_settings.osw_file_path)
         self.transition_list.load()
 
     def append_qvalues_to_transition_list(self):
@@ -83,7 +83,7 @@ class ExtractedIonChromatogramAnalysisServer:
         Runs the main post extracted ion chromatogram analysis workflow.
         """
         # Load data from the OSW file
-        self.osw_data = OSWDataAccess(self.massseer_gui.file_input_settings.osw_file_path)
+        self.osw_data = OSWDataAccess(self.massdash_gui.file_input_settings.osw_file_path)
 
         # Get and append q-values to the transition list
         self.get_transition_list()
@@ -104,7 +104,7 @@ class ExtractedIonChromatogramAnalysisServer:
         concensus_chromatogram_settings.create_ui()
 
         # Load XIC data from SQMass file
-        self.xic_data = SqMassLoader(self.massseer_gui.file_input_settings.sqmass_file_path_list, self.massseer_gui.file_input_settings.osw_file_path)
+        self.xic_data = SqMassLoader(self.massdash_gui.file_input_settings.sqmass_file_path_list, self.massdash_gui.file_input_settings.osw_file_path)
 
         # Print selected peptide and charge information
         LOGGER.info(f"Selected peptide: {transition_list_ui.transition_settings.selected_peptide} Selected charge: {transition_list_ui.transition_settings.selected_charge}")

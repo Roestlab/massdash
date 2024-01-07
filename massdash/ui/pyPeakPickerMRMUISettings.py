@@ -6,7 +6,7 @@ from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
 class pyPeakPickerMRMUISettings:
     """
-    A class representing the python based PeakPickerMRM peak picking UI settings for the MassSeerGUI.
+    A class representing the python based PeakPickerMRM peak picking UI settings for the MassDashGUI.
     
     Attributes:
         main_peak_picking_settings : PeakPickingSettings

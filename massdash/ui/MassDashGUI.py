@@ -8,7 +8,7 @@ from massdash.ui.RawTargetedExtractionAnalysisFormUI import RawTargetedExtractio
 # Utils
 from massdash.util import copy_attributes
 
-class MassSeerGUI:
+class MassDashGUI:
     """
     Class to create the user interface for massdash.
     
@@ -22,7 +22,7 @@ class MassSeerGUI:
     """
     def __init__(self, verbose, perf, perf_output="MassSeer_Performance_Report.txt"):
         """
-        Initializes the MassSeerGUI class.
+        Initializes the MassDashGUI class.
 
         Args:
             verbose (bool): Enables verbose mode.
@@ -62,8 +62,8 @@ class MassSeerGUI:
         if st.session_state.WELCOME_PAGE_STATE:
             with self.welcome_container:
                 with st.container():
-                    st.title("Welcome to MassSeer!")
-                    st.write("MassSeer is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
+                    st.title("Welcome to MassDash!")
+                    st.write("MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
                     st.write("It enables the visualization of chromatograms, algorithm testing, and parameter optimization, crucial for data analysis and experimental design.")
                     st.write("This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.")
 

@@ -3,7 +3,6 @@ import streamlit as st
 # Loaders
 from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # UI
-from massdash.ui.MassSeerGUI import MassSeerGUI
 from massdash.ui.TransitionListUISettings import TransitionListUISettings
 
 class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
@@ -13,8 +12,6 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
     Inherits from TransitionListUISettings.
 
     Attributes:
-    massseer_gui : MassSeerGUI
-        An instance of the MassSeerGUI class.
     transition_list : SpectralLibraryLoader
         An instance of the SpectralLibraryLoader class.
     transition_settings : TransitionListUISettings

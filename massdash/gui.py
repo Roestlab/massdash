@@ -8,7 +8,7 @@ from PIL import Image
 from massdash.server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
 from massdash.server.RawTargetedExtractionAnalysisServer import RawTargetedExtractionAnalysisServer
 # UI 
-from massdash.ui.MassSeerGUI import MassSeerGUI
+from massdash.ui.MassDashGUI import MassDashGUI
 # Utils
 from massdash.util import LOGGER
 
@@ -47,9 +47,9 @@ def main(verbose, perf, perf_output):
 
     st.session_state.WELCOME_PAGE_STATE = True
 
-    massseer_gui = MassSeerGUI(verbose==verbose, perf==perf, perf_output=perf_output)
+    massdash_gui = MassDashGUI(verbose==verbose, perf==perf, perf_output=perf_output)
     if st.session_state.WELCOME_PAGE_STATE:
-        massseer_gui.show_welcome_message()
+        massdash_gui.show_welcome_message()
 
 
     ###########################
@@ -64,10 +64,10 @@ def main(verbose, perf, perf_output):
         sqmass_file_path_input = os.path.join(dirname, '..', 'tests', 'test_data', 'xics')
         osw_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
         
-        massseer_gui.show_file_input_settings(osw_file_path, sqmass_file_path_input)
+        massdash_gui.show_file_input_settings(osw_file_path, sqmass_file_path_input)
         
         # Remove welcome message container if dataset is loaded
-        massseer_gui.welcome_container.empty()
+        massdash_gui.welcome_container.empty()
 
         st.session_state.WELCOME_PAGE_STATE = False
         
@@ -78,37 +78,37 @@ def main(verbose, perf, perf_output):
         diann_report_file_path_input = ""
         feature_file_type = ""
         st.stop("Toy dataset not available yet.")
-        massseer_gui.show_file_input_settings(diann_report_file_path_input, raw_file_path_input, transition_list_file_path, feature_file_type)
+        massdash_gui.show_file_input_settings(diann_report_file_path_input, raw_file_path_input, transition_list_file_path, feature_file_type)
 
         # Remove welcome message container if dataset is loaded
-        massseer_gui.welcome_container.empty()
+        massdash_gui.welcome_container.empty()
 
         st.session_state.WELCOME_PAGE_STATE = False
 
-    if st.session_state.workflow == "xic_data" and massseer_gui.osw_file_path!="*.osw" and massseer_gui.sqmass_file_path_input!="*.sqMass" and not st.session_state.clicked['load_toy_dataset_xic_data']:
+    if st.session_state.workflow == "xic_data" and massdash_gui.osw_file_path!="*.osw" and massdash_gui.sqmass_file_path_input!="*.sqMass" and not st.session_state.clicked['load_toy_dataset_xic_data']:
 
-        massseer_gui.show_file_input_settings(massseer_gui.osw_file_path, massseer_gui.sqmass_file_path_input)
+        massdash_gui.show_file_input_settings(massdash_gui.osw_file_path, massdash_gui.sqmass_file_path_input)
 
         # Remove welcome message container if dataset is loaded
-        massseer_gui.welcome_container.empty()
+        massdash_gui.welcome_container.empty()
         
         st.session_state.WELCOME_PAGE_STATE = False
 
-    if st.session_state.workflow == "raw_data" and massseer_gui.transition_list_file_path!="*.pqp" and massseer_gui.raw_file_path_input!="*.mzML" and not st.session_state.clicked['load_toy_dataset_raw_data']:
+    if st.session_state.workflow == "raw_data" and massdash_gui.transition_list_file_path!="*.pqp" and massdash_gui.raw_file_path_input!="*.mzML" and not st.session_state.clicked['load_toy_dataset_raw_data']:
         
-        massseer_gui.show_file_input_settings(massseer_gui.feature_file_path, massseer_gui.raw_file_path_input, massseer_gui.transition_list_file_path, massseer_gui.feature_file_type)
+        massdash_gui.show_file_input_settings(massdash_gui.feature_file_path, massdash_gui.raw_file_path_input, massdash_gui.transition_list_file_path, massdash_gui.feature_file_type)
         
         # Remove welcome message container if dataset is loaded
-        massseer_gui.welcome_container.empty()
+        massdash_gui.welcome_container.empty()
         
         st.session_state.WELCOME_PAGE_STATE = False
 
-    if st.session_state.workflow == "xic_data" and not st.session_state.WELCOME_PAGE_STATE and massseer_gui.file_input_settings is not None:
-        show_xic_exp = ExtractedIonChromatogramAnalysisServer(massseer_gui)
+    if st.session_state.workflow == "xic_data" and not st.session_state.WELCOME_PAGE_STATE and massdash_gui.file_input_settings is not None:
+        show_xic_exp = ExtractedIonChromatogramAnalysisServer(massdash_gui)
         show_xic_exp.main()
         
     if st.session_state.workflow == "raw_data" and not st.session_state.WELCOME_PAGE_STATE:
-        show_raw_exp = RawTargetedExtractionAnalysisServer(massseer_gui)
+        show_raw_exp = RawTargetedExtractionAnalysisServer(massdash_gui)
         show_raw_exp.main()
 
 

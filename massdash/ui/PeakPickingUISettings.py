@@ -8,7 +8,7 @@ from massdash.ui.MRMTransitionGroupPickerUISettings import MRMTransitionGroupPic
 
 class PeakPickingUISettings:
     """
-    A class representing the peak picking settings for the MassSeerGUI.
+    A class representing the peak picking settings for the MassDashGUI.
 
     Attributes:
     do_peak_picking : str
