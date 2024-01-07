@@ -1,3 +1,8 @@
+"""
+massdash/ui/FileInputUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import os
 import fnmatch
 from typing import Literal

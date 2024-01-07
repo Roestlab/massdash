@@ -1,3 +1,8 @@
+"""
+massdash/ui/ExtractedIonChromatogramAnalysisUI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 
 # Loaders

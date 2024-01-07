@@ -1,3 +1,8 @@
+"""
+massdash/ui/MRMTransitionGroupPickerUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 
 # UI

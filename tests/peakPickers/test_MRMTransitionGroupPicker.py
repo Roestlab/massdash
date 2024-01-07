@@ -1,3 +1,8 @@
+"""
+tests/peakPickers/test_MRMTransitionGroupPicker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import unittest
 from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
 from massseer.structs.TransitionGroup import TransitionGroup

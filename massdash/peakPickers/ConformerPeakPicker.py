@@ -1,3 +1,8 @@
+"""
+massdash/peakPickers/ConformerPeakPicker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import os
 from typing import List
 

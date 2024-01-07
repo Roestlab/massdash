@@ -1,3 +1,8 @@
+"""
+massdash/peakPickers/MRMTransitionGroupPicker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import pyopenms as po
 from typing import List
 

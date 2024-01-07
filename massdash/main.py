@@ -1,3 +1,8 @@
+"""
+massdash/main
+~~~~~~~~~~~~~
+"""
+
 import click
 import sys
 import os

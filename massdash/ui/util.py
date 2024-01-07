@@ -1,3 +1,8 @@
+"""
+massdash/ui/util
+~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 
 def clicked(button):

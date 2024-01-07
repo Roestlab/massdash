@@ -1,3 +1,8 @@
+"""
+massdash/loaders/access/MzMLDataAccess
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import click
 from typing import List, Tuple, Literal
 import itertools

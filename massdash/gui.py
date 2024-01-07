@@ -1,3 +1,8 @@
+"""
+massdash/gui
+~~~~~~~~~~~~
+"""
+
 import os
 import click
 import logging

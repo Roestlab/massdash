@@ -1,3 +1,8 @@
+"""
+massdash/ui/MassDashGUI
+~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 
 # UI

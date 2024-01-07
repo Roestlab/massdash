@@ -1,3 +1,8 @@
+"""
+massdash/structs/TargetedDIAConfig
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from typing import Tuple, List
 
 class TargetedDIAConfig:

@@ -1,3 +1,8 @@
+"""
+massdash/ui/ConcensusChromatogramUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 
 class ConcensusChromatogramUISettings:

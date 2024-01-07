@@ -1,3 +1,8 @@
+"""
+massdash/loaders/MzMLDataLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from os.path import basename, splitext
 from typing import List, Union, Literal
 import numpy as np

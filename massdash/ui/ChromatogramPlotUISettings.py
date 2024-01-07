@@ -1,3 +1,8 @@
+"""
+massdash/ui/ChromatogramPlotUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 
 class ChromatogramPlotUISettings:

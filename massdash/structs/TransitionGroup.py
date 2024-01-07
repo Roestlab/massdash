@@ -1,3 +1,8 @@
+"""
+massdash/structs/TransitionGroup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from typing import List, Tuple, Optional, Union, Literal
 import pyopenms as po
 import pandas as pd

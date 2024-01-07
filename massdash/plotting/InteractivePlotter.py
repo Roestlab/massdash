@@ -1,3 +1,8 @@
+"""
+massdash/plotting/InteractivePlotter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from typing import List, Optional, Literal
 import streamlit as st
 

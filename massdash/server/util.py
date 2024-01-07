@@ -1,3 +1,8 @@
+"""
+massdash/server/util
+~~~~~~~~~~~~~~~~~~~~
+"""
+
 import mmap
 
 def get_string_mslevels_from_bool(mslevel_bool_dict):

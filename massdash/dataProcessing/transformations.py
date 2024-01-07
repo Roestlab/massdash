@@ -1,3 +1,8 @@
+"""
+massdash/dataProcessing/transformations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import numpy as np
 
 def normalize(intensity):

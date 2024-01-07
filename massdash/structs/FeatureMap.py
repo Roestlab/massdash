@@ -1,3 +1,8 @@
+"""
+massdash/structs/FeatureMap
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from typing import List, Tuple
 
 # Data modules

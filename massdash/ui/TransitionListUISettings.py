@@ -1,3 +1,8 @@
+"""
+massdash/ui/TransitionListUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import time
 import streamlit as st
 import numpy as np

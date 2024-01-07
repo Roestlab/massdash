@@ -1,3 +1,8 @@
+"""
+massdash/server/OneDimensionPlotterServer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from os.path import basename
 import streamlit as st
 

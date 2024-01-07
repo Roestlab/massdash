@@ -1,3 +1,8 @@
+"""
+massdash/server/PeakPickingServer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 from typing import Literal
 
