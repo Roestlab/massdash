@@ -1,8 +1,8 @@
-Click
-streamlit
-pandas
-numpy
-scipy
-pyopenms
 bokeh==2.4.3
+Click
 matplotlib
+numpy
+pandas
+pyopenms
+scipy
+streamlit
