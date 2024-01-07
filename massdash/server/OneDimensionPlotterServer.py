@@ -2,18 +2,18 @@ from os.path import basename
 import streamlit as st
 
 # Plotting
-from massseer.plotting.GenericPlotter import PlotConfig
-from massseer.plotting.InteractivePlotter import InteractivePlotter
+from massdash.plotting.GenericPlotter import PlotConfig
+from massdash.plotting.InteractivePlotter import InteractivePlotter
 # Server
-from massseer.server.PeakPickingServer import PeakPickingServer
+from massdash.server.PeakPickingServer import PeakPickingServer
 # Structs
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.structs.FeatureMap import FeatureMap
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+from massdash.structs.FeatureMap import FeatureMap
 # UI
-from massseer.ui.TransitionListUISettings import TransitionListUISettings
-from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
+from massdash.ui.TransitionListUISettings import TransitionListUISettings
+from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from massdash.ui.PeakPickingUISettings import PeakPickingUISettings
 
 class OneDimensionPlotterServer:
     """

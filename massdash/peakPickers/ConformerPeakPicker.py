@@ -2,12 +2,12 @@ import os
 from typing import List
 
 # Preprocess
-from massseer.preprocess.ConformerPreprocessor import ConformerPreprocessor
+from massdash.preprocess.ConformerPreprocessor import ConformerPreprocessor
 # Structs
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from massseer.util import check_package
+from massdash.util import check_package
 
 onnxruntime, ONNXRUNTIME_AVAILABLE = check_package("onnxruntime")
 

@@ -13,11 +13,11 @@ import pandas as pd
 import numpy as np
 
 # Structs
-from massseer.structs.TargetedDIAConfig import TargetedDIAConfig
-from massseer.structs.FeatureMap import FeatureMap
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+from massdash.structs.TargetedDIAConfig import TargetedDIAConfig
+from massdash.structs.FeatureMap import FeatureMap
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
 # Internal
-from massseer.util import LOGGER, method_timer, code_block_timer
+from massdash.util import LOGGER, method_timer, code_block_timer
 
 class MzMLDataAccess():
     """

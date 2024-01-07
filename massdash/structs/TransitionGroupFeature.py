@@ -1,7 +1,9 @@
-from massseer.structs.GenericFeature import GenericFeature
 from typing import Optional, Tuple, List
 import pandas as pd
 import numpy as np
+
+# Structs
+from massdash.structs.GenericFeature import GenericFeature
 
 class TransitionGroupFeature(GenericFeature):
     '''

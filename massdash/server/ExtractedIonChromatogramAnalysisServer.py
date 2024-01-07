@@ -10,25 +10,25 @@ import numpy as np
 import pandas as pd
 
 # UI
-from massseer.ui.MassSeerGUI import MassSeerGUI
-from massseer.ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
-from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
-from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
+from massdash.ui.MassSeerGUI import MassSeerGUI
+from massdash.ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
+from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from massdash.ui.PeakPickingUISettings import PeakPickingUISettings
+from massdash.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 # Loaders
-from massseer.loaders.access.OSWDataAccess import OSWDataAccess
-from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from massseer.loaders.SqMassLoader import SqMassLoader
+from massdash.loaders.access.OSWDataAccess import OSWDataAccess
+from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from massdash.loaders.SqMassLoader import SqMassLoader
 # Peak Picking
-from massseer.peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
-from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
-from massseer.peakPickers.ConformerPeakPicker import ConformerPeakPicker
+from massdash.peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
+from massdash.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
+from massdash.peakPickers.ConformerPeakPicker import ConformerPeakPicker
 # Plotting
-from massseer.plotting.GenericPlotter import PlotConfig
-from massseer.plotting.InteractivePlotter import InteractivePlotter
+from massdash.plotting.GenericPlotter import PlotConfig
+from massdash.plotting.InteractivePlotter import InteractivePlotter
 # Util
-from massseer.util import LOGGER, time_block
-from massseer.server.util import get_string_mslevels_from_bool
+from massdash.util import LOGGER, time_block
+from massdash.server.util import get_string_mslevels_from_bool
 
 class ExtractedIonChromatogramAnalysisServer:
     """

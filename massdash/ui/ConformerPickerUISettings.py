@@ -2,7 +2,7 @@ import os
 import streamlit as st
 
 # UI
-from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
 DIRNAME = os.path.dirname(__file__)
 

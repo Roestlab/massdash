@@ -1,13 +1,17 @@
 from abc import ABC, abstractmethod
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from massseer.loaders.access.OSWDataAccess import OSWDataAccess
-from massseer.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
 from typing import List, Union, Literal
 from os.path import basename
-from massseer.util import LOGGER
 import pandas as pd
+
+# Loaders
+from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from massdash.loaders.access.OSWDataAccess import OSWDataAccess
+from massdash.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
+# Structs
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+# Utils
+from massdash.util import LOGGER
 
 class GenericLoader(ABC):
     ''' 

@@ -11,17 +11,17 @@ from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, HoverTo
 from bokeh.palettes import Category20, Viridis256
 
 # Plotting
-from massseer.plotting.GenericPlotter import GenericPlotter, PlotConfig
+from massdash.plotting.GenericPlotter import GenericPlotter, PlotConfig
 # Structs
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.structs.Chromatogram import Chromatogram
-from massseer.structs.Mobilogram import Mobilogram
-from massseer.structs.Spectrum import Spectrum
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+from massdash.structs.Chromatogram import Chromatogram
+from massdash.structs.Mobilogram import Mobilogram
+from massdash.structs.Spectrum import Spectrum
 # Data processing
-from massseer.dataProcessing.transformations import normalize
+from massdash.dataProcessing.transformations import normalize
 # Utils
-from massseer.util import LOGGER, check_streamlit
+from massdash.util import LOGGER, check_streamlit
 
 class InteractivePlotter(GenericPlotter):
     """

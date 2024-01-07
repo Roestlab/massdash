@@ -1,8 +1,10 @@
 
 from abc import ABC, abstractmethod
 from typing import List, Optional, Literal
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.structs.TransitionGroup import TransitionGroup
+
+# Structs
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+from massdash.structs.TransitionGroup import TransitionGroup
 
 class PlotConfig:
     """

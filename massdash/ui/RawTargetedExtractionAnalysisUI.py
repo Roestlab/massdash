@@ -3,16 +3,15 @@ import streamlit as st
 import numpy as np
 from typing import Literal, Dict
 
-# UI
-from massseer.ui.TransitionListUISettings import TransitionListUISettings
-from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from massseer.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 # Loaders
-from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from massseer.structs.TargetedDIAConfig import TargetedDIAConfig
+from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from massdash.structs.TargetedDIAConfig import TargetedDIAConfig
 # Structs
-from massseer.structs.FeatureMap import FeatureMap
-
+from massdash.structs.FeatureMap import FeatureMap
+# UI
+from massdash.ui.TransitionListUISettings import TransitionListUISettings
+from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from massdash.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 
 class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
     

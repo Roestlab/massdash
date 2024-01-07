@@ -1,9 +1,10 @@
 import streamlit as st
 
-from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from massseer.ui.pyPeakPickerMRMUISettings import pyPeakPickerMRMUISettings
-from massseer.ui.ConformerPickerUISettings import ConformerPickerUISettings
-from massseer.ui.MRMTransitionGroupPickerUISettings import MRMTransitionGroupPickerUISettings
+# UI
+from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from massdash.ui.pyPeakPickerMRMUISettings import pyPeakPickerMRMUISettings
+from massdash.ui.ConformerPickerUISettings import ConformerPickerUISettings
+from massdash.ui.MRMTransitionGroupPickerUISettings import MRMTransitionGroupPickerUISettings
 
 class PeakPickingUISettings:
     """

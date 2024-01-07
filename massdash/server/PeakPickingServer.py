@@ -2,18 +2,18 @@ import streamlit as st
 from typing import Literal
 
 # UI
-from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from massseer.ui.PeakPickingUISettings import PeakPickingUISettings
+from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from massdash.ui.PeakPickingUISettings import PeakPickingUISettings
 # Loaders
-from massseer.loaders.SqMassLoader import SqMassLoader
+from massdash.loaders.SqMassLoader import SqMassLoader
 # Structs
-from massseer.structs.TransitionGroup import TransitionGroup
+from massdash.structs.TransitionGroup import TransitionGroup
 # Peak Picking
-from massseer.peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
-from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
+from massdash.peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
+from massdash.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
 # Util
-from massseer.util import time_block
-from massseer.server.util import get_string_mslevels_from_bool
+from massdash.util import time_block
+from massdash.server.util import get_string_mslevels_from_bool
 
 class PeakPickingServer:
     """

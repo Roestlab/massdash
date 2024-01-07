@@ -2,7 +2,7 @@ import pyopenms as po
 from typing import Optional, Tuple, List
 import pandas as pd
 
-from massseer.structs.Data1D import Data1D
+from massdash.structs.Data1D import Data1D
 
 class Chromatogram(Data1D):
     ''' 

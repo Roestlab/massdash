@@ -1,11 +1,11 @@
 from os.path import basename
 
 # Plotting
-from massseer.plotting.GenericPlotter import PlotConfig
-from massseer.plotting.InteractiveThreeDimensionPlotter import InteractiveThreeDimensionPlotter
+from massdash.plotting.GenericPlotter import PlotConfig
+from massdash.plotting.InteractiveThreeDimensionPlotter import InteractiveThreeDimensionPlotter
 # UI
-from massseer.ui.TransitionListUISettings import TransitionListUISettings
-from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from massdash.ui.TransitionListUISettings import TransitionListUISettings
+from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
 
 class ThreeDimensionalPlotter:

@@ -1,13 +1,12 @@
 from typing import List, Optional
 import pandas as pd
 import pyopenms as po
-import numpy as np
 
-from massseer.peakPickers.GenericPeakPicker import GenericPeakPicker
-from massseer.structs.Chromatogram import Chromatogram
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.structs.TransitionFeature import TransitionFeature
-from massseer.structs.TransitionGroup import TransitionGroup
+# Structs
+from massdash.structs.Chromatogram import Chromatogram
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+from massdash.structs.TransitionFeature import TransitionFeature
+from massdash.structs.TransitionGroup import TransitionGroup
 
 class pyMRMTransitionGroupPicker:
     '''

@@ -1,6 +1,8 @@
 from typing import Tuple
-from massseer.structs.Data1D import Data1D
 import pandas as pd
+
+# Structs
+from massdash.structs.Data1D import Data1D
 
 class Spectrum(Data1D):
     ''' 

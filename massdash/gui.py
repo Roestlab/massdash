@@ -5,12 +5,12 @@ import streamlit as st
 from PIL import Image
 
 # Server
-from massseer.server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
-from massseer.server.RawTargetedExtractionAnalysisServer import RawTargetedExtractionAnalysisServer
+from massdash.server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
+from massdash.server.RawTargetedExtractionAnalysisServer import RawTargetedExtractionAnalysisServer
 # UI 
-from massseer.ui.MassSeerGUI import MassSeerGUI
+from massdash.ui.MassSeerGUI import MassSeerGUI
 # Utils
-from massseer.util import LOGGER
+from massdash.util import LOGGER
 
 @click.command()
 # @click.argument('args', default='args', type=str)
@@ -21,7 +21,7 @@ def main(verbose, perf, perf_output):
 
     ###########################
     ## Logging
-    LOGGER.name = 'MassSeerGUIMain'
+    LOGGER.name = 'MassDashGUIMain'
     if verbose:
         log_level = logging.DEBUG
     else:
@@ -37,11 +37,11 @@ def main(verbose, perf, perf_output):
     # There currently is warning with the icon size for some reason, not sure why
     # /home/justincsing/anaconda3/envs/py39/lib/python3.9/site-packages/PIL/IcoImagePlugin.py:316: UserWarning: Image was not the expected size
     #   warnings.warn("Image was not the expected size")
-    massseer_icon = Image.open(os.path.join(os.path.dirname(__file__), 'assets/img/massseer.ico'))
-    st.set_page_config(page_title='MassSeer', page_icon=massseer_icon, layout='wide')
+    MASSDASH_ICON = Image.open(os.path.join(os.path.dirname(__file__), 'assets/img/MassDash_Logo.ico'))
+    st.set_page_config(page_title='MassDash', page_icon=MASSDASH_ICON, layout='wide')
 
     dirname = os.path.dirname(__file__)
-    MASSSEER_LOGO = os.path.join(dirname, 'assets/img/MassSeer_Logo_Full.png')
+    MASSDASH_LOGO = os.path.join(dirname, 'assets/img/MassDash_Logo.png')
     OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
 
     ###########################
@@ -58,7 +58,7 @@ def main(verbose, perf, perf_output):
     ## Sidebar Window
 
     # MassSeer Sidebar Top Logo
-    st.sidebar.image(MASSSEER_LOGO)
+    st.sidebar.image(MASSDASH_LOGO)
 
     st.sidebar.divider()
 

@@ -14,11 +14,11 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 # Plotting
-from massseer.plotting.GenericPlotter import PlotConfig
+from massdash.plotting.GenericPlotter import PlotConfig
 # Structs
-from massseer.structs.FeatureMap import FeatureMap
+from massdash.structs.FeatureMap import FeatureMap
 # Utils
-from massseer.util import check_streamlit
+from massdash.util import check_streamlit
 
 class InteractiveThreeDimensionPlotter:
     """

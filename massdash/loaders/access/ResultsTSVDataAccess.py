@@ -2,10 +2,13 @@ import pandas as pd
 import numpy as np
 import re
 from typing import List
-from massseer.loaders.access.GenericResultsAccess import GenericResultsAccess
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 
-from massseer.util import LOGGER
+# Loaders
+from massdash.loaders.access.GenericResultsAccess import GenericResultsAccess
+# Structs
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+# Utils
+from massdash.util import LOGGER
 
 class ResultsTSVDataAccess(GenericResultsAccess): 
     ''' Class for generic access to TSV file containing the results, currently only supports DIA-NN tsv files'''

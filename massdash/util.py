@@ -19,7 +19,7 @@ import psutil
 
 # Logging
 FORMATTER = logging.Formatter("[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
-LOG_FILE = "MassSeer.log"
+LOG_FILE = "MassDash.log"
 
 def get_console_handler():
     """
@@ -63,7 +63,7 @@ def get_logger(logger_name, log_level=logging.INFO):
     return logger
 
 # Call first instance of logger
-LOGGER = get_logger('MassSeer')
+LOGGER = get_logger('MassDash')
 
 @contextlib.contextmanager
 def code_block_timer(ident, log_type):
@@ -120,7 +120,7 @@ def measure_memory_block():
     end_memory = psutil.virtual_memory().used
 
 class MeasureBlock:
-    def __init__(self, metric_name: str=None, write_out_perf: bool=False, perf_output: str='MassSeer_Performance_Report.txt'):
+    def __init__(self, metric_name: str=None, write_out_perf: bool=False, perf_output: str='MassDash_Performance_Report.txt'):
         self.metric_name = metric_name
         self.write_out_perf = write_out_perf
         self.perf_output = perf_output

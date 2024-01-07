@@ -7,20 +7,20 @@ from streamlit.web import cli as stcli
 @click.version_option()
 def cli():
     """
-    MassSeer: Streamlined DIA-MS visualization, analysis, optimization and rapid prototyping. 
+    MassDash: Streamlined DIA-MS visualization, analysis, optimization and rapid prototyping. 
     """
 
-# GUI for MassSeer.
+# GUI for MassDash.
 @cli.command()
 @click.option('--verbose', '-v', is_flag=True, help="Enables verbose mode.")
 @click.option('--perf', '-t', is_flag=True, help="Enables measuring and tracking of performance.")
-@click.option('--perf_output', '-o', default='MassSeer_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
+@click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
 def gui(verbose, perf, perf_output):
     """
-    GUI for MassSeer.
+    GUI for MassDash.
     """
 
-    click.echo("Starting MassSeer GUI...")
+    click.echo("Starting MassDash GUI...")
     click.echo("Arguments:")
     click.echo(f"verbose: {verbose}")
     click.echo(f"perf: {perf}")
@@ -47,7 +47,7 @@ def gui(verbose, perf, perf_output):
             if response == 'Y':
                 os.remove(perf_output)
             else:
-                click.echo("Exiting MassSeer GUI...")
+                click.echo("Exiting MassDash GUI...")
                 sys.exit(0)
                 
     print(f"Running: streamlit run {filename} {add_args}")

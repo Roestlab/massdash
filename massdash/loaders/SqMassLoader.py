@@ -1,15 +1,17 @@
 
 from abc import ABC, abstractmethod
-
-from pandas.core.api import DataFrame as DataFrame
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.loaders.GenericLoader import GenericLoader
-from massseer.loaders.access.SqMassDataAccess import SqMassDataAccess
-from massseer.loaders.access.OSWDataAccess import OSWDataAccess
 from typing import List, Dict, Union
 from os.path import basename
+from pandas.core.api import DataFrame as DataFrame
 import pandas as pd
+
+# Loaders
+from massdash.loaders.GenericLoader import GenericLoader
+from massdash.loaders.access.SqMassDataAccess import SqMassDataAccess
+from massdash.loaders.access.OSWDataAccess import OSWDataAccess
+# Structs
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
 
 class SqMassLoader(GenericLoader):
 

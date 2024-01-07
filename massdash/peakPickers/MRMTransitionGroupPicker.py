@@ -1,7 +1,9 @@
 import pyopenms as po
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
 from typing import List
+
+# Structs
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
 
 class MRMTransitionGroupPicker:
     ''' python wrapper of the pyopenms MRMTransitionGroupPicker '''

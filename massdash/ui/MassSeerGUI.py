@@ -1,16 +1,16 @@
 import streamlit as st
 
 # UI
-from massseer.ui.FileInputXICDataUISettings import FileInputXICDataUISettings
-from massseer.ui.FileInputRawDataUISettings import FileInputRawDataUISettings
-from massseer.ui.ExtractedIonChromatogramAnalysisFormUI import ExtractedIonChromatogramAnalysisFormUI
-from massseer.ui.RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
+from massdash.ui.FileInputXICDataUISettings import FileInputXICDataUISettings
+from massdash.ui.FileInputRawDataUISettings import FileInputRawDataUISettings
+from massdash.ui.ExtractedIonChromatogramAnalysisFormUI import ExtractedIonChromatogramAnalysisFormUI
+from massdash.ui.RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
 # Utils
-from massseer.util import copy_attributes
+from massdash.util import copy_attributes
 
 class MassSeerGUI:
     """
-    Class to create the user interface for MassSeer.
+    Class to create the user interface for massdash.
     
     Attributes:
         welcome_container (streamlit.container): A container for the welcome message.

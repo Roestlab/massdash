@@ -1,10 +1,10 @@
 import streamlit as st
 
-# UI
-from massseer.ui.MassSeerGUI import MassSeerGUI
-from massseer.ui.TransitionListUISettings import TransitionListUISettings
 # Loaders
-from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
+# UI
+from massdash.ui.MassSeerGUI import MassSeerGUI
+from massdash.ui.TransitionListUISettings import TransitionListUISettings
 
 class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
     """

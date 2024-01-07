@@ -34,12 +34,16 @@ $Maintainer: Justin Sing$
 $Authors: Hannes Roest, Justin Sing$
 --------------------------------------------------------------------------
 """
-import pandas as pd
 import sqlite3
-from massseer.util import check_sqlite_column_in_table, check_sqlite_table
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.loaders.access.GenericResultsAccess import GenericResultsAccess
+import pandas as pd
 from typing import List, Literal
+
+# Loaders
+from massdash.loaders.access.GenericResultsAccess import GenericResultsAccess
+# Structs
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+# Utils
+from massdash.util import check_sqlite_column_in_table, check_sqlite_table
 
 class OSWDataAccess(GenericResultsAccess):
     """

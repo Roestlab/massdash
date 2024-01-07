@@ -4,17 +4,17 @@ import numpy as np
 import pandas as pd
 
 # Loaders
-from massseer.loaders.access.MzMLDataAccess import MzMLDataAccess
-from massseer.loaders.GenericLoader import GenericLoader
-from massseer.loaders.access.OSWDataAccess import OSWDataAccess
-from massseer.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
-from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from massdash.loaders.access.MzMLDataAccess import MzMLDataAccess
+from massdash.loaders.GenericLoader import GenericLoader
+from massdash.loaders.access.OSWDataAccess import OSWDataAccess
+from massdash.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
+from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # Structs
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.FeatureMap import FeatureMap
-from massseer.structs.TargetedDIAConfig import TargetedDIAConfig
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.structs.FeatureMap import FeatureMap
+from massdash.structs.TargetedDIAConfig import TargetedDIAConfig
 # Utils
-from massseer.util import LOGGER
+from massdash.util import LOGGER
 
 
 class MzMLDataLoader(GenericLoader):

@@ -3,13 +3,14 @@ from bokeh.layouts import gridplot
 from typing import Dict
 
 # Plotting
-from massseer.plotting.GenericPlotter import PlotConfig
-from massseer.plotting.InteractiveTwoDimensionPlotter import InteractiveTwoDimensionPlotter
+from massdash.plotting.GenericPlotter import PlotConfig
+from massdash.plotting.InteractiveTwoDimensionPlotter import InteractiveTwoDimensionPlotter
+# Structs
+from massdash.structs.FeatureMap import FeatureMap
 # UI
-from massseer.ui.TransitionListUISettings import TransitionListUISettings
-from massseer.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-# structs
-from massseer.structs.FeatureMap import FeatureMap
+from massdash.ui.TransitionListUISettings import TransitionListUISettings
+from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+
 
 class TwoDimensionPlotterServer:
     """

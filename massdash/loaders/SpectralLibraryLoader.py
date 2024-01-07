@@ -3,11 +3,12 @@ from typing import List
 import pandas as pd
 
 # Loaders
-from massseer.loaders.access.TransitionTSVDataAccess import TransitionTSVDataAccess
-from massseer.loaders.access.TransitionPQPDataAccess import TransitionPQPDataAccess
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
+from massdash.loaders.access.TransitionTSVDataAccess import TransitionTSVDataAccess
+from massdash.loaders.access.TransitionPQPDataAccess import TransitionPQPDataAccess
+# Structs
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from massseer.util import LOGGER
+from massdash.util import LOGGER
 
 class SpectralLibraryLoader:
     """

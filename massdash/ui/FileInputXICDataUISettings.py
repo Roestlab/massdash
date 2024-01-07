@@ -3,7 +3,8 @@ import streamlit as st
 import os
 import fnmatch
 
-from massseer.ui.BaseUISettings import BaseUISettings
+# UI
+from massdash.ui.BaseUISettings import BaseUISettings
 
 class FileInputXICDataUISettings(BaseUISettings):
     """

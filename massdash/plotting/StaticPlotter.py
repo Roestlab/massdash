@@ -1,4 +1,4 @@
-from massseer.plotting.GenericPlotter import GenericPlotter
+from massdash.plotting.GenericPlotter import GenericPlotter
 
 class StaticPlotter(GenericPlotter):
     

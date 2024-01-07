@@ -1,7 +1,7 @@
 import streamlit as st 
 
 # Internal
-from massseer.ui.util import clicked
+from massdash.ui.util import clicked
 
 class ExtractedIonChromatogramAnalysisFormUI:
     """

@@ -34,16 +34,20 @@ $Maintainer: Justin Sing$
 $Authors: Hannes Roest, Justin Sing$
 --------------------------------------------------------------------------
 """
-from massseer.util import check_sqlite_column_in_table, check_sqlite_table
-from massseer.structs.Chromatogram import Chromatogram
+
 from typing import List
 from collections import OrderedDict
-import base64
 import pyopenms as po
 import sqlite3
-import zlib
 import pandas as pd
+import base64
 import struct
+import zlib
+
+# Structs
+from massdash.structs.Chromatogram import Chromatogram
+# Utils
+from massdash.util import check_sqlite_column_in_table, check_sqlite_table
 
 class SqMassDataAccess:
 

@@ -5,13 +5,13 @@ import pandas as pd
 import numpy as np
 
 # Structs
-from massseer.structs.Chromatogram import Chromatogram
-from massseer.structs.Mobilogram import Mobilogram
-from massseer.structs.Spectrum import Spectrum
+from massdash.structs.Chromatogram import Chromatogram
+from massdash.structs.Mobilogram import Mobilogram
+from massdash.structs.Spectrum import Spectrum
 # Utils
-from massseer.util import LOGGER
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TargetedDIAConfig import TargetedDIAConfig
+from massdash.util import LOGGER
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.structs.TargetedDIAConfig import TargetedDIAConfig
 
 class FeatureMap:
     '''

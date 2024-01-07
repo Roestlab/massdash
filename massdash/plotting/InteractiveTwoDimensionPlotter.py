@@ -10,10 +10,10 @@ from bokeh.plotting import figure
 from matplotlib import cm
 
 # Plotting
-from massseer.plotting.GenericPlotter import PlotConfig
+from massdash.plotting.GenericPlotter import PlotConfig
 
 # Structs
-from massseer.structs.FeatureMap import FeatureMap
+from massdash.structs.FeatureMap import FeatureMap
 
 def rgb_to_hex(rgb):
     """
