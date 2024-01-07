@@ -112,7 +112,7 @@ class SearchResultsAnalysisUI:
                         st.plotly_chart(plot_obj, use_container_width=True)
                     elif plot_type == "upset_diagram":
                         # st.pyplot(plot_obj, use_container_width=True)
-                        st.image(plot_obj)
+                        st.image(plot_obj, use_column_width=True)
                     
                     col_counter+=1
                     if col_counter >= len(plot_cols):

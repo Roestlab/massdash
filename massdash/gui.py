@@ -129,6 +129,17 @@ def main(verbose, perf, perf_output):
         massdash_gui.welcome_container.empty()
         
         st.session_state.WELCOME_PAGE_STATE = False
+        
+    if st.session_state.workflow == "search_results_analysis" and massdash_gui.feature_file_entries is not None and not st.session_state.clicked['load_toy_dataset_search_results_analysis']:
+
+        massdash_gui.show_file_input_settings(feature_file_entries_dict=massdash_gui.feature_file_entries)
+        
+        # Remove welcome message container if dataset is loaded
+        massdash_gui.welcome_container.empty()
+        
+        st.session_state.WELCOME_PAGE_STATE = False
+        
+        
 
     if st.session_state.workflow == "xic_data" and not st.session_state.WELCOME_PAGE_STATE and massdash_gui.file_input_settings is not None:
         show_xic_exp = ExtractedIonChromatogramAnalysisServer(massdash_gui)

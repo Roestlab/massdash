@@ -1,12 +1,8 @@
 import streamlit as st
-
-import os
-import fnmatch
 import pandas as pd
 
-from massseer.ui.BaseUISettings import BaseUISettings
-from massseer.ui.SearchResultsAnalysisFormUI import SearchResultsAnalysisFormUI
-from massseer.util import copy_attributes
+from .SearchResultsAnalysisFormUI import SearchResultsAnalysisFormUI
+from util import copy_attributes
 
 class FileInputSearchResultsAnalysisUISettings:
     """

@@ -298,7 +298,7 @@ class SearchResultAnalysisPlots:
         # Create the UpSet plot
         upset = UpSet(upset_data)
 
-        fig = plt.figure(figsize=(6, 4))
+        fig = plt.figure(figsize=(7, 3))
         upset.plot(fig = fig)
 
         buf = BytesIO()

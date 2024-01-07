@@ -7,17 +7,15 @@ import timeit
 from datetime import timedelta
 
 # UI
-from massseer.ui.MassSeerGUI import MassSeerGUI
-from massseer.ui.SearchResultsAnalysisUI import SearchResultsAnalysisUI
+from ui.MassDashGUI import MassDashGUI
+from ui.SearchResultsAnalysisUI import SearchResultsAnalysisUI
 # Loaders
-from massseer.loaders.access.OSWDataAccess import OSWDataAccess
-# from massseer.loaders.DiaNNLoader import DiaNNLoader
-# from massseer.loaders.DreamDIALoader import DreamDIALoader
-from massseer.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
+from loaders.access.OSWDataAccess import OSWDataAccess
+from loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
 # Plotting
-from massseer.plotting.SearchResultAnalysisPlots import SearchResultAnalysisPlots
+from plotting.SearchResultAnalysisPlots import SearchResultAnalysisPlots
 # Utils
-from massseer.util import conditional_decorator, check_streamlit
+from util import conditional_decorator, check_streamlit
 
 class SearchResultsAnalysisServer:
     """
@@ -63,7 +61,7 @@ class SearchResultsAnalysisServer:
         return data_access_dict
     
     @conditional_decorator(st.cache_resource, check_streamlit)
-    def get_data(_self, _data_access_dict, biological_level, qvalue_threshold):
+    def get_data(_self, _data_access_dict, qvalue_threshold):
         data_dict = {}
         for entry, data_access in _data_access_dict.items():
             if isinstance(data_access, OSWDataAccess):
@@ -112,7 +110,7 @@ class SearchResultsAnalysisServer:
             
             self.analysis_type.show_identification_settings()
             # self.get_data.clear()
-            ident_data_dict = self.get_data(search_results_access_dict, self.analysis_type.biological_level, self.analysis_type.qvalue_threshold)
+            ident_data_dict = self.get_data(search_results_access_dict, self.analysis_type.qvalue_threshold)
 
             plot_container = st.container()
 
