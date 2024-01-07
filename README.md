@@ -42,13 +42,13 @@ Change into massdash directory
 cd massdash
 ```
 
-Pip install using *setup.py*
+Pip install massdash in editable mode
 
 ```
 pip install -e .
 ```
 
-## Installing from PyPi (...Still to Come)
+## Installing from PyPI (still to come...)
 
 ```
 pip install massdash
