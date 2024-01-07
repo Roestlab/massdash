@@ -1,6 +1,6 @@
 """
-tests/structs/test_TransitionGroupFeature
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/structs/test_TransitionGroupFeature
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 import unittest

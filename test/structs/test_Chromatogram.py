@@ -1,6 +1,6 @@
 """
-tests/structs/test_Chromatogram
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/structs/test_Chromatogram
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 

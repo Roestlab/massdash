@@ -1,6 +1,6 @@
 """
-tests/peakPickers/test_pyMRMTransitionGroupPicker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/peakPickers/test_pyMRMTransitionGroupPicker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 
