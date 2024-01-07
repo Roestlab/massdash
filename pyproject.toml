@@ -2,9 +2,6 @@
 requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
-[tool.flit.scripts]
-massdash = 'massdash.main:cli'
-
 [tool.flit.metadata]
 module = "massdash"
 dist-name = "massdash"
@@ -40,3 +37,9 @@ requires = [
     "streamlit",
     "tqdm",
 ]
+
+[tool.flit.scripts]
+massdash = 'massdash.main:cli'
+
+[tool.flit.sdist]
+exclude = ["tests*"]
