@@ -14,22 +14,19 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         self.filename = filename
         self.results_type = results_type
 
-        import streamlit as st
-        st.write(f"results_type: {self.results_type}")
-        
         if self.results_type == "OpenSWATH":
             self.column_mapping = ""
             raise ValueError("OpenSWATH results not supported yet")
         elif self.results_type == "DIA-NN":
-            self.column_mapping = {'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge'}
+            self.column_mapping = {'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename'}
             self.hash_table_columns = ['Modified.Sequence', 'Precursor.Charge', 'Run']
         elif self.results_type == "DreamDIA":
-            self.column_mapping = {'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'Run'}
+            self.column_mapping = {'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'filename', 'quantification': 'Intensity'}
             self.hash_table_columns = ['full_sequence', 'sequence', 'filename']
             
         self.peptideHash = self._initializePeptideHashTable()
         self.df = self.loadData() 
-        self.runs = self.df['Run'].drop_duplicates()
+        self.runs = self.df['filename'].drop_duplicates()
         self.has_im = 'IM' in self.df.columns
     
     def loadData(self) -> pd.DataFrame:
@@ -85,7 +82,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             LOGGER.debug(f"Error: No matching runs found for {runname}")
             return []
         else:
-            targetPeptide = self.peptideHash[(self.peptideHash['Run'] == runname_exact) & (self.peptideHash['Modified.Sequence'] == peptide) & (self.peptideHash['Precursor.Charge'] == charge)]
+            targetPeptide = self.peptideHash[(self.peptideHash['filename'] == runname_exact) & (self.peptideHash['Modified.Sequence'] == peptide) & (self.peptideHash['Precursor.Charge'] == charge)]
 
             # return the row indices and add 1 to each index to account for the header row
             rows_to_load = [0] + [idx + 1 for idx in targetPeptide.index.tolist()]
@@ -133,14 +130,14 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         Returns:
             pd.DataFrame: Dataframe with the TransitionGroupFeatures
         '''
-        columns = ['Run', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence']
+        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence']
         if self.has_im:
             columns.append('consensusApexIM')
         runname_exact = self.getExactRunName(runname)
         if runname_exact is None:
             return pd.DataFrame(columns=columns)
         else:
-            df = self.df[(self.df['Run'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
+            df = self.df[(self.df['filename'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
 
             df = df.rename(columns={'RT.Start': 'leftBoundary', 
                                     'RT.Stop': 'rightBoundary', 
