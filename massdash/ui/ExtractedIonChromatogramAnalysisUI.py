@@ -31,7 +31,7 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
 
         Args:
         massseer_gui : object
-            An object representing the MassSeer GUI.
+            An object representing the MassDash GUI.
         transition_list : object
             An object representing the transition list.
         """
