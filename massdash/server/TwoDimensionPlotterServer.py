@@ -38,7 +38,7 @@ class TwoDimensionPlotterServer:
 
     """
 
-    def __init__(self, targeted_data: dict[FeatureMap], transition_list_ui: TransitionListUISettings, chrom_plot_settings: ChromatogramPlotUISettings):
+    def __init__(self, targeted_data: Dict[str, FeatureMap], transition_list_ui: TransitionListUISettings, chrom_plot_settings: ChromatogramPlotUISettings):
         self.targeted_data = targeted_data
         self.transition_list_ui = transition_list_ui
         self.chrom_plot_settings = chrom_plot_settings

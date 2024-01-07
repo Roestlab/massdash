@@ -25,8 +25,8 @@ class TransitionGroupFeature(GenericFeature):
                  consensusApexIM: Optional[float]=None,
                  precursor_mz: Optional[float]=None,
                  precursor_charge: Optional[int]=None,
-                 product_annotations: Optional[list[str]]=None,
-                 product_mz: Optional[list[float]]=None,
+                 product_annotations: Optional[List[str]]=None,
+                 product_mz: Optional[List[float]]=None,
                  sequence: Optional[str]=None,
                  ):
         super().__init__(leftBoundary, rightBoundary, areaIntensity=areaIntensity)

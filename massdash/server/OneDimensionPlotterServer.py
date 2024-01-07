@@ -3,6 +3,7 @@ massdash/server/OneDimensionPlotterServer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
+from typing import Dict
 from os.path import basename
 import streamlit as st
 
@@ -43,7 +44,7 @@ class OneDimensionPlotterServer:
     """
 
     def __init__(self, 
-                 feature_map_dict: dict[FeatureMap], 
+                 feature_map_dict: Dict[str, FeatureMap], 
                  transition_list_ui: TransitionListUISettings, chrom_plot_settings: ChromatogramPlotUISettings, 
                  peak_picking_settings: PeakPickingUISettings,
                  verbose: bool=False):
