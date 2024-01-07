@@ -1,0 +1,45 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "massdash"
+dist-name = "massdash"
+author = "Justin Sing"
+author-email = "justincsing@gmail.com"
+home-page = "https://github.com/Roestlab/massdash"
+description-file = "README.md"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+requires-python = ">=3.7"
+requires = [
+    "bokeh==2.4.3",
+    "Click",
+    "joblib",
+    "matplotlib",
+    "numpy>=1.9.0",
+    "pandas>=0.17",
+    "plotly",
+    "psutil",
+    "pyopenms",
+    "scipy",
+    "streamlit",
+    "tqdm",
+]
+
+[tool.flit.scripts]
+massdash = 'massdash.main:cli'
+
+[tool.flit.sdist]
+exclude = ["tests*"]

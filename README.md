@@ -1,7 +1,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Light.png" alt="MassDash_Logo" width="500">
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png" alt="MassDash_Logo" width="500">
-  <img alt="Placeholder to transition between light color mode and dark color mode - this image is not directly used." src="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png">
+  <img alt="" src="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png">
 </picture>
 
 MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry. It enables the visualization of chromatograms (spectra and ion mobiliograms to come...) and provides a flexible environment for rapid algorithm testing and parameter optimization, crucial for data analysis and experimental design. This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.
@@ -42,22 +42,16 @@ Change into massdash directory
 cd massdash
 ```
 
-Pip install using *setup.py*
+Pip install massdash in editable mode
 
 ```
 pip install -e .
 ```
 
-## Installing from PyPi (...Still to Come)
+## Installing from PyPI
 
 ```
 pip install massdash
-```
-
-## Installing dependencies
-
-```
-pip install -r requirements.txt
 ```
 
 # Running MassDash GUI
