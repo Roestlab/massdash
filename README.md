@@ -54,12 +54,6 @@ pip install -e .
 pip install massdash
 ```
 
-## Installing dependencies
-
-```
-pip install -r requirements.txt
-```
-
 # Running MassDash GUI
 
 ```
