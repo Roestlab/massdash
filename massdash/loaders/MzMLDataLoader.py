@@ -15,11 +15,11 @@ from .access.OSWDataAccess import OSWDataAccess
 from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
 from .SpectralLibraryLoader import SpectralLibraryLoader
 # Structs
-from structs.TransitionGroup import TransitionGroup
-from structs.FeatureMap import FeatureMap
-from structs.TargetedDIAConfig import TargetedDIAConfig
+from ..structs.TransitionGroup import TransitionGroup
+from ..structs.FeatureMap import FeatureMap
+from ..structs.TargetedDIAConfig import TargetedDIAConfig
 # Utils
-from util import LOGGER
+from ..util import LOGGER
 
 
 class MzMLDataLoader(GenericLoader):

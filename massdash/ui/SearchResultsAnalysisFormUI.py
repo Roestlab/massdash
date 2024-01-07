@@ -2,8 +2,8 @@ import streamlit as st
 import random
 from typing import Literal
 
-# Internal
-from ui.util import clicked
+# UI Util
+from .util import clicked
 
 class SearchResultsAnalysisFormUI:
     """

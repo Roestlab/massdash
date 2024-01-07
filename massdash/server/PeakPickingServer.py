@@ -7,18 +7,18 @@ import streamlit as st
 from typing import Literal
 
 # UI
-from ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from ui.PeakPickingUISettings import PeakPickingUISettings
+from ..ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from ..ui.PeakPickingUISettings import PeakPickingUISettings
 # Loaders
-from loaders.SqMassLoader import SqMassLoader
+from ..loaders.SqMassLoader import SqMassLoader
 # Structs
-from structs.TransitionGroup import TransitionGroup
+from ..structs.TransitionGroup import TransitionGroup
 # Peak Picking
-from peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
-from peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
+from ..peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
+from ..peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
 # Util
-from util import time_block
-from server.util import get_string_mslevels_from_bool
+from ..util import time_block
+from .util import get_string_mslevels_from_bool
 
 class PeakPickingServer:
     """

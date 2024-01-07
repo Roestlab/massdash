@@ -6,7 +6,7 @@ massdash/ui/ExtractedIonChromatogramAnalysisUI
 import streamlit as st
 
 # Loaders
-from loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # UI
 from .TransitionListUISettings import TransitionListUISettings
 

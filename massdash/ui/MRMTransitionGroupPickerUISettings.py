@@ -8,7 +8,6 @@ import streamlit as st
 # UI
 from .ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
-
 class MRMTransitionGroupPickerUISettings:
     """
     Settings for the user interface of the MRMTransitionGroupPicker algorithm.

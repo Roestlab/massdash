@@ -7,12 +7,12 @@ import os
 from typing import List
 
 # Preprocess
-from preprocess.ConformerPreprocessor import ConformerPreprocessor
+from ..preprocess.ConformerPreprocessor import ConformerPreprocessor
 # Structs
-from structs.TransitionGroup import TransitionGroup
-from structs.TransitionGroupFeature import TransitionGroupFeature
+from ..structs.TransitionGroup import TransitionGroup
+from ..structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from util import check_package
+from ..util import check_package
 
 onnxruntime, ONNXRUNTIME_AVAILABLE = check_package("onnxruntime")
 

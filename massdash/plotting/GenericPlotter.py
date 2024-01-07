@@ -8,8 +8,8 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Literal
 
 # Structs
-from structs.TransitionGroupFeature import TransitionGroupFeature
-from structs.TransitionGroup import TransitionGroup
+from ..structs.TransitionGroupFeature import TransitionGroupFeature
+from ..structs.TransitionGroup import TransitionGroup
 
 class PlotConfig:
     """

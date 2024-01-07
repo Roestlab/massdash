@@ -17,7 +17,7 @@ from matplotlib import cm
 # Plotting
 from .GenericPlotter import PlotConfig
 # Structs
-from structs.FeatureMap import FeatureMap
+from ..structs.FeatureMap import FeatureMap
 
 def rgb_to_hex(rgb):
     """

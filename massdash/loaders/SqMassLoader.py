@@ -15,8 +15,8 @@ from .GenericLoader import GenericLoader
 from .access.SqMassDataAccess import SqMassDataAccess
 from .access.OSWDataAccess import OSWDataAccess
 # Structs
-from structs.TransitionGroup import TransitionGroup
-from structs.TransitionGroupFeature import TransitionGroupFeature
+from ..structs.TransitionGroup import TransitionGroup
+from ..structs.TransitionGroupFeature import TransitionGroupFeature
 
 class SqMassLoader(GenericLoader):
 

@@ -7,15 +7,15 @@ import timeit
 from datetime import timedelta
 
 # UI
-from ui.MassDashGUI import MassDashGUI
-from ui.SearchResultsAnalysisUI import SearchResultsAnalysisUI
+from ..ui.MassDashGUI import MassDashGUI
+from ..ui.SearchResultsAnalysisUI import SearchResultsAnalysisUI
 # Loaders
-from loaders.access.OSWDataAccess import OSWDataAccess
-from loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
+from ..loaders.access.OSWDataAccess import OSWDataAccess
+from ..loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
 # Plotting
-from plotting.SearchResultAnalysisPlots import SearchResultAnalysisPlots
+from ..plotting.SearchResultAnalysisPlots import SearchResultAnalysisPlots
 # Utils
-from util import conditional_decorator, check_streamlit
+from ..util import conditional_decorator, check_streamlit
 
 class SearchResultsAnalysisServer:
     """

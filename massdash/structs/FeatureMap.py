@@ -16,7 +16,7 @@ from .Spectrum import Spectrum
 from .TransitionGroup import TransitionGroup
 from .TargetedDIAConfig import TargetedDIAConfig
 # Utils
-from util import LOGGER
+from ..util import LOGGER
 
 class FeatureMap:
     '''

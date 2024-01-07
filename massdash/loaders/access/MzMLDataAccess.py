@@ -18,11 +18,11 @@ import pandas as pd
 import numpy as np
 
 # Structs
-from structs.TargetedDIAConfig import TargetedDIAConfig
-from structs.FeatureMap import FeatureMap
-from structs.TransitionGroupFeature import TransitionGroupFeature
+from ...structs.TargetedDIAConfig import TargetedDIAConfig
+from ...structs.FeatureMap import FeatureMap
+from ...structs.TransitionGroupFeature import TransitionGroupFeature
 # Internal
-from util import LOGGER, method_timer, code_block_timer
+from ...util import LOGGER, method_timer, code_block_timer
 
 class MzMLDataAccess():
     """

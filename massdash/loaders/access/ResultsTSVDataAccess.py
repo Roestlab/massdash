@@ -11,9 +11,9 @@ from typing import Literal
 # Loaders
 from .GenericResultsAccess import GenericResultsAccess
 # Structs
-from structs.TransitionGroupFeature import TransitionGroupFeature
+from ...structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from util import LOGGER
+from ...util import LOGGER
 
 class ResultsTSVDataAccess(GenericResultsAccess): 
     ''' Class for generic access to TSV file containing the results, currently only supports DIA-NN tsv files'''

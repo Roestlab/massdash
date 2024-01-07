@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
 
+# UI
 from .SearchResultsAnalysisFormUI import SearchResultsAnalysisFormUI
-from util import copy_attributes
+# Util
+from ..util import copy_attributes
 
 class FileInputSearchResultsAnalysisUISettings:
     """

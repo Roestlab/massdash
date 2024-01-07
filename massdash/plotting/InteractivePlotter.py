@@ -16,17 +16,17 @@ from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, HoverTo
 from bokeh.palettes import Category20, Viridis256
 
 # Data processing
-from dataProcessing.transformations import normalize
+from ..dataProcessing.transformations import normalize
 # Plotting
 from .GenericPlotter import GenericPlotter, PlotConfig
 # Structs
-from structs.TransitionGroup import TransitionGroup
-from structs.TransitionGroupFeature import TransitionGroupFeature
-from structs.Chromatogram import Chromatogram
-from structs.Mobilogram import Mobilogram
-from structs.Spectrum import Spectrum
+from ..structs.TransitionGroup import TransitionGroup
+from ..structs.TransitionGroupFeature import TransitionGroupFeature
+from ..structs.Chromatogram import Chromatogram
+from ..structs.Mobilogram import Mobilogram
+from ..structs.Spectrum import Spectrum
 # Utils
-from util import LOGGER, check_streamlit
+from ..util import LOGGER, check_streamlit
 
 class InteractivePlotter(GenericPlotter):
     """

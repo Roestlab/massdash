@@ -10,7 +10,7 @@ import pandas as pd
 import streamlit as st
 
 # Utils
-from util import check_streamlit, conditional_decorator, check_sqlite_column_in_table, check_sqlite_table
+from ...util import check_streamlit, conditional_decorator, check_sqlite_column_in_table, check_sqlite_table
 
 class TransitionPQPDataAccess:
     '''

@@ -13,7 +13,7 @@ from .ExtractedIonChromatogramAnalysisFormUI import ExtractedIonChromatogramAnal
 from .RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
 from .SearchResultsAnalysisFormUI import SearchResultsAnalysisFormUI
 # Utils
-from util import copy_attributes
+from ..util import copy_attributes
 
 class MassDashGUI:
     """

@@ -9,10 +9,10 @@ import numpy as np
 from typing import Literal, Dict
 
 # Loaders
-from loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from structs.TargetedDIAConfig import TargetedDIAConfig
+from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from ..structs.TargetedDIAConfig import TargetedDIAConfig
 # Structs
-from structs.FeatureMap import FeatureMap
+from ..structs.FeatureMap import FeatureMap
 # UI
 from .TransitionListUISettings import TransitionListUISettings
 from .ChromatogramPlotUISettings import ChromatogramPlotUISettings
