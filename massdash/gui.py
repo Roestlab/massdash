@@ -34,13 +34,11 @@ def main(verbose, perf, perf_output):
         st.session_state['perf_counter'] = 200
     
     # Confit
-    # There currently is warning with the icon size for some reason, not sure why
-    # /home/justincsing/anaconda3/envs/py39/lib/python3.9/site-packages/PIL/IcoImagePlugin.py:316: UserWarning: Image was not the expected size
-    #   warnings.warn("Image was not the expected size")
     MASSDASH_ICON = Image.open(os.path.join(os.path.dirname(__file__), 'assets/img/MassDash_Logo.ico'))
     st.set_page_config(page_title='MassDash', page_icon=MASSDASH_ICON, layout='wide')
 
     dirname = os.path.dirname(__file__)
+
     MASSDASH_LOGO = os.path.join(dirname, 'assets/img/MassDash_Logo.png')
     OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
 
