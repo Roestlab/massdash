@@ -45,9 +45,9 @@ import struct
 import zlib
 
 # Structs
-from massdash.structs.Chromatogram import Chromatogram
+from structs.Chromatogram import Chromatogram
 # Utils
-from massdash.util import check_sqlite_column_in_table, check_sqlite_table
+from util import check_sqlite_column_in_table, check_sqlite_table
 
 class SqMassDataAccess:
 

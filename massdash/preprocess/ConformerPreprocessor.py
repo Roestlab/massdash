@@ -2,11 +2,11 @@ import numpy as np
 from typing import List, Literal
 
 # Preprocess
-from massdash.preprocess.GenericPreprocessor import GenericPreprocessor 
+from .GenericPreprocessor import GenericPreprocessor 
 # Structs
-from massdash.structs.TransitionGroup import TransitionGroup
+from structs.TransitionGroup import TransitionGroup
 # Utils
-from massdash.util import check_package
+from util import check_package
 
 torch, TORCH_AVAILABLE = check_package("torch")
 binary_recall_at_fixed_precision, TORCHMETRICS_AVAILABLE = check_package("torchmetrics", "functional.classification.binary_recall_at_fixed_precision")

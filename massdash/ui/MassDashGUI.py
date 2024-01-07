@@ -1,16 +1,16 @@
 import streamlit as st
 
 # UI
-from massdash.ui.FileInputXICDataUISettings import FileInputXICDataUISettings
-from massdash.ui.FileInputRawDataUISettings import FileInputRawDataUISettings
-from massdash.ui.ExtractedIonChromatogramAnalysisFormUI import ExtractedIonChromatogramAnalysisFormUI
-from massdash.ui.RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
+from .FileInputXICDataUISettings import FileInputXICDataUISettings
+from .FileInputRawDataUISettings import FileInputRawDataUISettings
+from .ExtractedIonChromatogramAnalysisFormUI import ExtractedIonChromatogramAnalysisFormUI
+from .RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
 # Utils
-from massdash.util import copy_attributes
+from util import copy_attributes
 
 class MassDashGUI:
     """
-    Class to create the user interface for massdash.
+    Class to create the user interface for 
     
     Attributes:
         welcome_container (streamlit.container): A container for the welcome message.

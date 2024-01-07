@@ -3,10 +3,10 @@ import pandas as pd
 import pyopenms as po
 
 # Structs
-from massdash.structs.Chromatogram import Chromatogram
-from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
-from massdash.structs.TransitionFeature import TransitionFeature
-from massdash.structs.TransitionGroup import TransitionGroup
+from structs.Chromatogram import Chromatogram
+from structs.TransitionGroupFeature import TransitionGroupFeature
+from structs.TransitionFeature import TransitionFeature
+from structs.TransitionGroup import TransitionGroup
 
 class pyMRMTransitionGroupPicker:
     '''

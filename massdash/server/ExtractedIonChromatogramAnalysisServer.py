@@ -10,25 +10,25 @@ import numpy as np
 import pandas as pd
 
 # UI
-from massdash.ui.MassDashGUI import MassDashGUI
-from massdash.ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
-from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from massdash.ui.PeakPickingUISettings import PeakPickingUISettings
-from massdash.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
+from ui.MassDashGUI import MassDashGUI
+from ui.ExtractedIonChromatogramAnalysisUI import ExtractedIonChromatogramAnalysisUI
+from ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from ui.PeakPickingUISettings import PeakPickingUISettings
+from ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 # Loaders
-from massdash.loaders.access.OSWDataAccess import OSWDataAccess
-from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from massdash.loaders.SqMassLoader import SqMassLoader
+from loaders.access.OSWDataAccess import OSWDataAccess
+from loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from loaders.SqMassLoader import SqMassLoader
 # Peak Picking
-from massdash.peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
-from massdash.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
-from massdash.peakPickers.ConformerPeakPicker import ConformerPeakPicker
+from peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
+from peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
+from peakPickers.ConformerPeakPicker import ConformerPeakPicker
 # Plotting
-from massdash.plotting.GenericPlotter import PlotConfig
-from massdash.plotting.InteractivePlotter import InteractivePlotter
+from plotting.GenericPlotter import PlotConfig
+from plotting.InteractivePlotter import InteractivePlotter
 # Util
-from massdash.util import LOGGER, time_block
-from massdash.server.util import get_string_mslevels_from_bool
+from util import LOGGER, time_block
+from server.util import get_string_mslevels_from_bool
 
 class ExtractedIonChromatogramAnalysisServer:
     """

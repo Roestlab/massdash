@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 # Structs
-from massdash.structs.GenericFeature import GenericFeature
+from .GenericFeature import GenericFeature
 
 class TransitionFeature(GenericFeature):
     def __init__(self, 

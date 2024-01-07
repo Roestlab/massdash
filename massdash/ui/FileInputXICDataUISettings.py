@@ -4,7 +4,7 @@ import os
 import fnmatch
 
 # UI
-from massdash.ui.BaseUISettings import BaseUISettings
+from .BaseUISettings import BaseUISettings
 
 class FileInputXICDataUISettings(BaseUISettings):
     """

@@ -5,8 +5,8 @@ from typing import Literal
 import streamlit as st
 
 # UI
-from massdash.ui.FileInputXICDataUISettings import FileInputXICDataUISettings
-from massdash.ui.FileInputRawDataUISettings import FileInputRawDataUISettings
+from .FileInputXICDataUISettings import FileInputXICDataUISettings
+from .FileInputRawDataUISettings import FileInputRawDataUISettings
 
 class FileInputUISettings(FileInputXICDataUISettings, FileInputRawDataUISettings):
     def __init__(self, workflow: str=Literal["xic_data", "raw_data"]) -> None:

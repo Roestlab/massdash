@@ -4,7 +4,7 @@ import fnmatch
 import streamlit as st
 
 # UI
-from massdash.ui.BaseUISettings import BaseUISettings
+from .BaseUISettings import BaseUISettings
 
 class FileInputRawDataUISettings(BaseUISettings):
     """
