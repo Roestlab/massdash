@@ -6,7 +6,7 @@ massdash/ui/MRMTransitionGroupPickerUISettings
 import streamlit as st
 
 # UI
-from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from .ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
 
 class MRMTransitionGroupPickerUISettings:

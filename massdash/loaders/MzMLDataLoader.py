@@ -9,17 +9,17 @@ import numpy as np
 import pandas as pd
 
 # Loaders
-from massdash.loaders.access.MzMLDataAccess import MzMLDataAccess
-from massdash.loaders.GenericLoader import GenericLoader
-from massdash.loaders.access.OSWDataAccess import OSWDataAccess
-from massdash.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
-from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from .access.MzMLDataAccess import MzMLDataAccess
+from .GenericLoader import GenericLoader
+from .access.OSWDataAccess import OSWDataAccess
+from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
+from .SpectralLibraryLoader import SpectralLibraryLoader
 # Structs
-from massdash.structs.TransitionGroup import TransitionGroup
-from massdash.structs.FeatureMap import FeatureMap
-from massdash.structs.TargetedDIAConfig import TargetedDIAConfig
+from structs.TransitionGroup import TransitionGroup
+from structs.FeatureMap import FeatureMap
+from structs.TargetedDIAConfig import TargetedDIAConfig
 # Utils
-from massdash.util import LOGGER
+from util import LOGGER
 
 
 class MzMLDataLoader(GenericLoader):

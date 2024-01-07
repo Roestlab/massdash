@@ -6,7 +6,7 @@ massdash/ui/RawTargetedExtractionAnalysisFormUI
 import streamlit as st 
 
 # UI
-from massdash.ui.util import clicked
+from .util import clicked
 
 class RawTargetedExtractionAnalysisFormUI:   
     """

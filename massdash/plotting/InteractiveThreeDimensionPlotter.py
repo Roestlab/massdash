@@ -19,11 +19,11 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 # Plotting
-from massdash.plotting.GenericPlotter import PlotConfig
+from .GenericPlotter import PlotConfig
 # Structs
-from massdash.structs.FeatureMap import FeatureMap
+from structs.FeatureMap import FeatureMap
 # Utils
-from massdash.util import check_streamlit
+from util import check_streamlit
 
 class InteractiveThreeDimensionPlotter:
     """

@@ -10,13 +10,13 @@ import pandas as pd
 import numpy as np
 
 # Structs
-from massdash.structs.Chromatogram import Chromatogram
-from massdash.structs.Mobilogram import Mobilogram
-from massdash.structs.Spectrum import Spectrum
+from .Chromatogram import Chromatogram
+from .Mobilogram import Mobilogram
+from .Spectrum import Spectrum
+from .TransitionGroup import TransitionGroup
+from .TargetedDIAConfig import TargetedDIAConfig
 # Utils
-from massdash.util import LOGGER
-from massdash.structs.TransitionGroup import TransitionGroup
-from massdash.structs.TargetedDIAConfig import TargetedDIAConfig
+from util import LOGGER
 
 class FeatureMap:
     '''

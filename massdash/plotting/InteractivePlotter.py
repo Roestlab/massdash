@@ -15,18 +15,18 @@ from bokeh.plotting import figure
 from bokeh.models import Line, ColumnDataSource, Legend, Title, Range1d, HoverTool
 from bokeh.palettes import Category20, Viridis256
 
-# Plotting
-from massdash.plotting.GenericPlotter import GenericPlotter, PlotConfig
-# Structs
-from massdash.structs.TransitionGroup import TransitionGroup
-from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
-from massdash.structs.Chromatogram import Chromatogram
-from massdash.structs.Mobilogram import Mobilogram
-from massdash.structs.Spectrum import Spectrum
 # Data processing
-from massdash.dataProcessing.transformations import normalize
+from dataProcessing.transformations import normalize
+# Plotting
+from .GenericPlotter import GenericPlotter, PlotConfig
+# Structs
+from structs.TransitionGroup import TransitionGroup
+from structs.TransitionGroupFeature import TransitionGroupFeature
+from structs.Chromatogram import Chromatogram
+from structs.Mobilogram import Mobilogram
+from structs.Spectrum import Spectrum
 # Utils
-from massdash.util import LOGGER, check_streamlit
+from util import LOGGER, check_streamlit
 
 class InteractivePlotter(GenericPlotter):
     """

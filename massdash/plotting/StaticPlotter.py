@@ -3,7 +3,8 @@ massdash/plotting/StaticPlotter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-from massdash.plotting.GenericPlotter import GenericPlotter
+# Plotting
+from .GenericPlotter import GenericPlotter
 
 class StaticPlotter(GenericPlotter):
     

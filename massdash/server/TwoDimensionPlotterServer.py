@@ -8,13 +8,13 @@ from bokeh.layouts import gridplot
 from typing import Dict
 
 # Plotting
-from massdash.plotting.GenericPlotter import PlotConfig
-from massdash.plotting.InteractiveTwoDimensionPlotter import InteractiveTwoDimensionPlotter
+from plotting.GenericPlotter import PlotConfig
+from plotting.InteractiveTwoDimensionPlotter import InteractiveTwoDimensionPlotter
 # Structs
-from massdash.structs.FeatureMap import FeatureMap
+from structs.FeatureMap import FeatureMap
 # UI
-from massdash.ui.TransitionListUISettings import TransitionListUISettings
-from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from ui.TransitionListUISettings import TransitionListUISettings
+from ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
 
 class TwoDimensionPlotterServer:

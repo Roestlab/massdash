@@ -9,14 +9,14 @@ import numpy as np
 from typing import Literal, Dict
 
 # Loaders
-from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from massdash.structs.TargetedDIAConfig import TargetedDIAConfig
+from loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from structs.TargetedDIAConfig import TargetedDIAConfig
 # Structs
-from massdash.structs.FeatureMap import FeatureMap
+from structs.FeatureMap import FeatureMap
 # UI
-from massdash.ui.TransitionListUISettings import TransitionListUISettings
-from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from massdash.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
+from .TransitionListUISettings import TransitionListUISettings
+from .ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from .ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 
 class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
     

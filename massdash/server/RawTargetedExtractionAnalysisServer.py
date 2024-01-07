@@ -11,25 +11,25 @@ import timeit
 from datetime import timedelta
 
 # UI
-from massdash.ui.RawTargetedExtractionAnalysisUI import RawTargetedExtractionAnalysisUI
-from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from massdash.ui.PeakPickingUISettings import PeakPickingUISettings
-from massdash.ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
-from massdash.ui.util import st_mutable_write
+from ui.RawTargetedExtractionAnalysisUI import RawTargetedExtractionAnalysisUI
+from ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from ui.PeakPickingUISettings import PeakPickingUISettings
+from ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
+from ui.util import st_mutable_write
 # Server
-from massdash.server.OneDimensionPlotterServer import OneDimensionPlotterServer
-from massdash.server.TwoDimensionPlotterServer import TwoDimensionPlotterServer
-from massdash.server.ThreeDimensionPlotterServer import ThreeDimensionalPlotter
-from massdash.server.util import check_ion_mobility
+from .OneDimensionPlotterServer import OneDimensionPlotterServer
+from .TwoDimensionPlotterServer import TwoDimensionPlotterServer
+from .ThreeDimensionPlotterServer import ThreeDimensionalPlotter
+from .util import check_ion_mobility
 # Structs 
-from massdash.structs.TargetedDIAConfig import TargetedDIAConfig
-from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
-from massdash.structs.FeatureMap import FeatureMap
+from structs.TargetedDIAConfig import TargetedDIAConfig
+from structs.TransitionGroupFeature import TransitionGroupFeature
+from structs.FeatureMap import FeatureMap
 # Loaders
-from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from massdash.loaders.MzMLDataLoader import MzMLDataLoader
+from loaders.SpectralLibraryLoader import SpectralLibraryLoader
+from loaders.MzMLDataLoader import MzMLDataLoader
 # Util
-from massdash.util import LOGGER, conditional_decorator, check_streamlit, time_block, MeasureBlock
+from util import LOGGER, conditional_decorator, check_streamlit, time_block, MeasureBlock
 
 class RawTargetedExtractionAnalysisServer:
     

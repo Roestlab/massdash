@@ -44,11 +44,11 @@ import pandas as pd
 from typing import List, Literal
 
 # Loaders
-from massdash.loaders.access.GenericResultsAccess import GenericResultsAccess
+from .GenericResultsAccess import GenericResultsAccess
 # Structs
-from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+from structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from massdash.util import check_sqlite_column_in_table, check_sqlite_table
+from util import check_sqlite_column_in_table, check_sqlite_table
 
 class OSWDataAccess(GenericResultsAccess):
     """

@@ -8,10 +8,10 @@ import pyopenms as po
 import pandas as pd
 
 # Structs
-from massdash.structs.Chromatogram import Chromatogram
-from massdash.structs.Mobilogram import Mobilogram
-from massdash.structs.Spectrum import Spectrum
-from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+from .Chromatogram import Chromatogram
+from .Mobilogram import Mobilogram
+from .Spectrum import Spectrum
+from .TransitionGroupFeature import TransitionGroupFeature
 
 class TransitionGroup:
     '''
@@ -158,8 +158,8 @@ class TransitionGroup:
         '''
         Plot the 1D data, meant for jupyter notebook context
         '''
-        from massdash.plotting.GenericPlotter import PlotConfig
-        from massdash.plotting.InteractivePlotter import InteractivePlotter
+        from plotting.GenericPlotter import PlotConfig
+        from plotting.InteractivePlotter import InteractivePlotter
 
         config = PlotConfig()
         if self.type == Chromatogram:

@@ -7,7 +7,7 @@ from typing import Tuple
 import pandas as pd
 
 # Structs
-from massdash.structs.Data1D import Data1D
+from .Data1D import Data1D
 
 class Mobilogram(Data1D):
     ''' 

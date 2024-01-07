@@ -7,7 +7,7 @@ import streamlit as st
 import pyopenms as po
 
 # UI
-from massdash.ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
+from .ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
 class pyPeakPickerMRMUISettings:
     """

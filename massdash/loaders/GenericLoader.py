@@ -9,14 +9,14 @@ from os.path import basename
 import pandas as pd
 
 # Loaders
-from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from massdash.loaders.access.OSWDataAccess import OSWDataAccess
-from massdash.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
+from .SpectralLibraryLoader import SpectralLibraryLoader
+from .access.OSWDataAccess import OSWDataAccess
+from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
 # Structs
-from massdash.structs.TransitionGroup import TransitionGroup
-from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+from structs.TransitionGroup import TransitionGroup
+from structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from massdash.util import LOGGER
+from util import LOGGER
 
 class GenericLoader(ABC):
     ''' 

@@ -11,12 +11,12 @@ from pandas.core.api import DataFrame as DataFrame
 import pandas as pd
 
 # Loaders
-from massdash.loaders.GenericLoader import GenericLoader
-from massdash.loaders.access.SqMassDataAccess import SqMassDataAccess
-from massdash.loaders.access.OSWDataAccess import OSWDataAccess
+from .GenericLoader import GenericLoader
+from .access.SqMassDataAccess import SqMassDataAccess
+from .access.OSWDataAccess import OSWDataAccess
 # Structs
-from massdash.structs.TransitionGroup import TransitionGroup
-from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+from structs.TransitionGroup import TransitionGroup
+from structs.TransitionGroupFeature import TransitionGroupFeature
 
 class SqMassLoader(GenericLoader):
 

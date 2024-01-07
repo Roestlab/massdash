@@ -9,11 +9,11 @@ import re
 from typing import List
 
 # Loaders
-from massdash.loaders.access.GenericResultsAccess import GenericResultsAccess
+from .GenericResultsAccess import GenericResultsAccess
 # Structs
-from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+from structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from massdash.util import LOGGER
+from util import LOGGER
 
 class ResultsTSVDataAccess(GenericResultsAccess): 
     ''' Class for generic access to TSV file containing the results, currently only supports DIA-NN tsv files'''

@@ -4,7 +4,7 @@ massdash/preprocess/GenericPreprocessor
 """
 
 
-from massdash.structs.TransitionGroup import TransitionGroup
+from structs.TransitionGroup import TransitionGroup
 
 class GenericPreprocessor:
     def __init__(self, transition_group: TransitionGroup):
