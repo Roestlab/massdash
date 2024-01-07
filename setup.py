@@ -7,15 +7,15 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-setup(name='MassSeer',
+setup(name='MassDash',
       version="0.1.0-alpha.0",
       author="Justin Sing",
       author_email="justincsing@gmail.com",
-      description="MassSeer: Streamlined DIA-MS visualization, analysis,  optimization and rapid prototyping.",
+      description="MassDash: Streamlined DIA-MS visualization, analysis,  optimization and rapid prototyping.",
       long_description=long_description,
       long_description_content_type='text/markdown',
       license="BSD",
-      url="https://github.com/Roestlab/massseer",
+      url="https://github.com/Roestlab/massdash",
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
       classifiers=[
@@ -40,7 +40,7 @@ setup(name='MassSeer',
       ],
       entry_points={
           'console_scripts': [
-              "MassSeer=massseer.main:cli",
+              "MassDash=massdash.main:cli",
               ]
       }
       )
