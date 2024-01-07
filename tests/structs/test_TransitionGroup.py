@@ -1,3 +1,8 @@
+"""
+tests/structs/test_TransitionGroup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import unittest
 from massseer.structs.TransitionGroup import TransitionGroup
 from massseer.structs.Chromatogram import Chromatogram
