@@ -7,7 +7,7 @@ tests/structs/test_Chromatogram
 import unittest
 import numpy as np
 import pyopenms as po
-from massseer.structs.Chromatogram import Chromatogram
+from massdash.structs.Chromatogram import Chromatogram
 
 class TestChromatogram(unittest.TestCase):
     def setUp(self):

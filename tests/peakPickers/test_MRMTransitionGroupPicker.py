@@ -4,10 +4,10 @@ tests/peakPickers/test_MRMTransitionGroupPicker
 """
 
 import unittest
-from massseer.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.structs.Chromatogram import Chromatogram
+from massdash.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
+from massdash.structs.Chromatogram import Chromatogram
 import pyopenms as po
 from snapshottest import TestCase
 import numpy as np
@@ -77,7 +77,7 @@ class TestMRMTransitionGroupPicker(TestCase):
         self.assertEqual(val, 5)
         self.assertEqual(picker.params.getValue(b'PeakPickerMRM:signal_to_noise'), 1000.0)
 
-        # Test setting of invalid parameter
+        # Test setting of invalid parameterata/xics/test_chrom_1.sqMass', '../test_data/xics/test_chrom_2.sqMass'], rsltsFile="../test_data/osw/test_data.osw")
         with self.assertRaises(ValueError):
             picker.setGeneralParameters(invalid_param=5)
 

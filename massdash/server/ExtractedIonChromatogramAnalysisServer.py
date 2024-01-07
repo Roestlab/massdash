@@ -40,7 +40,7 @@ class ExtractedIonChromatogramAnalysisServer:
     A class representing a server for extracted ion chromatogram analysis.
 
     Attributes:
-        massdash_gui (MassDashGUI): An object representing the MassSeer GUI.
+        massdash_gui (MassDashGUI): An object representing the MassDash GUI.
         transition_list (SpectralLibraryLoader): An object representing the transition list.
         osw_data (OSWDataAccess): An object representing the OSW data.
         xic_data (SqMassLoader): An object representing the XIC data.
@@ -55,7 +55,7 @@ class ExtractedIonChromatogramAnalysisServer:
         Initializes the ExtractedIonChromatogramAnalysisServer object.
 
         Args:
-            massdash_gui (MassDashGUI): An object representing the MassSeer GUI.
+            massdash_gui (MassDashGUI): An object representing the MassDash GUI.
         """
         self.massdash_gui = massdash_gui
         self.transition_list = None

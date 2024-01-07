@@ -27,7 +27,7 @@ class MassDashGUI:
         show_welcome_message: Displays a welcome message and input fields for OpenSwath and DIA-NN workflows.
         show_file_input_settings: Displays the file input settings.
     """
-    def __init__(self, verbose, perf, perf_output="MassSeer_Performance_Report.txt"):
+    def __init__(self, verbose, perf, perf_output="MassDash_Performance_Report.txt"):
         """
         Initializes the MassDashGUI class.
 

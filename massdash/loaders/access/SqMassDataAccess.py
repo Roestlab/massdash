@@ -7,7 +7,7 @@ massdash/loaders/access/SqMassDataAccess
 # -*- coding: utf-8 -*-
 """
 =========================================================================
-            MassSeer 
+            MassDash 
 =========================================================================
 
 Copyright (c) 2013, ETH Zurich

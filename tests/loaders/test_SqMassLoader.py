@@ -4,14 +4,14 @@ tests/loaders/test_SqMassLoader
 """
 
 from snapshottest import TestCase
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.loaders.SqMassLoader import SqMassLoader
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.loaders.SqMassLoader import SqMassLoader
 import unittest
 import pandas as pd
 
 class TestSqMassLoader(TestCase):
     def setUp(self):
-        self.loader = SqMassLoader(transitionFiles=['../test_data/xics/test_chrom_1.sqMass', '../test_data/xics/test_chrom_2.sqMass'], rsltsFile="../test_data/osw/test_data.osw")
+        self.loader = SqMassLoader(dataFiles=['../test_data/xics/test_chrom_1.sqMass', '../test_data/xics/test_chrom_2.sqMass'], rsltsFile="../test_data/osw/test_data.osw")
 
     def test_loadTransitionGroupFeature(self):
         # Test loading a peak feature for a valid peptide ID and charge

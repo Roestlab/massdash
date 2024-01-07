@@ -13,12 +13,12 @@ from snapshottest import GenericRepr, Snapshot
 snapshots = Snapshot()
 
 snapshots['TestFindPeakBoundaries::test_find_peak_boundaries 1'] = [
-    GenericRepr('<massseer.structs.TransitionFeature.TransitionFeature object at 0x100000000>')
+    GenericRepr('<massdash.structs.TransitionFeature.TransitionFeature object at 0x100000000>')
 ]
 
 snapshots['TestFindPeakBoundaries::test_find_peak_boundaries 2'] = [
-    GenericRepr('<massseer.structs.TransitionFeature.TransitionFeature object at 0x100000000>'),
-    GenericRepr('<massseer.structs.TransitionFeature.TransitionFeature object at 0x100000000>')
+    GenericRepr('<massdash.structs.TransitionFeature.TransitionFeature object at 0x100000000>'),
+    GenericRepr('<massdash.structs.TransitionFeature.TransitionFeature object at 0x100000000>')
 ]
 
 snapshots['TestFindPeakBoundaries::test_find_peak_boundaries 3'] = [
@@ -38,16 +38,16 @@ snapshots['TestFindPeakBoundaries::test_perform_chromatogram_peak_picking_single
 ]
 
 snapshots['TestFindPeakBoundaries::test_resolve_level 1'] = [
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>'),
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>'),
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>')
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>'),
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>'),
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>')
 ]
 
 snapshots['TestFindPeakBoundaries::test_resolve_level 2'] = [
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>')
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>')
 ]
 
 snapshots['TestFindPeakBoundaries::test_resolve_level 3'] = [
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>'),
-    GenericRepr('<massseer.structs.Chromatogram.Chromatogram object at 0x100000000>')
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>'),
+    GenericRepr('<massdash.structs.Chromatogram.Chromatogram object at 0x100000000>')
 ]
