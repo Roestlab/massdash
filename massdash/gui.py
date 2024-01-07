@@ -10,13 +10,13 @@ import streamlit as st
 from PIL import Image
 
 # Server
-from server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
-from server.RawTargetedExtractionAnalysisServer import RawTargetedExtractionAnalysisServer
-from server.SearchResultsAnalysisServer import SearchResultsAnalysisServer
+from massdash.server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
+from massdash.server.RawTargetedExtractionAnalysisServer import RawTargetedExtractionAnalysisServer
+from massdash.server.SearchResultsAnalysisServer import SearchResultsAnalysisServer
 # UI 
-from ui.MassDashGUI import MassDashGUI
+from massdash.ui.MassDashGUI import MassDashGUI
 # Utils
-from util import LOGGER
+from massdash.util import LOGGER
 
 @click.command()
 # @click.argument('args', default='args', type=str)
