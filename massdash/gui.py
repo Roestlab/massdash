@@ -84,7 +84,6 @@ def main(verbose, perf, perf_output):
         feature_file_type = ""
         st.stop("Toy dataset not available yet.")
         massdash_gui.show_file_input_settings(diann_report_file_path_input, raw_file_path_input, transition_list_file_path, feature_file_type)
-
         # Remove welcome message container if dataset is loaded
         massdash_gui.welcome_container.empty()
 
@@ -113,34 +112,23 @@ def main(verbose, perf, perf_output):
         st.session_state.WELCOME_PAGE_STATE = False
 
     if st.session_state.workflow == "xic_data" and massdash_gui.osw_file_path!="*.osw" and massdash_gui.sqmass_file_path_input!="*.sqMass" and not st.session_state.clicked['load_toy_dataset_xic_data']:
-
         massdash_gui.show_file_input_settings(massdash_gui.osw_file_path, massdash_gui.sqmass_file_path_input)
-
         # Remove welcome message container if dataset is loaded
         massdash_gui.welcome_container.empty()
-        
         st.session_state.WELCOME_PAGE_STATE = False
 
     if st.session_state.workflow == "raw_data" and massdash_gui.transition_list_file_path!="*.pqp" and massdash_gui.raw_file_path_input!="*.mzML" and not st.session_state.clicked['load_toy_dataset_raw_data']:
-        
         massdash_gui.show_file_input_settings(massdash_gui.feature_file_path, massdash_gui.raw_file_path_input, massdash_gui.transition_list_file_path, massdash_gui.feature_file_type)
-        
         # Remove welcome message container if dataset is loaded
         massdash_gui.welcome_container.empty()
-        
         st.session_state.WELCOME_PAGE_STATE = False
         
     if st.session_state.workflow == "search_results_analysis" and massdash_gui.feature_file_entries is not None and not st.session_state.clicked['load_toy_dataset_search_results_analysis']:
-
         massdash_gui.show_file_input_settings(feature_file_entries_dict=massdash_gui.feature_file_entries)
-        
         # Remove welcome message container if dataset is loaded
         massdash_gui.welcome_container.empty()
-        
         st.session_state.WELCOME_PAGE_STATE = False
         
-        
-
     if st.session_state.workflow == "xic_data" and not st.session_state.WELCOME_PAGE_STATE and massdash_gui.file_input_settings is not None:
         show_xic_exp = ExtractedIonChromatogramAnalysisServer(massdash_gui)
         show_xic_exp.main()
@@ -152,7 +140,6 @@ def main(verbose, perf, perf_output):
     if st.session_state.workflow == "search_results_analysis" and not st.session_state.WELCOME_PAGE_STATE:
         show_search_results_analysis = SearchResultsAnalysisServer(massdash_gui)
         show_search_results_analysis.main()
-
 
     # OpenMS Siderbar Bottom Logo
     st.sidebar.image(OPENMS_LOGO)
