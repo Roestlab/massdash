@@ -1,6 +1,6 @@
 """
-tests/peakPickers/test_MRMTransitionGroupPicker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/peakPickers/test_MRMTransitionGroupPicker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 import unittest

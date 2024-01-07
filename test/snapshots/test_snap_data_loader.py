@@ -1,6 +1,6 @@
 """
-tests/snapshots/snap_test_data_loader
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/snapshots/test_snap_data_loader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 # -*- coding: utf-8 -*-

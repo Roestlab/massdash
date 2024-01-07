@@ -1,6 +1,6 @@
 """
-tests/loaders/snapshots/snap_test_OSWDataAccess
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/snapshots/loaders/test_snap_SqlDataAccess
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 # -*- coding: utf-8 -*-
@@ -40,8 +40,6 @@ snapshots['TestOSWDataAccess::test_getPrecursorCharges 1'] = (
 
 snapshots['TestOSWDataAccess::test_getPrecursorCharges 2'] = GenericRepr('   CHARGE\n0       2\n1       3')
 
-snapshots['TestOSWDataAccess::test_getPrecursorIDFromPeptideAndCharge 1'] = GenericRepr('29')
-
 snapshots['TestOSWDataAccess::test_getProteinTable 1'] = (
     5,
     4
@@ -49,29 +47,10 @@ snapshots['TestOSWDataAccess::test_getProteinTable 1'] = (
 
 snapshots['TestOSWDataAccess::test_getProteinTable 2'] = GenericRepr('   PROTEIN_ID  PEPTIDE_ID                 PROTEIN_ACCESSION  DECOY\n0         539         207  QQSVKANSSPTTNIDHLK;ANSSPTTNIDHLK      0\n1         539         218  QQSVKANSSPTTNIDHLK;ANSSPTTNIDHLK      0\n2         539         220  QQSVKANSSPTTNIDHLK;ANSSPTTNIDHLK      0\n3         507        4707                       NKESPTKAIVR      0\n4         507        4709                       NKESPTKAIVR      0')
 
-snapshots['TestOSWDataAccess::test_getTransitionGroupFeatures 1'] = 0
+snapshots['TestSqMassDataAccess::test_getDataForChromatograms 1'] = 3
 
-snapshots['TestOSWDataAccess::test_getTransitionGroupFeatures 2'] = [
+snapshots['TestSqMassDataAccess::test_getDataForChromatogramsFromNativeIds 1'] = 5
+
+snapshots['TestSqMassDataAccess::test_getPrecursorChromIDs 1'] = [
+    424
 ]
-
-snapshots['TestOSWDataAccess::test_getTransitionGroupFeatures 3'] = 0
-
-snapshots['TestOSWDataAccess::test_getTransitionGroupFeatures 4'] = 0
-
-snapshots['TestOSWDataAccess::test_getTransitionGroupFeaturesDf 1'] = (
-    0,
-    7
-)
-
-snapshots['TestOSWDataAccess::test_getTransitionGroupFeaturesDf 2'] = GenericRepr('Empty DataFrame\nColumns: [filename, leftBoundary, rightBoundary, areaIntensity, qvalue, consensusApex, consensusApexIntensity]\nIndex: []')
-
-snapshots['TestOSWDataAccess::test_getTransitionGroupFeaturesDf 3'] = True
-
-snapshots['TestOSWDataAccess::test_getTransitionGroupFeaturesDf 4'] = True
-
-snapshots['TestOSWDataAccess::test_getTransitionIDAnnotationFromSequence 1'] = (
-    6,
-    2
-)
-
-snapshots['TestOSWDataAccess::test_getTransitionIDAnnotationFromSequence 2'] = GenericRepr('   TRANSITION_ID ANNOTATION\n0            174       y9^1\n1            175       y3^1\n2            176       y7^1\n3            177       y8^1\n4            178       y4^1\n5            179      y10^1')
