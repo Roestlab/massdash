@@ -70,7 +70,7 @@ class OSWDataAccess(GenericResultsAccess):
         self._initializeFeatureScoreHashtable()
         
         if mode == 'gui':
-            self.df = self.getAllTopTransitionGroupFeaturesDf()
+            self.df = self.load_data()
         
 
     ###### INDICES CREATOR ######
