@@ -23,17 +23,26 @@ class SearchResultsAnalysisUI:
         Displays the transition list UI and filters the transition list based on user input.
         """
         # Create a UI for the transition list
-        self.analysis = st.sidebar.selectbox("Analysis type", ["Identifications", "Quantifications", "Score Distributions"], help="Select the type of analysis to perform.")
+        self.analysis = st.sidebar.selectbox("Analysis type", ["Results", "Score Distributions"], help="Select the type of analysis to perform.")
     
     def show_identification_settings(self):
         """
         Displays the identification settings.
         """
         st.sidebar.divider()
-        st.sidebar.subheader("Identification settings")
+        st.sidebar.subheader("Results settings")
         self.biological_level = st.sidebar.selectbox("Biological level", ["Protein", "Peptide", "Precursor"], index=1, help="Select the composition level for the identifications.")
         
         self.qvalue_threshold = st.sidebar.number_input("Qvalue threshold", value=0.01, min_value=0.0, max_value=1.0, step=0.01, key=f'identification_settings_fdr_threshold', help="FDR threshold for identifications.")
+        
+        # Checkbox to aggregate identifications
+        self.aggregate_identifications = st.sidebar.checkbox("Aggregate identifications", value=True, key=f'aggregate_identifications', help="Aggregate identifications per entry.")
+        
+        # Number of columns for the plots
+        self.num_cols = st.sidebar.number_input("Number of columns for plots", value=2, min_value=1, max_value=4, step=1, key=f'num_cols', help="Number of columns for the plots.")
+        
+        # Multiple select for the type of plots
+        self.plot_types = st.sidebar.multiselect("Select plot types", ["Identification", "Quantification", "CV", "UpSet"], default=["Identification", "Quantification", "CV", "UpSet"], key=f'plot_types', help="Select the type of plots to display.")
         
     def show_score_tables(self, data_access_dict):
         """
@@ -87,4 +96,24 @@ class SearchResultsAnalysisUI:
         self.selected_score_col = st.sidebar.selectbox("Select score column", score_columns, index=use_index)
 
 
-    
+    def show_plots(self, plot_container: st.container, plot_dict: dict, num_cols=2):
+        """
+        Displays the plots.
+        """
+        # Create a UI for the plots
+        with plot_container:
+            plot_cols = st.columns(num_cols)
+            col_counter = 0
+            for plot_type, plot_obj in plot_dict.items():
+                with plot_cols[col_counter]:
+                    if plot_type == "identifications":
+                        st.bokeh_chart(plot_obj, use_container_width=True)
+                    elif plot_type == "quantifications" or plot_type == "coefficient_of_variation":
+                        st.plotly_chart(plot_obj, use_container_width=True)
+                    elif plot_type == "upset_diagram":
+                        # st.pyplot(plot_obj, use_container_width=True)
+                        st.image(plot_obj)
+                    
+                    col_counter+=1
+                    if col_counter >= len(plot_cols):
+                        col_counter = 0

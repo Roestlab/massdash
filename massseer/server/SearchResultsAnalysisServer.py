@@ -49,13 +49,15 @@ class SearchResultsAnalysisServer:
         data_access_dict = {}
         for entry, entry_data in _feature_file_entries.items():
             print(f"Loading search results from {entry_data['search_results_file_path']}")
-            if entry_data['search_results_file_type'] == "OpenSwath":
-                data_access = OSWDataAccess(entry_data['search_results_file_path'])
-                data_access_dict[entry] = data_access   
+            if entry_data['search_results_file_type'] == "OpenSWATH":
+                data_access = OSWDataAccess(entry_data['search_results_file_path'], mode='gui')
+                data_access_dict[entry_data['search_results_exp_name']] = data_access   
             elif entry_data['search_results_file_type'] == "DIA-NN":
-                data_access = ResultsTSVDataAccess(entry_data['search_results_file_path'], [entry_data['search_results_file_path']])
+                data_access = ResultsTSVDataAccess(entry_data['search_results_file_path'], entry_data['search_results_file_type'])
+                data_access_dict[entry_data['search_results_exp_name']] = data_access
             elif entry_data['search_results_file_type'] == "DreamDIA":
-                data_access = ResultsTSVDataAccess(entry_data['search_results_file_path'], [entry_data['search_results_file_path']])
+                data_access = ResultsTSVDataAccess(entry_data['search_results_file_path'], entry_data['search_results_file_type'])
+                data_access_dict[entry_data['search_results_exp_name']] = data_access
             else:
                 raise ValueError(f"Search results file type {entry_data['search_results_file_type']} not supported.")
         return data_access_dict
@@ -65,7 +67,14 @@ class SearchResultsAnalysisServer:
         data_dict = {}
         for entry, data_access in _data_access_dict.items():
             if isinstance(data_access, OSWDataAccess):
-                data_dict[entry] = data_access.get_top_rank_identfications(biological_level, qvalue_threshold)
+                data_dict[entry] = data_access.df[ data_access.df['Qvalue'] < qvalue_threshold ]
+                # Add entry name to dataframe   
+                data_dict[entry]['entry'] = entry
+            if isinstance(data_access, ResultsTSVDataAccess):
+                data_dict[entry] = data_access.df[ data_access.df['Qvalue'] < qvalue_threshold ]
+                # Add entry name to dataframe   
+                data_dict[entry]['entry'] = entry
+            
         return data_dict
     
     @conditional_decorator(st.cache_resource, check_streamlit)
@@ -95,21 +104,48 @@ class SearchResultsAnalysisServer:
         self.analysis_type = SearchResultsAnalysisUI()
         self.analysis_type.analysis_type()
 
+        # self.load_search_result_entries.clear()
         search_results_access_dict = self.load_search_result_entries(self.massseer_gui.file_input_settings.feature_file_entries)
 
         # Create a UI for the analysis
-        if self.analysis_type.analysis == "Identifications":
-            print("In development, coming soon!")
+        if self.analysis_type.analysis == "Results":
+            
             self.analysis_type.show_identification_settings()
+            # self.get_data.clear()
             ident_data_dict = self.get_data(search_results_access_dict, self.analysis_type.biological_level, self.analysis_type.qvalue_threshold)
-            for entry, ident_data in ident_data_dict.items():
-                print(ident_data)
-                if ident_data is not None:
-                    st.dataframe(ident_data.head(10))
-            pass
-        elif self.analysis_type.analysis == "Quantifications":
-            print("In development, coming soon!")
-            pass
+
+            plot_container = st.container()
+
+            # get overlapping columnn names
+            overlapping_columns = set.intersection(*[set(df.columns) for df in ident_data_dict.values()])
+            # st.write(f"overlapping_columns: {overlapping_columns}")
+            ident_data = pd.concat([df[overlapping_columns] for df in ident_data_dict.values()], axis=0)
+            # st.write(ident_data)
+            
+            search_results_plots_container = st.container()
+            search_results_plots_container.empty()
+            
+            plot_dict = {}
+            
+            plotter = SearchResultAnalysisPlots()
+            if "Identification" in self.analysis_type.plot_types:
+                pobj = plotter.plot_identifications(ident_data, self.analysis_type.aggregate_identifications)
+                plot_dict['identifications'] = pobj
+
+            if "Quantification" in self.analysis_type.plot_types:
+                pobj2 = plotter.plot_quantifications(ident_data)
+                plot_dict['quantifications'] = pobj2
+            
+            if "CV" in self.analysis_type.plot_types: 
+                pboj3 = plotter.plot_coefficient_of_variation(ident_data)
+                plot_dict['coefficient_of_variation'] = pboj3
+            
+            if "UpSet" in self.analysis_type.plot_types:
+                pobj4 = plotter.plot_upset_diagram(ident_data)
+                plot_dict['upset_diagram'] = pobj4
+            
+            self.analysis_type.show_plots(plot_container, plot_dict, num_cols=self.analysis_type.num_cols)
+            
         elif self.analysis_type.analysis == "Score Distributions":
             self.analysis_type.show_score_tables(search_results_access_dict)
             
@@ -127,7 +163,6 @@ class SearchResultsAnalysisServer:
             
             counter =  0
             for entry, df in score_df.items():
-                print(f"Entry: {entry}")
                 plotter = SearchResultAnalysisPlots()
                 pobj = plotter.plot_score_distributions(df, self.analysis_type.selected_score_col)
                 with search_results_plots_container:
