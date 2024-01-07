@@ -3,6 +3,7 @@ Click
 matplotlib
 numpy
 pandas
+psutil
 pyopenms
 scipy
 streamlit
