@@ -1,6 +1,6 @@
 """
-tests/peakPickers/snapshots/snap_test_pyMRMTransitionGroupPicker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/peakPickers/snapshots/test_snap_pyMRMTransitionGroupPicker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 # -*- coding: utf-8 -*-

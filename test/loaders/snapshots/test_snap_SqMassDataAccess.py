@@ -1,6 +1,6 @@
 """
-tests/loaders/snapshots/snap_test_SqMassDataAccess
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/loaders/snapshots/test_snap_SqMassDataAccess
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 # -*- coding: utf-8 -*-

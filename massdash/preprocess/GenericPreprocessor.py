@@ -3,7 +3,7 @@ massdash/preprocess/GenericPreprocessor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-
+# Structs
 from ..structs.TransitionGroup import TransitionGroup
 
 class GenericPreprocessor:

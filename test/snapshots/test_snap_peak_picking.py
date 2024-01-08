@@ -1,6 +1,6 @@
 """
-tests/snapshots/snap_test_peak_picking
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/snapshots/test_snap_peak_picking
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 # -*- coding: utf-8 -*-

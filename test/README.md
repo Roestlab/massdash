@@ -8,6 +8,14 @@ Install snapshottest with
 
 ## Running unittests
 
-```
+Execute the following command in test/:
+
+```bash
 python -m unittest 
+```
+
+For verbose output:
+
+```bash
+python -m unittest -v
 ```

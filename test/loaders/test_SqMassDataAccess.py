@@ -1,6 +1,6 @@
 """
-tests/loaders/test_SqMassDataAccess
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/loaders/test_SqMassDataAccess
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 from snapshottest import TestCase
