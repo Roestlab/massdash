@@ -11,7 +11,7 @@ class TransitionGroup:
     Class for Storing a transition group
     '''
     def __init__(self, precursorData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]],
-                 transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]]):
+                 transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]], sequence: str = None, precursor_charge: int = None):
         self.precursorData = precursorData
         self.transitionData = transitionData
         self.type = type(precursorData[0])
@@ -23,6 +23,8 @@ class TransitionGroup:
             raise ValueError("Precursor and transition data cannot both be empty")
         if len(precursorData) > 0 and len(transitionData) > 0:
             assert(self.dataType == type(transitionData[0])) 
+        self.sequence = sequence
+        self.precursor_charge = precursor_charge
   
 
     def to_pyopenms(self, includePrecursors=True):

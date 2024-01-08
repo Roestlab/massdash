@@ -215,6 +215,27 @@ class SpectralLibraryLoader:
         """
         return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['Annotation'].tolist()
     
+    def get_fragment_library_intensity(self, peptide: str, charge: int, annotation: str) -> float:
+        """
+        Retrieves a list of fragment annotations for a given peptide and charge.
+
+        Args:
+            peptide (str): The peptide sequence.
+            charge (int): The precursor charge.
+            annotation (str): The fragment annotation.
+
+        Returns:
+            float: The library intensity for the specified fragment annotation.
+        """
+        out = self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge) & (self.data['Annotation'] == annotation)]['LibraryIntensity']
+        if out.empty:
+            raise ValueError(f"Annotation {annotation} not found for peptide {peptide} charge {charge}")
+        elif len(out) > 1:
+            LOGGER.warning(f"Multiple annotations found for peptide {peptide} charge {charge}. Returning first.")
+            return out.iloc[0]
+        else: # len(out) == 1
+            return out.iloc[0]
+    
     def filter_for_target_transition_list(self, protein: str, peptide: str, charge: int) -> pd.DataFrame:
         """
         Filters the data for a specific target transition list based on the given protein, peptide, and charge.
