@@ -7,7 +7,10 @@
 </p>
 
 [![pypiv](https://img.shields.io/pypi/v/massdash.svg)](https://pypi.python.org/pypi/massdash)
+[![pypidownload](https://img.shields.io/pypi/dm/massdash?color=orange)](https://pypistats.org/packages/massdash)
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![dockerv](https://img.shields.io/docker/v/singjust/massdash?label=docker&color=green)](https://hub.docker.com/r/singjust/massdash)
+[![dockerpull](https://img.shields.io/docker/pulls/singjust/massdash?color=green)](https://hub.docker.com/r/singjust/massdash)
 [![Licence](https://img.shields.io/badge/License-BSD_3--Clause-orange.svg)](https://raw.githubusercontent.com/RoestLab/massdash/main/LICENSE)
 
 MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry. It enables the visualization of chromatograms (spectra and ion mobiliograms to come...) and provides a flexible environment for rapid algorithm testing and parameter optimization, crucial for data analysis and experimental design. This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.
@@ -32,11 +35,18 @@ Key Features:
 
 This tool empowers researchers to take control of their mass spectrometry data, experiment with algorithms, and optimize parameters to enhance the accuracy and efficiency of their research. It's a valuable resource for laboratories and researchers working in the field of mass spectrometry, streamlining their workflows and contributing to scientific advancements.
 
-# Installing MassDash
+# Installation
 
-## Installing from cloned directory
+Install the stable version of MassDash from the Python Package Index (PyPI):
 
-Run git clone
+```
+pip install massdash
+```
+
+<details>
+   <summary>Installing from source</summary>
+
+Clone the repository
 
 ```
 git clone https://github.com/Roestlab/massdash.git
@@ -54,11 +64,8 @@ Pip install massdash in editable mode
 pip install -e .
 ```
 
-## Installing from PyPI
+</details>
 
-```
-pip install massdash
-```
 
 # Running MassDash GUI
 
@@ -94,3 +101,21 @@ ssh -NfL localhost:----:localhost:---- your_user_name@remote_ip_address
 ```
 
 Now you can copy Network/External url to your local machine browser and use massdash. 
+
+# Docker
+
+MassDash is also vailable from Docker:
+
+Pull the stable version (e.g. 0.0.1) from DockerHub:
+
+```
+$ docker pull singjust/massdash:0.0.1
+```
+
+Run the Docker Container:
+
+```
+docker run -p 8501:8501 singjust/massdash:0.0.1
+```
+
+**Note:** the docker image binds to port 8501 for running MassDash locally.

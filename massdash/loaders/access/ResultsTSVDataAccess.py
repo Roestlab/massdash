@@ -6,7 +6,7 @@ massdash/loaders/access/ResultsTSVDataAccess
 import pandas as pd
 import numpy as np
 import re
-from typing import List
+from typing import Literal
 
 # Loaders
 from .GenericResultsAccess import GenericResultsAccess
@@ -17,12 +17,14 @@ from ...util import LOGGER
 
 class ResultsTSVDataAccess(GenericResultsAccess): 
     ''' Class for generic access to TSV file containing the results, currently only supports DIA-NN tsv files'''
-    def __init__(self, filename: str, verbose: bool = False) -> None:
+    def __init__(self, filename: str, results_type: Literal["OpenSWATH", "DIA-NN", "DreamDIA"] = "DIA-NN", verbose: bool = False) -> None:
         super().__init__(filename, verbose)
         self.filename = filename
+        self.results_type = results_type
+            
         self.peptideHash = self._initializePeptideHashTable()
         self.df = self.loadData() 
-        self.runs = self.df['Run'].drop_duplicates()
+        self.runs = self.df['filename'].drop_duplicates()
         self.has_im = 'IM' in self.df.columns
     
     def loadData(self) -> pd.DataFrame:
@@ -31,8 +33,18 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         df = pd.read_csv(self.filename, sep='\t')
 
+        if self.results_type == "OpenSWATH":
+            self.column_mapping = {'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge'}
+            raise ValueError("OpenSWATH results not supported yet")
+        elif self.results_type == "DIA-NN":
+            self.column_mapping = {'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename'}
+            self.hash_table_columns = ['Modified.Sequence', 'Precursor.Charge', 'Run']
+        elif self.results_type == "DreamDIA":
+            self.column_mapping = {'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'filename', 'quantification': 'Intensity'}
+            self.hash_table_columns = ['full_sequence', 'sequence', 'filename']
+        
         # rename columns, assuming this is a DIA-NN file
-        df = df.rename(columns={'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge'})
+        df = df.rename(columns=self.column_mapping)
         # Assign dummy Decoy column all 0
         df['Decoy'] = 0
         return df
@@ -41,7 +53,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         Load Peptide and Charge for easy access
         '''
-        return pd.read_csv(self.filename, sep='\t', usecols=['Modified.Sequence', 'Precursor.Charge', 'Run'])
+        return pd.read_csv(self.filename, sep='\t', usecols=self.hash_table_columns)
 
     def getTopTransitionGroupFeature(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:
         '''
@@ -78,7 +90,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             LOGGER.debug(f"Error: No matching runs found for {runname}")
             return []
         else:
-            targetPeptide = self.peptideHash[(self.peptideHash['Run'] == runname_exact) & (self.peptideHash['Modified.Sequence'] == peptide) & (self.peptideHash['Precursor.Charge'] == charge)]
+            targetPeptide = self.peptideHash[(self.peptideHash['filename'] == runname_exact) & (self.peptideHash['Modified.Sequence'] == peptide) & (self.peptideHash['Precursor.Charge'] == charge)]
 
             # return the row indices and add 1 to each index to account for the header row
             rows_to_load = [0] + [idx + 1 for idx in targetPeptide.index.tolist()]
@@ -126,14 +138,14 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         Returns:
             pd.DataFrame: Dataframe with the TransitionGroupFeatures
         '''
-        columns = ['Run', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence']
+        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence']
         if self.has_im:
             columns.append('consensusApexIM')
         runname_exact = self.getExactRunName(runname)
         if runname_exact is None:
             return pd.DataFrame(columns=columns)
         else:
-            df = self.df[(self.df['Run'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
+            df = self.df[(self.df['filename'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
 
             df = df.rename(columns={'RT.Start': 'leftBoundary', 
                                     'RT.Stop': 'rightBoundary', 
