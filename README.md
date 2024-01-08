@@ -1,8 +1,14 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Light.png" alt="MassDash_Logo" width="500">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png" alt="MassDash_Logo" width="500">
-  <img comment="Placeholder to transition between light color mode and dark color mode - this image is not directly used." src="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Light.png" alt="MassDash_Logo" width="500">
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png" alt="MassDash_Logo" width="500">
+    <img comment="Placeholder to transition between light color mode and dark color mode - this image is not directly used." src="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png">
+  </picture>
+</p>
+
+[![pypiv](https://img.shields.io/pypi/v/massdash.svg)](https://pypi.python.org/pypi/massdash)
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Licence](https://img.shields.io/badge/License-BSD_3--Clause-orange.svg)](https://raw.githubusercontent.com/RoestLab/massdash/main/LICENSE)
 
 MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry. It enables the visualization of chromatograms (spectra and ion mobiliograms to come...) and provides a flexible environment for rapid algorithm testing and parameter optimization, crucial for data analysis and experimental design. This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.
 
