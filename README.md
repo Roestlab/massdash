@@ -10,7 +10,7 @@
 [![pypidownload](https://img.shields.io/pypi/dm/massdash?color=orange)](https://pypistats.org/packages/massdash)
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![dockerv](https://img.shields.io/docker/v/singjust/massdash?label=docker&color=green)](https://hub.docker.com/r/singjust/massdash)
-[![dockerpull](https://img.shields.io/docker/pulls/singjust/massdash)(https://hub.docker.com/r/singjust/massdash)
+[![dockerpull](https://img.shields.io/docker/pulls/singjust/massdash)](https://hub.docker.com/r/singjust/massdash)
 [![Licence](https://img.shields.io/badge/License-BSD_3--Clause-orange.svg)](https://raw.githubusercontent.com/RoestLab/massdash/main/LICENSE)
 
 MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry. It enables the visualization of chromatograms (spectra and ion mobiliograms to come...) and provides a flexible environment for rapid algorithm testing and parameter optimization, crucial for data analysis and experimental design. This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.
