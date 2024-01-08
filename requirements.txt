@@ -2,6 +2,8 @@ bokeh==2.4.3
 Click
 joblib
 matplotlib
+matplotlib-venn
+upsetplot
 numpy
 pandas
 plotly
