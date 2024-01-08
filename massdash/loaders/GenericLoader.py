@@ -37,7 +37,7 @@ class GenericLoader(ABC):
         ### set the results file depending on the file ending
         if self.rsltsFile_str.endswith('.osw') and rsltsFileType == 'OpenSWATH':
             self.rsltsFile = OSWDataAccess(self.rsltsFile_str, mode=mode)
-        elif rsltsFile.endswith('.tsv') and rsltsFileType == 'DIA-NN':
+        elif rsltsFile.endswith('.tsv') and rsltsFileType in ['DIA-NN', 'OpenSWATH', 'DreamDIA']:
             self.rsltsFile = ResultsTSVDataAccess(self.rsltsFile_str)
         else:
             raise Exception(f"Error: Unsupported file type {rsltsFile} or unsupported rsltsFileType {rsltsFileType}")
