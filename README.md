@@ -32,11 +32,18 @@ Key Features:
 
 This tool empowers researchers to take control of their mass spectrometry data, experiment with algorithms, and optimize parameters to enhance the accuracy and efficiency of their research. It's a valuable resource for laboratories and researchers working in the field of mass spectrometry, streamlining their workflows and contributing to scientific advancements.
 
-# Installing MassDash
+# Installation
 
-## Installing from cloned directory
+Install the stable version of MassDash from the Python Package Index (PyPI):
 
-Run git clone
+```
+pip install massdash
+```
+
+<details>
+   <summary>Installing from source</summary>
+
+Clone the repository
 
 ```
 git clone https://github.com/Roestlab/massdash.git
@@ -54,11 +61,8 @@ Pip install massdash in editable mode
 pip install -e .
 ```
 
-## Installing from PyPI
+</details>
 
-```
-pip install massdash
-```
 
 # Running MassDash GUI
 
