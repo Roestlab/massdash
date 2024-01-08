@@ -11,6 +11,7 @@ from ..preprocess.ConformerPreprocessor import ConformerPreprocessor
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
 from ..structs.TransitionGroupFeature import TransitionGroupFeature
+from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # Utils
 from ..util import check_package
 
@@ -35,7 +36,7 @@ class ConformerPeakPicker:
         _convertConformerFeatureToTransitionGroupFeatures: Convert conformer predicted feature to TransitionGroupFeatures.
     """
     
-    def __init__(self, transition_group: TransitionGroup, pretrained_model_file: str, window_size: int = 175, prediction_threshold: float = 0.5, prediction_type: str = "logits"):
+    def __init__(self, library_file: str, pretrained_model_file: str, window_size: int = 175, prediction_threshold: float = 0.5, prediction_type: str = "logits"):
         """
         Initialize the ConformerPeakPicker class.
 
@@ -46,12 +47,12 @@ class ConformerPeakPicker:
             prediction_threshold (float, optional): The prediction threshold for peak picking. Defaults to 0.5.
             prediction_type (str, optional): The prediction type for peak picking. Defaults to "logits".
         """
-        self.transition_group = transition_group
         self.pretrained_model_file = pretrained_model_file
         self.window_size = window_size
         self.prediction_threshold = prediction_threshold
         self.prediction_type = prediction_type
         self.onnx_session = None
+        self.library = SpectralLibraryLoader(library_file)
         
         self._validate_model()
         
@@ -74,7 +75,7 @@ class ConformerPeakPicker:
         # Load pretrained model
         self.onnx_session = onnxruntime.InferenceSession(self.pretrained_model_file)
 
-    def pick(self, max_int_transition: int=1000) -> List[TransitionGroupFeature]:
+    def pick(self, transition_group, max_int_transition: int=1000) -> List[TransitionGroupFeature]:
         """
         Perform peak picking.
 
@@ -86,8 +87,8 @@ class ConformerPeakPicker:
         """
         # Transform data into required input
         print("Preprocessing data...")
-        conformer_preprocessor = ConformerPreprocessor(self.transition_group)
-        input_data = conformer_preprocessor.preprocess()
+        conformer_preprocessor = ConformerPreprocessor(transition_group)
+        input_data = conformer_preprocessor.preprocess(self.library)
         print("Loading model...")
         self.load_model()
         print("Predicting...")
@@ -96,7 +97,7 @@ class ConformerPeakPicker:
         print("Getting predicted boundaries...")
         peak_info = conformer_preprocessor.find_top_peaks(ort_output[0], ["precursor"], self.prediction_threshold, self.prediction_type)
         # Get actual peak boundaries
-        peak_info = conformer_preprocessor.get_peak_boundaries(peak_info, self.transition_group, self.window_size)
+        peak_info = conformer_preprocessor.get_peak_boundaries(peak_info, transition_group, self.window_size)
         print(f"Peak info: {peak_info}")
         return self._convertConformerFeatureToTransitionGroupFeatures(peak_info, max_int_transition)
 

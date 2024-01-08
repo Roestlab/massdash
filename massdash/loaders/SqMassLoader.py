@@ -83,7 +83,7 @@ class SqMassLoader(GenericLoader):
             prec_chrom_ids = t.getPrecursorChromIDs(precursor_id)
             precursor_chroms = t.getDataForChromatograms(prec_chrom_ids['chrom_ids'], prec_chrom_ids['native_ids'])
 
-            out[t] = TransitionGroup(precursor_chroms, transition_chroms)
+            out[t] = TransitionGroup(precursor_chroms, transition_chroms, pep_id, charge)
         return out
 
     def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:

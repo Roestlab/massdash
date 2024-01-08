@@ -10,6 +10,7 @@ from typing import List, Literal
 from .GenericPreprocessor import GenericPreprocessor 
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
+from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # Utils
 from ..util import check_package
 
@@ -101,7 +102,7 @@ class ConformerPreprocessor(GenericPreprocessor):
         """
         return 1 / (1 + np.exp(-x))
 
-    def preprocess(self, window_size: int=175) -> np.ndarray:
+    def preprocess(self, library: SpectralLibraryLoader, window_size: int=175) -> np.ndarray:
         """
         Preprocesses the data by scaling and transforming it into a numpy array.
         
@@ -131,7 +132,7 @@ class ConformerPreprocessor(GenericPreprocessor):
             # append ms2 intensity data to data
             data = np.append(data, [chrom.intensity], axis=0)
 
-            lib_int =  self.transition_group.targeted_transition_list[self.transition_group.targeted_transition_list.Annotation==chrom.label]['LibraryIntensity'].values 
+            lib_int = library.get_fragment_library_intensity(self.transition_group.sequence, self.transition_group.precursor_charge, chrom.label)
             lib_int = np.repeat(lib_int, len(chrom.intensity))
             lib_int_data = np.append(lib_int_data, [lib_int], axis=0)
 
@@ -190,7 +191,7 @@ class ConformerPreprocessor(GenericPreprocessor):
         new_data[19] = tmp_arr
 
         ## Add charge state
-        new_data[20] = self.transition_group.targeted_transition_list.PrecursorCharge.values[0] * np.ones(len(data[0]))
+        new_data[20] = self.transition_group.precursor_charge * np.ones(len(data[0]))
         
         ## Convert to float32
         new_data = new_data.astype(np.float32)
