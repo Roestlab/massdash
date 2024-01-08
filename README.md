@@ -101,3 +101,21 @@ ssh -NfL localhost:----:localhost:---- your_user_name@remote_ip_address
 ```
 
 Now you can copy Network/External url to your local machine browser and use massdash. 
+
+# Docker
+
+MassDash is also vailable from Docker:
+
+Pull the stable version (e.g. 0.0.1) from DockerHub:
+
+```
+$ docker pull singjust/massdash:0.0.1
+```
+
+Run the Docker Container:
+
+```
+docker run -p 8501:8501 singjust/massdash:0.0.1
+```
+
+**Note:** the docker image binds to port 8501 for running MassDash locally.
