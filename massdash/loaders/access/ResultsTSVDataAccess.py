@@ -21,16 +21,6 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         super().__init__(filename, verbose)
         self.filename = filename
         self.results_type = results_type
-
-        if self.results_type == "OpenSWATH":
-            self.column_mapping = ""
-            raise ValueError("OpenSWATH results not supported yet")
-        elif self.results_type == "DIA-NN":
-            self.column_mapping = {'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename'}
-            self.hash_table_columns = ['Modified.Sequence', 'Precursor.Charge', 'Run']
-        elif self.results_type == "DreamDIA":
-            self.column_mapping = {'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'filename', 'quantification': 'Intensity'}
-            self.hash_table_columns = ['full_sequence', 'sequence', 'filename']
             
         self.peptideHash = self._initializePeptideHashTable()
         self.df = self.loadData() 
@@ -43,6 +33,16 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         df = pd.read_csv(self.filename, sep='\t')
 
+        if self.results_type == "OpenSWATH":
+            self.column_mapping = {'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge'}
+            raise ValueError("OpenSWATH results not supported yet")
+        elif self.results_type == "DIA-NN":
+            self.column_mapping = {'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename'}
+            self.hash_table_columns = ['Modified.Sequence', 'Precursor.Charge', 'Run']
+        elif self.results_type == "DreamDIA":
+            self.column_mapping = {'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'filename', 'quantification': 'Intensity'}
+            self.hash_table_columns = ['full_sequence', 'sequence', 'filename']
+        
         # rename columns, assuming this is a DIA-NN file
         df = df.rename(columns=self.column_mapping)
         # Assign dummy Decoy column all 0
