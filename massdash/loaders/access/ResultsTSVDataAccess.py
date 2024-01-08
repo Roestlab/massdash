@@ -34,7 +34,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         df = pd.read_csv(self.filename, sep='\t')
 
         if self.results_type == "OpenSWATH":
-            self.column_mapping = {'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge'}
+            self.column_mapping = {'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge', 'leftWidth': 'RT.Start', 'rightWidth': 'RT.Stop'}
         elif self.results_type == "DIA-NN":
             self.column_mapping = {'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename'}
         elif self.results_type == "DreamDIA":
@@ -52,11 +52,14 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         if self.results_type == "OpenSWATH":
             self.hash_table_columns = ['FullPeptideName', 'Charge', 'filename']
+            self.rt_multiplier = 1
         elif self.results_type == "DIA-NN":
             self.hash_table_columns = ['Modified.Sequence', 'Precursor.Charge', 'Run']
+            self.rt_multiplier = 60
         elif self.results_type == "DreamDIA":
             self.hash_table_columns = ['full_sequence', 'sequence', 'filename']
-        
+            self.rt_multiplier = 1
+            
         return pd.read_csv(self.filename, sep='\t', usecols=self.hash_table_columns)
 
     def getTopTransitionGroupFeature(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:
@@ -113,13 +116,13 @@ class ResultsTSVDataAccess(GenericResultsAccess):
                 out = []
                 for _, row in feature_data.iterrows():
                     out.append(TransitionGroupFeature(consensusApex=row['RT'] * 60,
-                                                      leftBoundary=row['RT.Start'] * 60,
-                                                      rightBoundary=row['RT.Stop'] * 60,
-                                                      areaIntensity=row['Precursor.Quantity'],
-                                                      qvalue=row['Q.Value'],
+                                                      leftBoundary=row['RT.Start'] * self.rt_multiplier,
+                                                      rightBoundary=row['RT.Stop'] * self.rt_multiplier,
+                                                      areaIntensity=row['Intensity'],
+                                                      qvalue=row['Qvalue'],
                                                       consensusApexIM=row['IM'] if self.has_im else None,
-                                                      sequence=row['Modified.Sequence'],
-                                                      precursor_charge=row['Precursor.Charge']))
+                                                      sequence=row['ModifiedPeptideSequence'],
+                                                      precursor_charge=row['PrecursorCharge']))
                 return out 
             else: # len(row_indices)-1==0:
                 LOGGER.debug(f"Error: No feature results found for {peptide_tmp} {charge} in {self.filename}")
@@ -153,7 +156,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
 
             df = df.rename(columns={'RT.Start': 'leftBoundary', 
                                     'RT.Stop': 'rightBoundary', 
-                                    'Precursor.Quantity': 'areaIntensity', 
+                                    'Intensity': 'areaIntensity', 
                                     'RT': 'consensusApex', 
                                     'Qvalue' : 'qvalue',
                                     'PrecursorCharge': 'precursor_charge',
@@ -163,9 +166,9 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             if self.has_im:
                 df = df.rename(columns={'IM': 'consensusApexIM'})
 
-            df['consensusApex'] = df['consensusApex'] * 60
-            df['leftBoundary'] = df['leftBoundary'] * 60
-            df['rightBoundary'] = df['rightBoundary'] * 60
+            df['consensusApex'] = df['consensusApex'] * self.rt_multiplier
+            df['leftBoundary'] = df['leftBoundary'] * self.rt_multiplier
+            df['rightBoundary'] = df['rightBoundary'] * self.rt_multiplier
             df['consensusApexIntensity'] = np.nan
             return df[columns]
 
