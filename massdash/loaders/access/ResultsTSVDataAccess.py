@@ -17,6 +17,15 @@ from ...util import LOGGER
 
 class ResultsTSVDataAccess(GenericResultsAccess): 
     ''' Class for generic access to TSV file containing the results, currently only supports DIA-NN tsv files'''
+
+    # static variable
+    columnMapping = {
+        'OpenSwath':{'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge', 'leftWidth': 'RT.Start', 'rightWidth': 'RT.Stop'},
+        'DIA-NN':{'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename'},
+        'DreamDIA':{'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'filename', 'quantification': 'Intensity'}
+
+    }
+
     def __init__(self, filename: str, results_type: Literal["OpenSWATH", "DIA-NN", "DreamDIA"] = "DIA-NN", verbose: bool = False) -> None:
         super().__init__(filename, verbose)
         self.filename = filename
@@ -33,15 +42,10 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         df = pd.read_csv(self.filename, sep='\t')
 
-        if self.results_type == "OpenSWATH":
-            self.column_mapping = {'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge', 'leftWidth': 'RT.Start', 'rightWidth': 'RT.Stop'}
-        elif self.results_type == "DIA-NN":
-            self.column_mapping = {'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename'}
-        elif self.results_type == "DreamDIA":
-            self.column_mapping = {'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'filename', 'quantification': 'Intensity'}
+        # rename column according to column mapping 
+        df = df.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
         
-        # rename columns, assuming this is a DIA-NN file
-        df = df.rename(columns=self.column_mapping)
+        # TODO is this required?
         # Assign dummy Decoy column all 0
         df['Decoy'] = 0
         return df
@@ -60,8 +64,10 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             self.hash_table_columns = ['full_sequence', 'sequence', 'filename']
             self.rt_multiplier = 1
             
-        return pd.read_csv(self.filename, sep='\t', usecols=self.hash_table_columns)
+        pepHash = pd.read_csv(self.filename, sep='\t', usecols=self.hash_table_columns)
 
+        return pepHash.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
+        
     def getTopTransitionGroupFeature(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:
         '''
         Loads the top TransitionGroupFeature from the results file
@@ -91,13 +97,12 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             TransitionGroupFeature: TransitionGroupFeature object containing peak boundaries, intensity and confidence
         '''
         runname_exact = self.getExactRunName(runname)
-        print(runname_exact)
 
         if runname_exact is None:
             LOGGER.debug(f"Error: No matching runs found for {runname}")
             return []
         else:
-            targetPeptide = self.peptideHash[(self.peptideHash['filename'] == runname_exact) & (self.peptideHash['Modified.Sequence'] == peptide) & (self.peptideHash['Precursor.Charge'] == charge)]
+            targetPeptide = self.peptideHash[(self.peptideHash['filename'] == runname_exact) & (self.peptideHash['ModifiedPeptideSequence'] == peptide) & (self.peptideHash['PrecursorCharge'] == charge)]
 
             # return the row indices and add 1 to each index to account for the header row
             rows_to_load = [0] + [idx + 1 for idx in targetPeptide.index.tolist()]
@@ -109,6 +114,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
 
             if len(rows_to_load)-1 !=0:
                 feature_data = pd.read_csv(self.filename, sep='\t', skiprows=lambda x: x not in rows_to_load)
+                feature_data = feature_data.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
                 LOGGER.debug(f"Found {feature_data.shape[0]} rows from {self.filename} for feature data")
 
                 # Save the chromatogram peak feature from the report using cols 'RT', 'RT.Start', 'RT.Stop', 'Precursor.Quantity', 'Q.Value'
