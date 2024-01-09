@@ -42,7 +42,8 @@ class PlotConfig:
         self.subtitle = None
         self.x_axis_label = "Retention Time"
         self.y_axis_label = "Intensity"
-        self.smoothing_dict = {'type': 'sgolay', 'sgolay_polynomial_order': 3, 'sgolay_frame_length': 11}
+        self.smoothing_dict = {'type': ['sgolay', 'gaussian'], 'sgolay_polynomial_order': 3,
+                               'sgolay_frame_length': 11, 'gaussian_sigma': 2.0, 'gaussian_window': 11}
         self.x_range = None
         self.y_range = None
         self.scale_intensity = False

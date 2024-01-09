@@ -151,7 +151,9 @@ class TransitionGroup:
     
     def plot(self, 
              transitionGroupFeatures: Optional[List[TransitionGroupFeature]] = None, 
-             smoothing: Optional[Literal['none', 'sgolay']] = 'none',
+             smoothing: Optional[Literal['none', 'sgolay', 'gaussian']] = 'none',
+             gaussian_sigma: float = 2.0,
+             gaussian_window: int = 11,
              sgolay_polynomial_order: int = 3,
              sgolay_frame_length: int = 11) -> None:
         '''
@@ -170,7 +172,9 @@ class TransitionGroup:
         else:
             raise ValueError("Unknown type of 1D data")
 
-        config.smoothing_dict = {'type': smoothing, 'sgolay_polynomial_order': sgolay_polynomial_order, 'sgolay_frame_length': sgolay_frame_length}
+        config.smoothing_dict = {'type': smoothing, 'sgolay_polynomial_order': sgolay_polynomial_order,
+                                 'sgolay_frame_length': sgolay_frame_length,
+                                 'gaussian_sigma': gaussian_sigma, 'gaussian_window': gaussian_window}
 
         plotter = InteractivePlotter(config)
 
