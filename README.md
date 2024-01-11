@@ -1,6 +1,19 @@
-<img src="https://github.com/Roestlab/massseer/assets/32938975/0def9673-d1ec-43ba-97dc-10208c8911de" alt="MassSeer_Logo_Full_Small" width="500" />
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Logo_Light.png" alt="MassDash_Logo" width="500">
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Logo_Dark.png" alt="MassDash_Logo" width="500">
+    <img comment="Placeholder to transition between light color mode and dark color mode - this image is not directly used." src="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png">
+  </picture>
+</p>
 
-MassSeer is a powerful platform designed for researchers and analysts in the field of mass spectrometry. It enables the visualization of chromatograms (spectra and ion mobiliograms to come...) and provides a flexible environment for rapid algorithm testing and parameter optimization, crucial for data analysis and experimental design. This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.
+[![pypiv](https://img.shields.io/pypi/v/massdash.svg)](https://pypi.python.org/pypi/massdash)
+[![pypidownload](https://img.shields.io/pypi/dm/massdash?color=orange)](https://pypistats.org/packages/massdash)
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![dockerv](https://img.shields.io/docker/v/singjust/massdash?label=docker&color=green)](https://hub.docker.com/r/singjust/massdash)
+[![dockerpull](https://img.shields.io/docker/pulls/singjust/massdash?color=green)](https://hub.docker.com/r/singjust/massdash)
+[![Licence](https://img.shields.io/badge/License-BSD_3--Clause-orange.svg)](https://raw.githubusercontent.com/RoestLab/massdash/main/LICENSE)
+
+MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry. It enables the visualization of chromatograms (spectra and ion mobiliograms to come...) and provides a flexible environment for rapid algorithm testing and parameter optimization, crucial for data analysis and experimental design. This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.
 
 Key Features:
 
@@ -22,49 +35,45 @@ Key Features:
 
 This tool empowers researchers to take control of their mass spectrometry data, experiment with algorithms, and optimize parameters to enhance the accuracy and efficiency of their research. It's a valuable resource for laboratories and researchers working in the field of mass spectrometry, streamlining their workflows and contributing to scientific advancements.
 
-![image](https://github.com/Roestlab/massseer/assets/32938975/215db9e9-0322-4cd4-8472-ad7897290daa)
+# Installation
 
-# Installing MassSeer
-
-## Installing from cloned directory
-
-Run git clone
+Install the stable version of MassDash from the Python Package Index (PyPI):
 
 ```
-git clone https://github.com/Roestlab/massseer.git
+pip install massdash
 ```
 
-Change into massseer directory
+<details>
+   <summary>Installing from source</summary>
+
+Clone the repository
 
 ```
-cd massseer
+git clone https://github.com/Roestlab/massdash.git
 ```
 
-Pip install using *setup.py*
+Change into massdash directory
+
+```
+cd massdash
+```
+
+Pip install massdash in editable mode
 
 ```
 pip install -e .
 ```
 
-## Installing from PyPi (...Still to Come)
+</details>
+
+
+# Running MassDash GUI
 
 ```
-pip install MassSeer
+massdash gui
 ```
 
-## Installing dependencies
-
-```
-pip install -r requirements.txt
-```
-
-# Running MassSeer GUI
-
-```
-MassSeer gui
-```
-
-# Running MassSeer GUI from a Remote Machine
+# Running MassDash GUI from a Remote Machine
 
 Login to your remote machine
 
@@ -72,10 +81,10 @@ Login to your remote machine
 your_user_name@remote_ip_address
 ```
 
-Navigate to MassSeer directory and start GUI. 
+Navigate to massdash directory and start GUI. 
 
 ```
-MassSeer gui
+massdash gui
 ```
 
 You will receive a message letting you know you can view Streamlit app in your browser with two URLs. 
@@ -91,4 +100,22 @@ In your local machine, start a fresh terminal window. And enter the following co
 ssh -NfL localhost:----:localhost:---- your_user_name@remote_ip_address
 ```
 
-Now you can copy Network/External url to your local machine browser and use MassSeer. 
+Now you can copy Network/External url to your local machine browser and use massdash. 
+
+# Docker
+
+MassDash is also vailable from Docker:
+
+Pull the stable version (e.g. 0.0.1) from DockerHub:
+
+```
+$ docker pull singjust/massdash:0.0.1
+```
+
+Run the Docker Container:
+
+```
+docker run -p 8501:8501 singjust/massdash:0.0.1
+```
+
+**Note:** the docker image binds to port 8501 for running MassDash locally.
