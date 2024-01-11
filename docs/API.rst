@@ -106,3 +106,34 @@ Classes
    InteractiveTwoDimensionPlotter
    InteractiveThreeDimensionPlotter
 
+:mod:`masseer.peakPickers`: Classes for Peak Picking 
+====================================================
+
+.. automodule:: massseer.peakPickers
+   :no-members:
+   :no-inherited-members:
+
+.. currentmodule:: massseer.peakPickers
+
+Abstract Classes
+----------------
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   GenericPeakPicker
+
+Classes
+-------
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+   
+   MRMTransitionGroupPicker
+   pyMRMTransitionGroupPicker
+   ConformerPeakPicker
+
