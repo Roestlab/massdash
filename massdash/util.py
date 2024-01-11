@@ -300,20 +300,27 @@ def get_download_folder():
     return download_folder
 
 def download_file(url, dest_folder):
-    from urllib.request import urlretrieve
-    # response = requests.get(url)
+    """
+    Downloads a file from the given URL and saves it to the specified destination folder.
+
+    Args:
+        url (str): The URL of the file to download.
+        dest_folder (str): The destination folder where the file will be saved.
+
+    Returns:
+        None
+    """
     os.makedirs(dest_folder, exist_ok=True)
+    response = requests.get(url)
     if check_streamlit():
         import streamlit as st
-        st.write(f"Downloading {url} to {os.path.join(dest_folder, url.split('/')[-1])}")
-        with st.spinner(f"Downloading {url}"):
-            urlretrieve(url, os.path.join(dest_folder, url.split("/")[-1]))
-            # with open(os.path.join(dest_folder, url.split("/")[-1]), "wb") as f:
-            #     f.write(response.content)
-    # else:
-    #     LOGGER.info(f"Downloading {url}")
-    #     with open(os.path.join(dest_folder, url.split("/")[-1]), "wb") as f:
-    #         f.write(response.content)
+        with st.spinner(f"Downloading {url} to {dest_folder}"):
+            with open(os.path.join(dest_folder, url.split("/")[-1]), "wb") as f:
+                f.write(response.content)
+    else:
+        LOGGER.info(f"Downloading {url} to {dest_folder}")
+        with open(os.path.join(dest_folder, url.split("/")[-1]), "wb") as f:
+            f.write(response.content)
 
 #######################################
 ## Decorators
