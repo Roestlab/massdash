@@ -208,6 +208,7 @@ class InteractiveTwoDimensionPlotter:
         if self.config.smoothing_dict['type'] == 'gauss':
             arr = gaussian_filter(arr, sigma=self.config.smoothing_dict['sigma'])
 
+        # based on http://www.janeriksolem.net/histogram-equalization-with-python-and.html
         if self.config.normalization_dict['type'] == 'equalization':
             hist, bins = np.histogram(arr.flatten(), self.config.normalization_dict['bins'], density=True)
             cdf = hist.cumsum() # cumulative distribution function
