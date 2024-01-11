@@ -8,6 +8,7 @@ from typing import List, Tuple
 # Data modules
 import numpy as np
 import pandas as pd
+from scipy.ndimage.filters import gaussian_filter
 
 # Plotting modules
 from bokeh.models import HoverTool, CrosshairTool, Title
@@ -193,7 +194,7 @@ class InteractiveTwoDimensionPlotter:
 
     def prepare_array(self, arr: pd.DataFrame) -> np.ndarray:
         """
-        Prepare the array for plotting.
+        Prepare the array for plotting. Also performs equalization and/or smoothing if specified in the configuration.
 
         Args:
             arr (pd.DataFrame): The input DataFrame.
@@ -203,6 +204,19 @@ class InteractiveTwoDimensionPlotter:
         """
         arr = arr.to_numpy()
         arr[np.isnan(arr)] = 0
+
+        if self.config.smoothing_dict['type'] == 'gauss':
+            arr = gaussian_filter(arr, sigma=self.config.smoothing_dict['sigma'])
+
+        if self.config.normalization_dict['type'] == 'equalization':
+            hist, bins = np.histogram(arr.flatten(), self.config.normalization_dict['bins'], density=True)
+            cdf = hist.cumsum() # cumulative distribution function
+            cdf = (self.config.normalization_dict['bins']-1) * cdf / cdf[-1] # normalize
+
+            # use linear interpolation of cdf to find new pixel values
+            image_equalized = np.interp(arr.flatten(), bins[:-1], cdf)
+            arr = image_equalized.reshape(arr.shape)
+
         return arr
 
     def create_heatmap_plot(self, title_text: str, arr: np.ndarray, rt_min: float, rt_max: float, im_min: float, im_max: float, dw_main: float, dh_main: float, linked_crosshair, two_d_plots: List[figure]) -> figure:
