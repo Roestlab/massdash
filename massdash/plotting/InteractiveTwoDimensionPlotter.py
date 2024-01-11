@@ -134,9 +134,9 @@ class InteractiveTwoDimensionPlotter:
         """
         df = featureMap.feature_df
         if not self.config.include_ms1:
-            df = df[self.df['ms_level'] != 1]
+            df = df[df['ms_level'] != 1]
         if not self.config.include_ms2:
-            df = df[self.df['ms_level'] != 2]
+            df = df[df['ms_level'] != 2]
             
         if self.config.type_of_heatmap == "m/z vs retention time":
             arr = df.pivot_table(index='mz', columns='rt', values='int', aggfunc="sum")
