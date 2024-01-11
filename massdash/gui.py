@@ -66,8 +66,13 @@ def main(verbose, perf, perf_output):
     st.sidebar.divider()
 
     if st.session_state.workflow == "xic_data" and st.session_state.clicked['load_toy_dataset_xic_data']:
-        sqmass_file_path_input = os.path.join(dirname, '..', 'test', 'test_data', 'xics')
-        osw_file_path = os.path.join(dirname, '..', 'test', 'test_data', 'osw', 'test_data.osw')
+        tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
+        sqmass_file_path_input = tmp_download_folder + "/test_chrom_1.sqMass"
+        url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/xics/test_chrom_1.sqMass"
+        download_file(url, tmp_download_folder)
+        osw_file_path = tmp_download_folder + "/test_data.osw"
+        url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/osw/test_data.osw"
+        download_file(url, tmp_download_folder)       
         
         massdash_gui.show_file_input_settings(osw_file_path, sqmass_file_path_input)
         
@@ -77,7 +82,6 @@ def main(verbose, perf, perf_output):
         st.session_state.WELCOME_PAGE_STATE = False
         
     elif st.session_state.workflow == "raw_data" and st.session_state.clicked['load_toy_dataset_raw_data']:
-        #TODO: Create small toy example 
         tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
         transition_list_file_path = tmp_download_folder + "/test.pqp"
         url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/openswath/lib/test.pqp"
@@ -91,24 +95,25 @@ def main(verbose, perf, perf_output):
         feature_file_type = "OpenSWATH"
         # st.stop("Toy dataset not available yet.")
         massdash_gui.show_file_input_settings(diann_report_file_path_input, raw_file_path_input, transition_list_file_path, feature_file_type)
+        
         # Remove welcome message container if dataset is loaded
         massdash_gui.welcome_container.empty()
 
         st.session_state.WELCOME_PAGE_STATE = False
 
     if st.session_state.workflow == "search_results_analysis" and st.session_state.clicked['load_toy_dataset_search_results_analysis']:
-        # feature_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'osw', 'test_data.osw')
-        feature_file_path = os.path.join(dirname, '..', 'tests', 'test_data', 'example_dia', 'openswath', 'osw', 'test.osw')
+        tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
+        feature_file_path = tmp_download_folder + "/test.osw"
+        url = "https://github.com/Roestlab/massdash/blob/dev/test/test_data/example_dia/openswath/osw/test.osw"
+        download_file(url, tmp_download_folder)
         feature_file_type = "OpenSWATH"
         
-        feature_file_path_2 = os.path.join(dirname, '..', 'tests', 'test_data', 'example_dia', 'diann', 'report', 'test_combined_diann_report.tsv') 
-        feature_file_type_2 = "DIA-NN"
-        
-        feature_file_path_3 = os.path.join(dirname, '..', 'tests', 'test_data', 'example_dia', 'dreamdia', 'test_dreamdia_report.tsv') 
+        feature_file_path_3 = tmp_download_folder + "/test_dreamdia_report.tsv"
+        url = "https://github.com/Roestlab/massdash/blob/dev/test/test_data/example_dia/dreamdia/test_dreamdia_report.tsv"
+        download_file(url, tmp_download_folder)
         feature_file_type_3 = "DreamDIA"
         
         search_results_entries_dict = {'entry_1': {'search_results_file_path':          feature_file_path, 'search_results_exp_name': 'OSW', 'search_results_file_type': feature_file_type}, 
-                                        'entry_2': {'search_results_file_path': feature_file_path_2, 'search_results_exp_name': 'DIA-NN', 'search_results_file_type': feature_file_type_2}, 
                                         'entry_3': {'search_results_file_path': feature_file_path_3, 'search_results_exp_name': 'DreamDIA', 'search_results_file_type': feature_file_type_3}}
         
         massdash_gui.show_file_input_settings(feature_file_entries_dict=search_results_entries_dict)
