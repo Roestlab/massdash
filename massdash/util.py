@@ -286,6 +286,12 @@ def file_basename_without_extension(file_path):
     return base_name
 
 def get_download_folder():
+    """
+    Get the download folder based on the user's operating system.
+
+    Returns:
+        str: The path to the download folder.
+    """
     # Get the user's home directory
     home_dir = os.path.expanduser("~")
 
@@ -299,7 +305,7 @@ def get_download_folder():
 
     return download_folder
 
-def download_file(url, dest_folder):
+def download_file(url: str, dest_folder: str):
     """
     Downloads a file from the given URL and saves it to the specified destination folder.
 
