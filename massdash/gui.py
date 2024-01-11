@@ -16,7 +16,7 @@ from massdash.server.SearchResultsAnalysisServer import SearchResultsAnalysisSer
 # UI 
 from massdash.ui.MassDashGUI import MassDashGUI
 # Utils
-from massdash.util import LOGGER
+from massdash.util import LOGGER, get_download_folder, download_file
 
 @click.command()
 # @click.argument('args', default='args', type=str)
@@ -78,11 +78,18 @@ def main(verbose, perf, perf_output):
         
     elif st.session_state.workflow == "raw_data" and st.session_state.clicked['load_toy_dataset_raw_data']:
         #TODO: Create small toy example 
-        transition_list_file_path = ""
-        raw_file_path_input = ""
-        diann_report_file_path_input = ""
-        feature_file_type = ""
-        st.stop("Toy dataset not available yet.")
+        tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
+        transition_list_file_path = tmp_download_folder + "/test.pqp"
+        url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/openswath/lib/test.pqp"
+        download_file(url, tmp_download_folder)
+        raw_file_path_input = tmp_download_folder +  "/test_raw_1.mzML"
+        url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/raw/test_raw_1.mzML"
+        download_file(url, tmp_download_folder)
+        diann_report_file_path_input = tmp_download_folder + "/test.osw"
+        url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/openswath/osw/test.osw"
+        download_file(url, tmp_download_folder)
+        feature_file_type = "OpenSWATH"
+        # st.stop("Toy dataset not available yet.")
         massdash_gui.show_file_input_settings(diann_report_file_path_input, raw_file_path_input, transition_list_file_path, feature_file_type)
         # Remove welcome message container if dataset is loaded
         massdash_gui.welcome_container.empty()
