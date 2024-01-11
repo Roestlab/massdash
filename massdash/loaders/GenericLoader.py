@@ -4,17 +4,8 @@ massdash/loaders/GenericLoader
 """
 
 from abc import ABC, abstractmethod
-<<<<<<< HEAD:massseer/loaders/GenericLoader.py
-from massseer.structs.TransitionGroup import TransitionGroup
-from massseer.structs.TransitionGroupFeature import TransitionGroupFeature
-from massseer.loaders.SpectralLibraryLoader import SpectralLibraryLoader
-from massseer.loaders.access.OSWDataAccess import OSWDataAccess
-from massseer.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
-from typing import List, Union, Literal, Optional
-=======
-from typing import Dict, List, Union, Literal
->>>>>>> dev:massdash/loaders/GenericLoader.py
 from os.path import basename
+from typing import Dict, List, Union, Literal, Optional
 import pandas as pd
 
 # Loaders
@@ -32,7 +23,6 @@ class GenericLoader(ABC):
     Abstract class for loading Chromatograms and peak features
     Classes which inherit from this should contain one results file and one transition file
     '''
-<<<<<<< HEAD:massseer/loaders/GenericLoader.py
     def __init__(self, 
                  rsltsFile: str, 
                  dataFiles: Union[str, List[str]], 
@@ -40,9 +30,6 @@ class GenericLoader(ABC):
                  rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'DIA-NN', 
                  verbose: bool=False, 
                  mode: Literal['module', 'gui'] = 'module'):
-=======
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str, rsltsFileType: Literal['OpenSWATH', 'DIA-NN', 'DreamDIA'], verbose: bool=False, mode: Literal['module', 'gui'] = 'module'):
->>>>>>> dev:massdash/loaders/GenericLoader.py
         ## store the file names
         self.rsltsFile_str = rsltsFile
         self.libraryFile_str = libraryFile
@@ -94,9 +81,6 @@ class GenericLoader(ABC):
         '''
         pass
 
-<<<<<<< HEAD:massseer/loaders/GenericLoader.py
-    def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> dict[str, List[TransitionGroupFeature]]:
-=======
     @abstractmethod
     def loadTransitionGroups(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
         '''
@@ -110,7 +94,6 @@ class GenericLoader(ABC):
         pass
 
     def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> Dict[str, List[TransitionGroupFeature]]:
->>>>>>> dev:massdash/loaders/GenericLoader.py
         '''
         Loads a PeakFeature object from the results file
         Args:

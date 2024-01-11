@@ -4,9 +4,9 @@ This is an abstract class for loading spectra from a file.
 
 import pandas as pd
 
-from massseer.loaders.GenericLoader import GenericLoader
+from ..loaders import GenericLoader
 from abc import ABC, abstractmethod
-from massseer.structs import TransitionGroup, TargetedDIAConfig, FeatureMap
+from ..structs import TransitionGroup, TargetedDIAConfig, FeatureMap
 from typing import List, Union, Literal
 
 class GenericSpectrumLoader(GenericLoader):
