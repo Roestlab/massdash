@@ -136,39 +136,57 @@ class GenericLoader(ABC):
         '''
         pass
 
-    @abstractmethod
     def plotChromatogram(self,
-                        seq: str, 
-                        charge: int, 
-                        includeBoundaries: bool = True, 
+                        transitionGroup: TransitionGroup,
+                        transitionGroupFeatures: Optional[List[TransitionGroupFeature]],
                         include_ms1: bool = False, 
                         smooth: bool = True, 
                         sgolay_polynomial_order: int = 3, 
                         sgolay_frame_length: int = 11, 
-                        scale_intensity: bool = False,
-                        mz_tol: float = 20,
-                        rt_window: float = 50,
-                        im_window: Optional[float] = None) -> 'bokeh.plotting.figure.Figure':
+                        scale_intensity: bool = False) -> 'bokeh.plotting.figure.Figure':
         '''
-        Plots a chromatogram for a given peptide sequence and charge state for a given run
+        Plots a chromatogram for a transitionGroup and transitionGroupFeatures given peptide sequence and charge state for a given run
 
         Args:
-            seq (str): Peptide sequence
-            charge (int): Charge state
-            includeBoundaries (bool, optional): Whether to include peak boundaries. Defaults to True.
+            transitionGroup (TransitionGroup): TransitionGroup object
+            transitionGroupFeatures (List[TransitionGroupFeature]): List of TransitionGroupFeature objects, plots peak boundaries if not None
             include_ms1 (bool, optional): Whether to include MS1 data. Defaults to False.
             smooth (bool, optional): Whether to smooth the chromatogram. Defaults to True.
             sgolay_polynomial_order (int, optional): Order of the polynomial to use for smoothing. Defaults to 3.
             sgolay_frame_length (int, optional): Frame length to use for smoothing. Defaults to 11.
             scale_intensity (bool, optional): Whether to scale the intensity of the chromatogram such that all chromatograms are individually normalized to 1. Defaults to False.
-            mz_tol (float, optional): m/z tolerance for extraction (in ppm). Defaults to 20.
-            rt_tol (float, optional): RT tolerance for extraction (in seconds). Defaults to 50.
-            im_tol (float, optional): IM tolerance for extraction (in 1/k0). Defaults to None.
 
         Returns: 
             bokeh.plotting.figure.Figure: Bokeh figure object
         '''
-        pass
+
+        from bokeh.plotting import output_notebook, show
+        from ..plotting import InteractivePlotter, PlotConfig
+       
+        # Initiate Plotting in Jupyter Notebook
+        output_notebook()
+
+        # Create an instance of the InteractivePlotter class and set appropriate config
+        pc = PlotConfig()
+        pc.include_ms1 = include_ms1
+        if smooth:
+            pc.smoothing_dict = {'type': 'sgolay', 'sgolay_polynomial_order': sgolay_polynomial_order, 'sgolay_frame_length': sgolay_frame_length}
+        else:
+            pc.smoothing_dict = {'type': 'none'}
+        pc.scale_intensity = scale_intensity
+
+        plotter = InteractivePlotter(pc)
+
+        # Plot the chromatogram data
+        print(transitionGroup)
+        fig = plotter.plot(transitionGroup)
+
+        # Add boundaries to the plot
+        fig = plotter.add_peak_boundaries(fig, transitionGroupFeatures)
+
+        show(fig)
+
+        return fig
 
     def __str__(self):
         return f"{__class__.__name__}: rsltsFile={self.rsltsFile_str}, dataFiles={self.dataFiles_str}"

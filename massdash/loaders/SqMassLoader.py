@@ -4,21 +4,19 @@ massdash/loaders/SqMassLoader
 """
 
 
-from abc import ABC, abstractmethod
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Union
 from os.path import basename
 from pandas.core.api import DataFrame as DataFrame
 import pandas as pd
 
 # Loaders
-from .GenericLoader import GenericLoader
+from .GenericChromatogramLoader import GenericChromatogramLoader
 from .access.SqMassDataAccess import SqMassDataAccess
 from .access.OSWDataAccess import OSWDataAccess
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
-from ..structs.TransitionGroupFeature import TransitionGroupFeature
 
-class SqMassLoader(GenericLoader):
+class SqMassLoader(GenericChromatogramLoader):
 
     ''' 
     Class for loading Chromatograms and peak features from SqMass files and OSW files
@@ -26,7 +24,7 @@ class SqMassLoader(GenericLoader):
     '''
 
     def __init__(self, dataFiles: Union[str, List[str]], rsltsFile: str):
-        super().__init__(rsltsFile, dataFiles, rsltsFile, 'OpenSWATH')
+        super().__init__(rsltsFile, dataFiles, 'OpenSWATH')
         self.dataFiles = [SqMassDataAccess(f) for f in self.dataFiles_str]
         self.rsltsFile = OSWDataAccess(self.rsltsFile_str)
 
@@ -120,7 +118,3 @@ class SqMassLoader(GenericLoader):
 
     def __repr__(self):
         return f"SqMassLoader(rsltsFile={self.rsltsFile_str}, dataFiles={self.dataFiles_str}"
-    
-    def plotChromatogram(self, seq: str, charge: int, includeBoundaries: bool = True, include_ms1: bool = False, smooth: bool = True, sgolay_polynomial_order: int = 3, sgolay_frame_length: int = 11, scale_intensity: bool = False, mz_tol: float = 20, rt_window: float = 50, im_window: Optional[float] = None) -> 'bokeh.plotting.figure.Figure':
-        return super().plotChromatogram(seq, charge, includeBoundaries, include_ms1, smooth, sgolay_polynomial_order, sgolay_frame_length, scale_intensity, mz_tol, rt_window, im_window)
-

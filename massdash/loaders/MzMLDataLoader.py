@@ -4,16 +4,13 @@ massdash/loaders/MzMLDataLoader
 """
 
 from os.path import basename, splitext
-from typing import Dict, List, Optional, Union, Literal
+from typing import Dict, List, Union, Literal
 import numpy as np
 import pandas as pd
 
 # Loaders
 from .access.MzMLDataAccess import MzMLDataAccess
-from .GenericLoader import GenericLoader
-from .access.OSWDataAccess import OSWDataAccess
-from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
-from .SpectralLibraryLoader import SpectralLibraryLoader
+from .GenericSpectrumLoader import GenericSpectrumLoader
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
 from ..structs.FeatureMap import FeatureMap
@@ -22,7 +19,7 @@ from ..structs.TargetedDIAConfig import TargetedDIAConfig
 from ..util import LOGGER
 
 
-class MzMLDataLoader(GenericLoader):
+class MzMLDataLoader(GenericSpectrumLoader):
     '''
     Class to load data from MzMLFiles using a .osw output file or .tsv report file
     
@@ -124,6 +121,3 @@ class MzMLDataLoader(GenericLoader):
             else:
                 out[d.filename] = d.reduce_spectra(t, config)
         return out
-
-    def plotChromatogram(self, seq: str, charge: int, includeBoundaries: bool = True, include_ms1: bool = False, smooth: bool = True, sgolay_polynomial_order: int = 3, sgolay_frame_length: int = 11, scale_intensity: bool = False, mz_tol: float = 20, rt_window: float = 50, im_window: Optional[float] = None) -> 'bokeh.plotting.figure.Figure':
-        return super().plotChromatogram(seq, charge, includeBoundaries, include_ms1, smooth, sgolay_polynomial_order, sgolay_frame_length, scale_intensity, mz_tol, rt_window, im_window)
