@@ -9,6 +9,6 @@ plotly
 psutil
 pyopenms
 scipy
-streamlit
+streamlit>=1.30.0
 tqdm
 upsetplot
