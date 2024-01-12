@@ -69,11 +69,11 @@ def display_input_section(title, key_base: str, file_extension: str, dialog_titl
     """
     st.subheader(title)
     if st_cols is None:
-        st_cols = st.columns([0.1, 0.9], gap="small")
+        st_cols = st.columns([0.05, 0.95], gap="small")
     with st_cols[0]:
         st.write("\n")
         st.write("\n\n\n\n")
-        dialog_button = st.button("Browse", key=f'{key_base}_browse', help=f"Browse for the {title} file.")
+        dialog_button = st.button("📁", key=f'{key_base}_browse', help=f"Browse for the {title} file.")
         if dialog_button:
             st.session_state.tmp_input_dict[key_base] = tk_file_dialog(file_extension, dialog_title)
     with st_cols[1]:

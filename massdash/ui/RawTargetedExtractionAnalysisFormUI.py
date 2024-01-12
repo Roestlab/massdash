@@ -58,7 +58,7 @@ class RawTargetedExtractionAnalysisFormUI:
             # Tabs for different data workflows
             st.subheader("Input Search Results")
 
-            cols = st.columns([0.1, 0.6, 0.3], gap="small")
+            cols = st.columns([0.05, 0.65, 0.3], gap="small")
 
             self.feature_file_path = display_input_section("Input Feature file", "feature_file_path", [("OpenSwath Files", ".osw"), ("Feature Files", ".tsv")],"Select Feature File", "*.osw", st_cols=cols[0:2])
             self.feature_file_type = cols[2].selectbox("Select file type", options=["OpenSWATH", "DIA-NN"], key='feature_file_type_tmp', help="Select the file type of the feature file")
