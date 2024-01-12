@@ -72,13 +72,13 @@ MassDash empowers researchers to streamline mass spectrometry workflows, experim
 
 - **User-friendly dashboard**: MassDash's dashboard is designed with users in mind, facilitating research productivity in both beginners and experts in the field.
 
-- **Data Exploration**: Explore mass spectrometry data with our suite of tools and gain insights to make informed research decisions.
+- **Data exploration**: Explore mass spectrometry data with our suite of tools and gain insights to make informed research decisions.
 
 - **Customization**: Flexibly tailor data analysis parameters and results for specific research needs.
 
-- **Rapid Prototyping**: Save time and resource when developing mass spectrometry workflows by quickly prototyping and testing research ideas.
+- **Rapid prototyping**: Save time and resource when developing mass spectrometry workflows by quickly prototyping and testing research ideas.
 
-- **Data Integration**: Seamlessly import, process, and export data to facilitate data sharing and collaboration.
+- **Data integration**: Seamlessly import, process, and export data to facilitate data sharing and collaboration.
 
 ## Launching MassDash from a remote machine
 
