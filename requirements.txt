@@ -3,7 +3,6 @@ Click
 joblib
 matplotlib
 matplotlib-venn
-upsetplot
 numpy
 pandas
 plotly
@@ -12,3 +11,4 @@ pyopenms
 scipy
 streamlit
 tqdm
+upsetplot

@@ -36,6 +36,7 @@ requires = [
     "scipy",
     "streamlit",
     "tqdm",
+    "upsetplot",
 ]
 
 [tool.flit.scripts]
