@@ -69,7 +69,7 @@ def display_input_section(title, key_base: str, file_extension: str, dialog_titl
     """
     st.subheader(title)
     if st_cols is None:
-        st_cols = st.columns([0.1, 1.9], gap="small")
+        st_cols = st.columns([0.1, 0.9], gap="small")
     with st_cols[0]:
         st.write("\n")
         st.write("\n\n\n\n")
