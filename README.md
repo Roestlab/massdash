@@ -5,6 +5,7 @@
     <img comment="Placeholder to transition between light color mode and dark color mode - this image is not directly used." src="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png">
   </picture>
 </p>
+MassDash_Landing_Page.png
 
 [![pypiv](https://img.shields.io/pypi/v/massdash.svg)](https://pypi.python.org/pypi/massdash)
 [![pypidownload](https://img.shields.io/pypi/dm/massdash?color=orange)](https://pypistats.org/packages/massdash)
@@ -13,109 +14,131 @@
 [![dockerpull](https://img.shields.io/docker/pulls/singjust/massdash?color=green)](https://hub.docker.com/r/singjust/massdash)
 [![Licence](https://img.shields.io/badge/License-BSD_3--Clause-orange.svg)](https://raw.githubusercontent.com/RoestLab/massdash/main/LICENSE)
 
-MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry. It enables the visualization of chromatograms (spectra and ion mobiliograms to come...) and provides a flexible environment for rapid algorithm testing and parameter optimization, crucial for data analysis and experimental design. This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.
+MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry. By providing a centralized web-based dashboard, MassDash facilitates data analysis and experiment design by enabling users to visualize chromatograms, test algorithms, and optimize parameters. This tool offers a flexible environment for mass spectrometry research, with notable specailty in handling Data-Independent Acquisition (DIA) data.
 
-Key Features:
+## Installation
 
-- **Chromatogram Visualization**: View and analyze chromatograms with ease, allowing for in-depth examination of mass spectrometry data.
+**Recommended**: Install the latest stable version of MassDash from the Python Package Index (PyPI):
 
-- **Algorithm Testing**: Experiment with various data analysis algorithms and workflows, facilitating the development and fine-tuning of custom algorithms.
-
-- **Parameter Optimization**: Optimize parameters for data analysis tools like OpenSwathWorkflow, ensuring the best results for your specific experiments.
-
-- **User-Friendly Interface**: A user-friendly and intuitive interface makes it accessible to both beginners and experts in the field.
-
-- **Data Exploration**: Dive into your mass spectrometry data, investigate peaks, and gain insights to make informed decisions.
-
-- **Customization**: Adapt the tool to your specific research needs, allowing for tailored analysis and results.
-
-- **Rapid Prototyping**: Quickly prototype and test ideas, saving time and resources in the development of mass spectrometry workflows.
-
-- **Data Integration**: Seamlessly import, process, and export data, facilitating data sharing and collaboration.
-
-This tool empowers researchers to take control of their mass spectrometry data, experiment with algorithms, and optimize parameters to enhance the accuracy and efficiency of their research. It's a valuable resource for laboratories and researchers working in the field of mass spectrometry, streamlining their workflows and contributing to scientific advancements.
-
-# Installation
-
-Install the stable version of MassDash from the Python Package Index (PyPI):
-
-```
-pip install massdash
+```bash
+pip install massdash --upgrade
 ```
 
 <details>
    <summary>Installing from source</summary>
 
-Clone the repository
+Clone the repository:
 
-```
+```bash
 git clone https://github.com/Roestlab/massdash.git
 ```
 
-Change into massdash directory
+Change into massdash directory:
 
-```
+```bash
 cd massdash
 ```
 
-Pip install massdash in editable mode
+Install massdash in editable mode:
 
-```
+```bash
 pip install -e .
 ```
 
 </details>
 
+## Quick start
 
-# Running MassDash GUI
+To open up MassDash in your browser, simply type the following in your terminal:
 
-```
+```bash
 massdash gui
 ```
 
-# Running MassDash GUI from a Remote Machine
+<p align="center">
+  <img alt="MassDash Landing Page" src="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Landing_Page.png">
+</p>
 
-Login to your remote machine
+## Features
 
-```
+MassDash empowers researchers to streamline mass spectrometry workflows, experiment with data analysis algorithms, and optimize parameters to enhance research accuracy and efficiency. Below are some of MassDash's notable features:
+
+**Chromatogram visualization**: Easily view and analyze chromatograms for an in-depth examination of mass spectrometry data.
+
+**Algorithm testing**: Develope and fine-tune custom algorithms by interfacing with MassDash's various data analysis algorithms and workflows.
+
+**Parameter optimization**: Ensure optimal results for your experiment by optimizing parameters for data analysis workflows, such as *OpenSwathWorkflow*.
+
+**User-friendly dashboard**: MassDash's dashboard is designed with users in mind, facilitating research productivity in both beginners and experts in the field.
+
+**Data Exploration**: Explore your mass spectrometry data with our suite of tools and gain insights to make informed research decisions.
+
+**Customization**: Flexibly tailor your data analysis parameters and results for your specific research needs.
+
+**Rapid Prototyping**: Save time and resource when developing mass spectrometry workflows by quickly prototyping and testing research ideas.
+
+**Data Integration**: Seamlessly import, process, and export data to facilitate data sharing and collaboration.
+
+## Launching MassDash GUI from a remote machine
+
+SSH into your remote machine and install `massdash`; installing `massdash` inside a Python virtual environment is highly recommended to contain project-specific dependencies:
+
+```bash
 your_user_name@remote_ip_address
 ```
 
-Navigate to massdash directory and start GUI. 
-
+```bash
+pip install massdash
 ```
+
+Launch the MassDash GUI:
+
+```bash
 massdash gui
 ```
 
-You will receive a message letting you know you can view Streamlit app in your browser with two URLs. 
+In your terminal, you will receive a message providing two URLs with and IP address and port; for example:
 
-```
+```text
   Network URL: http://192.168.142.176:8501
   External URL: http://142.150.84.40:8501
 ```
 
-In your local machine, start a fresh terminal window. And enter the following command. Replace '----' with the last 4 digits from the URLs above. In this example, '----' would be 8501.
+Open a terminal window in your local machine and enter the following command, replacing "----" with the URL port number (e.g., 8501):
 
-```
-ssh -NfL localhost:----:localhost:---- your_user_name@remote_ip_address
-```
-
-Now you can copy Network/External url to your local machine browser and use massdash. 
-
-# Docker
-
-MassDash is also vailable from Docker:
-
-Pull the stable version (e.g. 0.0.1) from DockerHub:
-
-```
-$ docker pull singjust/massdash:0.0.1
+```bash
+ssh -fNL ----:localhost:---- your_user_name@remote_ip_address
 ```
 
-Run the Docker Container:
+You can now view the MassDash GUI on your local machine's browser by clicking on either of the provided URLs.
 
-```
-docker run -p 8501:8501 singjust/massdash:0.0.1
+## Docker
+
+MassDash is also available from Docker.
+
+Pull the latest stable version of MassDash from DockerHub:
+
+```bash
+docker pull singjust/massdash:latest
 ```
 
-**Note:** the docker image binds to port 8501 for running MassDash locally.
+Spin up the Docker container:
+
+```bash
+docker run -p 8501:8501 singjust/massdash:latest
+```
+
+**Note:** The Docker image binds to port 8501 when running MassDash locally.
+
+## Contribute
+
+* [Issues Tracker](https://github.com/Roestlab/massdash/issues)
+* [Source Code](https://github.com/Roestlab/massdash/tree/main/massdash)
+
+## Support
+
+If you are having issues or would like to propose a new feature, please use the [issues tracker](https://github.com/Roestlab/massdash/issues).
+
+## License
+
+This project is licensed under the BSD 3-Clause license.
