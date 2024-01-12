@@ -33,23 +33,26 @@ def st_mutable_write(text=None):
         write_container.write(text)
     return write_container
 
-def tk_file_dialog(file_type: str=""):
+def tk_file_dialog(file_type: list = None, title: str = "Select File"):
     """
     Creates a Tkinter file dialog for selecting a file.
-    
+
     Args:
-        file_type (str): The file type to be selected.
-        
+        file_type (list): List of tuples specifying file types and their corresponding extensions.
+                           Example: [("Text files", "*.txt"), ("CSV files", "*.csv")]
+        title (str): The title of the file dialog.
+
     Returns:
         str: The path to the selected file.
     """
     root = Tk()
     root.withdraw()
-    file_path = filedialog.askopenfilename(filetypes=[(f"{file_type} files", file_type)] if file_type else [])
+    file_path = filedialog.askopenfilename(filetypes=file_type, title=title)
     root.destroy()
     return file_path
 
-def display_input_section(title, key_base, file_extension, placeholder, st_cols = None):
+
+def display_input_section(title, key_base: str, file_extension: str, dialog_title: str, placeholder: str, st_cols = None):
     """
     Display an input section with a title, file browsing button, and text input field.
 
@@ -57,6 +60,7 @@ def display_input_section(title, key_base, file_extension, placeholder, st_cols 
         title (str): The title of the input section.
         key_base (str): The base key used for storing session state variables
         file_extension (str): The file extension to filter when browsing for files.
+        dialog_title (str): The title of the file browsing dialog.
         placeholder (str): The placeholder text for the text input field.
         st_cols (streamlit.columns): The columns to display the input section in.
 
@@ -71,7 +75,7 @@ def display_input_section(title, key_base, file_extension, placeholder, st_cols 
         st.write("\n\n\n\n")
         dialog_button = st.button("Browse", key=f'{key_base}_browse', help=f"Browse for the {title} file.")
         if dialog_button:
-            st.session_state.tmp_input_dict[key_base] = tk_file_dialog(file_extension)
+            st.session_state.tmp_input_dict[key_base] = tk_file_dialog(file_extension, dialog_title)
     with st_cols[1]:
         input_value = st.text_input("Enter file path", value=st.session_state.tmp_input_dict[key_base],
                                     placeholder=placeholder, key=f'{key_base}_tmp',
