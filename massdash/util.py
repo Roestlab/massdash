@@ -294,16 +294,7 @@ def get_download_folder():
     """
     # Get the user's home directory
     home_dir = os.path.expanduser("~")
-
-    # Determine the platform (Windows, macOS, Linux)
-    if os.name == "nt":  # Windows
-        download_folder = os.path.join(home_dir, "Downloads")
-    elif sys.platform == "darwin":  # macOS
-        download_folder = os.path.join(home_dir, "Downloads")
-    else:  # Linux (and other Unix-like systems)
-        download_folder = os.path.join(home_dir, "Downloads")
-
-    return download_folder
+    return os.path.join(home_dir, "Downloads")
 
 def download_file(url: str, dest_folder: str):
     """
