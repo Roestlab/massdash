@@ -6,7 +6,7 @@ massdash/ui/RawTargetedExtractionAnalysisFormUI
 import streamlit as st 
 
 # UI
-from .util import clicked
+from .util import clicked, display_input_section
 
 class RawTargetedExtractionAnalysisFormUI:   
     """
@@ -51,23 +51,20 @@ class RawTargetedExtractionAnalysisFormUI:
             st.session_state.WELCOME_PAGE_STATE = False
         
         # Create form for inputting file paths and submit button
-        with st.form(key = "raw_data_form"):
-            
-            st.subheader("Input Transition List")
-            self.transition_list_file_path = st.text_input("Enter file path", value=None, placeholder="*.pqp / *.tsv", key='raw_data_transition_list_tmp', help="Path to the transition list file (*.pqp / *.tsv)")
-
-            st.subheader("Input Raw file")
-            self.raw_file_path_input = st.text_input("Enter file path", value=None, placeholder="*.mzML", key='raw_data_file_path_tmp', help="Path to the raw file (*.mzML)")
+        with st.container(border=True):
+            self.transition_list_file_path = display_input_section("Input Transition List", "transition_list_file_path", ".pqp", "*.pqp")
+            self.raw_file_path_input = display_input_section("Input Raw file", "raw_file_path_input", ".mzML", "*.mzML")
 
             # Tabs for different data workflows
             st.subheader("Input Search Results")
 
-            cols = st.columns([0.7, 0.3])
-            self.feature_file_path = cols[0].text_input("Enter file path of the feature file", value=None, placeholder="*.osw / *.tsv", key='feature_file_path_tmp', help="Path to the feature file (*.osw / *.tsv) from an OpenSwath or DIA-NN workflow")
-            self.feature_file_type = cols[1].selectbox("Select file type", options=["OpenSWATH", "DIA-NN"], key='feature_file_type_tmp', help="Select the file type of the feature file")
+            cols = st.columns([0.1, 1.6, 0.3], gap="small")
+
+            self.feature_file_path = display_input_section("Input Feature file", "feature_file_path", ".osw", "*.osw", st_cols=cols[0:2])
+            self.feature_file_type = cols[2].selectbox("Select file type", options=["OpenSWATH", "DIA-NN"], key='feature_file_type_tmp', help="Select the file type of the feature file")
                 
             # Submit button for form
-            begin_button = st.form_submit_button('Begin Targeted Extraction')
+            begin_button = st.button('Begin Targeted Extraction')
             
             if begin_button:
                 st.session_state.workflow = "raw_data"
