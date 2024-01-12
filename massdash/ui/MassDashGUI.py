@@ -54,6 +54,18 @@ class MassDashGUI:
         if 'workflow' not in st.session_state:
             st.session_state.workflow = None
             
+        if 'perf_on' not in st.session_state:
+            st.session_state['perf_on'] = perf 
+        if 'perf_counter' not in st.session_state:
+            st.session_state['perf_counter'] = 200
+        if "tmp_input_dict" not in st.session_state:
+            st.session_state.tmp_input_dict = {}
+            st.session_state.tmp_input_dict['osw_file_path'] = None
+            st.session_state.tmp_input_dict['sqmass_file_path_input'] = None
+            st.session_state.tmp_input_dict['transition_list_file_path'] = None
+            st.session_state.tmp_input_dict['raw_file_path_input'] = None
+            st.session_state.tmp_input_dict['feature_file_path'] = None
+            
     def show_welcome_message(self):
         """
         Displays a welcome message and input fields for OpenSwath and DIA-NN workflows.
