@@ -3,6 +3,8 @@ massdash/ui/util
 ~~~~~~~~~~~~~~~~
 """
 
+from os import getcwd
+from os.path import dirname
 import streamlit as st
 from tkinter import Tk, filedialog
 
@@ -33,7 +35,23 @@ def st_mutable_write(text=None):
         write_container.write(text)
     return write_container
 
-def tk_file_dialog(file_type: list = None, title: str = "Select File"):
+def get_parent_directory(input_file: str=None):
+    """
+    Get the parent directory of a file, if no file is provided, the current working directory is returned.
+
+    Args:
+        input_file (str): The path to the feature file.
+
+    Returns:
+        str: The parent directory.
+    """
+    if input_file is None:
+        parent_dir = getcwd()
+    else:
+        parent_dir = dirname(input_file)
+    return parent_dir
+
+def tk_file_dialog(file_type: list = [], title: str = "Select File", parent_dir: str = getcwd()):
     """
     Creates a Tkinter file dialog for selecting a file.
 
@@ -41,13 +59,15 @@ def tk_file_dialog(file_type: list = None, title: str = "Select File"):
         file_type (list): List of tuples specifying file types and their corresponding extensions.
                            Example: [("Text files", "*.txt"), ("CSV files", "*.csv")]
         title (str): The title of the file dialog.
+        parent_dir (str): The path to the parent directory of the file dialog.
 
     Returns:
         str: The path to the selected file.
     """
     root = Tk()
     root.withdraw()
-    file_path = filedialog.askopenfilename(filetypes=file_type, title=title)
+    file_type.extend([("All files", "*.*")])
+    file_path = filedialog.askopenfilename(filetypes=file_type, title=title, initialdir=parent_dir)
     root.destroy()
     return file_path
 
@@ -75,7 +95,7 @@ def display_input_section(title, key_base: str, file_extension: str, dialog_titl
         st.write("\n\n\n\n")
         dialog_button = st.button("📁", key=f'{key_base}_browse', help=f"Browse for the {title} file.")
         if dialog_button:
-            st.session_state.tmp_input_dict[key_base] = tk_file_dialog(file_extension, dialog_title)
+            st.session_state.tmp_input_dict[key_base] = tk_file_dialog(file_extension, dialog_title, get_parent_directory(st.session_state.tmp_input_dict[key_base]))    
     with st_cols[1]:
         input_value = st.text_input("Enter file path", value=st.session_state.tmp_input_dict[key_base],
                                     placeholder=placeholder, key=f'{key_base}_tmp',

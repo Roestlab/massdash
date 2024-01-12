@@ -1,10 +1,9 @@
 from os.path import basename
-import streamlit as st 
-import random
 from typing import Literal
+import streamlit as st 
 
 # UI Util
-from .util import clicked, tk_file_dialog
+from .util import clicked, get_parent_directory, tk_file_dialog
 
 class SearchResultsAnalysisFormUI:
     """
@@ -22,7 +21,8 @@ class SearchResultsAnalysisFormUI:
             st.write("\n\n\n\n")
             dialog_button = st.button("📁", key=f'search_results_browser_{entry_number}', help=f"Browse for the search results file.")
             if dialog_button:
-                st.session_state.tmp_input_dict[f'feature_file_path_{entry_number}'] = tk_file_dialog([("OpenSwath Files", ".osw"), ("Feature File", ".tsv")], "Select Feature File")
+                parent_dir = get_parent_directory(st.session_state.tmp_input_dict[f'feature_file_path_{entry_number}'])
+                st.session_state.tmp_input_dict[f'feature_file_path_{entry_number}'] = tk_file_dialog(file_type=[("OpenSwath Files", ".osw"), ("Feature File", ".tsv")], title="Select Feature File", parent_dir=parent_dir)
         
         search_results_file_path = cols[1].text_input("Enter file path", value=st.session_state.tmp_input_dict[f'feature_file_path_{entry_number}'], placeholder="*.osw / *.tsv", key=f"search_results_{entry_number}", help="Path to the  search results file (*.osw / *.tsv)")
         
