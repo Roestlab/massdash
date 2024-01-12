@@ -68,11 +68,11 @@ def main(verbose, perf, perf_output):
     if st.session_state.workflow == "xic_data" and st.session_state.clicked['load_toy_dataset_xic_data']:
         tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
         sqmass_file_path_input = tmp_download_folder + "/test_chrom_1.sqMass"
-        url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/xics/test_chrom_1.sqMass"
-        download_file(url, tmp_download_folder)
+        url_test_sqmass = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/xics/test_chrom_1.sqMass"
+        download_file(url_test_sqmass, tmp_download_folder)
         osw_file_path = tmp_download_folder + "/test_data.osw"
-        url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/osw/test_data.osw"
-        download_file(url, tmp_download_folder)       
+        url_test_osw = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/osw/test_data.osw"
+        download_file(url_test_osw, tmp_download_folder)       
         
         massdash_gui.show_file_input_settings(osw_file_path, sqmass_file_path_input)
         
@@ -84,14 +84,14 @@ def main(verbose, perf, perf_output):
     elif st.session_state.workflow == "raw_data" and st.session_state.clicked['load_toy_dataset_raw_data']:
         tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
         transition_list_file_path = tmp_download_folder + "/test.pqp"
-        url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/openswath/lib/test.pqp"
-        download_file(url, tmp_download_folder)
+        url_test_pqp = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/openswath/lib/test.pqp"
+        download_file(url_test_pqp, tmp_download_folder)
         raw_file_path_input = tmp_download_folder +  "/test_raw_1.mzML"
-        url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/raw/test_raw_1.mzML"
-        download_file(url, tmp_download_folder)
+        url_test_raw_mzml = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/raw/test_raw_1.mzML"
+        download_file(url_test_raw_mzml, tmp_download_folder)
         diann_report_file_path_input = tmp_download_folder + "/test.osw"
-        url = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/openswath/osw/test.osw"
-        download_file(url, tmp_download_folder)
+        url_test_osw = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/openswath/osw/test.osw"
+        download_file(url_test_osw, tmp_download_folder)
         feature_file_type = "OpenSWATH"
         # st.stop("Toy dataset not available yet.")
         massdash_gui.show_file_input_settings(diann_report_file_path_input, raw_file_path_input, transition_list_file_path, feature_file_type)
@@ -104,13 +104,13 @@ def main(verbose, perf, perf_output):
     if st.session_state.workflow == "search_results_analysis" and st.session_state.clicked['load_toy_dataset_search_results_analysis']:
         tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
         feature_file_path = tmp_download_folder + "/test.osw"
-        url = "https://github.com/Roestlab/massdash/blob/dev/test/test_data/example_dia/openswath/osw/test.osw"
-        download_file(url, tmp_download_folder)
+        url_test_osw = "https://github.com/Roestlab/massdash/blob/dev/test/test_data/example_dia/openswath/osw/test.osw"
+        download_file(url_test_osw, tmp_download_folder)
         feature_file_type = "OpenSWATH"
         
         feature_file_path_3 = tmp_download_folder + "/test_dreamdia_report.tsv"
-        url = "https://github.com/Roestlab/massdash/blob/dev/test/test_data/example_dia/dreamdia/test_dreamdia_report.tsv"
-        download_file(url, tmp_download_folder)
+        url_test_dreamdia_report = "https://github.com/Roestlab/massdash/blob/dev/test/test_data/example_dia/dreamdia/test_dreamdia_report.tsv"
+        download_file(url_test_dreamdia_report, tmp_download_folder)
         feature_file_type_3 = "DreamDIA"
         
         search_results_entries_dict = {'entry_1': {'search_results_file_path':          feature_file_path, 'search_results_exp_name': 'OSW', 'search_results_file_type': feature_file_type}, 
