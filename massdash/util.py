@@ -309,14 +309,15 @@ def download_file(url: str, dest_folder: str):
     """
     os.makedirs(dest_folder, exist_ok=True)
     response = requests.get(url)
+    filename = url.split("/")[-1]
     if check_streamlit():
         import streamlit as st
         with st.spinner(f"Downloading {url} to {dest_folder}"):
-            with open(os.path.join(dest_folder, url.split("/")[-1]), "wb") as f:
+            with open(os.path.join(dest_folder, filename), "wb") as f:
                 f.write(response.content)
     else:
         LOGGER.info(f"Downloading {url} to {dest_folder}")
-        with open(os.path.join(dest_folder, url.split("/")[-1]), "wb") as f:
+        with open(os.path.join(dest_folder, filename), "wb") as f:
             f.write(response.content)
 
 #######################################
