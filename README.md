@@ -66,7 +66,7 @@ MassDash empowers researchers to streamline mass spectrometry workflows, experim
 
 - **Chromatogram visualization**: Easily view and analyze chromatograms for an in-depth examination of mass spectrometry data.
 
-- **Algorithm testing**: Develope and fine-tune custom algorithms by interfacing with MassDash's various data analysis algorithms and workflows.
+- **Algorithm testing**: Develop and fine-tune custom algorithms by interfacing with MassDash's various data analysis algorithms and workflows.
 
 - **Parameter optimization**: Ensure optimal results for your experiment by optimizing parameters for data analysis workflows, such as *OpenSwathWorkflow*.
 
@@ -105,7 +105,7 @@ Two URLs with an IP address and port number will appear in the terminal after la
   External URL: http://142.150.84.40:8501
 ```
 
- Enter the following command on a local machine's terminal, replacing "----" with the URL port number (e.g., 8501):
+ Enter the following command in a local machine's terminal, replacing "----" with the URL port number (e.g., 8501):
 
 ```bash
 ssh -fNL ----:localhost:---- your_user_name@remote_ip_address
