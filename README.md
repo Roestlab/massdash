@@ -57,7 +57,7 @@ massdash gui
 ```
 
 <p align="left">
-  <img alt="MassDash Landing Page" style="width: 80%;" src="https://github.com/Roestlab/massdash/blob/refactor/readme/massdash/assets/img/MassDash_Landing_Page.png">
+  <img alt="MassDash Landing Page" style="width: 80%;" src="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Landing_Page.png">
 </p>
 
 ## Features
