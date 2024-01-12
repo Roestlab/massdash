@@ -49,7 +49,7 @@ def tk_file_dialog(file_type: str=""):
     root.destroy()
     return file_path
 
-def display_input_section(title, key_base, file_extension, placeholder):
+def display_input_section(title, key_base, file_extension, placeholder, st_cols = None):
     """
     Display an input section with a title, file browsing button, and text input field.
 
@@ -58,22 +58,22 @@ def display_input_section(title, key_base, file_extension, placeholder):
         key_base (str): The base key used for storing session state variables
         file_extension (str): The file extension to filter when browsing for files.
         placeholder (str): The placeholder text for the text input field.
+        st_cols (streamlit.columns): The columns to display the input section in.
 
     Returns:
         str: The value entered in the text input field.
     """
     st.subheader(title)
-
-    cols = st.columns([0.1, 1.9], gap="small")
-    with cols[0]:
+    if st_cols is None:
+        st_cols = st.columns([0.1, 1.9], gap="small")
+    with st_cols[0]:
         st.write("\n")
         st.write("\n\n\n\n")
         dialog_button = st.button("Browse", key=f'{key_base}_browse', help=f"Browse for the {title} file.")
         if dialog_button:
             st.session_state.tmp_input_dict[key_base] = tk_file_dialog(file_extension)
-    with cols[1]:
+    with st_cols[1]:
         input_value = st.text_input("Enter file path", value=st.session_state.tmp_input_dict[key_base],
                                     placeholder=placeholder, key=f'{key_base}_tmp',
                                     help=f"Path to the {title} file ({file_extension})")
-        
     return input_value
