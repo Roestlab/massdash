@@ -5,8 +5,8 @@ massdash/ui/ExtractedIonChromatogramAnalysisFormUI
 
 import streamlit as st 
 
-# Internal
-from .util import clicked
+# UI Utils
+from .util import clicked, display_input_section
 
 class ExtractedIonChromatogramAnalysisFormUI:
     """
@@ -46,17 +46,12 @@ class ExtractedIonChromatogramAnalysisFormUI:
             st.session_state.workflow = "xic_data"
             st.session_state.WELCOME_PAGE_STATE = False
         
-        # Create form for inputting file paths and submit button
-        with st.form(key = "xic_data_form"):
-            
-            st.subheader("Input OSW file")
-            self.osw_file_path = st.text_input("Enter file path",  value=None, placeholder="*.osw", key='osw_file_path_tmp', help="Path to the OpenSwathWorkflow output file (*.osw)")
-
-            st.subheader("Input sqMass file/directory")
-            self.sqmass_file_path_input = st.text_input("Enter file path", value=None, placeholder="*.sqMass", key='sqmass_file_path_input_tmp', help="Path to the sqMass file (*.sqMass) or path to a directory containing sqMass files.")
+        with st.container(border=True):
+            self.osw_file_path = display_input_section("Input OSW file", "osw_file_path", ".osw", "*.osw")
+            self.sqmass_file_path_input = display_input_section("Input sqMass file/directory", "sqmass_file_path_input", ".sqMass", "*.sqMass")
                 
             # Submit button for form
-            begin_button = st.form_submit_button('Begin Visualization')
+            begin_button = st.button('Begin Visualization', key='begin_button', help="Begin the visualization.")
             
             if begin_button:
                 st.session_state.workflow = "xic_data"
