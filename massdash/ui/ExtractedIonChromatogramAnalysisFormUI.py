@@ -47,8 +47,8 @@ class ExtractedIonChromatogramAnalysisFormUI:
             st.session_state.WELCOME_PAGE_STATE = False
         
         with st.container(border=True):
-            self.osw_file_path = display_input_section("Input OSW file", "osw_file_path", ".osw", "*.osw")
-            self.sqmass_file_path_input = display_input_section("Input sqMass file/directory", "sqmass_file_path_input", ".sqMass", "*.sqMass")
+            self.osw_file_path = display_input_section("Input OSW file", "osw_file_path", [("OpenSwath Files", ".osw")], "Select OpenSwath File", "*.osw")
+            self.sqmass_file_path_input = display_input_section("Input sqMass file/directory", "sqmass_file_path_input", [("sqMass Files", ".sqMass")], "Select sqMass File", "*.sqMass")
                 
             # Submit button for form
             begin_button = st.button('Begin Visualization', key='begin_button', help="Begin the visualization.")
