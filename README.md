@@ -85,7 +85,7 @@ MassDash empowers researchers to streamline mass spectrometry workflows, experim
 SSH into a remote machine and install `massdash`; it's highly recommended to install `massdash` in a Python virtual environment to contain project-specific dependencies:
 
 ```bash
-your_user_name@remote_ip_address
+ssh your_user_name@remote_ip_address
 ```
 
 ```bash
