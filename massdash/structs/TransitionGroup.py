@@ -159,8 +159,8 @@ class TransitionGroup:
         '''
         Plot the 1D data, meant for jupyter notebook context
         '''
-        from plotting.GenericPlotter import PlotConfig
-        from plotting.InteractivePlotter import InteractivePlotter
+        from ..plotting import PlotConfig
+        from ..plotting import InteractivePlotter
 
         config = PlotConfig()
         if self.type == Chromatogram:

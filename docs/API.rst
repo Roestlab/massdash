@@ -6,14 +6,14 @@ Note: This section provides a comprehensive overview of all methods and classes 
 :mod:`masseer.structs`: Internal Structures For storing data
 ============================================================
 
-.. automodule:: massseer.structs
+.. automodule:: massdash.structs
    :no-members:
    :no-inherited-members:
 
 Abstract Classes
 ----------------
 
-.. currentmodule:: massseer
+.. currentmodule:: massdash
 
 .. autosummary::
    :nosignatures:
@@ -24,7 +24,7 @@ Abstract Classes
  
 Classes 
 -------
-.. currentmodule:: massseer
+.. currentmodule:: massdash
 
 .. autosummary::
    :nosignatures:
@@ -44,11 +44,11 @@ Classes
 :mod:`masseer.loaders`: Classes for loading data 
 ================================================
 
-.. automodule:: massseer.loaders
+.. automodule:: massdash.loaders
    :no-members:
    :no-inherited-members:
 
-.. currentmodule:: massseer.loaders
+.. currentmodule:: massdash.loaders
 
 Abstract Classes
 ----------------
@@ -77,11 +77,11 @@ Classes
 :mod:`masseer.plotting`: Classes for plotting data 
 ==================================================
 
-.. automodule:: massseer.plotting
+.. automodule:: massdash.plotting
    :no-members:
    :no-inherited-members:
 
-.. currentmodule:: massseer.plotting
+.. currentmodule:: massdash.plotting
 
 Abstract Classes
 ----------------
@@ -109,11 +109,11 @@ Classes
 :mod:`masseer.peakPickers`: Classes for Peak Picking 
 ====================================================
 
-.. automodule:: massseer.peakPickers
+.. automodule:: massdash.peakPickers
    :no-members:
    :no-inherited-members:
 
-.. currentmodule:: massseer.peakPickers
+.. currentmodule:: massdash.peakPickers
 
 Abstract Classes
 ----------------
