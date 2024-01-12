@@ -139,8 +139,11 @@ class SearchResultsAnalysisServer:
                 plot_dict['coefficient_of_variation'] = pboj3
             
             if "UpSet" in self.analysis_type.plot_types:
-                pobj4 = plotter.plot_upset_diagram(ident_data)
-                plot_dict['upset_diagram'] = pobj4
+                # Get unique values in entry column
+                unique_entries = ident_data['entry'].unique()
+                if len(unique_entries) > 1:
+                    pobj4 = plotter.plot_upset_diagram(ident_data)
+                    plot_dict['upset_diagram'] = pobj4
             
             self.analysis_type.show_plots(plot_container, plot_dict, num_cols=self.analysis_type.num_cols)
             
