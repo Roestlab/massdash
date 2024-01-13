@@ -106,7 +106,8 @@ class ExtractedIonChromatogramAnalysisServer:
         peak_picking_settings.create_ui(chrom_plot_settings)
 
         concensus_chromatogram_settings = ConcensusChromatogramUISettings()
-        concensus_chromatogram_settings.create_ui()
+        # TODO: Uncomment out once concensus chromatogram is implemented
+        # concensus_chromatogram_settings.create_ui()
 
         # Load XIC data from SQMass file
         self.xic_data = SqMassLoader(self.massdash_gui.file_input_settings.sqmass_file_path_list, self.massdash_gui.file_input_settings.osw_file_path)
