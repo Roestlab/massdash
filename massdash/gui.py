@@ -34,11 +34,6 @@ def main(verbose, perf, perf_output):
         log_level = logging.INFO
     LOGGER.setLevel(log_level) 
     
-    if 'perf_on' not in st.session_state:
-        st.session_state['perf_on'] = perf 
-    if 'perf_counter' not in st.session_state:
-        st.session_state['perf_counter'] = 200
-
     # Confit
     MASSDASH_ICON = Image.open(os.path.join(os.path.dirname(__file__), 'assets/img/MassDash_Logo.ico'))
     st.set_page_config(page_title='MassDash', page_icon=MASSDASH_ICON, layout='wide')
@@ -56,7 +51,7 @@ def main(verbose, perf, perf_output):
     massdash_gui = MassDashGUI(verbose==verbose, perf==perf, perf_output=perf_output)
     if st.session_state.WELCOME_PAGE_STATE:
         massdash_gui.show_welcome_message()
-
+    
     ###########################
     ## Sidebar Window
 
