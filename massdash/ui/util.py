@@ -46,10 +46,8 @@ def get_parent_directory(input_file: str=None):
         str: The parent directory.
     """
     if input_file is None:
-        parent_dir = getcwd()
-    else:
-        parent_dir = dirname(input_file)
-    return parent_dir
+        return getcwd()
+    return dirname(input_file)
 
 def tk_file_dialog(file_type: list = [], title: str = "Select File", parent_dir: str = getcwd()):
     """
