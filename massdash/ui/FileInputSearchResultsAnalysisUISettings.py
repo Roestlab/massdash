@@ -30,10 +30,6 @@ class FileInputSearchResultsAnalysisUISettings:
 
         file_list_container = st.sidebar.container()
         file_list_container.empty()
-
-        # search_results_form = SearchResultsAnalysisFormUI()
-        # search_results_form.create_forum(st.sidebar, st_type="sidebar", feature_file_entries_dict=feature_file_entries)
-        # copy_attributes(search_results_form, self)
         self.feature_file_entries = feature_file_entries
         
         with file_list_container:
