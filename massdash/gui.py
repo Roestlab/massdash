@@ -48,7 +48,7 @@ def main(verbose, perf, perf_output):
 
     st.session_state.WELCOME_PAGE_STATE = True
 
-    massdash_gui = MassDashGUI(verbose==verbose, perf==perf, perf_output=perf_output)
+    massdash_gui = MassDashGUI(verbose=verbose, perf=perf, perf_output=perf_output)
     if st.session_state.WELCOME_PAGE_STATE:
         massdash_gui.show_welcome_message()
     
