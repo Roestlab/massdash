@@ -198,6 +198,12 @@ class ExtractedIonChromatogramAnalysisServer:
                     plot_settings_dict['y_axis_label'] = 'Intensity'
                     plot_settings_dict['title'] = os.path.basename(file.filename)
                     plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
+                    
+                    if chrom_plot_settings.set_x_range:
+                        plot_settings_dict['x_range'] = axis_limits_dict['x_range']
+                        
+                    if chrom_plot_settings.set_y_range:
+                        plot_settings_dict['y_range'] = axis_limits_dict['y_range']
 
                     # Update plot configuration
                     plot_config = PlotConfig()
