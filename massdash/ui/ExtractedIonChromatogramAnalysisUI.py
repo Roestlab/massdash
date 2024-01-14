@@ -91,14 +91,19 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
         plot_dict : dict
             A dictionary containing the plot objects for each file.
         """
+        if len(plot_dict.values()) == 1:
+            plot_num_cols = 1
+        else:
+            plot_num_cols = chrom_plot_settings.num_plot_columns
+        
         with plot_container:
-            plot_cols = st.columns(chrom_plot_settings.num_plot_columns)
+            plot_cols = st.columns(plot_num_cols)
             col_counter = 0
             for file in plot_dict:
                 plot_obj = plot_dict[file]
 
                 if concensus_chromatogram_settings.do_consensus_chrom != 'none':
-                    # TODO
+                    # TODO: implement consensus chromatogram
                     pass
                 else:
                     with plot_cols[col_counter]:
