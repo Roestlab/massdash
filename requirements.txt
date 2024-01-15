@@ -10,5 +10,6 @@ psutil
 pyopenms
 scipy
 streamlit>=1.30.0
+streamlit-javascript
 tqdm
 upsetplot
