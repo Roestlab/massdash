@@ -8,6 +8,8 @@ import streamlit as st
 
 # UI
 from .ChromatogramPlotUISettings import ChromatogramPlotUISettings
+# Utils
+from ..util import download_file
 
 DIRNAME = os.path.dirname(__file__)
 
@@ -40,7 +42,12 @@ class ConformerPickerUISettings:
         self.shipped_model = st.sidebar.checkbox("Use shipped model", value=True, help="Use the shipped model.")
         if  self.shipped_model:
             self.pretrained_model_file = os.path.join(DIRNAME, '..', 'assets', 'models', 'conformer', 'base_cape.onnx')
-            print(f"HERE: {self.pretrained_model_file}")
+            # Check if the model file exists
+            if not os.path.exists(self.pretrained_model_file):
+                with st.spinner(f"Downloading pretrained model: {self.pretrained_model_file}..."):
+                    tmp_download_folder = os.path.join(DIRNAME, '..', 'assets', 'models', 'conformer')
+                    url_pretrained_conformer = "https://github.com/Roestlab/massdash/releases/download/v0.0.1-alpha/base_cape.onnx"
+                    download_file(url_pretrained_conformer, tmp_download_folder)
         else:
             self.pretrained_model_file = st.sidebar.text_input("Pretrained model file", value="", help="The pretrained model file to use.")
         
