@@ -4,7 +4,7 @@ Python Interface
 .. note:
    This tutorial assumes the user has prior experience with Python and Jupyter Notebook. If this is not the case, we recommend using the :doc:`GUI`.
 
-The MassDash library is a powerful interface for data manipulation with python, generating plots reproducibly rapid algorithm prototyping. For data exploration, we recommend using the :doc:`GUI`. This documentation is designed to be read in order starting with the :doc:`QuickStart` page. Please see below for an overview of the tutorials. For more information please see the :doc:`API` documentaiton
+The MassDash library is a powerful interface for data manipulation with python, generating plots reproducibly rapid algorithm prototyping. For data exploration, we recommend using the :doc:`GUI`. This documentation is designed to be read in order starting with the :doc:`python_docs/Quick Start` page. Please see below for an overview of the tutorials. For more information please see the :doc:`API` documentaiton
 
 .. toctree::
    :maxdepth: 2

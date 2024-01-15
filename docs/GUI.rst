@@ -10,7 +10,7 @@ GUI
    gui_docs/On-The-Fly Targeted Extraction of Raw DIA Mass Spectrometry Data Workflow
    gui_docs/Search Results Comparisons Workflow
 
-MassDash is a modular and flexible python package that has a streamlit graphical user interface (GUI), but can also be used as a python module for regular python scripting. This tutorial will go through the basics of how to use the GUI, for scripting with MassDash, please refer to the API documentation for MassDash.
+MassDash is a modular and flexible python package that has a streamlit graphical user interface (GUI), but can also be used as a python module for regular python scripting. This tutorial will go through the basics of how to use the GUI, for scripting with MassDash, please refer to the :doc:`Python Interface` or the :doc:`API` documentation. 
 
 To run the GUI, enter the following in your terminal:
 

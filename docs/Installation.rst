@@ -36,7 +36,7 @@ Install using pip
 Docker Image
 ------------
 
-MassDash is available as a docker image on dockerhub, ensure you have docker installed on your system, you can then pull the latest image of MassDash.
+MassDash is available as a docker image on dockerhub `here <https://hub.docker.com/r/singjust/massdash>`_, ensure you have docker installed on your system, you can then pull the latest image of MassDash.
 
 .. code-block:: bash
 
