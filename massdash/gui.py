@@ -7,6 +7,7 @@ import os
 import click
 import logging
 import streamlit as st
+from streamlit_javascript import st_javascript
 from PIL import Image
 
 # Server
@@ -39,8 +40,12 @@ def main(verbose, perf, perf_output):
     st.set_page_config(page_title='MassDash', page_icon=MASSDASH_ICON, layout='wide')
 
     dirname = os.path.dirname(__file__)
-
-    MASSDASH_LOGO = os.path.join(dirname, 'assets/img/MassDash_Logo_Dark.png')
+    
+    st_theme = st_javascript("""window.getComputedStyle(window.parent.document.getElementsByClassName("stApp")[0]).getPropertyValue("color-scheme")""")
+    if st_theme == "dark":
+        MASSDASH_LOGO = os.path.join(dirname, 'assets/img/MassDash_Logo_Light.png')
+    else:
+        MASSDASH_LOGO = os.path.join(dirname, 'assets/img/MassDash_Logo_Dark.png')
     OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
 
     ###########################
