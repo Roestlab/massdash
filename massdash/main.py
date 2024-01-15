@@ -20,16 +20,19 @@ def cli():
 @click.option('--verbose', '-v', is_flag=True, help="Enables verbose mode.")
 @click.option('--perf', '-t', is_flag=True, help="Enables measuring and tracking of performance.")
 @click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
-def gui(verbose, perf, perf_output):
+@click.option('--server_port', '-p', default=8501, type=int, help="Port to run the MassDash GUI on.")
+def gui(verbose, perf, perf_output, server_port):
     """
     GUI for MassDash.
     """
 
     click.echo("Starting MassDash GUI...")
-    click.echo("Arguments:")
-    click.echo(f"verbose: {verbose}")
-    click.echo(f"perf: {perf}")
-    click.echo(f"perf_output: {perf_output}")
+    if verbose:
+        click.echo("Arguments:")
+        for arg_name, arg_value in locals().items():
+            if arg_name != 'self':  # Exclude 'self' for methods inside a class
+                click.echo(f"{arg_name}: {arg_value}")
+                
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, 'gui.py')
     
@@ -54,7 +57,11 @@ def gui(verbose, perf, perf_output):
             else:
                 click.echo("Exiting MassDash GUI...")
                 sys.exit(0)
-                
-    print(f"Running: streamlit run {filename} {add_args}")
-    sys.argv = ["streamlit", "run", filename, "--", *add_args]
+    streamlit_args = []
+    if server_port:
+        streamlit_args.append('--server.port')
+        streamlit_args.append(str(server_port))
+    if verbose:
+        click.echo(f"Running: streamlit run {filename} {streamlit_args} -- {add_args}")
+    sys.argv = ["streamlit", "run", filename, *streamlit_args, "--", *add_args]
     sys.exit(stcli.main())

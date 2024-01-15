@@ -185,7 +185,8 @@ class RawTargetedExtractionAnalysisServer:
             peak_picking_settings.create_ui(chrom_plot_settings)
 
             concensus_chromatogram_settings = ConcensusChromatogramUISettings()
-            concensus_chromatogram_settings.create_ui()
+            # TODO: Uncomment out once concensus chromatogram is implemented
+            # concensus_chromatogram_settings.create_ui()
         
             st_log_writer = st_mutable_write("Extracting spectra...")
             with MeasureBlock(f"{self.__class__.__name__}::targeted_extraction", self.massdash_gui.perf, self.massdash_gui.perf_output) as perf_metrics:

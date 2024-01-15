@@ -18,6 +18,8 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 import psutil
 
+import requests
+
 
 #######################################
 ## Logging Utils
@@ -282,7 +284,41 @@ def file_basename_without_extension(file_path):
     base_name, _ = os.path.splitext(base_name)
     
     return base_name
-    
+
+def get_download_folder():
+    """
+    Get the download folder based on the user's operating system.
+
+    Returns:
+        str: The path to the download folder.
+    """
+    # Get the user's home directory
+    home_dir = os.path.expanduser("~")
+    return os.path.join(home_dir, "Downloads")
+
+def download_file(url: str, dest_folder: str):
+    """
+    Downloads a file from the given URL and saves it to the specified destination folder.
+
+    Args:
+        url (str): The URL of the file to download.
+        dest_folder (str): The destination folder where the file will be saved.
+
+    Returns:
+        None
+    """
+    os.makedirs(dest_folder, exist_ok=True)
+    response = requests.get(url)
+    filename = url.split("/")[-1]
+    if check_streamlit():
+        import streamlit as st
+        with st.spinner(f"Downloading {url} to {dest_folder}"):
+            with open(os.path.join(dest_folder, filename), "wb") as f:
+                f.write(response.content)
+    else:
+        LOGGER.info(f"Downloading {url} to {dest_folder}")
+        with open(os.path.join(dest_folder, filename), "wb") as f:
+            f.write(response.content)
 
 #######################################
 ## Decorators
