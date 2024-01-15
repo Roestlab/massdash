@@ -34,7 +34,8 @@ requires = [
     "psutil",
     "pyopenms",
     "scipy",
-    "streamlit",
+    "streamlit>=1.30.0",
+    "streamlit-javascript",
     "tqdm",
     "upsetplot",
 ]
