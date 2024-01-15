@@ -5,8 +5,8 @@ Contents
    :maxdepth: 3
    :glob:
 
-   Getting Started
-   Python Interface
+   Installation
    GUI
+   Python Interface
    API
    Plotting Gallery
