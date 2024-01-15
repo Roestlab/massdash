@@ -3,8 +3,8 @@ API
 
 Note: This section provides a comprehensive overview of all methods and classes avaliable in MassSeer. This content is generated automatically using sphinx autosummary and autodoc based on the python documentation.
 
-:mod:`masseer.structs`: Internal Structures For storing data
-============================================================
+:mod:`massdash.structs`: Internal Structures For storing data
+*************************************************************
 
 .. automodule:: massdash.structs
    :no-members:
@@ -41,8 +41,8 @@ Classes
    structs.TargetedDIAConfig
 
 
-:mod:`masseer.loaders`: Classes for loading data 
-================================================
+:mod:`massdash.loaders`: Classes for loading data 
+*************************************************
 
 .. automodule:: massdash.loaders
    :no-members:
@@ -74,8 +74,8 @@ Classes
    SqMassLoader
    SpectralLibraryLoader
 
-:mod:`masseer.plotting`: Classes for plotting data 
-==================================================
+:mod:`massdash.plotting`: Classes for plotting data 
+***************************************************
 
 .. automodule:: massdash.plotting
    :no-members:
@@ -106,8 +106,8 @@ Classes
    InteractiveTwoDimensionPlotter
    InteractiveThreeDimensionPlotter
 
-:mod:`masseer.peakPickers`: Classes for Peak Picking 
-====================================================
+:mod:`massdash.peakPickers`: Classes for Peak Picking 
+*****************************************************
 
 .. automodule:: massdash.peakPickers
    :no-members:
@@ -136,4 +136,3 @@ Classes
    MRMTransitionGroupPicker
    pyMRMTransitionGroupPicker
    ConformerPeakPicker
-
