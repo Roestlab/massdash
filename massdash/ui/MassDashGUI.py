@@ -4,6 +4,7 @@ massdash/ui/MassDashGUI
 """
 
 import streamlit as st
+import platform
 
 # UI
 from .FileInputXICDataUISettings import FileInputXICDataUISettings
@@ -86,6 +87,7 @@ class MassDashGUI:
                     st.write("MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
                     st.write("It enables the visualization of chromatograms, algorithm testing, and parameter optimization, crucial for data analysis and experimental design.")
                     st.write("This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.")
+                    st.write(f"platform.processor(): {platform.processor()}")
 
                     # Tabs for different data workflows
                     tab1, tab2, tab3 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data", "Search Results Analysis"])
