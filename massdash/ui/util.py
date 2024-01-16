@@ -6,7 +6,14 @@ massdash/ui/util
 from os import getcwd
 from os.path import dirname
 import streamlit as st
-from tkinter import Tk, filedialog
+import platform
+
+if platform.processor() is not None:
+    from tkinter import Tk, filedialog
+else:
+    Tk = None
+    filedialog = None
+    st.write("Warning: Tkinter is not available on this platform. File browsing is disabled.")
 
 def clicked(button):
     """
