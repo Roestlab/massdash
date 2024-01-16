@@ -8,7 +8,7 @@ import streamlit as st
 
 # Data modules
 import numpy as np
-from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter, gaussian, convolve
 
 # Plotting modules
 from bokeh.plotting import figure
@@ -111,6 +111,20 @@ class InteractivePlotter(GenericPlotter):
                     st.error(error_message)
                 else:
                     raise ValueError(error_message)
+
+        elif self.smoothing_dict['type'] == 'gaussian':
+            try:
+                window = gaussian(self.smoothing_dict['gaussian_window'], std=self.smoothing_dict['gaussian_sigma'])
+                intensity = convolve(intensity, window, mode='same') / window.sum()
+
+            except ValueError as ve:
+                error_message = f"Error: {ve}"
+
+                if check_streamlit():
+                    st.error(error_message)
+                else:
+                    raise ValueError(error_message)
+
         elif self.smoothing_dict['type'] == 'none':
             pass
         else:
