@@ -10,4 +10,4 @@ testing - a test package
 """
 
 __all__ = [ 'structs', 'preprocess', 'loaders', 'ui', 'server' ]
-__version__ = "0.0.5"
+__version__ = "0.0.6"

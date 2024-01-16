@@ -7,6 +7,7 @@ import os
 import click
 import logging
 import streamlit as st
+from streamlit_javascript import st_javascript
 from PIL import Image
 
 # Server
@@ -34,18 +35,17 @@ def main(verbose, perf, perf_output):
         log_level = logging.INFO
     LOGGER.setLevel(log_level) 
     
-    if 'perf_on' not in st.session_state:
-        st.session_state['perf_on'] = perf 
-    if 'perf_counter' not in st.session_state:
-        st.session_state['perf_counter'] = 200
-
     # Confit
     MASSDASH_ICON = Image.open(os.path.join(os.path.dirname(__file__), 'assets/img/MassDash_Logo.ico'))
     st.set_page_config(page_title='MassDash', page_icon=MASSDASH_ICON, layout='wide')
 
     dirname = os.path.dirname(__file__)
-
-    MASSDASH_LOGO = os.path.join(dirname, 'assets/img/MassDash_Logo_Dark.png')
+    
+    st_theme = st_javascript("""window.getComputedStyle(window.parent.document.getElementsByClassName("stApp")[0]).getPropertyValue("color-scheme")""")
+    if st_theme == "dark":
+        MASSDASH_LOGO = os.path.join(dirname, 'assets/img/MassDash_Logo_Light.png')
+    else:
+        MASSDASH_LOGO = os.path.join(dirname, 'assets/img/MassDash_Logo_Dark.png')
     OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
 
     ###########################
@@ -53,10 +53,10 @@ def main(verbose, perf, perf_output):
 
     st.session_state.WELCOME_PAGE_STATE = True
 
-    massdash_gui = MassDashGUI(verbose==verbose, perf==perf, perf_output=perf_output)
+    massdash_gui = MassDashGUI(verbose=verbose, perf=perf, perf_output=perf_output)
     if st.session_state.WELCOME_PAGE_STATE:
         massdash_gui.show_welcome_message()
-
+    
     ###########################
     ## Sidebar Window
 

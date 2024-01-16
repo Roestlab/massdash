@@ -35,6 +35,7 @@ class PlotConfig:
         type_of_comparison (str): The type of comparison to be displayed. (Only used for InteractivePlotter)
         context (str): The context in which the plot is being displayed.
              valid: "streamlit", "jupyter" 
+        normalization_dict (dict): A dictionary containing the parameters for normalizing the data (2D heatmap only)
     """
     def __init__(self):
         """
@@ -53,6 +54,7 @@ class PlotConfig:
         self.x_axis_label = "Retention Time"
         self.y_axis_label = "Intensity"
         self.smoothing_dict = {'type': 'sgolay', 'sgolay_polynomial_order': 3, 'sgolay_frame_length': 11}
+        self.normalization_dict = {'type': 'equalization', 'bins': 2} # other is {'type': 'none'}
         self.x_range = None
         self.y_range = None
         self.scale_intensity = False
@@ -92,6 +94,7 @@ class GenericPlotter(ABC):
         self.x_range = config.x_range
         self.y_range = config.y_range
         self.scale_intensity = config.scale_intensity
+        self.normalization_dict = config.normalization_dict
 
     @abstractmethod
     def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram'):

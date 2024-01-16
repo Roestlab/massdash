@@ -8,6 +8,7 @@ from typing import List, Tuple
 # Data modules
 import numpy as np
 import pandas as pd
+from scipy.ndimage.filters import gaussian_filter
 
 # Plotting modules
 from bokeh.models import HoverTool, CrosshairTool, Title
@@ -18,6 +19,8 @@ from matplotlib import cm
 from .GenericPlotter import PlotConfig
 # Structs
 from ..structs.FeatureMap import FeatureMap
+#Transofmrations
+from ..dataProcessing.transformations import equalize2D
 
 def rgb_to_hex(rgb):
     """
@@ -125,9 +128,9 @@ class InteractiveTwoDimensionPlotter:
         """
         df = featureMap.feature_df
         if not self.config.include_ms1:
-            df = df[self.df['ms_level'] != 1]
+            df = df[df['ms_level'] != 1]
         if not self.config.include_ms2:
-            df = df[self.df['ms_level'] != 2]
+            df = df[df['ms_level'] != 2]
             
         if self.config.type_of_heatmap == "m/z vs retention time":
             arr = df.pivot_table(index='mz', columns='rt', values='int', aggfunc="sum")
@@ -185,7 +188,7 @@ class InteractiveTwoDimensionPlotter:
 
     def prepare_array(self, arr: pd.DataFrame) -> np.ndarray:
         """
-        Prepare the array for plotting.
+        Prepare the array for plotting. Also performs equalization and/or smoothing if specified in the configuration.
 
         Args:
             arr (pd.DataFrame): The input DataFrame.
@@ -195,6 +198,13 @@ class InteractiveTwoDimensionPlotter:
         """
         arr = arr.to_numpy()
         arr[np.isnan(arr)] = 0
+
+        if self.config.smoothing_dict['type'] == 'gauss':
+            arr = gaussian_filter(arr, sigma=self.config.smoothing_dict['sigma'])
+
+        if self.config.normalization_dict['type'] == 'equalization':
+            arr = equalize2D(arr, self.config.normalization_dict['bins'])
+        
         return arr
 
     def create_heatmap_plot(self, title_text: str, arr: np.ndarray, rt_min: float, rt_max: float, im_min: float, im_max: float, dw_main: float, dh_main: float, linked_crosshair, two_d_plots: List[figure]) -> figure:
