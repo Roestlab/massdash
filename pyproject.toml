@@ -36,6 +36,7 @@ requires = [
     "scipy",
     "streamlit>=1.30.0",
     "streamlit-javascript",
+    "tk",
     "tqdm",
     "upsetplot",
 ]
