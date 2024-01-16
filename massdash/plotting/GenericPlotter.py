@@ -33,6 +33,8 @@ class PlotConfig:
         The range of values to be displayed on the y-axis.
     scale_intensity : bool
         A flag indicating whether to scale the intensity of the data.
+    normalization_dict : dict
+        A dictionary containing the parameters for normalizing the data (2D heatmap only)
     """
     def __init__(self):
         self.include_ms1 = True
@@ -43,6 +45,7 @@ class PlotConfig:
         self.x_axis_label = "Retention Time"
         self.y_axis_label = "Intensity"
         self.smoothing_dict = {'type': 'sgolay', 'sgolay_polynomial_order': 3, 'sgolay_frame_length': 11}
+        self.normalization_dict = {'type': 'equalization', 'bins': 2} # other is {'type': 'none'}
         self.x_range = None
         self.y_range = None
         self.scale_intensity = False
@@ -82,6 +85,7 @@ class GenericPlotter(ABC):
         self.x_range = config.x_range
         self.y_range = config.y_range
         self.scale_intensity = config.scale_intensity
+        self.normalization_dict = config.normalization_dict
 
     @abstractmethod
     def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram'):
