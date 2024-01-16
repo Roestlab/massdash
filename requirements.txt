@@ -14,4 +14,4 @@ streamlit-javascript
 tk
 tqdm
 upsetplot
-massdash
+massdash @ git+https://github.com/Roestlab/massdash.git@patch/streamlit_deployment%
