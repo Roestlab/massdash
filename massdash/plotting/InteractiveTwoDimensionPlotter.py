@@ -19,6 +19,8 @@ from matplotlib import cm
 from .GenericPlotter import PlotConfig
 # Structs
 from ..structs.FeatureMap import FeatureMap
+#Transofmrations
+from ..dataProcessing.transformations import equalize2D
 
 def rgb_to_hex(rgb):
     """
@@ -208,16 +210,9 @@ class InteractiveTwoDimensionPlotter:
         if self.config.smoothing_dict['type'] == 'gauss':
             arr = gaussian_filter(arr, sigma=self.config.smoothing_dict['sigma'])
 
-        # based on http://www.janeriksolem.net/histogram-equalization-with-python-and.html
         if self.config.normalization_dict['type'] == 'equalization':
-            hist, bins = np.histogram(arr.flatten(), self.config.normalization_dict['bins'], density=True)
-            cdf = hist.cumsum() # cumulative distribution function
-            cdf = (self.config.normalization_dict['bins']-1) * cdf / cdf[-1] # normalize
-
-            # use linear interpolation of cdf to find new pixel values
-            image_equalized = np.interp(arr.flatten(), bins[:-1], cdf)
-            arr = image_equalized.reshape(arr.shape)
-
+            arr = equalize2D(arr, self.config.normalization_dict['bins'])
+        
         return arr
 
     def create_heatmap_plot(self, title_text: str, arr: np.ndarray, rt_min: float, rt_max: float, im_min: float, im_max: float, dw_main: float, dh_main: float, linked_crosshair, two_d_plots: List[figure]) -> figure:
