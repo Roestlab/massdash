@@ -38,14 +38,6 @@ class PlotConfig:
         normalization_dict (dict): A dictionary containing the parameters for normalizing the data (2D heatmap only)
     """
     def __init__(self):
-        """
-        A class representing the configuration for a plot.
-
-        Attributes:
-           
-
-        
-        """
         self.include_ms1 = True
         self.include_ms2 = True
         self.num_plot_columns = 2

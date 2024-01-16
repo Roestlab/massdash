@@ -1,7 +1,7 @@
 API
 ===
 
-Note: This section provides a comprehensive overview of all methods and classes avaliable in MassSeer. This content is generated automatically using sphinx autosummary and autodoc based on the python documentation.
+Note: This section provides a comprehensive overview of all methods and classes avaliable in MassDash. This content is generated automatically using sphinx autosummary and autodoc based on the python documentation.
 
 :mod:`massdash.structs`: Internal Structures For storing data
 *************************************************************

@@ -1,9 +1,11 @@
+from abc import abstractmethod
 import pandas as pd 
-
-from .GenericLoader import GenericLoader
-from ..structs import TransitionGroup
-from abc import ABC, abstractmethod
 from typing import List, Union, Literal
+
+# Loader
+from .GenericLoader import GenericLoader
+# Structs
+from ..structs import TransitionGroup
 
 class GenericChromatogramLoader(GenericLoader):
     '''
@@ -76,7 +78,6 @@ class GenericChromatogramLoader(GenericLoader):
             bokeh.plotting.figure.Figure: Bokeh figure object
         '''
 
-        print("here")
         ## TODO allow plotting of multiple chromatograms
         if len(self.dataFiles_str) > 1:
             raise NotImplementedError("Only one transition file is supported")

@@ -2,16 +2,17 @@
 The :mod:`massseer.loaders` subpackage contains the structures for loading data into MassSeer
 """
 
-from .MzMLDataLoader import MzMLDataLoader
-from .SqMassLoader import SqMassLoader
-from .SpectralLibraryLoader import SpectralLibraryLoader
-from .GenericLoader import GenericLoader
 from .GenericChromatogramLoader import GenericChromatogramLoader
+from .GenericLoader import GenericLoader
 from .GenericSpectrumLoader import GenericSpectrumLoader
+from .MzMLDataLoader import MzMLDataLoader
+from .SpectralLibraryLoader import SpectralLibraryLoader
+from .SqMassLoader import SqMassLoader
 
-__all__ = [ "MzMLDataLoader", 
-            "SqMassLoader",
-            "SpectralLibraryLoader",
+__all__ = [ 
             "GenericChromatogramLoader",
             "GenericLoader",
-            "GenericSpectrumLoader"]
+            "GenericSpectrumLoader",
+            "MzMLDataLoader", 
+            "SpectralLibraryLoader",
+            "SqMassLoader"]

@@ -2,12 +2,14 @@
 This is an abstract class for loading spectra from a file.
 '''
 
-import pandas as pd
-
-from .GenericLoader import GenericLoader
 from abc import ABC, abstractmethod
-from ..structs import TransitionGroup, TargetedDIAConfig, FeatureMap
+import pandas as pd
 from typing import List, Union, Literal, Optional
+
+# Loader
+from .GenericLoader import GenericLoader
+# Structs
+from ..structs import TransitionGroup, TargetedDIAConfig, FeatureMap
 
 class GenericSpectrumLoader(GenericLoader):
     '''

@@ -12,12 +12,13 @@ from .Spectrum import Spectrum
 from .TargetedDIAConfig import TargetedDIAConfig
 from .Data1D import Data1D
 
-__all__ = [ "TransitionGroupFeature", 
-            "TransitionGroup", 
-            "TransitionFeature", 
+__all__ = [ 
             "Chromatogram", 
+            "Data1D",
             "FeatureMap", 
             "Mobilogram", 
-            "Spectrum",
-            "Data1D",
-             "TargetedDIAConfig" ]
+            "TargetedDIAConfig",
+            "TransitionFeature", 
+            "TransitionGroup", 
+            "TransitionGroupFeature", 
+            "Spectrum"]
