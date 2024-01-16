@@ -14,3 +14,4 @@ streamlit-javascript
 tqdm
 upsetplot
 nbsphinx
+sphinx-copybutton
