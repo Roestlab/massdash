@@ -1,3 +1,8 @@
+"""
+testFileGeneration/ionMobilityTest/diann/format_library_diann
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 # This script formats an OSW library to be used with DIA-NN
 
 import argparse

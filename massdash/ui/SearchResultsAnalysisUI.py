@@ -1,3 +1,8 @@
+"""
+massdash/ui/SearchResultsAnalysisUI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 
 class SearchResultsAnalysisUI:

@@ -1,3 +1,8 @@
+"""
+massdash/plotting/SearchResultAnalysisPlots
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from bokeh.plotting import figure
 from bokeh.layouts import gridplot
 from bokeh.models import Legend, HoverTool, ColumnDataSource, FactorRange, Whisker
