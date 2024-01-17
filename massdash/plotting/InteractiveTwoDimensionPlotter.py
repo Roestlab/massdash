@@ -46,14 +46,6 @@ class InteractiveTwoDimensionPlotter:
         df (pd.DataFrame): The input DataFrame containing the data for plotting.
         config (PlotConfig): The configuration for plotting.
         
-    Methods:
-        plot: Plot the data.
-        plot_individual_heatmaps: Plot a heatmap based on the provided DataFrame.
-        plot_aggregated_heatmap: Plot an aggregated heatmap based on the provided DataFrame.
-        get_axis_titles: Returns the axis titles based on the type of heatmap.
-        get_plot_parameters: Get parameters for plotting.
-        prepare_array: Prepare the array for plotting.
-        create_heatmap_plot: Create a heatmap plot.
     """
 
     # Convert the Matplotlib colormap to a list of RGB hex colors

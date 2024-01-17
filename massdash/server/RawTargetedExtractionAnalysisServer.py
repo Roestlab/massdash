@@ -19,7 +19,7 @@ from ..ui.util import st_mutable_write
 # Server
 from .OneDimensionPlotterServer import OneDimensionPlotterServer
 from .TwoDimensionPlotterServer import TwoDimensionPlotterServer
-from .ThreeDimensionPlotterServer import ThreeDimensionalPlotter
+from .ThreeDimensionPlotterServer import ThreeDimensionPlotterServer
 from .util import check_ion_mobility
 # Structs 
 from ..structs.TargetedDIAConfig import TargetedDIAConfig
@@ -206,7 +206,7 @@ class RawTargetedExtractionAnalysisServer:
                 elif chrom_plot_settings.display_plot_dimension_type == "2D":
                     plot_obj_dict = TwoDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_two_dimensional_plots().plot_obj_dict
                 elif chrom_plot_settings.display_plot_dimension_type == "3D":
-                    plot_obj_dict = ThreeDimensionalPlotter(featureMaps, transition_list_ui, chrom_plot_settings).generate_three_dimensional_plots().plot_obj_dict
+                    plot_obj_dict = ThreeDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_three_dimensional_plots().plot_obj_dict
             st_log_writer.write(f"Generating plot complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
             
             # Show extracted data

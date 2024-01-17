@@ -36,15 +36,6 @@ class InteractivePlotter(GenericPlotter):
         config (PlotConfig): The configuration object for the plot.
         verbose (bool): Enables verbose mode.
         
-    Methods:
-        plot: Plots the given transitionGroup using the specified plot type.
-        process_chrom: Process a chromatogram and add it to a Bokeh figure.
-        add_peak_boundaries: Adds peak boundaries to a Bokeh figure.
-        plot_chromatogram: Plots a chromatogram for a given TransitionGroup.
-        process_mobilo: Process a mobilogram and add it to a Bokeh figure.
-        plot_mobilogram: Plots the mobilogram for a given TransitionGroup.
-        process_spectra: Process a spectrum and add it to a Bokeh figure.
-        plot_spectra: Plots the spectra data for a given transition group.
     """
     def __init__(self, config: PlotConfig, verbose: bool=False):
         super().__init__(config)
@@ -172,7 +163,8 @@ class InteractivePlotter(GenericPlotter):
             dark2_palette = Viridis256[0:len(features)]
 
         createBoundaryLegend = False
-        if len(legend_labels) == 0:
+        st.write('legend_labels', legend_labels)
+        if len(legend_labels) > 0:
             if len(legend_labels) != len(features):
                 raise ValueError("The number of legend labels must match the number of features")
             createBoundaryLegend = True
@@ -225,6 +217,7 @@ class InteractivePlotter(GenericPlotter):
         if createBoundaryLegend:
             legend = Legend(items=legend_items, title='TransitionGroupFeatures', glyph_width=1)
             p.add_layout(legend, 'above')
+        self.fig = p
 
         return p
 

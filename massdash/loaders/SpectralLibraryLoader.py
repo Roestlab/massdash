@@ -23,20 +23,6 @@ class SpectralLibraryLoader:
         in_file (str): The path to the spectral library file.
         data (pd.DataFrame): The spectral library data.
         
-    Methods:
-        load: Loads the spectral library file.
-        save: Saves the spectral library data to a file.
-        get_unique_proteins: Retrieves a list of unique protein IDs from the spectral library.
-        get_unique_peptides_per_protein: Retrieves a list of unique peptide sequences for a given protein.
-        get_unique_charge_states_per_peptide: Retrieves a list of unique charge states for a given peptide.
-        get_peptide_precursor_mz: Retrieves the precursor m/z value for a given peptide and charge.
-        get_peptide_product_mz_list: Retrieves a list of product m/z values for a given peptide and charge.
-        get_peptide_product_charge_list: Retrieves a list of product charges for a given peptide and charge.
-        get_peptide_retention_time: Retrieves the retention time for a given peptide and charge.
-        get_peptide_ion_mobility: Retrieves the ion mobility of a peptide with a specific charge from the spectral library.
-        get_peptide_library_intensity: Retrieves the library intensity for a specific peptide and charge.
-        get_peptide_fragment_annotation_list: Retrieves a list of fragment annotations for a given peptide and charge.
-        filter_for_target_transition_list: Filters the data for a specific target transition list based on the given protein, peptide, and charge.
     """
     def __init__(self, in_file: str, verbose: bool=False) -> None:
         self.in_file = in_file
@@ -234,6 +220,27 @@ class SpectralLibraryLoader:
             List[str]: A list of fragment annotations.
         """
         return self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge)]['Annotation'].tolist()
+    
+    def get_fragment_library_intensity(self, peptide: str, charge: int, annotation: str) -> float:
+        """
+        Retrieves a list of fragment annotations for a given peptide and charge.
+
+        Args:
+            peptide (str): The peptide sequence.
+            charge (int): The precursor charge.
+            annotation (str): The fragment annotation.
+
+        Returns:
+            float: The library intensity for the specified fragment annotation.
+        """
+        out = self.data[(self.data['ModifiedPeptideSequence'] == peptide) & (self.data['PrecursorCharge'] == charge) & (self.data['Annotation'] == annotation)]['LibraryIntensity']
+        if out.empty:
+            raise ValueError(f"Annotation {annotation} not found for peptide {peptide} charge {charge}")
+        elif len(out) > 1:
+            LOGGER.warning(f"Multiple annotations found for peptide {peptide} charge {charge}. Returning first.")
+            return out.iloc[0]
+        else: # len(out) == 1
+            return out.iloc[0]
     
     def filter_for_target_transition_list(self, protein: str, peptide: str, charge: int) -> pd.DataFrame:
         """

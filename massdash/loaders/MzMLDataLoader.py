@@ -10,10 +10,7 @@ import pandas as pd
 
 # Loaders
 from .access.MzMLDataAccess import MzMLDataAccess
-from .GenericLoader import GenericLoader
-from .access.OSWDataAccess import OSWDataAccess
-from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
-from .SpectralLibraryLoader import SpectralLibraryLoader
+from .GenericSpectrumLoader import GenericSpectrumLoader
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
 from ..structs.FeatureMap import FeatureMap
@@ -22,7 +19,7 @@ from ..structs.TargetedDIAConfig import TargetedDIAConfig
 from ..util import LOGGER
 
 
-class MzMLDataLoader(GenericLoader):
+class MzMLDataLoader(GenericSpectrumLoader):
     '''
     Class to load data from MzMLFiles using a .osw output file or .tsv report file
     

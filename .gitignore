@@ -5,3 +5,6 @@ tmp
 *.log*
 # Ignore macOS system files
 .DS_Store
+_build
+generated
+.ipynb_checkpoints

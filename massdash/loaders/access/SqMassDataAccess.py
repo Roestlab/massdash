@@ -57,7 +57,7 @@ from ...util import check_sqlite_column_in_table, check_sqlite_table
 class SqMassDataAccess:
 
     def __init__(self, filename):
-        self.conn = sqlite3.connect(filename)
+        self.conn = sqlite3.connect(filename, check_same_thread=False)
         self.c = self.conn.cursor()
         self.filename = filename
 

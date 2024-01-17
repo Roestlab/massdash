@@ -93,7 +93,10 @@ class PeakPickingServer:
         with time_block() as elapsed_time:
             tr_group_feature_data = {}
             for file, tr_group in tr_group_data.items():
-                peak_picker = MRMTransitionGroupPicker(self.peak_picking_settings.peak_picker_algo_settings.smoother)
+                if self.peak_picking_settings.peak_picker_algo_settings.smoother == 'none': ## none in MassDash corresponds to 'original' in MRMTransitionGroupPicker
+                    peak_picker = MRMTransitionGroupPicker('original')
+                else:
+                    peak_picker = MRMTransitionGroupPicker(self.peak_picking_settings.peak_picker_algo_settings.smoother)
                 peak_features = peak_picker.pick(tr_group)
                 tr_group_feature_data[file] = peak_features
 
