@@ -2,17 +2,12 @@ import os
 import platform
 import streamlit as st
 
-if platform.processor() == '':
-    # from tkinter import Tk, filedialog
-    Tk = None
-    filedialog = None
-else:
-    Tk = None
-    filedialog = None
-    st.write("Warning: Tkinter is not available on this platform. File browsing is disabled.")
-    
 # UI Utils
 from ..util import display_input_section
+# Utils
+from ...util import check_package
+
+Tk, filedialog, TKINTER_AVAILABLE = check_package("tkinter", ["Tk", "filedialog"])
 
 class FileInput():
     def __init__(self, title, key_base: str, file_extension: str, dialog_title: str, placeholder: str, st_cols = None):
@@ -41,9 +36,9 @@ class FileInput():
         Returns:
             str: The path to the selected file.
         """
-        # if False:
-        #     file_path = display_input_section(self.title, self.key_base, [(self.placeholder, self.file_extension)], self.dialog_title, self.file_extension, st_cols=self.st_cols)
-        #     return file_path
-        # else:
+        if TKINTER_AVAILABLE:
+            file_path = display_input_section(self.title, self.key_base, [(self.placeholder, self.file_extension)], self.dialog_title, self.file_extension, st_cols=self.st_cols)
+            return file_path
+        else:
             # Create a streamlit file dialog
-        return st.file_uploader(self.title, help=f"Path to the {self.title} file ({self.file_extension})")
+            return st.file_uploader(self.title, help=f"Path to the {self.title} file ({self.file_extension})")

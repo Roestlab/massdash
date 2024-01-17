@@ -8,14 +8,10 @@ from os.path import dirname
 import streamlit as st
 import platform
 
-if platform.processor() == '':
-    # from tkinter import Tk, filedialog
-    Tk = None
-    filedialog = None
-else:
-    Tk = None
-    filedialog = None
-    st.write("Warning: Tkinter is not available on this platform. File browsing is disabled.")
+# Utils
+from ..util import check_package
+
+Tk, filedialog, TKINTER_AVAILABLE = check_package("tkinter", ["Tk", "filedialog"])
 
 def clicked(button):
     """
