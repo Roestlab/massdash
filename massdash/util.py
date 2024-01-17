@@ -276,7 +276,8 @@ def check_package(package_name: str, module_paths: Optional[List[str]] = None) -
         return *imported_modules, True
     except ImportError:
         print(f"{package_name} is not installed. Please install it using 'pip install {package_name}'.")
-        return (None,) * len(module_paths) + (False,)
+        len_multiplier = 1 if module_paths is None else len(module_paths)
+        return (None,) * len_multiplier + (False,)
 
 def file_basename_without_extension(file_path):
     """
