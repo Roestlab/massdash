@@ -1,5 +1,5 @@
 import os
-import platform
+import tempfile
 import streamlit as st
 
 # UI Utils
@@ -41,4 +41,10 @@ class FileInput():
             return file_path
         else:
             # Create a streamlit file dialog
-            return st.file_uploader(self.title, help=f"Path to the {self.title} file ({self.file_extension})")
+            uploaded_file = st.file_uploader(self.title, help=f"Path to the {self.title} file ({self.file_extension})")
+            if uploaded_file:
+                temp_dir = tempfile.mkdtemp()
+                file_path = os.path.join(temp_dir, uploaded_file.name)
+                with open(file_path, "wb") as f:
+                        f.write(uploaded_file.getvalue())
+                return file_path
