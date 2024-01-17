@@ -103,6 +103,7 @@ class PeakPickingServer:
         st.write(f"Performing MRMTransitionGroupPicker Peak Picking... Elapsed time: {elapsed_time()}")
         return tr_group_feature_data
 
+    #TODO Add Conformer Peak Picker for 2D
     def perform_peak_picking(self, tr_group_data: TransitionGroup=None, xic_data: SqMassLoader=None, transition_list_ui: Literal['ExtractedIonChromatogramAnalysisUI', 'RawTargetedExtractionAnalysisUI']=None):
         """
         Performs peak picking based on the selected method.
