@@ -272,8 +272,6 @@ def check_package(package_name: str, module_paths: Optional[List[str]] = None) -
         print(f"{package_name} is not installed. Please install it using 'pip install {package_name}'.")
         return (None,) * len(module_paths) + (False,)
 
-Tk, filedialog, TKINTER_AVAILABLE = check_package("tkinter", ["Tk", "filedialog"])
-
 def file_basename_without_extension(file_path):
     """
     Returns the basename of a file without the extension including archive extensions.
