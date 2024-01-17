@@ -4,6 +4,8 @@ import streamlit as st
 
 if platform.processor() == '':
     from tkinter import Tk, filedialog
+    Tk = None
+    filedialog = None
 else:
     Tk = None
     filedialog = None
@@ -39,7 +41,7 @@ class FileInput():
         Returns:
             str: The path to the selected file.
         """
-        if platform.processor() != '':
+        if True:
             file_path = display_input_section(self.title, self.key_base, [(self.placeholder, self.file_extension)], self.dialog_title, self.file_extension, st_cols=self.st_cols)
             return file_path
         else:
