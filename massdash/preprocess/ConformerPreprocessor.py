@@ -14,7 +14,7 @@ from ..structs.TransitionGroup import TransitionGroup
 from ..util import check_package
 
 torch, TORCH_AVAILABLE = check_package("torch")
-binary_recall_at_fixed_precision, TORCHMETRICS_AVAILABLE = check_package("torchmetrics", "functional.classification.binary_recall_at_fixed_precision")
+binary_recall_at_fixed_precision, TORCHMETRICS_AVAILABLE = check_package("torchmetrics", ["functional.classification.binary_recall_at_fixed_precision"])
 
 class ConformerPreprocessor(GenericPreprocessor):
     """
