@@ -41,7 +41,7 @@ class TransitionPQPDataAccess:
         _, file_extension = os.path.splitext(filename)
         if file_extension.lower() not in ['.pqp', '.osw']:
             raise ValueError("Unsupported file format. TransitionPQPLoader requires an sqlite-based .pqp file or .osw file.")
-        self.conn = sqlite3.connect(filename)
+        self.conn = sqlite3.connect(filename, check_same_thread=False)
         self.c = self.conn.cursor()
     
     def load(_self) -> None:

@@ -69,7 +69,7 @@ class OSWDataAccess(GenericResultsAccess):
             filename (str): The path to the SQLite database file.
         """
         super().__init__(filename, verbose)
-        self.conn = sqlite3.connect(filename)
+        self.conn = sqlite3.connect(filename, check_same_thread=False)
         self.c = self.conn.cursor()
         
         # hashtable, each run is its own data 
