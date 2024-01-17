@@ -8,11 +8,8 @@ from os.path import dirname
 import streamlit as st
 import platform
 
-if platform.processor() is not None:
-    # from tkinter import Tk, filedialog
-    Tk = None
-    filedialog = None
-    st.write(f"platform.processor(): {platform.processor()}")
+if platform.processor() == '':
+    from tkinter import Tk, filedialog
 else:
     Tk = None
     filedialog = None
