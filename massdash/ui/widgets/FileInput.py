@@ -3,7 +3,7 @@ import platform
 import streamlit as st
 
 if platform.processor() == '':
-    from tkinter import Tk, filedialog
+    # from tkinter import Tk, filedialog
     Tk = None
     filedialog = None
 else:
