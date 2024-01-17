@@ -80,7 +80,13 @@ def code_block_timer(ident, log_type):
     Args:
         ident (str): Identifier for the code block.
         log_type (function): Logging function to output the elapsed time.
-, False
+
+    Yields:
+        None
+
+    Example:
+        with code_block_timer("my_code_block", logger.info):
+            # Code block to measure execution time
             ...
     """
     tstart = time()
@@ -267,7 +273,7 @@ def check_package(package_name: str, module_paths: Optional[List[str]] = None) -
                 if module is None:
                     module = importlib.import_module(f"{package_name}.{module_path}")
                 imported_modules += (module,)
-        return imported_modules, True
+        return *imported_modules, True
     except ImportError:
         print(f"{package_name} is not installed. Please install it using 'pip install {package_name}'.")
         return (None,) * len(module_paths) + (False,)
@@ -293,7 +299,15 @@ def file_basename_without_extension(file_path):
     
     # Remove other extensions
     base_name, _ = os.path.splitext(base_name)
-    List, Tuple, 
+    
+    return base_name
+
+def get_download_folder():
+    """
+    Get the download folder based on the user's operating system.
+
+    Returns:
+        str: The path to the download folder.
     """
     # Get the user's home directory
     home_dir = os.path.expanduser("~")
