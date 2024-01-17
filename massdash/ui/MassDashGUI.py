@@ -4,6 +4,7 @@ massdash/ui/MassDashGUI
 """
 
 import streamlit as st
+import platform
 
 # UI
 from .FileInputXICDataUISettings import FileInputXICDataUISettings
@@ -86,6 +87,12 @@ class MassDashGUI:
                     st.write("MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
                     st.write("It enables the visualization of chromatograms, algorithm testing, and parameter optimization, crucial for data analysis and experimental design.")
                     st.write("This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.")
+                    
+                    platform_context = platform.processor()
+                    if platform_context == "":
+                        st.warning("Warning: It seems like you are running MassDash via streamlit sharing. Please note that streamlit sharing only allows for uploading files up to 1Gb in size. If you want to use MassDash with larger files, please consider running MassDash locally. See [massdash](https://github.com/Roestlab/massdash)")
+                        st.info("You can filter OSW and sqMass files using `pyprophets filter` module. See [pyprophet](https://github.com/PyProphet/pyprophet)")
+                        st.info("You can file raw mzML files using OpenMS's `FileFilter` tool. See [OpenMS FileFilter](https://abibuilder.cs.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_FileFilter.html)")
 
                     # Tabs for different data workflows
                     tab1, tab2, tab3 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data", "Search Results Analysis"])
