@@ -45,10 +45,10 @@ def equalize2D(arr: np.array, num_bins: int):
         arr
     """
     # based on http://www.janeriksolem.net/histogram-equalization-with-python-and.html
-    hist, _ = np.histogram(arr.flatten(), num_bins, density=True)
+    hist, bins = np.histogram(arr.flatten(), num_bins, density=True)
     cdf = hist.cumsum() # cumulative distribution function
     cdf = (num_bins - 1) * cdf / cdf[-1] # normalize
 
     # use linear interpolation of cdf to find new pixel values
-    image_equalized = np.interp(arr.flatten(), num_bins[:-1], cdf)
+    image_equalized = np.interp(arr.flatten(), bins[:-1], cdf)
     return  image_equalized.reshape(arr.shape)
