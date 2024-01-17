@@ -6,7 +6,7 @@ massdash/util
 import os
 import sys
 import importlib
-from typing import Optional
+from typing import List, Tuple, Optional
 
 # Logging and performance modules
 from functools import wraps
@@ -80,13 +80,7 @@ def code_block_timer(ident, log_type):
     Args:
         ident (str): Identifier for the code block.
         log_type (function): Logging function to output the elapsed time.
-
-    Yields:
-        None
-
-    Example:
-        with code_block_timer("my_code_block", logger.info):
-            # Code block to measure execution time
+, False
             ...
     """
     tstart = time()
@@ -240,26 +234,45 @@ def check_sqlite_column_in_table(con, table, column):
 
     return(column_present)
 
-def check_package(package_name: str, module_path: Optional[str]=None):
+def check_package(package_name: str, module_paths: Optional[List[str]] = None) -> Tuple[Optional[Tuple], bool]:
     """
-    Check if a Python package is installed.
+    Check if a Python package is installed and import specified modules.
 
     Args:
         package_name (str): The name of the package to check.
-        module_path (str, optional): The path to the module within the package. Defaults to None.
+        module_paths (List[str], optional): List of module paths within the package. Defaults to None.
 
     Returns:
-        bool: True if the package is installed, False otherwise.
+        Tuple[Optional[Tuple], bool]: Tuple containing the imported modules and a flag indicating
+        whether the package is installed (True) or not (False).
+
+    Raises:
+        ImportError: If the specified package or module(s) cannot be imported.
+
+    Examples:
+        # Example usage for tkinter
+        tkinter_modules, TKINTER_AVAILABLE = check_package("tkinter", ["Tk", "filedialog"])
+        # Example usage for torch
+        torch, TORCH_AVAILABLE = check_package("torch")
+        # Example usage for torchmetrics
+        binary_recall_at_fixed_precision, TORCHMETRICS_AVAILABLE = check_package("torchmetrics", ["functional.classification.binary_recall_at_fixed_precision"])
     """
     try:
-        if module_path is None:
-            return importlib.import_module(package_name), True
+        imported_modules = ()
+        if module_paths is None:
+            imported_modules = (importlib.import_module(package_name),)
         else:
-            return importlib.import_module(f"{package_name}.{module_path}"), True
+            for module_path in module_paths:
+                module = getattr(importlib.import_module(package_name), module_path, None)
+                if module is None:
+                    module = importlib.import_module(f"{package_name}.{module_path}")
+                imported_modules += (module,)
+        return imported_modules, True
     except ImportError:
         print(f"{package_name} is not installed. Please install it using 'pip install {package_name}'.")
-        return None, False
+        return (None,) * len(module_paths) + (False,)
 
+Tk, filedialog, TKINTER_AVAILABLE = check_package("tkinter", ["Tk", "filedialog"])
 
 def file_basename_without_extension(file_path):
     """
@@ -282,15 +295,7 @@ def file_basename_without_extension(file_path):
     
     # Remove other extensions
     base_name, _ = os.path.splitext(base_name)
-    
-    return base_name
-
-def get_download_folder():
-    """
-    Get the download folder based on the user's operating system.
-
-    Returns:
-        str: The path to the download folder.
+    List, Tuple, 
     """
     # Get the user's home directory
     home_dir = os.path.expanduser("~")
