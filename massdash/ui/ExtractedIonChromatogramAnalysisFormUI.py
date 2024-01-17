@@ -7,6 +7,7 @@ import streamlit as st
 
 # UI Utils
 from .util import clicked, display_input_section
+from .widgets.FileInput import FileInput
 
 class ExtractedIonChromatogramAnalysisFormUI:
     """
@@ -47,8 +48,9 @@ class ExtractedIonChromatogramAnalysisFormUI:
             st.session_state.WELCOME_PAGE_STATE = False
         
         with st.container(border=True):
-            self.osw_file_path = display_input_section("Input OSW file", "osw_file_path", [("OpenSwath Files", ".osw")], "Select OpenSwath File", "*.osw")
-            self.sqmass_file_path_input = display_input_section("Input sqMass file/directory", "sqmass_file_path_input", [("sqMass Files", ".sqMass")], "Select sqMass File", "*.sqMass")
+            # self.osw_file_path = display_input_section("Input OSW file", "osw_file_path", [("OpenSwath Files", ".osw")], "Select OpenSwath File", "*.osw")
+            self.osw_file_path = FileInput("Input OSW file", "osw_file_path", [("OpenSwath Files", ".osw")], "Select OpenSwath File", "*.osw").create_ui()
+            self.sqmass_file_path_input = FileInput("Input sqMass file/directory", "sqmass_file_path_input", [("sqMass Files", ".sqMass")], "Select sqMass File", "*.sqMass").create_ui()
                 
             # Submit button for form
             begin_button = st.button('Begin Visualization', key='begin_button', help="Begin the visualization.")
