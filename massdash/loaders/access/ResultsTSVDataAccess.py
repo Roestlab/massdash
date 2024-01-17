@@ -6,7 +6,7 @@ massdash/loaders/access/ResultsTSVDataAccess
 import pandas as pd
 import numpy as np
 import re
-from typing import List
+from typing import Literal
 
 # Loaders
 from .GenericResultsAccess import GenericResultsAccess
@@ -17,12 +17,23 @@ from ...util import LOGGER
 
 class ResultsTSVDataAccess(GenericResultsAccess): 
     ''' Class for generic access to TSV file containing the results, currently only supports DIA-NN tsv files'''
-    def __init__(self, filename: str, verbose: bool = False) -> None:
+
+    # static variable
+    columnMapping = {
+        'OpenSwath':{'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge', 'leftWidth': 'RT.Start', 'rightWidth': 'RT.Stop'},
+        'DIA-NN':{'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename'},
+        'DreamDIA':{'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'filename', 'quantification': 'Intensity'}
+
+    }
+
+    def __init__(self, filename: str, results_type: Literal["OpenSWATH", "DIA-NN", "DreamDIA"] = "DIA-NN", verbose: bool = False) -> None:
         super().__init__(filename, verbose)
         self.filename = filename
+        self.results_type = results_type
+        
         self.peptideHash = self._initializePeptideHashTable()
-        self.df = self.loadData() 
-        self.runs = self.df['Run'].drop_duplicates()
+        self.df = self.loadData()   
+        self.runs = self.df['filename'].drop_duplicates()  
         self.has_im = 'IM' in self.df.columns
     
     def loadData(self) -> pd.DataFrame:
@@ -31,8 +42,10 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         df = pd.read_csv(self.filename, sep='\t')
 
-        # rename columns, assuming this is a DIA-NN file
-        df = df.rename(columns={'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge'})
+        # rename column according to column mapping 
+        df = df.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
+        
+        # TODO is this required?
         # Assign dummy Decoy column all 0
         df['Decoy'] = 0
         return df
@@ -41,8 +54,20 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         Load Peptide and Charge for easy access
         '''
-        return pd.read_csv(self.filename, sep='\t', usecols=['Modified.Sequence', 'Precursor.Charge', 'Run'])
+        if self.results_type == "OpenSWATH":
+            self.hash_table_columns = ['FullPeptideName', 'Charge', 'filename']
+            self.rt_multiplier = 1
+        elif self.results_type == "DIA-NN":
+            self.hash_table_columns = ['Modified.Sequence', 'Precursor.Charge', 'Run']
+            self.rt_multiplier = 60
+        elif self.results_type == "DreamDIA":
+            self.hash_table_columns = ['full_sequence', 'sequence', 'filename']
+            self.rt_multiplier = 1
+            
+        pepHash = pd.read_csv(self.filename, sep='\t', usecols=self.hash_table_columns)
 
+        return pepHash.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
+        
     def getTopTransitionGroupFeature(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:
         '''
         Loads the top TransitionGroupFeature from the results file
@@ -72,13 +97,12 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             TransitionGroupFeature: TransitionGroupFeature object containing peak boundaries, intensity and confidence
         '''
         runname_exact = self.getExactRunName(runname)
-        print(runname_exact)
 
         if runname_exact is None:
             LOGGER.debug(f"Error: No matching runs found for {runname}")
             return []
         else:
-            targetPeptide = self.peptideHash[(self.peptideHash['Run'] == runname_exact) & (self.peptideHash['Modified.Sequence'] == peptide) & (self.peptideHash['Precursor.Charge'] == charge)]
+            targetPeptide = self.peptideHash[(self.peptideHash['filename'] == runname_exact) & (self.peptideHash['ModifiedPeptideSequence'] == peptide) & (self.peptideHash['PrecursorCharge'] == charge)]
 
             # return the row indices and add 1 to each index to account for the header row
             rows_to_load = [0] + [idx + 1 for idx in targetPeptide.index.tolist()]
@@ -90,6 +114,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
 
             if len(rows_to_load)-1 !=0:
                 feature_data = pd.read_csv(self.filename, sep='\t', skiprows=lambda x: x not in rows_to_load)
+                feature_data = feature_data.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
                 LOGGER.debug(f"Found {feature_data.shape[0]} rows from {self.filename} for feature data")
 
                 # Save the chromatogram peak feature from the report using cols 'RT', 'RT.Start', 'RT.Stop', 'Precursor.Quantity', 'Q.Value'
@@ -97,13 +122,13 @@ class ResultsTSVDataAccess(GenericResultsAccess):
                 out = []
                 for _, row in feature_data.iterrows():
                     out.append(TransitionGroupFeature(consensusApex=row['RT'] * 60,
-                                                      leftBoundary=row['RT.Start'] * 60,
-                                                      rightBoundary=row['RT.Stop'] * 60,
-                                                      areaIntensity=row['Precursor.Quantity'],
-                                                      qvalue=row['Q.Value'],
+                                                      leftBoundary=row['RT.Start'] * self.rt_multiplier,
+                                                      rightBoundary=row['RT.Stop'] * self.rt_multiplier,
+                                                      areaIntensity=row['Intensity'],
+                                                      qvalue=row['Qvalue'],
                                                       consensusApexIM=row['IM'] if self.has_im else None,
-                                                      sequence=row['Modified.Sequence'],
-                                                      precursor_charge=row['Precursor.Charge']))
+                                                      sequence=row['ModifiedPeptideSequence'],
+                                                      precursor_charge=row['PrecursorCharge']))
                 return out 
             else: # len(row_indices)-1==0:
                 LOGGER.debug(f"Error: No feature results found for {peptide_tmp} {charge} in {self.filename}")
@@ -126,18 +151,18 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         Returns:
             pd.DataFrame: Dataframe with the TransitionGroupFeatures
         '''
-        columns = ['Run', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence']
+        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence']
         if self.has_im:
             columns.append('consensusApexIM')
         runname_exact = self.getExactRunName(runname)
         if runname_exact is None:
             return pd.DataFrame(columns=columns)
         else:
-            df = self.df[(self.df['Run'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
+            df = self.df[(self.df['filename'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
 
             df = df.rename(columns={'RT.Start': 'leftBoundary', 
                                     'RT.Stop': 'rightBoundary', 
-                                    'Precursor.Quantity': 'areaIntensity', 
+                                    'Intensity': 'areaIntensity', 
                                     'RT': 'consensusApex', 
                                     'Qvalue' : 'qvalue',
                                     'PrecursorCharge': 'precursor_charge',
@@ -147,9 +172,9 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             if self.has_im:
                 df = df.rename(columns={'IM': 'consensusApexIM'})
 
-            df['consensusApex'] = df['consensusApex'] * 60
-            df['leftBoundary'] = df['leftBoundary'] * 60
-            df['rightBoundary'] = df['rightBoundary'] * 60
+            df['consensusApex'] = df['consensusApex'] * self.rt_multiplier
+            df['leftBoundary'] = df['leftBoundary'] * self.rt_multiplier
+            df['rightBoundary'] = df['rightBoundary'] * self.rt_multiplier
             df['consensusApexIntensity'] = np.nan
             return df[columns]
 

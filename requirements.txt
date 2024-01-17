@@ -2,11 +2,16 @@ bokeh==2.4.3
 Click
 joblib
 matplotlib
+matplotlib-venn
 numpy
 pandas
 plotly
 psutil
 pyopenms
 scipy
-streamlit
+streamlit>=1.30.0
+streamlit-javascript
+tk
 tqdm
+upsetplot
+massdash

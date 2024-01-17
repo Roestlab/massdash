@@ -19,7 +19,7 @@ from ..ui.util import st_mutable_write
 # Server
 from .OneDimensionPlotterServer import OneDimensionPlotterServer
 from .TwoDimensionPlotterServer import TwoDimensionPlotterServer
-from .ThreeDimensionPlotterServer import ThreeDimensionalPlotter
+from .ThreeDimensionPlotterServer import ThreeDimensionPlotterServer
 from .util import check_ion_mobility
 # Structs 
 from ..structs.TargetedDIAConfig import TargetedDIAConfig
@@ -185,7 +185,8 @@ class RawTargetedExtractionAnalysisServer:
             peak_picking_settings.create_ui(chrom_plot_settings)
 
             concensus_chromatogram_settings = ConcensusChromatogramUISettings()
-            concensus_chromatogram_settings.create_ui()
+            # TODO: Uncomment out once concensus chromatogram is implemented
+            # concensus_chromatogram_settings.create_ui()
         
             st_log_writer = st_mutable_write("Extracting spectra...")
             with MeasureBlock(f"{self.__class__.__name__}::targeted_extraction", self.massdash_gui.perf, self.massdash_gui.perf_output) as perf_metrics:
@@ -205,7 +206,7 @@ class RawTargetedExtractionAnalysisServer:
                 elif chrom_plot_settings.display_plot_dimension_type == "2D":
                     plot_obj_dict = TwoDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_two_dimensional_plots().plot_obj_dict
                 elif chrom_plot_settings.display_plot_dimension_type == "3D":
-                    plot_obj_dict = ThreeDimensionalPlotter(featureMaps, transition_list_ui, chrom_plot_settings).generate_three_dimensional_plots().plot_obj_dict
+                    plot_obj_dict = ThreeDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_three_dimensional_plots().plot_obj_dict
             st_log_writer.write(f"Generating plot complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
             
             # Show extracted data

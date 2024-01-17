@@ -10,10 +10,7 @@ import pandas as pd
 
 # Loaders
 from .access.MzMLDataAccess import MzMLDataAccess
-from .GenericLoader import GenericLoader
-from .access.OSWDataAccess import OSWDataAccess
-from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
-from .SpectralLibraryLoader import SpectralLibraryLoader
+from .GenericSpectrumLoader import GenericSpectrumLoader
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
 from ..structs.FeatureMap import FeatureMap
@@ -22,7 +19,7 @@ from ..structs.TargetedDIAConfig import TargetedDIAConfig
 from ..util import LOGGER
 
 
-class MzMLDataLoader(GenericLoader):
+class MzMLDataLoader(GenericSpectrumLoader):
     '''
     Class to load data from MzMLFiles using a .osw output file or .tsv report file
     
@@ -51,7 +48,10 @@ class MzMLDataLoader(GenericLoader):
         for t in self.dataFiles:
             runname = basename(t.filename).split('.')[0]
             out[t.filename] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
-        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        # Drop duplicate columns
+        out_df = out_df.loc[:,~out_df.columns.duplicated()]
+        return out_df
         
     def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
@@ -68,7 +68,10 @@ class MzMLDataLoader(GenericLoader):
         for t in self.dataFiles:
             runname = basename(t.filename).split('.')[0]
             out[t.filename] = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
-        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        # Drop duplicate columns
+        out_df = out_df.loc[:,~out_df.columns.duplicated()]
+        return out_df
         
     def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, TransitionGroup]:
         '''
@@ -102,7 +105,11 @@ class MzMLDataLoader(GenericLoader):
         # for each run, groupby intensity and rt to get chromatogram
         out_transitions = { run:df.feature_df[['Annotation', 'int', 'rt']].groupby(['Annotation', 'rt']).sum().reset_index() for run, df in out_feature_map.items() }
 
-        return pd.concat(out_transitions).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        out_df =  pd.concat(out_transitions).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        
+        # Drop duplicate columns
+        out_df = out_df.loc[:,~out_df.columns.duplicated()]
+        return out_df
 
     def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> Dict[str, FeatureMap]:
         '''

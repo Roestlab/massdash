@@ -30,3 +30,25 @@ def normalize(intensity):
         return intensity
     else:
         return [(x - min(intensity)) / (max(intensity) - min(intensity)) for x in intensity]
+    
+def equalize2D(arr: np.array, num_bins: int):
+    """
+    Equalize the input array using histogram equalization.
+
+    Based off of http://www.janeriksolem.net/histogram-equalization-with-python-and.html
+
+    Args:
+        arr (np.array): An 2D array of intensity values.
+        bins (int): The number of bins to use for the histogram.
+    
+    Returns:
+        arr
+    """
+    # based on http://www.janeriksolem.net/histogram-equalization-with-python-and.html
+    hist, bins = np.histogram(arr.flatten(), num_bins, density=True)
+    cdf = hist.cumsum() # cumulative distribution function
+    cdf = (num_bins - 1) * cdf / cdf[-1] # normalize
+
+    # use linear interpolation of cdf to find new pixel values
+    image_equalized = np.interp(arr.flatten(), bins[:-1], cdf)
+    return  image_equalized.reshape(arr.shape)

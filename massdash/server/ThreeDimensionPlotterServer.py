@@ -12,7 +12,7 @@ from ..plotting.InteractiveThreeDimensionPlotter import InteractiveThreeDimensio
 from ..ui.TransitionListUISettings import TransitionListUISettings
 from ..ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
 
-class ThreeDimensionalPlotter:
+class ThreeDimensionPlotterServer:
     """
     Class for generating three-dimensional plots based on targeted data.
 

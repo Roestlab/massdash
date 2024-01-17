@@ -25,6 +25,8 @@ class TargetedDIAConfig:
         self._rt_window = 50
         self._im_window = 0.06
         self._mslevel = [1, 2]
+        self._im_start= None
+        self._im_end = None
 
     # Define properties with custom setters for each attribute
     @property
@@ -66,6 +68,22 @@ class TargetedDIAConfig:
     @mslevel.setter
     def mslevel(self, value):
         self._mslevel = value
+
+    @property 
+    def im_start(self):
+        return self._im_start
+
+    @im_start.setter
+    def im_start(self, value):
+        self._im_start = value
+
+    @property 
+    def im_end(self):
+        return self._im_end
+
+    @im_end.setter
+    def im_end(self, value):
+       self._im_end = value
 
     def __str__(self):
         return f"{'-'*8} {__class__.__name__} {'-'*8}\nms1_mz_tol: {self.ms1_mz_tol}\nmz_tol: {self.mz_tol}\nrt_window: {self.rt_window}\nim_window: {self.im_window}\nmslevel: {self.mslevel}"
@@ -119,6 +137,9 @@ class TargetedDIAConfig:
         Return:
           (tuple) a tuple of the lower and upper bound for target IM
         """
+        if self.im_start is not None and self.im_end is not None:
+            return (self.im_start, self.im_end)
+
         return im_apex-(self.im_window/2), im_apex+(self.im_window/2)
 
     def is_mz_in_product_mz_tol_window(self, check_mz: float, target_product_upper_lower_list: List[Tuple[float, float]]) -> bool:

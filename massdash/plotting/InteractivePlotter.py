@@ -8,7 +8,7 @@ import streamlit as st
 
 # Data modules
 import numpy as np
-from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter, gaussian, convolve
 
 # Plotting modules
 from bokeh.plotting import figure
@@ -36,15 +36,6 @@ class InteractivePlotter(GenericPlotter):
         config (PlotConfig): The configuration object for the plot.
         verbose (bool): Enables verbose mode.
         
-    Methods:
-        plot: Plots the given transitionGroup using the specified plot type.
-        process_chrom: Process a chromatogram and add it to a Bokeh figure.
-        add_peak_boundaries: Adds peak boundaries to a Bokeh figure.
-        plot_chromatogram: Plots a chromatogram for a given TransitionGroup.
-        process_mobilo: Process a mobilogram and add it to a Bokeh figure.
-        plot_mobilogram: Plots the mobilogram for a given TransitionGroup.
-        process_spectra: Process a spectrum and add it to a Bokeh figure.
-        plot_spectra: Plots the spectra data for a given transition group.
     """
     def __init__(self, config: PlotConfig, verbose: bool=False):
         super().__init__(config)
@@ -111,6 +102,20 @@ class InteractivePlotter(GenericPlotter):
                     st.error(error_message)
                 else:
                     raise ValueError(error_message)
+
+        elif self.smoothing_dict['type'] == 'gaussian':
+            try:
+                window = gaussian(self.smoothing_dict['gaussian_window'], std=self.smoothing_dict['gaussian_sigma'])
+                intensity = convolve(intensity, window, mode='same') / window.sum()
+
+            except ValueError as ve:
+                error_message = f"Error: {ve}"
+
+                if check_streamlit():
+                    st.error(error_message)
+                else:
+                    raise ValueError(error_message)
+
         elif self.smoothing_dict['type'] == 'none':
             pass
         else:
@@ -143,22 +148,31 @@ class InteractivePlotter(GenericPlotter):
 
         return line
 
-    def add_peak_boundaries(self, p: figure, features: List[TransitionGroupFeature]) -> None:
+    def add_peak_boundaries(self, p: figure, features: List[TransitionGroupFeature], legend_labels:Optional[List[str]] = []) -> None:
         """
         Adds peak boundaries to a Bokeh figure.
 
         Args:
             p (figure): The Bokeh figure to add the peak boundaries to.
             features (List[TransitionGroupFeature]): A list of peak features to highlight on the plot.
+            legend_labels (List[str], optional): A list of labels for the peak features. Defaults to [].
         """
         if len(features) <= 8:
             dark2_palette = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666']
         else:
             dark2_palette = Viridis256[0:len(features)]
 
+        createBoundaryLegend = False
+        st.write('legend_labels', legend_labels)
+        if len(legend_labels) > 0:
+            if len(legend_labels) != len(features):
+                raise ValueError("The number of legend labels must match the number of features")
+            createBoundaryLegend = True
+
         # Add peak boundaries
         i = 0
-        for feature in features:
+        legend_items = []
+        for idx, feature in enumerate(features):
             if self.scale_intensity:
                 source = ColumnDataSource(data = {
                     'Intensity' : [1],
@@ -176,6 +190,8 @@ class InteractivePlotter(GenericPlotter):
             
             # Left border
             leftWidth_line = p.vbar(x='leftWidth', bottom='bottom_int', top='Intensity', width=0.1, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+            if createBoundaryLegend:
+                legend_items.append((legend_labels[idx], [leftWidth_line]))
 
             # Right border
             p.vbar(x='rightWidth', bottom='bottom_int', top='Intensity', width=0.1, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
@@ -198,6 +214,10 @@ class InteractivePlotter(GenericPlotter):
         # hover.renderers = [leftWidth_apex_point]
         # Add the HoverTool to your plot
         p.add_tools(hover)
+        if createBoundaryLegend:
+            legend = Legend(items=legend_items, title='TransitionGroupFeatures', glyph_width=1)
+            p.add_layout(legend, 'above')
+        self.fig = p
 
         return p
 

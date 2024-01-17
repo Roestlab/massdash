@@ -9,7 +9,9 @@ import numpy as np
 import pandas as pd
 
 class Data1D(ABC):
-    ''' Abstract class of storing a 1D data set where have the data vs intensity'''
+    ''' 
+    Abstract class of storing a 1D data set where have the data vs intensity
+    '''
 
     def __init__(self, data: np.array, intensity: np.array, label: str='None') -> None:
         self.intensity = np.array(intensity)

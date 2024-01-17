@@ -308,7 +308,7 @@ class MzMLDataAccess():
                         filtered_im = im_array[extract_target_indices]
                 else:
                     filtered_im = []
-                LOGGER.warn(f"INFO: Adding filtered mz data of length {len(filtered_mz)} | int of length {len(filtered_int)} | im of length {len(filtered_im)}")
+                LOGGER.debug(f"INFO: Adding filtered mz data of length {len(filtered_mz)} | int of length {len(filtered_int)} | im of length {len(filtered_im)}")
                 # replace peak data with filtered peak data
                 spec_out.set_peaks((filtered_mz, filtered_int))
                 
@@ -385,7 +385,7 @@ class MzMLDataAccess():
             FeatureMap: a FeatureMap object that contains filtered spectra
         """
         results_df = pd.DataFrame()
-        for k in tqdm(range(msExperiment.getNrSpectra())):
+        for k in range(msExperiment.getNrSpectra()):
             spec = msExperiment.getSpectrum(k)
             mz, intensity = spec.get_peaks()
             if (len(mz) == 0 and len(intensity) == 0):
@@ -395,8 +395,9 @@ class MzMLDataAccess():
             rt = np.full([mz.shape[0]], spec.getRT(), float)
             
             if not self.has_im:
-                LOGGER.warn(
-                    f"MS{spec.getMSLevel()} spectrum native id {spec.getNativeID()} had no ion mobility array")
+                if config.im_window is not None:
+                    LOGGER.warn(
+                        f"MS{spec.getMSLevel()} spectrum native id {spec.getNativeID()} had no ion mobility array")
                 im = np.full([mz.shape[0]], np.nan, float)
             else:
                 im_tmp = spec.getFloatDataArrays()[0]

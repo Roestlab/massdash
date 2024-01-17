@@ -33,14 +33,6 @@ class InteractiveThreeDimensionPlotter:
         df (pd.DataFrame): The input DataFrame containing the data for plotting.
         config (PlotConfig): The configuration for plotting.
         
-    Methods:
-        plot: Plot the data.
-        plot_3d_scatter_general: Make a general 3D scatter plot with options for individual or overall plots.
-        plot_individual_3d_scatter: Make individual 3D scatter plots for each precursor and each product ion.
-        plot_3d_scatter: Make a 3D scatter plot with all MS data on the same plot.
-        plot_3d_vline: Plot a 3D spectrum-chromatogram vertical line plot.
-        plot_individual_3d_surface: Plot individual 3D surface plots for each precursor and each product ion.
-        plot_individual_3d_mesh_cube: Plot individual 3D surface plots for each precursor and each product ion. (EXPERIMENTAL)
     """
     def __init__(self, config: PlotConfig):
         self.config = config
@@ -83,7 +75,7 @@ class InteractiveThreeDimensionPlotter:
             spacing = 0.05
             ratio = 1
         elif self.config.context == "jupyter": 
-            marker_size = 2
+            marker_size = 5
             ratio = 0.75
             if num_rows == 1:
                 height_scale_factor = width_scale_factor = 800

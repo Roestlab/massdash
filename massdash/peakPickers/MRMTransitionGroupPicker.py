@@ -80,7 +80,21 @@ class MRMTransitionGroupPicker:
 
 
     def setGeneralParameters(self, **kwargs):
-        ''' Set a supported parameter '''
+        ''' 
+        Set a supported parameter
+
+        Args:
+            stop_after_feature (int): Stop after feature
+            stop_after_intensity_ratio (float): Stop after intensity ratio
+            min_peak_width (float): Minimum peak width
+            recalculate_peaks_max_z (float): Recalculate peaks max z
+            resample_boundary (float): Resample boundary
+            recalculate_peaks (bool): Recalculate peaks
+            background_subtraction (str): Background subtraction
+            use_precursors (bool): Use precursors
+            signal_to_noise (float): Signal to noise
+        '''
+
         valid_params = ['stop_after_feature', 'stop_after_intensity_ratio', 'min_peak_width', 'recalculate_peaks_max_z', 'resample_boundary', 'recalculate_peaks', 'background_subtraction', 'use_precursors']
         mrmParams = ['signal_to_noise']
         valid_params = valid_params + mrmParams
