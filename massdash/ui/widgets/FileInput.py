@@ -8,7 +8,7 @@ from ..util import get_parent_directory, tk_file_dialog, display_input_section
 from ...util import check_package
 
 Tk, filedialog, TKINTER_AVAILABLE = check_package("tkinter", ["Tk", "filedialog"])
-TKINTER_AVAILABLE = False
+
 class FileInput():
     def __init__(self, title, key_base: str, file_extension: str, dialog_title: str, placeholder: str, st_cols = None):
         """

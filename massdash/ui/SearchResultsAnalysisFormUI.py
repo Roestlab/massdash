@@ -3,31 +3,40 @@ from typing import Literal
 import streamlit as st 
 
 # UI Util
-from .util import clicked, get_parent_directory, tk_file_dialog, TKINTER_AVAILABLE
+from .util import clicked
 from .widgets.FileInput import FileInput
 
 class SearchResultsAnalysisFormUI:
     """
+    Class to create the user interface for the SearchResultsAnalysisForm.
+    
+    Attributes:
+        feature_file_entries (dict): A dictionary of the feature file entries.
     """
     def __init__(self) -> None:
         self.feature_file_entries = {}
     
     @staticmethod
     def add_new_row(entry_number, search_results_file_path=None, search_results_exp_name=None, search_results_file_type=None):
+        """
+        Method to add a new row to the search results analysis form.
+        
+        Args:
+            entry_number (int): The entry number.
+            search_results_file_path (str): The path to the search results file.
+            search_results_exp_name (str): The experiment name.
+            search_results_file_type (str): The file type of the search results file.
+            
+        Returns:
+            str: The path to the search results file.
+            str: The experiment name.
+            str: The file type of the search results file.
+        """
         feature_file_path_entry = f'feature_file_path_{entry_number}'
         if feature_file_path_entry not in st.session_state.tmp_input_dict:
             st.session_state.tmp_input_dict[feature_file_path_entry] = None
         cols = st.columns(spec=[0.05, 0.65, 0.2, 0.1])
-        # with cols[0]:
-        #     st.write("\n")
-        #     st.write("\n\n\n\n")
-        #     dialog_button = st.button("📁", key=f'search_results_browser_{entry_number}', help=f"Browse for the search results file.")
-        #     if dialog_button:
-        #         parent_dir = get_parent_directory(st.session_state.tmp_input_dict[feature_file_path_entry])
-        #         st.session_state.tmp_input_dict[feature_file_path_entry] = tk_file_dialog(file_type=[("OpenSwath Files", ".osw"), ("Feature File", ".tsv")], title="Select Feature File", parent_dir=parent_dir)
-        
-        # search_results_file_path = cols[1].text_input("Enter file path", value=st.session_state.tmp_input_dict[feature_file_path_entry], placeholder="*.osw / *.tsv", key=f"search_results_{entry_number}", help="Path to the  search results file (*.osw / *.tsv)")
-        
+
         search_results_file_path = FileInput("", f'search_results_browser_{entry_number}', [("OpenSwath Files", ".osw"), ("Feature File", ".tsv")], "Select Feature File", "*.osw / *.tsv", cols[0:2]).create_ui(type="search_results_analysis", entry_number=entry_number, feature_file_path_entry=feature_file_path_entry)
         
         if search_results_file_path is not None:
@@ -45,6 +54,14 @@ class SearchResultsAnalysisFormUI:
         return search_results_file_path, search_results_exp_name, search_results_file_type
 
     def create_forum(self, st_container: Literal["st", "st.sidebar"]=st, st_type: Literal["main", "sidebar"]="main", feature_file_entries_dict=None):
+        """
+        Method to create the form for the search results analysis workflow.
+        
+        Args:
+            st_container (Literal["st", "st.sidebar"], optional): The streamlit container to use. Defaults to st.
+            st_type (Literal["main", "sidebar"], optional): The type of streamlit container to use. Defaults to "main".
+            feature_file_entries_dict (dict, optional): A dictionary of the feature file entries. Defaults to None.
+        """
         # Create form for inputting file paths and submit button
         if st_type=="main":
             st.subheader("Input Search Results")
@@ -83,6 +100,9 @@ class SearchResultsAnalysisFormUI:
             st.session_state.workflow = "search_results_analysis"
     
     def create_ui(self):
+        """
+        Method to create the user interface for the search results analysis workflow.
+        """
         st.write("This workflow is designed to analyze and investigate the search results from a DIA experiment (s). and for comparisons between search results.")
         
         st.title("Search Results Analysis")
