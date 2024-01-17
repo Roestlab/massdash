@@ -41,9 +41,9 @@ class FileInput():
         Returns:
             str: The path to the selected file.
         """
-        if True:
-            file_path = display_input_section(self.title, self.key_base, [(self.placeholder, self.file_extension)], self.dialog_title, self.file_extension, st_cols=self.st_cols)
-            return file_path
-        else:
+        # if False:
+        #     file_path = display_input_section(self.title, self.key_base, [(self.placeholder, self.file_extension)], self.dialog_title, self.file_extension, st_cols=self.st_cols)
+        #     return file_path
+        # else:
             # Create a streamlit file dialog
-            return st.file_uploader(self.title, help=f"Path to the {self.title} file ({self.file_extension})")
+        return st.file_uploader(self.title, help=f"Path to the {self.title} file ({self.file_extension})")
