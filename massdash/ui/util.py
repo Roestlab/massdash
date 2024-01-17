@@ -9,7 +9,9 @@ import streamlit as st
 import platform
 
 if platform.processor() == '':
-    from tkinter import Tk, filedialog
+    # from tkinter import Tk, filedialog
+    Tk = None
+    filedialog = None
 else:
     Tk = None
     filedialog = None
