@@ -40,5 +40,5 @@ MassDash is available as a docker image on dockerhub `here <https://github.com/R
 
 .. code-block:: bash
 
-        docker pull singjust/massdash:latest
+        docker pull ghcr.io/roestlab/massdash:latest 
 
