@@ -67,7 +67,7 @@ def main(verbose, perf, perf_output):
 
     if st.session_state.workflow == "xic_data" and st.session_state.clicked['load_toy_dataset_xic_data']:
         tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
-        sqmass_file_path_input = tmp_download_folder + "/test_1.sqMass"
+        sqmass_file_path_input = tmp_download_folder + "/test_raw_1.sqMass"
         download_file(URL_TEST_SQMASS, tmp_download_folder)
         osw_file_path = tmp_download_folder + "/test.osw"
         download_file(URL_TEST_OSW, tmp_download_folder)       
