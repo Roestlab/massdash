@@ -163,7 +163,7 @@ class InteractivePlotter(GenericPlotter):
             dark2_palette = Viridis256[0:len(features)]
 
         createBoundaryLegend = False
-        st.write('legend_labels', legend_labels)
+        
         if len(legend_labels) > 0:
             if len(legend_labels) != len(features):
                 raise ValueError("The number of legend labels must match the number of features")
