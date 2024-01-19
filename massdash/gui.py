@@ -104,12 +104,12 @@ def main(verbose, perf, perf_output):
     if st.session_state.workflow == "search_results_analysis" and st.session_state.clicked['load_toy_dataset_search_results_analysis']:
         tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
         feature_file_path = tmp_download_folder + "/test.osw"
-        url_test_osw = "https://github.com/Roestlab/massdash/blob/dev/test/test_data/example_dia/openswath/osw/test.osw"
+        url_test_osw = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/openswath/osw/test.osw"
         download_file(url_test_osw, tmp_download_folder)
         feature_file_type = "OpenSWATH"
         
         feature_file_path_3 = tmp_download_folder + "/test_dreamdia_report.tsv"
-        url_test_dreamdia_report = "https://github.com/Roestlab/massdash/blob/dev/test/test_data/example_dia/dreamdia/test_dreamdia_report.tsv"
+        url_test_dreamdia_report = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/dreamdia/test_dreamdia_report.tsv"
         download_file(url_test_dreamdia_report, tmp_download_folder)
         feature_file_type_3 = "DreamDIA"
         
