@@ -11,6 +11,7 @@
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![pypiv](https://img.shields.io/pypi/v/massdash.svg)](https://pypi.python.org/pypi/massdash)
 [![pypidownload](https://img.shields.io/pypi/dm/massdash?color=orange)](https://pypistats.org/packages/massdash)
+[![biocondav](https://img.shields.io/conda/v/bioconda/massdash?label=bioconda&color=purple)](https://anaconda.org/bioconda/massdash)
 [![dockerv](https://img.shields.io/docker/v/singjust/massdash?label=docker&color=green)](https://hub.docker.com/r/singjust/massdash)
 [![dockerpull](https://img.shields.io/docker/pulls/singjust/massdash?color=green)](https://hub.docker.com/r/singjust/massdash)
 [![readthedocs](https://img.shields.io/readthedocs/massdash)]([https://massdash.readthedocs.io/en/latest/Installation.html](https://massdash.readthedocs.io/en/latest/index.html))
@@ -24,6 +25,12 @@
 
 ```bash
 pip install massdash --upgrade
+```
+
+or if you use the Anaconda for package and environment management, then you can install from bioconda:
+
+```bash
+conda install bioconda::massdash
 ```
 
 <details>
