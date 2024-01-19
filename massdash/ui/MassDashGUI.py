@@ -45,6 +45,14 @@ class MassDashGUI:
         self.perf = perf
         self.perf_output = perf_output
         
+        self.osw_file_path = None
+        self.sqmass_file_path_input = None
+        self.feature_file_path = None
+        self.raw_file_path_input = None
+        self.transition_list_file_path = None
+        self.feature_file_type = None
+        self.feature_file_entries = None
+        
         # initialize load_toy_dataset key in clicked session state
         # This is needed because streamlit buttons return True when clicked and then default back to False.
         # See: https://discuss.streamlit.io/t/how-to-make-st-button-content-stick-persist-in-its-own-section/45694/2
