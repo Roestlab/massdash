@@ -14,7 +14,7 @@
 [![biocondav](https://img.shields.io/conda/v/bioconda/massdash?label=bioconda&color=purple)](https://anaconda.org/bioconda/massdash)
 [![dockerv](https://img.shields.io/docker/v/singjust/massdash?label=docker&color=green)](https://hub.docker.com/r/singjust/massdash)
 [![dockerpull](https://img.shields.io/docker/pulls/singjust/massdash?color=green)](https://hub.docker.com/r/singjust/massdash)
-[![readthedocs](https://img.shields.io/readthedocs/massdash)]([https://massdash.readthedocs.io/en/latest/Installation.html](https://massdash.readthedocs.io/en/latest/index.html))
+[![readthedocs](https://img.shields.io/readthedocs/massdash)](https://massdash.readthedocs.io/en/latest/index.html)
 [![Licence](https://img.shields.io/badge/License-BSD_3--Clause-orange.svg)](https://raw.githubusercontent.com/RoestLab/massdash/main/LICENSE)
 
 **MassDash** is a powerful platform designed for researchers and analysts in the field of mass spectrometry. By providing a centralized web-based dashboard, MassDash facilitates data analysis and experiment design by enabling users to visualize chromatograms, test algorithms, and optimize parameters. This tool offers a flexible environment for mass spectrometry research, with notable specailty in handling Data-Independent Acquisition (DIA) data.
