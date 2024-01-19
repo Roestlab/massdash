@@ -49,13 +49,17 @@ def main(verbose, perf, perf_output):
     OPENMS_LOGO = os.path.join(dirname, 'assets/img/OpenMS.png')
 
     ###########################
-    ## Main Container Window
-
-    st.session_state.WELCOME_PAGE_STATE = True
-
+    ## Main Container Window   
     massdash_gui = MassDashGUI(verbose=verbose, perf=perf, perf_output=perf_output)
+    
+    if st.session_state.workflow is None:
+        st.session_state.WELCOME_PAGE_STATE = True
+        
     if st.session_state.WELCOME_PAGE_STATE:
         massdash_gui.show_welcome_message()
+    else:
+        massdash_gui.show_welcome_message()
+        massdash_gui.welcome_container.empty()
     
     ###########################
     ## Sidebar Window
@@ -123,7 +127,7 @@ def main(verbose, perf, perf_output):
 
         st.session_state.WELCOME_PAGE_STATE = False
 
-    if st.session_state.workflow == "xic_data" and massdash_gui.osw_file_path!="*.osw" and massdash_gui.sqmass_file_path_input!="*.sqMass" and not st.session_state.clicked['load_toy_dataset_xic_data']:
+    if st.session_state.workflow == "xic_data" and not st.session_state.WELCOME_PAGE_STATE and not st.session_state.clicked['load_toy_dataset_xic_data']:
         massdash_gui.show_file_input_settings(massdash_gui.osw_file_path, massdash_gui.sqmass_file_path_input)
         # Remove welcome message container if dataset is loaded
         massdash_gui.welcome_container.empty()
