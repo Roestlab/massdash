@@ -27,7 +27,7 @@
 pip install massdash --upgrade
 ```
 
-or if you use the Anaconda for package and environment management, then you can install from bioconda:
+or if you use Anaconda for package and environment management, then you can install from bioconda:
 
 ```bash
 conda install bioconda::massdash
