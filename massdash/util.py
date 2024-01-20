@@ -19,6 +19,8 @@ from logging.handlers import TimedRotatingFileHandler
 import psutil
 
 import requests
+import streamlit as st
+from streamlit.components.v1 import html
 
 
 #######################################
@@ -319,6 +321,29 @@ def download_file(url: str, dest_folder: str):
         LOGGER.info(f"Downloading {url} to {dest_folder}")
         with open(os.path.join(dest_folder, filename), "wb") as f:
             f.write(response.content)
+
+def open_page(url: str):
+    """
+    Opens a new browser window/tab with the specified URL.
+
+    Args:
+        url (str): The URL to open in the new window/tab.
+    """
+    open_script = """
+        <script type="text/javascript">
+            window.open('%s', '_blank').focus();
+        </script>
+    """ % (url)
+    html(open_script)
+    
+def reset_app():
+    """
+    Resets the application by clearing cache data and resources, and resetting session state variables.
+    """
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    st.session_state.WELCOME_PAGE_STATE = True
+    st.session_state.workflow = None
 
 #######################################
 ## Decorators
