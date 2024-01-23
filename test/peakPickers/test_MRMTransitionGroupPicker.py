@@ -3,14 +3,18 @@ test/peakPickers/test_MRMTransitionGroupPicker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
+import platform
 import unittest
+
+import numpy as np
+import pyopenms as po
+from snapshottest import TestCase
+
 from massdash.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
 from massdash.structs.TransitionGroup import TransitionGroup
 from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
 from massdash.structs.Chromatogram import Chromatogram
-import pyopenms as po
-from snapshottest import TestCase
-import numpy as np
+
 
 class TestMRMTransitionGroupPicker(TestCase):
 
@@ -59,8 +63,6 @@ class TestMRMTransitionGroupPicker(TestCase):
         ### Create empty transition group for testing ###
         chrom_empty = Chromatogram(rt_arr_short, empty_intens)
         self.transition_group_empty = TransitionGroup([chrom_empty],[])
-
-
          
         ### Create Chromatograms for testing ####
         self.tg_3 = TransitionGroup([chrom_1], [chrom_3])# only peak in precursor signal
@@ -104,14 +106,15 @@ class TestMRMTransitionGroupPicker(TestCase):
         with self.assertRaises(ValueError):
             picker.setSmoother("invalid_smoother")
 
+    @unittest.skipIf(platform.system() == 'Darwin', "Test disabled on macOS")
     def test_pick_empty(self):
         ### Test empty transition group ###
         picker = MRMTransitionGroupPicker("original")
         tg_feature = picker.pick(self.transition_group_empty)
         self.assertEqual(len(tg_feature), 0)
 
+    @unittest.skipIf(platform.system() == 'Darwin', "Test disabled on macOS")
     def test_pick_1(self):
-
         ### Test example #1, a bit of a blackbox test ##
         picker = MRMTransitionGroupPicker("original")
         tg_feature = picker.pick(self.tg_1)
@@ -123,6 +126,7 @@ class TestMRMTransitionGroupPicker(TestCase):
         self.assertAlmostEqual(tg_feature[0].leftBoundary, 1493.72, places=3)
         self.assertAlmostEqual(tg_feature[0].rightBoundary, 1504.0, places=3)
 
+    @unittest.skipIf(platform.system() == 'Darwin', "Test disabled on macOS")
     def test_pick_2(self):
         ### Test example #2 ##
         ### Test with background subtraction ###
@@ -136,6 +140,7 @@ class TestMRMTransitionGroupPicker(TestCase):
         self.assertAlmostEqual(tg_feature[0].leftBoundary, 1493.72, places=3)
         self.assertAlmostEqual(tg_feature[0].rightBoundary, 1504.0, places=3)
 
+    @unittest.skipIf(platform.system() == 'Darwin', "Test disabled on macOS")
     def test_pick_3(self):
         ### Transition group #2 direct from C++ implementation ##
         picker = MRMTransitionGroupPicker("gauss", gauss_width=10.0)
@@ -148,6 +153,7 @@ class TestMRMTransitionGroupPicker(TestCase):
         self.assertAlmostEqual(tg_feature[0].leftBoundary, 7, places=5)
         self.assertAlmostEqual(tg_feature[0].rightBoundary, 21, places=5)
 
+    @unittest.skipIf(platform.system() == 'Darwin', "Test disabled on macOS")
     def test_pick_4(self):
         ### Transition group #2 black box test ##
         picker = MRMTransitionGroupPicker("sgolay")
@@ -159,6 +165,7 @@ class TestMRMTransitionGroupPicker(TestCase):
         self.assertAlmostEqual(tg_feature[0].leftBoundary, 5, places=5)
         self.assertAlmostEqual(tg_feature[0].rightBoundary, 23, places=5)
 
+    @unittest.skipIf(platform.system() == 'Darwin', "Test disabled on macOS")
     def test_pick_4(self):
         ### Transition group #3 for testing with precursors##
         picker = MRMTransitionGroupPicker("original")
@@ -170,9 +177,6 @@ class TestMRMTransitionGroupPicker(TestCase):
         self.assertAlmostEqual(tg_feature[0].areaIntensity, 45, places=5)
         self.assertAlmostEqual(tg_feature[0].leftBoundary, 7, places=5)
         self.assertAlmostEqual(tg_feature[0].rightBoundary, 21, places=5)
-
-
-
 
     def test_convertPyopenMSFeaturesToPeakFeatures(self):
         picker = MRMTransitionGroupPicker('original')

@@ -4,7 +4,7 @@ This is an abstract class for loading spectra from a file.
 
 from abc import ABC, abstractmethod
 import pandas as pd
-from typing import List, Union, Literal, Optional
+from typing import Dict, List, Union, Literal, Optional
 
 # Loader
 from .GenericLoader import GenericLoader
@@ -25,7 +25,7 @@ class GenericSpectrumLoader(GenericLoader):
         super().__init__(rsltsFile=rsltsFile, dataFiles=dataFiles, libraryFile=libraryFile, rsltsFileType=rsltsFileType, verbose=verbose, mode=mode)
 
     @abstractmethod
-    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
 
@@ -39,7 +39,7 @@ class GenericSpectrumLoader(GenericLoader):
         pass
     
     @abstractmethod
-    def loadTransitionGroupsDf(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> dict[str, pd.DataFrame]:
+    def loadTransitionGroupsDf(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, pd.DataFrame]:
         '''
         Loads the transition group for a given peptide ID and charge across all files into a pandas DataFrame
         
@@ -54,7 +54,7 @@ class GenericSpectrumLoader(GenericLoader):
         pass 
 
     @abstractmethod
-    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> dict[str, FeatureMap]:
+    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> Dict[str, FeatureMap]:
         '''
         Loads a dictionary of FeatureMaps (where the keys are the filenames) from the results file
 

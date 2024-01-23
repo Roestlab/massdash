@@ -3,15 +3,22 @@ test/loaders/test_SqMassDataAccess
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
+import unittest
+from pathlib import Path
+
+import pandas as pd
 from snapshottest import TestCase
+
 from massdash.loaders.access.SqMassDataAccess import SqMassDataAccess
 from massdash.structs.Chromatogram import Chromatogram
-import unittest
-import pandas as pd
+from massdash.util import find_git_directory
+
+TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
+
 
 class TestSqMassDataAccess(TestCase):
     def setUp(self):
-        self.db_path = "../test_data/xics/test_chrom_1.sqMass"
+        self.db_path = f"{str(TEST_PATH)}/test_data/xics/test_chrom_1.sqMass"
         self.mass_data_access = SqMassDataAccess(self.db_path)
 
     def test_getPrecursorChromIDs(self):

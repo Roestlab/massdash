@@ -21,7 +21,6 @@ class TransitionGroup:
                  transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]], sequence: str = None, precursor_charge: int = None):
         self.precursorData = precursorData
         self.transitionData = transitionData
-        self.type = type(precursorData[0])
         if len(transitionData) > 0:
             self.dataType = type(transitionData[0])
         elif len(precursorData) > 0:
@@ -52,6 +51,7 @@ class TransitionGroup:
                 precursor.setNativeID('p' + str(i))
                 chrom = self.precursorData[i].to_pyopenms(id='p' + str(i))
                 transitionGroup.addPrecursorChromatogram(chrom, chrom.getNativeID())
+        
         return transitionGroup
     
     def max(self, boundary: Tuple[float, float], level: Optional[str] = 'ms1ms2') -> float:
@@ -181,11 +181,11 @@ class TransitionGroup:
         from ..plotting import InteractivePlotter
 
         config = PlotConfig()
-        if self.type == Chromatogram:
+        if self.dataType == Chromatogram:
             config.plot_type = "chromatogram"
-        elif self.type == Mobilogram:
+        elif self.dataType == Mobilogram:
             config.plot_type = "mobilogram"
-        elif self.type == Spectrum:
+        elif self.dataType == Spectrum:
             config.plot_type = "spectrum"
         else:
             raise ValueError("Unknown type of 1D data")
@@ -199,7 +199,7 @@ class TransitionGroup:
         plotter.plot(self)
 
         if transitionGroupFeatures is not None:
-            if self.type == Chromatogram:
+            if self.dataType == Chromatogram:
                 plotter.add_peak_boundaries(plotter.fig, transitionGroupFeatures)
             else:
                 raise NotImplementedError("Peak boundaries are only implemented for chromatograms")
