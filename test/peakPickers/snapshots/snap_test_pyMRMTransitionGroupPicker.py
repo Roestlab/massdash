@@ -1,8 +1,3 @@
-"""
-test/peakPickers/snapshots/test_snap_pyMRMTransitionGroupPicker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"""
-
 # -*- coding: utf-8 -*-
 # snapshottest: v1 - https://goo.gl/zC4yUc
 from __future__ import unicode_literals
@@ -25,16 +20,16 @@ snapshots['TestFindPeakBoundaries::test_find_peak_boundaries 3'] = [
 ]
 
 snapshots['TestFindPeakBoundaries::test_perform_chromatogram_peak_picking_merged_peak_picking 1'] = [
-    GenericRepr('TransitionGroupFeature Apex: None LeftWidth: 10.0 RightWidth: 18.0 Area: 50.0 Qvalue: None')
+    GenericRepr('-------- TransitionGroupFeature --------\nleftBoundary: 10.0\nrightBoundary: 18.0\nareaIntensity: 50.0\nconsensusApex: None\nconsensusApexIntensity: 5.0\nqvalue: None\nconsensusApexIM: None\nprecursor_mz: None\nprecursor_charge: None\nproduct_annotations: None\nproduct_mz: None\nsequence: None')
 ]
 
 snapshots['TestFindPeakBoundaries::test_perform_chromatogram_peak_picking_multiple_peaks 1'] = [
-    GenericRepr('TransitionGroupFeature Apex: None LeftWidth: 21.0 RightWidth: 29.0 Area: 87.0 Qvalue: None'),
-    GenericRepr('TransitionGroupFeature Apex: None LeftWidth: 4.0 RightWidth: 12.0 Area: 25.0 Qvalue: None')
+    GenericRepr('-------- TransitionGroupFeature --------\nleftBoundary: 21.0\nrightBoundary: 29.0\nareaIntensity: 87.0\nconsensusApex: None\nconsensusApexIntensity: 25.0\nqvalue: None\nconsensusApexIM: None\nprecursor_mz: None\nprecursor_charge: None\nproduct_annotations: None\nproduct_mz: None\nsequence: None'),
+    GenericRepr('-------- TransitionGroupFeature --------\nleftBoundary: 4.0\nrightBoundary: 12.0\nareaIntensity: 25.0\nconsensusApex: None\nconsensusApexIntensity: 5.0\nqvalue: None\nconsensusApexIM: None\nprecursor_mz: None\nprecursor_charge: None\nproduct_annotations: None\nproduct_mz: None\nsequence: None')
 ]
 
 snapshots['TestFindPeakBoundaries::test_perform_chromatogram_peak_picking_single_peak 1'] = [
-    GenericRepr('TransitionGroupFeature Apex: None LeftWidth: 10.0 RightWidth: 18.0 Area: 25.0 Qvalue: None')
+    GenericRepr('-------- TransitionGroupFeature --------\nleftBoundary: 10.0\nrightBoundary: 18.0\nareaIntensity: 25.0\nconsensusApex: None\nconsensusApexIntensity: 5.0\nqvalue: None\nconsensusApexIM: None\nprecursor_mz: None\nprecursor_charge: None\nproduct_annotations: None\nproduct_mz: None\nsequence: None')
 ]
 
 snapshots['TestFindPeakBoundaries::test_resolve_level 1'] = [

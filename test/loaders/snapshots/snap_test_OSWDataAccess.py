@@ -1,8 +1,3 @@
-"""
-test/loaders/snapshots/test_snap_OSWDataAccess
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"""
-
 # -*- coding: utf-8 -*-
 # snapshottest: v1 - https://goo.gl/zC4yUc
 from __future__ import unicode_literals
@@ -30,8 +25,6 @@ snapshots['TestOSWDataAccess::test_getPeptideTransitionInfo 1'] = (
     389,
     20
 )
-
-snapshots['TestOSWDataAccess::test_getPeptideTransitionInfo 2'] = GenericRepr('     PEPTIDE_ID  PRECURSOR_ID  TRANSITION_ID UNMODIFIED_SEQUENCE  ... PRODUCT_DETECTING  PEPTIDE_DECOY  PRECURSOR_DECOY TRANSITION_DECOY\n0           207            29            174       ANSSPTTNIDHLK  ...                 1              0                0                0\n1           207            29            175       ANSSPTTNIDHLK  ...                 1              0                0                0\n2           207            29            176       ANSSPTTNIDHLK  ...                 1              0                0                0\n3           207            29            177       ANSSPTTNIDHLK  ...                 1              0                0                0\n4           207            29            178       ANSSPTTNIDHLK  ...                 1              0                0                0\n..          ...           ...            ...                 ...  ...               ...            ...              ...              ...\n384         207            29         700416       ANSSPTTNIDHLK  ...                 0              0                0                1\n385         207            29         700417       ANSSPTTNIDHLK  ...                 0              0                0                1\n386         207            29         700418       ANSSPTTNIDHLK  ...                 0              0                0                1\n387         207            29         700419       ANSSPTTNIDHLK  ...                 0              0                0                1\n388         207            29         700420       ANSSPTTNIDHLK  ...                 0              0                0                1\n\n[389 rows x 20 columns]')
 
 snapshots['TestOSWDataAccess::test_getPrecursorCharges 1'] = (
     2,
