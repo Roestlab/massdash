@@ -6,8 +6,14 @@ test/loaders/snapshots/test_snap_SqMassLoader
 # -*- coding: utf-8 -*-
 # snapshottest: v1 - https://goo.gl/zC4yUc
 from __future__ import unicode_literals
+from pathlib import Path
 
 from snapshottest import GenericRepr, Snapshot
+
+from massdash.util import find_git_directory
+
+TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
+# TODO: If this test is to be run, make sure to swap '../test_data' to f'{str(TEST_PATH)/test_data}'
 
 
 snapshots = Snapshot()
