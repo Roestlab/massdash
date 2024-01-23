@@ -8,3 +8,4 @@ tmp
 _build
 generated
 .ipynb_checkpoints
+snapshots
