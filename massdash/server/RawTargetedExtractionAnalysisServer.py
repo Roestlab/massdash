@@ -193,6 +193,7 @@ class RawTargetedExtractionAnalysisServer:
                 if clear_caches:
                     self.targeted_extraction.clear()
                 featureMaps = self.targeted_extraction(transition_list_ui)
+                st.write(list(featureMaps.values())[0].feature_df)
             st_log_writer.write(f"Extracting spectra complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
 
             transition_list_ui.validate_extraction(featureMaps, plot_container)
@@ -202,7 +203,7 @@ class RawTargetedExtractionAnalysisServer:
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
                 if chrom_plot_settings.display_plot_dimension_type == "1D":
-                    plot_obj_dict = OneDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings, peak_picking_settings, self.massdash_gui.verbose).generate_chromatogram_plots().plot_obj_dict
+                    plot_obj_dict = OneDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings, peak_picking_settings, self.massdash_gui.file_input_settings.transition_list_file_path, self.massdash_gui.verbose).generate_chromatogram_plots().plot_obj_dict
                 elif chrom_plot_settings.display_plot_dimension_type == "2D":
                     plot_obj_dict = TwoDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_two_dimensional_plots().plot_obj_dict
                 elif chrom_plot_settings.display_plot_dimension_type == "3D":
