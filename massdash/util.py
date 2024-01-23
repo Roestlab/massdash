@@ -7,6 +7,7 @@ import os
 import sys
 import importlib
 from typing import Optional
+from pathlib import Path
 
 # Logging and performance modules
 from functools import wraps
@@ -391,3 +392,25 @@ def method_timer(f):
         return result
     return wrap
 
+def find_git_directory(start_path=None):
+    """Find the full path to the nearest '.git' directory by climbing up the directory tree.
+
+    Args:
+        start_path (str or Path, optional): The starting path for the search. If not provided,
+            the current working directory is used.
+
+    Returns:
+        Path or None: The full path to the '.git' directory if found, or None if not found.
+    """
+    # If start_path is not provided, use the current working directory
+    start_path = Path(start_path) if start_path else Path.cwd()
+    # Iterate through parent directories until .git is found
+    current_path = start_path
+    while current_path:
+        git_path = current_path / '.git'
+        if git_path.is_dir():
+            return git_path.resolve()
+        current_path = current_path.parent
+
+    # If .git is not found in any parent directory, return None
+    return None
