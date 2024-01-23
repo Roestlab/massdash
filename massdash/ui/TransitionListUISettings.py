@@ -105,7 +105,7 @@ class TransitionListUISettings:
         """
         col1, col2 = st.sidebar.columns(2)
         with col1:
-            self.selected_charge = st.selectbox("Select charge", charge_list, help="Select the charge state to process")
+            self.selected_charge = st.selectbox("Select charge", np.sort(charge_list), help="Select the charge state to process")
         with col2:
             precursor_mz = transition_list.get_peptide_precursor_mz(self.selected_peptide, self.selected_charge)
             st.code(f"Precursor m/z\n{precursor_mz}", language="markdown")
