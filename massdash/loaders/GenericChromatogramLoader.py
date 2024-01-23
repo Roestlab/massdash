@@ -1,6 +1,6 @@
 from abc import abstractmethod
 import pandas as pd 
-from typing import List, Union, Literal
+from typing import Dict, List, Union, Literal
 
 # Loader
 from .GenericLoader import GenericLoader
@@ -28,7 +28,7 @@ class GenericChromatogramLoader(GenericLoader):
         super().__init__(rsltsFile, dataFiles, None, rsltsFileType, verbose, mode)
     
     @abstractmethod
-    def loadTransitionGroups(self, pep_id: str, charge: int) -> dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
         Args:
