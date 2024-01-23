@@ -97,7 +97,7 @@ class ConformerPeakPicker:
         print("Getting predicted boundaries...")
         peak_info = conformer_preprocessor.find_top_peaks(ort_output[0], ["precursor"], self.prediction_threshold, self.prediction_type)
         # Get actual peak boundaries
-        peak_info = conformer_preprocessor.get_peak_boundaries(peak_info, transition_group, self.window_size)
+        peak_info = conformer_preprocessor.get_peak_boundaries(peak_info, self.window_size)
         print(f"Peak info: {peak_info}")
         return self._convertConformerFeatureToTransitionGroupFeatures(peak_info, max_int_transition)
 

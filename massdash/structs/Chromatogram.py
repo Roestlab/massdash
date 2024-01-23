@@ -30,3 +30,16 @@ class Chromatogram(Data1D):
     
     def toPandasDf(self) -> pd.DataFrame:
         return super().toPandasDfHelper_('rt')
+    
+    def pad(self, length: int) -> 'Chromatogram':
+        """
+        Pad the chromatogram with zeros on both sides.
+
+        Args:
+            pad (int): The number of zeros to pad on both sides.
+
+        Returns:
+            Chromatogram: A new chromatogram object with padded data and intensity.
+        """
+        new_data, new_intensity = super().pad(length)
+        return Chromatogram(new_data, new_intensity, self.label)

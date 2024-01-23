@@ -18,3 +18,16 @@ class Spectrum(Data1D):
         
     def toPandasDf(self) -> pd.DataFrame:
         return super().toPandasDfHelper_(self, 'mz')
+    
+    def pad(self, length: int) -> 'Spectrum':
+        """
+        Pad the chromatogram with zeros on both sides.
+
+        Args:
+            pad (int): The number of zeros to pad on both sides.
+
+        Returns:
+            Chromatogram: A new chromatogram object with padded data and intensity.
+        """
+        new_data, new_intensity = super().pad(length)
+        return Spectrum(new_data, new_intensity, self.label)

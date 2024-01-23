@@ -100,6 +100,54 @@ class Data1D(ABC):
         else:
             return np.median(self.intensity)
 
+    def pad(self, length):
+        """
+        Pad the data and intensity arrays with zeros to a given length. Modifies the object in place.
+
+        Args:
+            length (int): The length of the output array
+        
+        Returns: 
+            (new_data, new_intensity) : tuple of padded data and intensity
+
+        """
+
+        #### need to slice the array
+        if length == len(self.data):
+            new_data = self.data
+            new_intensity = self.intensity
+        elif length < len(self.data):
+            if length % 2 == 0:
+                slice_left = slice_right = length // 2
+            else: # length % 2 == 1
+                slice_left = length // 2 + 1
+                slice_right = length // 2
+            new_data = self.data[slice_left:-slice_right]
+            new_intensity = self.intensity[slice_left:-slice_right]
+        else: # length > len(self.data):
+            ### infer the chromatogram step size
+            step = self.data[1] - self.data[0]
+
+            both_even_or_odd = length % 2 == len(self.data) % 2
+            if both_even_or_odd:
+                pad_left = pad_right = (length - len(self.data)) // 2
+
+                new_intensity = np.copy(self.intensity)
+                new_intensity = np.pad(new_intensity, (pad_left, pad_right), 'constant', constant_values=0)
+            else:
+                pad_left = (length - len(self.data)) // 2 + 1
+                pad_right = (length - len(self.data)) // 2
+                #### length is odd, unequal paddings #####
+            
+            #### Pad the data to left and right ####
+            data_right = np.linspace(self.data[-1] + step, self.data[-1] + step * pad_right, num=pad_right)
+            data_left = np.linspace(self.data[0] - step * pad_left, self.data[0] - step, num=pad_left)
+            new_data = np.concatenate((data_left, self.data, data_right))
+            new_intensity = np.copy(self.intensity)
+            new_intensity = np.pad(new_intensity, (pad_left, pad_right), 'constant', constant_values=0)
+        return (new_data, new_intensity)
+
+
     @abstractmethod
     def toPandasDf(self) -> pd.DataFrame:
         pass
