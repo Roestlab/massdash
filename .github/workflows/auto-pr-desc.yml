@@ -15,16 +15,16 @@ jobs:
     steps:
       # Step 1: Use an action to generate the pull request description
       - name: Generate PR Description
-        uses: octue/generate-pull-request-description@1.0.0.beta-2
+        uses: octue/generate-pull-request-description@main
         id: pr-description
         with:
           pull_request_url: ${{ github.event.pull_request.url }}
-          api_token: ${{ secrets.token }}
+          api_token: ${{ secrets.GITHUB_TOKEN }}
 
       # Step 2: Update the pull request body using the generated description
       - name: Update pull request body
         uses: riskledger/update-pr-description@v2
         with:
           body: ${{ steps.pr-description.outputs.pull_request_description }}
-          token: ${{ secrets.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
