@@ -47,7 +47,7 @@ class InteractivePlotter(GenericPlotter):
         else:
             LOGGER.setLevel("INFO")
 
-    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectra'] = 'chromatogram') -> figure:
+    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram') -> figure:
         """
         Plots the given transitionGroup using the specified plot type.
 
@@ -63,7 +63,7 @@ class InteractivePlotter(GenericPlotter):
             plot =  self.plot_chromatogram(transitionGroup, features)
         elif plot_type == 'mobilogram':
             plot =  self.plot_mobilogram(transitionGroup)
-        elif plot_type == 'spectra':
+        elif plot_type == 'spectrum':
             plot =  self.plot_spectra(transitionGroup)
         else:
             raise ValueError("Unsupported plot plot_type")
@@ -148,7 +148,7 @@ class InteractivePlotter(GenericPlotter):
 
         return line
 
-    def add_peak_boundaries(self, 
+    def __add_peak_boundaries(self, 
                             p: figure, 
                             features: List[TransitionGroupFeature],
                             transitionGroup: TransitionGroup,
@@ -328,7 +328,7 @@ class InteractivePlotter(GenericPlotter):
 
         # Add peak boundaries if available
         if features is not None:
-            p = self.add_peak_boundaries(p, features, transitionGroup=transitionGroup)
+            p = self.__add_peak_boundaries(p, features, transitionGroup=transitionGroup)
 
         return p
 
