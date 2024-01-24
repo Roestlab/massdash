@@ -33,7 +33,7 @@ class PeakPickingServer:
         self.peak_picking_settings = peak_picking_settings
         self.chrom_plot_settings = chrom_plot_settings
 
-    def perform_osw_pyprophet_peak_picking(self, xic_data: SqMassLoader, transition_list_ui: Literal['ExtractedIonChromatogramAnalysisUI', 'RawTargetedExtractionAnalysisUI']):
+    def perform_feature_file_peak_picking(self, xic_data: SqMassLoader, transition_list_ui: Literal['ExtractedIonChromatogramAnalysisUI', 'RawTargetedExtractionAnalysisUI']):
         """
         Get peak boundaries from Feature File Boundaries.
 
@@ -119,7 +119,7 @@ class PeakPickingServer:
 
         # Perform peak picking based on the selected method
         if self.peak_picking_settings.do_peak_picking == 'Feature File Boundaries':
-            tr_group_feature_data = self.perform_osw_pyprophet_peak_picking(xic_data, transition_list_ui)
+            tr_group_feature_data = self.perform_feature_file_peak_picking(xic_data, transition_list_ui)
         elif self.peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
             tr_group_feature_data = self.perform_pypeakpicker_mrm_peak_picking(tr_group_data)
         elif self.peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
