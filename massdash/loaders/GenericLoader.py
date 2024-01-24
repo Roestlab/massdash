@@ -178,10 +178,7 @@ class GenericLoader(ABC):
         plotter = InteractivePlotter(pc)
 
         # Plot the chromatogram data
-        fig = plotter.plot(transitionGroup)
-
-        # Add boundaries to the plot
-        fig = plotter.add_peak_boundaries(fig, transitionGroupFeatures, transitionGroup)
+        fig = plotter.plot(transitionGroup, transitionGroupFeatures)
 
         show(fig)
 
