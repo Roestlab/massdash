@@ -3,7 +3,6 @@ massdash/structs/Mobilogram
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-from typing import Tuple
 import pandas as pd
 
 # Structs

@@ -3,7 +3,6 @@ massdash/structs/Spectrum
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-from typing import Tuple
 import pandas as pd
 
 # Structs

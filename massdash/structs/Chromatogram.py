@@ -4,7 +4,7 @@ massdash/structs/Chromatogram
 """
 
 import pyopenms as po
-from typing import Optional, Tuple, List
+from typing import Optional
 import pandas as pd
 
 # Structs
