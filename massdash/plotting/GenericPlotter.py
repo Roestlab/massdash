@@ -57,6 +57,7 @@ class PlotConfig:
         self.type_of_comparison = "retention time vs ion mobility"
         self.context = "streamlit" # or "jupyter"
         self.normalization_dict = {'type':'none'} # or {'type':'equalization', 'bins': (int)}
+        self.ms_level_str = 'ms1ms2'
 
     def __str__(self):
         return f"{'-'*8} PlotConfig {'-'*8}\ninclude_ms1: {self.include_ms1}\ninclude_ms2: {self.include_ms2}\nnum_plot_columns: {self.num_plot_columns}\ntitle: {self.title}\nsubtitle: {self.subtitle}\nx_axis_label: {self.x_axis_label}\ny_axis_label: {self.y_axis_label}\nsmoothing_dict: {self.smoothing_dict}\nx_range: {self.x_range}\ny_range: {self.y_range}\nscale_intensity: {self.scale_intensity}\naggregate_mslevels: {self.aggregate_mslevels}\ntype_of_heatmap: {self.type_of_heatmap}\ntype_of_3d_plot: {self.type_of_3d_plot}\ntype_of_comparison: {self.type_of_comparison}\n{'-'*30}"
@@ -71,6 +72,13 @@ class PlotConfig:
         for key, value in config_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+                
+        if self.include_ms1 and self.include_ms2:
+            self.ms_level_str = 'ms1ms2'
+        elif self.include_ms1 and not self.include_ms2:
+            self.ms_level_str = 'ms1'
+        elif not self.include_ms1 and self.include_ms2:
+            self.ms_level_str = 'ms2'
 
 class GenericPlotter(ABC):
     """ 
@@ -89,7 +97,8 @@ class GenericPlotter(ABC):
         self.y_range = config.y_range
         self.scale_intensity = config.scale_intensity
         self.normalization_dict = config.normalization_dict
-
+        self.ms_level_str = config.ms_level_str
+            
     @abstractmethod
     def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram'):
         pass
