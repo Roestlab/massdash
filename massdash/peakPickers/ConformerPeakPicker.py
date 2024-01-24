@@ -14,6 +14,7 @@ from ..structs.TransitionGroupFeature import TransitionGroupFeature
 from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # Utils
 from ..util import check_package
+from ..util import LOGGER
 
 onnxruntime, ONNXRUNTIME_AVAILABLE = check_package("onnxruntime")
 
@@ -57,6 +58,8 @@ class ConformerPeakPicker:
         ## set in load_model
         self.onnx_session = None
         self.window_size = None
+
+        LOGGER.name = __class__.__name__
         
     def _validate_model(self):
         """
@@ -76,7 +79,12 @@ class ConformerPeakPicker:
             raise ImportError("onnxruntime is required for loading the pretrained Conformer model, but not installed.")
         # Load pretrained model
         self.onnx_session = onnxruntime.InferenceSession(self.pretrained_model_file)
-        self.window_size = self.onnx_session.get_inputs()[0].shape[2]
+        if len(self.onnx_session.get_inputs()) == 0:
+            raise ValueError("Pretrained model does not have any inputs.")
+        elif len(self.onnx_session.get_inputs()[0].shape) != 3:
+            raise ValueError("First input to model must be a 3D numpy array, current shape: {}".format(len(self.onnx_session.get_inputs()[0].shape)))
+        else:
+            self.window_size = self.onnx_session.get_inputs()[0].shape[2]
 
     def pick(self, transition_group, max_int_transition: int=1000) -> List[TransitionGroupFeature]:
         """
@@ -89,19 +97,19 @@ class ConformerPeakPicker:
             List[TransitionGroupFeature]: The list of transition group features.
         """
         # Transform data into required input
-        print("Loading model...")
+        LOGGER.info("Loading model...")
         self.load_model()
-        print("Preprocessing data...")
+        LOGGER.info("Preprocessing data...")
         conformer_preprocessor = ConformerPreprocessor(transition_group, self.window_size)
         input_data = conformer_preprocessor.preprocess(self.library)
-        print("Predicting...")
+        LOGGER.info("Predicting...")
         ort_input = {self.onnx_session.get_inputs()[0].name: input_data}
         ort_output = self.onnx_session.run(None, ort_input)
-        print("Getting predicted boundaries...")
+        LOGGER.info("Getting predicted boundaries...")
         peak_info = conformer_preprocessor.find_top_peaks(ort_output[0], ["precursor"], self.prediction_threshold, self.prediction_type)
         # Get actual peak boundaries
         peak_info = conformer_preprocessor.get_peak_boundaries(peak_info)
-        print(f"Peak info: {peak_info}")
+        LOGGER.info(f"Peak info: {peak_info}")
         return self._convertConformerFeatureToTransitionGroupFeatures(peak_info, max_int_transition)
 
     def _convertConformerFeatureToTransitionGroupFeatures(self, peak_info: dict, max_int_transition: int=1000) -> List[TransitionGroupFeature]:

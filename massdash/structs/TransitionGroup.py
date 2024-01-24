@@ -153,10 +153,16 @@ class TransitionGroup:
     
     def pad(self, length: int) -> None:
         """
-        Pad the data and intensity arrays with zeros to a given length. Modifies the object in place.
+        Pad the data and intensity arrays with zeros to a given length on both sides. Or slices to the given length if the length is smaller than the current length.
+
+        E.g. if the data array is [1, 2, 3] and the desired length is 7, 
+        the padded data array will be [0, 0, 1, 2, 3, 0, 0].
 
         Args:
             length (int): The length of the output array
+
+        Returns:
+            TransitionGroup: A new TransitionGroup object with padded data and intensity.
         """
         new_precursorData = []
         new_transitionData = []

@@ -21,7 +21,7 @@ class Mobilogram(Data1D):
     
     def pad(self, length: int) -> 'Mobilogram':
         """
-        Pad the chromatogram with zeros on both sides.
+        Pad the mobilogram with zeros on both sides.
 
         Args:
             pad (int): The number of zeros to pad on both sides.

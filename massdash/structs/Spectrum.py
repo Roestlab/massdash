@@ -21,7 +21,7 @@ class Spectrum(Data1D):
     
     def pad(self, length: int) -> 'Spectrum':
         """
-        Pad the chromatogram with zeros on both sides.
+        Pad the spectrum with zeros on both sides.
 
         Args:
             pad (int): The number of zeros to pad on both sides.
