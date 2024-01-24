@@ -27,15 +27,15 @@ class SearchResultsAnalysisServer:
     A class representing the server-side functionality for search results analysis.
     """
 
-    def __init__(self, massseer_gui) -> None:
+    def __init__(self, massdash_gui) -> None:
         """
         Initializes the SearchResultsAnalysisServer object.
 
         Args:
-        massseer_gui : object
-            An object representing the MassSeer GUI.
+        massdash_gui : object
+            An object representing the MassDash GUI.
         """
-        self.massseer_gui = massseer_gui
+        self.massdash_gui = massdash_gui
         self.file_input_settings = None
         self.analysis_settings = None
         self.analysis = None
@@ -108,7 +108,7 @@ class SearchResultsAnalysisServer:
         self.analysis_type.analysis_type()
 
         # self.load_search_result_entries.clear()
-        search_results_access_dict = self.load_search_result_entries(self.massseer_gui.file_input_settings.feature_file_entries)
+        search_results_access_dict = self.load_search_result_entries(self.massdash_gui.file_input_settings.feature_file_entries)
 
         # Create a UI for the analysis
         if self.analysis_type.analysis == "Results":

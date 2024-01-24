@@ -2,7 +2,7 @@
 massdash/structs
 ~~~~~~~~~~~~~~~~
 
-This subpackage contains the structures for storing MassSeer data
+This subpackage contains the structures for storing MassDash data
 """
 
 from .TransitionGroupFeature import TransitionGroupFeature

@@ -2,7 +2,7 @@
 massdash/ui
 ~~~~~~~~~~~
 
-This subpackage contains the structures for storing MassSeer data
+This subpackage contains the structures for storing MassDash data
 """
 from .BaseUISettings import BaseUISettings
 from .ChromatogramPlotUISettings import ChromatogramPlotUISettings
