@@ -36,7 +36,7 @@ class ConformerPeakPicker:
         _convertConformerFeatureToTransitionGroupFeatures: Convert conformer predicted feature to TransitionGroupFeatures.
     """
     
-    def __init__(self, library_file: str, pretrained_model_file: str, window_size: int = 175, prediction_threshold: float = 0.5, prediction_type: str = "logits"):
+    def __init__(self, library_file: str, pretrained_model_file: str, prediction_threshold: float = 0.5, prediction_type: str = "logits"):
         """
         Initialize the ConformerPeakPicker class.
 
@@ -48,13 +48,15 @@ class ConformerPeakPicker:
             prediction_type (str, optional): The prediction type for peak picking. Defaults to "logits".
         """
         self.pretrained_model_file = pretrained_model_file
-        self.window_size = window_size
         self.prediction_threshold = prediction_threshold
         self.prediction_type = prediction_type
-        self.onnx_session = None
         self.library = SpectralLibraryLoader(library_file)
         
         self._validate_model()
+
+        ## set in load_model
+        self.onnx_session = None
+        self.window_size = None
         
     def _validate_model(self):
         """
@@ -74,6 +76,7 @@ class ConformerPeakPicker:
             raise ImportError("onnxruntime is required for loading the pretrained Conformer model, but not installed.")
         # Load pretrained model
         self.onnx_session = onnxruntime.InferenceSession(self.pretrained_model_file)
+        self.window_size = self.onnx_session.get_inputs()[0].shape[2]
 
     def pick(self, transition_group, max_int_transition: int=1000) -> List[TransitionGroupFeature]:
         """
@@ -86,11 +89,11 @@ class ConformerPeakPicker:
             List[TransitionGroupFeature]: The list of transition group features.
         """
         # Transform data into required input
+        print("Loading model...")
+        self.load_model()
         print("Preprocessing data...")
         conformer_preprocessor = ConformerPreprocessor(transition_group, self.window_size)
         input_data = conformer_preprocessor.preprocess(self.library)
-        print("Loading model...")
-        self.load_model()
         print("Predicting...")
         ort_input = {self.onnx_session.get_inputs()[0].name: input_data}
         ort_output = self.onnx_session.run(None, ort_input)

@@ -123,7 +123,6 @@ class PeakPickingServer:
                 st.write(f"Pretrained model file: {self.peak_picking_settings.peak_picker_algo_settings.pretrained_model_file}")
                         
                 peak_picker = ConformerPeakPicker(spec_lib_path, self.peak_picking_settings.peak_picker_algo_settings.pretrained_model_file, 
-                                                  window_size=self.peak_picking_settings.peak_picker_algo_settings.conformer_window_size,
                                                   prediction_threshold=self.peak_picking_settings.peak_picker_algo_settings.conformer_prediction_threshold,
                                                   prediction_type=self.peak_picking_settings.peak_picker_algo_settings.conformer_prediction_type)
                 
@@ -148,7 +147,6 @@ class PeakPickingServer:
             dict: The transition group feature data.
         """
         tr_group_feature_data = {}
-        st.write("Performing Peak Picking for", tr_group_data)
 
         # Perform peak picking based on the selected method
         if self.peak_picking_settings.do_peak_picking == 'OSW-PyProphet':

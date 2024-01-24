@@ -193,7 +193,6 @@ class RawTargetedExtractionAnalysisServer:
                 if clear_caches:
                     self.targeted_extraction.clear()
                 featureMaps = self.targeted_extraction(transition_list_ui)
-                st.write(list(featureMaps.values())[0].feature_df)
             st_log_writer.write(f"Extracting spectra complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
 
             transition_list_ui.validate_extraction(featureMaps, plot_container)
