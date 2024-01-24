@@ -52,3 +52,33 @@ def equalize2D(arr: np.array, num_bins: int):
     # use linear interpolation of cdf to find new pixel values
     image_equalized = np.interp(arr.flatten(), bins[:-1], cdf)
     return  image_equalized.reshape(arr.shape)
+
+def min_max_scale(data, min: float=None, max: float=None) -> np.ndarray:
+    """
+    Perform min-max scaling on the input data.
+
+    Args:
+        data (numpy.ndarray): The input data to be scaled.
+        min (float, optional): The minimum value for scaling. If not provided, the minimum value of the data will be used.
+        max (float, optional): The maximum value for scaling. If not provided, the maximum value of the data will be used.
+
+    Returns:
+        numpy.ndarray: The scaled data.
+
+    """
+    min = data.min() if not min else min
+    max = data.max() if not max else max
+
+    return np.nan_to_num((data - min) / (max - min))
+
+def sigmoid(x: np.ndarray) -> np.ndarray:
+        """
+        Compute the sigmoid function for the given input.
+
+        Parameters:
+        x (float): The input value.
+
+        Returns:
+        float: The sigmoid value of the input.
+        """
+        return 1 / (1 + np.exp(-x))
