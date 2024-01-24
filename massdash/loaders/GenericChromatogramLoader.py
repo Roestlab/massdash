@@ -1,3 +1,8 @@
+"""
+massdash/loaders/GenericChromatogramLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from abc import abstractmethod
 import pandas as pd 
 from typing import Dict, List, Union, Literal

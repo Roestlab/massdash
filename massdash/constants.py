@@ -1,6 +1,6 @@
 """
 massdash/constants
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 """
 
 import os

@@ -1,4 +1,7 @@
 """
+massdash/ui
+~~~~~~~~~~~
+
 This subpackage contains the structures for storing MassSeer data
 """
 from .BaseUISettings import BaseUISettings

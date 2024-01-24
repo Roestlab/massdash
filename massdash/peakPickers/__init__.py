@@ -1,4 +1,7 @@
 """
+massdash/peakPickers
+~~~~~~~~~~~~~~~~~~~~
+
 This subpackage contains classes for performing peak picking 
 """
 from .ConformerPeakPicker import ConformerPeakPicker

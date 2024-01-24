@@ -1,4 +1,7 @@
 """
+massdash/loaders
+~~~~~~~~~~~~~~~~
+
 The :mod:`massseer.loaders` subpackage contains the structures for loading data into MassSeer
 """
 
