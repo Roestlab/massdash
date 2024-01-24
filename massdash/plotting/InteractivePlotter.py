@@ -150,8 +150,9 @@ class InteractivePlotter(GenericPlotter):
 
     def add_peak_boundaries(self, 
                             p: figure, 
-                            features: List[TransitionGroupFeature], 
-                            transitionGroup: TransitionGroup,legend_labels:Optional[List[str]] = []) -> None:
+                            features: List[TransitionGroupFeature],
+                            transitionGroup: TransitionGroup,
+                            legend_labels:Optional[List[str]] = []) -> None:
         """
         Adds peak boundaries to a Bokeh figure.
 
