@@ -19,15 +19,15 @@ class Mobilogram(Data1D):
     def toPandasDf(self) -> pd.DataFrame:
         return super().toPandasDfHelper_(self, 'im')
     
-    def pad(self, length: int) -> 'Mobilogram':
+    def adjust_length(self, length: int) -> 'Mobilogram':
         """
-        Pad the mobilogram with zeros on both sides.
+        Adjust the length of the mobilogram to a given length, this involved either padding or truncating the mobilogram
 
         Args:
-            pad (int): The number of zeros to pad on both sides.
+            length (int): The desired output length.
 
         Returns:
-            Chromatogram: A new chromatogram object with padded data and intensity.
+            Mobilogram: A new Mobilogram object with padded/truncated driftTime and intensity.
         """
-        new_data, new_intensity = super().pad(length)
+        new_data, new_intensity = super().adjust_length(length)
         return Mobilogram(new_data, new_intensity, self.label)

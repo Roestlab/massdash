@@ -19,15 +19,15 @@ class Spectrum(Data1D):
     def toPandasDf(self) -> pd.DataFrame:
         return super().toPandasDfHelper_(self, 'mz')
     
-    def pad(self, length: int) -> 'Spectrum':
+    def adjust_length(self, length: int) -> 'Spectrum':
         """
-        Pad the spectrum with zeros on both sides.
+        Adjust the length of the mobilogram to a given length, this involved either padding or truncating the chromatogram
 
         Args:
-            pad (int): The number of zeros to pad on both sides.
+            length (int): The desired output length.
 
         Returns:
-            Chromatogram: A new chromatogram object with padded data and intensity.
+            Spectrum: A new Spectrum object with padded/truncated length of mz and intensity.
         """
-        new_data, new_intensity = super().pad(length)
+        new_data, new_intensity = super().adjust_length(length)
         return Spectrum(new_data, new_intensity, self.label)

@@ -100,15 +100,26 @@ class Data1D(ABC):
         else:
             return np.median(self.intensity)
 
-    def pad(self, length):
+    def adjust_length(self, length):
         """
+        Adjusts the length of the Data1D object.
+
+        If the length is smaller than the current length, the data will be sliced to the given length.
+        If the length is larger than the current length, the data will be padded with zeros on both sides.
+
+        E.g. if the data array is [1, 2, 3] and the desired length is 7, 
+        the returned array will be [0, 0, 1, 2, 3, 0, 0].
+
+        E.g. if the data array is [1, 2, 3] and the desired length is 1,
+        the returned data array will be [1].
+
         Pad the data and intensity arrays with zeros to a given length. Modifies the object in place.
 
         Args:
             length (int): The length of the output array
         
         Returns: 
-            (new_data, new_intensity) : tuple of padded data and intensity
+            (new_data, new_intensity) : tuple of padded/truncated data and intensity
 
         """
 

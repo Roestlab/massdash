@@ -31,15 +31,15 @@ class Chromatogram(Data1D):
     def toPandasDf(self) -> pd.DataFrame:
         return super().toPandasDfHelper_('rt')
     
-    def pad(self, length: int) -> 'Chromatogram':
+    def adjust_length(self, length: int) -> 'Chromatogram':
         """
-        Pad the chromatogram with zeros on both sides.
+        Adjust the length of the chromatogram to a given length, this involved either padding or truncating the chromatogram
 
         Args:
-            pad (int): The number of zeros to pad on both sides.
+            length (int): The desired output length.
 
         Returns:
-            Chromatogram: A new chromatogram object with padded data and intensity.
+            Chromatogram: A new chromatogram object with padded/truncated rt and intensity.
         """
-        new_data, new_intensity = super().pad(length)
+        new_data, new_intensity = super().adjust_length(length)
         return Chromatogram(new_data, new_intensity, self.label)

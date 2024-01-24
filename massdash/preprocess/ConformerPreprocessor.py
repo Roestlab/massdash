@@ -41,7 +41,7 @@ class ConformerPreprocessor(GenericPreprocessor):
         super().__init__(transition_group)
 
         ## pad the transition group to the window size
-        self.transition_group = self.transition_group.pad(window_size)
+        self.transition_group = self.transition_group.adjust_length(window_size)
         self.window_size = window_size
 
     @staticmethod
@@ -113,7 +113,7 @@ class ConformerPreprocessor(GenericPreprocessor):
         Code adapted from CAPE
 
         Args:
-            window_size (int): The desired window size for trimming the data. Default is 175.
+            SpectralLibraryLoader (SpectralLibraryLoader): The spectral library loader.
 
         Returns:
             np.ndarray: The preprocessed data as a numpy array with shape (1, 21, len(data[0])).
