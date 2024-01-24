@@ -148,13 +148,17 @@ class InteractivePlotter(GenericPlotter):
 
         return line
 
-    def add_peak_boundaries(self, p: figure, features: List[TransitionGroupFeature], legend_labels:Optional[List[str]] = []) -> None:
+    def add_peak_boundaries(self, 
+                            p: figure, 
+                            features: List[TransitionGroupFeature], 
+                            transitionGroup: TransitionGroup,legend_labels:Optional[List[str]] = []) -> None:
         """
         Adds peak boundaries to a Bokeh figure.
 
         Args:
             p (figure): The Bokeh figure to add the peak boundaries to.
             features (List[TransitionGroupFeature]): A list of peak features to highlight on the plot.
+            transitionGroup (TransitionGroup): The TransitionGroup object containing precursor and transition data.
             legend_labels (List[str], optional): A list of labels for the peak features. Defaults to [].
         """
         if len(features) <= 8:
@@ -182,7 +186,7 @@ class InteractivePlotter(GenericPlotter):
                     'bottom_int'    : [0]})
             else:
                 source = ColumnDataSource(data = {
-                    'Intensity' : [feature.areaIntensity],
+                    'Intensity' : [transitionGroup.max((feature.leftBoundary, feature.rightBoundary), level=self.ms_level_str)],
                     'leftWidth'   : [feature.leftBoundary],
                     'rightWidth'   : [feature.rightBoundary],
                     'ms2_mscore' : [feature.qvalue],
@@ -323,7 +327,7 @@ class InteractivePlotter(GenericPlotter):
 
         # Add peak boundaries if available
         if features is not None:
-            p = self.add_peak_boundaries(p, features)
+            p = self.add_peak_boundaries(p, features, transitionGroup=transitionGroup)
 
         return p
 
