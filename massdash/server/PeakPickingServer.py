@@ -3,6 +3,7 @@ massdash/server/PeakPickingServer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
+import numpy as np
 import streamlit as st
 from typing import Literal
 
@@ -14,8 +15,7 @@ from ..loaders.SqMassLoader import SqMassLoader
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
 # Peak Picking
-from ..peakPickers.pyMRMTransitionGroupPicker import pyMRMTransitionGroupPicker
-from ..peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
+from ..peakPickers import pyMRMTransitionGroupPicker, MRMTransitionGroupPicker, ConformerPeakPicker
 # Util
 from ..util import time_block
 from .util import get_string_mslevels_from_bool
@@ -103,7 +103,37 @@ class PeakPickingServer:
         st.write(f"Performing MRMTransitionGroupPicker Peak Picking... Elapsed time: {elapsed_time()}")
         return tr_group_feature_data
 
-    def perform_peak_picking(self, tr_group_data: TransitionGroup=None, xic_data: SqMassLoader=None, transition_list_ui: Literal['ExtractedIonChromatogramAnalysisUI', 'RawTargetedExtractionAnalysisUI']=None):
+    def perform_conformer_peak_picking(self, spec_lib_path: str, tr_group_data: TransitionGroup):
+        """
+        Performs peak picking using ConformerPeakPicker algorithm.
+
+        Args:
+            tr_group_data (dict): The transition group data.
+            spec_lib_path (str): The path to the spectral library.
+
+        Returns:
+            dict: The transition group feature data.
+        """
+        with time_block() as elapsed_time:
+            # Peak picking using Conformer
+            tr_group_feature_data = {}
+
+            for file, tr_group in tr_group_data.items():
+                #tr_group.targeted_transition_list = self.transition_list_ui.target_transition_list
+                st.write(f"Pretrained model file: {self.peak_picking_settings.peak_picker_algo_settings.pretrained_model_file}")
+                        
+                peak_picker = ConformerPeakPicker(spec_lib_path, self.peak_picking_settings.peak_picker_algo_settings.pretrained_model_file, 
+                                                  prediction_threshold=self.peak_picking_settings.peak_picker_algo_settings.conformer_prediction_threshold,
+                                                  prediction_type=self.peak_picking_settings.peak_picker_algo_settings.conformer_prediction_type)
+                
+                # get the trantition in tr_group with the max intensity
+                max_int_transition = np.max([transition.intensity for transition in tr_group.transitionData])
+                peak_features = peak_picker.pick(tr_group, max_int_transition=max_int_transition)
+                tr_group_feature_data[file] = peak_features
+        st.write(f"Performing Conformer Peak Picking... Elapsed time: {elapsed_time()}")
+        return tr_group_feature_data
+
+    def perform_peak_picking(self, tr_group_data: TransitionGroup=None, xic_data: SqMassLoader=None, transition_list_ui: Literal['ExtractedIonChromatogramAnalysisUI', 'RawTargetedExtractionAnalysisUI']=None, spec_lib: str=None):
         """
         Performs peak picking based on the selected method.
 
@@ -111,6 +141,7 @@ class PeakPickingServer:
             tr_group_data (dict, optional): The transition group data. Defaults to None.
             xic_data (object, optional): The XIC data. Defaults to None.
             transition_list_ui (object, optional): The transition list UI. Defaults to None.
+            spec_lib (object, optional): The spectral library. Defaults to None. Mandatory if peak picking using ConformerPeakPicker.
 
         Returns:
             dict: The transition group feature data.
@@ -124,6 +155,8 @@ class PeakPickingServer:
             tr_group_feature_data = self.perform_pypeakpicker_mrm_peak_picking(tr_group_data)
         elif self.peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
             tr_group_feature_data = self.perform_mrmtransitiongrouppicker_peak_picking(tr_group_data)
+        elif self.peak_picking_settings.do_peak_picking == 'Conformer':
+            tr_group_feature_data = self.perform_conformer_peak_picking(spec_lib, tr_group_data)
         else:
             tr_group_feature_data = {file: None for file in tr_group_data.keys()}
 

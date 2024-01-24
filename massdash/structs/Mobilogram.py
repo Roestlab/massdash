@@ -3,7 +3,6 @@ massdash/structs/Mobilogram
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-from typing import Tuple
 import pandas as pd
 
 # Structs
@@ -18,3 +17,16 @@ class Mobilogram(Data1D):
 
     def toPandasDf(self) -> pd.DataFrame:
         return super().toPandasDfHelper_(self, 'im')
+    
+    def adjust_length(self, length: int) -> 'Mobilogram':
+        """
+        Adjust the length of the mobilogram to a given length, this involved either padding or truncating the mobilogram
+
+        Args:
+            length (int): The desired output length.
+
+        Returns:
+            Mobilogram: A new Mobilogram object with padded/truncated driftTime and intensity.
+        """
+        new_data, new_intensity = super().adjust_length(length)
+        return Mobilogram(new_data, new_intensity, self.label)

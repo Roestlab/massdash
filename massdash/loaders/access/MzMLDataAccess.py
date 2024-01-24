@@ -420,7 +420,7 @@ class MzMLDataAccess():
         else:
             LOGGER.warn(f"No spectra found for peptide: {feature.sequence}{feature.precursor_charge}. Try adjusting the extraction parameters")
 
-        return FeatureMap(results_df, config)
+        return FeatureMap(results_df, feature.sequence, feature.precursor_charge, config)
     
     def _find_closest_reference_mz(self, given_mz: np.array, reference_mz_values: np.array, peptide_product_annotation_list: np.array) -> np.array:
         """

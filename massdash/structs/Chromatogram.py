@@ -4,7 +4,7 @@ massdash/structs/Chromatogram
 """
 
 import pyopenms as po
-from typing import Optional, Tuple, List
+from typing import Optional
 import pandas as pd
 
 # Structs
@@ -30,3 +30,16 @@ class Chromatogram(Data1D):
     
     def toPandasDf(self) -> pd.DataFrame:
         return super().toPandasDfHelper_('rt')
+    
+    def adjust_length(self, length: int) -> 'Chromatogram':
+        """
+        Adjust the length of the chromatogram to a given length, this involved either padding or truncating the chromatogram
+
+        Args:
+            length (int): The desired output length.
+
+        Returns:
+            Chromatogram: A new chromatogram object with padded/truncated rt and intensity.
+        """
+        new_data, new_intensity = super().adjust_length(length)
+        return Chromatogram(new_data, new_intensity, self.label)
