@@ -45,7 +45,7 @@ class PeakPickingUISettings:
         st.sidebar.title("Peak Picking")
 
         ## Perform Peak Picking
-        self.do_peak_picking = st.sidebar.selectbox("Peak Picking", ['none', 'OSW-PyProphet', 'pyPeakPickerMRM', 'MRMTransitionGroupPicker', 'Conformer'], help="Peak picking method to use.")
+        self.do_peak_picking = st.sidebar.selectbox("Peak Picking", ['none', 'Feature File Boundaries', 'pyPeakPickerMRM', 'MRMTransitionGroupPicker', 'Conformer'], help="Peak picking method to use.")
 
         if self.do_peak_picking != 'none':
             ## Perform peak picking on displayed chromatogram, or adjust smoothing separately for peak picking?
@@ -54,7 +54,7 @@ class PeakPickingUISettings:
         if self.do_peak_picking == "pyPeakPickerMRM":
             self.peak_picker_algo_settings = pyPeakPickerMRMUISettings(self)
             self.peak_picker_algo_settings.create_ui(plot_settings)
-        elif self.do_peak_picking == "OSW-PyProphet":
+        elif self.do_peak_picking == "Feature File Boundaries":
             pass
         elif self.do_peak_picking == "MRMTransitionGroupPicker":
             self.peak_picker_algo_settings = MRMTransitionGroupPickerUISettings(self)

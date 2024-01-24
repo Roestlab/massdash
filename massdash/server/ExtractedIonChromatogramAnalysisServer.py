@@ -127,10 +127,10 @@ class ExtractedIonChromatogramAnalysisServer:
             st.write(f"Loading XIC data... Elapsed time: {elapsed_time()}") 
             
             # Perform peak picking based on user settings
-            if peak_picking_settings.do_peak_picking == 'OSW-PyProphet':
+            if peak_picking_settings.do_peak_picking == 'Feature File Boundaries':
                 with time_block() as elapsed_time:
                     tr_group_feature_data = self.xic_data.loadTransitionGroupFeatures(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
-                st.write(f"Loading OSW-PyProphet Peak Boundaries... Elapsed time: {elapsed_time()}")
+                st.write(f"Loading Feature File Peak Boundaries... Elapsed time: {elapsed_time()}")
             elif peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
                 with time_block() as elapsed_time:
                     # Peak picking using pyMRMTransitionGroupPicker
