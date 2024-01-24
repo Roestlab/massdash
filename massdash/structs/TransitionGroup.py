@@ -184,7 +184,7 @@ class TransitionGroup:
 
         if transitionGroupFeatures is not None:
             if self.dataType == Chromatogram:
-                plotter.add_peak_boundaries(plotter.fig, transitionGroupFeatures)
+                plotter.add_peak_boundaries(plotter.fig, transitionGroupFeatures, self)
             else:
                 raise NotImplementedError("Peak boundaries are only implemented for chromatograms")
 
