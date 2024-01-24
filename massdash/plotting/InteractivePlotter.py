@@ -47,7 +47,7 @@ class InteractivePlotter(GenericPlotter):
         else:
             LOGGER.setLevel("INFO")
 
-    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram') -> figure:
+    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram', feature_legend_labels:Optional[List[str]] = []) -> figure:
         """
         Plots the given transitionGroup using the specified plot type.
 
@@ -60,7 +60,7 @@ class InteractivePlotter(GenericPlotter):
             figure: The generated plot as a Bokeh figure object.
         """
         if plot_type == 'chromatogram':
-            plot =  self.plot_chromatogram(transitionGroup, features)
+            plot =  self.plot_chromatogram(transitionGroup, features, feature_legend_labels)
         elif plot_type == 'mobilogram':
             plot =  self.plot_mobilogram(transitionGroup)
         elif plot_type == 'spectrum':
@@ -226,7 +226,7 @@ class InteractivePlotter(GenericPlotter):
 
         return p
 
-    def plot_chromatogram(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]]) -> figure:
+    def plot_chromatogram(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]], feature_legend_labels:Optional[List[str]] = []) -> figure:
         """
         Plots a chromatogram for a given TransitionGroup.
 
@@ -328,7 +328,7 @@ class InteractivePlotter(GenericPlotter):
 
         # Add peak boundaries if available
         if features is not None:
-            p = self.__add_peak_boundaries(p, features, transitionGroup=transitionGroup)
+            p = self.__add_peak_boundaries(p, features, transitionGroup, feature_legend_labels)
 
         return p
 
