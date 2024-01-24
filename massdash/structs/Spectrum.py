@@ -21,7 +21,7 @@ class Spectrum(Data1D):
     
     def adjust_length(self, length: int) -> 'Spectrum':
         """
-        Adjust the length of the mobilogram to a given length, this involved either padding or truncating the chromatogram
+        Adjust the length of the spectrum to a given length, this involved either padding or truncating the spectrum
 
         Args:
             length (int): The desired output length.
