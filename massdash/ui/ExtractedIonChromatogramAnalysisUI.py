@@ -30,7 +30,7 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
          Initializes the ExtractedIonChromatogramAnalysisServer object.
 
         Args:
-        massseer_gui : object
+        massdash_gui : object
             An object representing the MassDash GUI.
         transition_list : object
             An object representing the transition list.

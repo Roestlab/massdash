@@ -1,4 +1,7 @@
 """
+massdash/server
+~~~~~~~~~~~~~~~
+
 This subpackage contains "server side" classes for GUI 
 """
 from .ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer

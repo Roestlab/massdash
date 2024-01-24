@@ -10,6 +10,7 @@ from typing import List, Literal
 from .GenericPreprocessor import GenericPreprocessor 
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
+from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # Utils
 from ..util import check_package
 
@@ -36,8 +37,12 @@ class ConformerPreprocessor(GenericPreprocessor):
 
     """
 
-    def __init__(self, transition_group: TransitionGroup):
+    def __init__(self, transition_group: TransitionGroup, window_size: int=175):
         super().__init__(transition_group)
+
+        ## pad the transition group to the window size
+        self.transition_group = self.transition_group.adjust_length(window_size)
+        self.window_size = window_size
 
     @staticmethod
     def min_max_scale(data, min: float=None, max: float=None) -> np.ndarray:
@@ -101,14 +106,14 @@ class ConformerPreprocessor(GenericPreprocessor):
         """
         return 1 / (1 + np.exp(-x))
 
-    def preprocess(self, window_size: int=175) -> np.ndarray:
+    def preprocess(self, library: SpectralLibraryLoader) -> np.ndarray:
         """
         Preprocesses the data by scaling and transforming it into a numpy array.
         
         Code adapted from CAPE
 
         Args:
-            window_size (int): The desired window size for trimming the data. Default is 175.
+            SpectralLibraryLoader (SpectralLibraryLoader): The spectral library loader.
 
         Returns:
             np.ndarray: The preprocessed data as a numpy array with shape (1, 21, len(data[0])).
@@ -122,17 +127,19 @@ class ConformerPreprocessor(GenericPreprocessor):
             # Row index 19: library retention time diff
             # Row index 20: precursor charge
 
-        #  initialize empty numpy array
-        data = np.empty((0, len(self.transition_group.transitionData[0].intensity)), float)
+        if len(self.transition_group.transitionData) != 6:
+            raise ValueError(f"Transition group must have 6 transitions, but has {len(self.transition_group.transitionData)}.")
 
-        lib_int_data = np.empty((0, len(self.transition_group.transitionData[0].intensity)), float)
+        #  initialize empty numpy array
+        data = np.empty((0, self.window_size), float) 
+        lib_int_data = np.empty((0, self.window_size), float)
 
         for chrom in self.transition_group.transitionData:
             # append ms2 intensity data to data
             data = np.append(data, [chrom.intensity], axis=0)
 
-            lib_int =  self.transition_group.targeted_transition_list[self.transition_group.targeted_transition_list.Annotation==chrom.label]['LibraryIntensity'].values 
-            lib_int = np.repeat(lib_int, len(chrom.intensity))
+            lib_int = library.get_fragment_library_intensity(self.transition_group.sequence, self.transition_group.precursor_charge, chrom.label)
+            lib_int = np.repeat(lib_int, self.window_size)
             lib_int_data = np.append(lib_int_data, [lib_int], axis=0)
 
         # initialize empty numpy array to store scaled data
@@ -148,20 +155,7 @@ class ConformerPreprocessor(GenericPreprocessor):
             )
 
         ## MS1 trace data
-        # padd precursor intensity data with zeros to match ms2 intensity data
-        len_trans = len(self.transition_group.transitionData[0].intensity)
-        len_prec = len(self.transition_group.precursorData[0].intensity)
-        if len_prec!=len_trans:
-            if len_prec < len_trans:
-                prec_int = np.pad(self.transition_group.precursorData[0].intensity, (0, len_trans-len_prec), 'constant', constant_values=(0, 0))
-            if len_prec > len_trans:
-                prec_int = self.transition_group.precursorData[0].intensity
-                # compute number of points to trim from either side of the middle point
-                remove_n_points = len_prec - len_trans
-                # trim precursor intensity data
-                prec_int = prec_int[remove_n_points//2:-remove_n_points//2]
-        else:
-            prec_int = self.transition_group.precursorData[0].intensity
+        prec_int = self.transition_group.precursorData[0].intensity
         
         # append ms1 intensity data to data
         new_data[12] = self.min_max_scale(prec_int)
@@ -190,17 +184,10 @@ class ConformerPreprocessor(GenericPreprocessor):
         new_data[19] = tmp_arr
 
         ## Add charge state
-        new_data[20] = self.transition_group.targeted_transition_list.PrecursorCharge.values[0] * np.ones(len(data[0]))
+        new_data[20] = self.transition_group.precursor_charge * np.ones(len(data[0]))
         
         ## Convert to float32
         new_data = new_data.astype(np.float32)
-        
-        ## trim data if does not match window size starting at the centre
-        if len(new_data[0]) > window_size:
-            middle_index = len(data[0]) // 2
-            trim_start = middle_index - (window_size // 2)
-            trim_end = middle_index + (window_size // 2) + 1
-            new_data = new_data[:, trim_start:trim_end]
         
         # cnvert the shape to be (1, 21, len(data[0]))
         new_data = np.expand_dims(new_data, axis=0)
@@ -297,36 +284,35 @@ class ConformerPreprocessor(GenericPreprocessor):
 
         return peak_info
     
-    def get_peak_boundaries(self, peak_info: dict, tr_group: TransitionGroup, window_size: int=175):
+    def get_peak_boundaries(self, peak_info: dict):
         """
         Adjusts the peak boundaries in the peak_info dictionary based on the window size and the dimensions of the input rt_array.
         Calculates the actual RT values from the rt_array and appends them to the peak_info dictionary.
 
         Args:
             peak_info (dict): A dictionary containing information about the peaks.
-            tr_group (TransitionGroup): The transition group containing the data.
             window_size (int, optional): The size of the window used for trimming the rt_array. Defaults to 175.
 
         Returns:
             dict: The updated peak_info dictionary with adjusted peak boundaries and RT values.
         """
-        rt_array = tr_group.transitionData[0].data 
-        if rt_array.shape[0] != window_size:
-            print(f"input_data {rt_array.shape[0]} was trimmed to {window_size}, adjusting peak_info indexes to map to the original datas dimensions")
+        rt_array = self.transition_group.transitionData[0].data 
+        if rt_array.shape[0] != self.window_size:
+            print(f"input_data {rt_array.shape[0]} was trimmed to {self.window_size}, adjusting peak_info indexes to map to the original datas dimensions")
             for key in peak_info.keys():
                 for i in range(len(peak_info[key])):
                     peak_info[key][i]['max_idx_org'] = peak_info[key][i]['max_idx']
                     peak_info[key][i]['start_idx_org'] = peak_info[key][i]['start_idx']
                     peak_info[key][i]['end_idx_org'] = peak_info[key][i]['end_idx']
-                    new_max_idx = peak_info[key][i]['max_idx'] + (window_size // 2) - (rt_array.shape[0] // 2)
+                    new_max_idx = peak_info[key][i]['max_idx'] + (self.window_size // 2) - (rt_array.shape[0] // 2)
                     if not new_max_idx < 0:
                         peak_info[key][i]['max_idx'] = new_max_idx
 
-                    new_start_idx = peak_info[key][i]['start_idx'] + (window_size // 2) - (rt_array.shape[0] // 2)
+                    new_start_idx = peak_info[key][i]['start_idx'] + (self.window_size // 2) - (rt_array.shape[0] // 2)
                     if not new_start_idx < 0:
                         peak_info[key][i]['start_idx'] = new_start_idx
 
-                    peak_info[key][i]['end_idx'] = peak_info[key][i]['end_idx'] + (window_size // 2) - (rt_array.shape[0] // 2)
+                    peak_info[key][i]['end_idx'] = peak_info[key][i]['end_idx'] + (self.window_size // 2) - (rt_array.shape[0] // 2)
 
         # get actual RT value from RT array and append to peak_info
         for key in peak_info.keys():
@@ -334,6 +320,6 @@ class ConformerPreprocessor(GenericPreprocessor):
                 peak_info[key][i]['rt_apex'] = rt_array[peak_info[key][i]['max_idx']]
                 peak_info[key][i]['rt_start'] = rt_array[peak_info[key][i]['start_idx']]
                 peak_info[key][i]['rt_end'] = rt_array[peak_info[key][i]['end_idx']]
-                peak_info[key][i]['int_apex'] = np.max([tg.intensity[peak_info[key][i]['max_idx']] for tg in tr_group.transitionData])
+                peak_info[key][i]['int_apex'] = np.max([tg.intensity[peak_info[key][i]['max_idx']] for tg in self.transition_group.transitionData])
 
         return peak_info

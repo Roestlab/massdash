@@ -1,5 +1,4 @@
 """
-=======
 massdash
 ~~~~~~~~
 TODO: ADD general documentation about how to use the auto API here

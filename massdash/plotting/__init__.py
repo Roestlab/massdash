@@ -1,4 +1,7 @@
 """
+massdash/plotting
+~~~~~~~~~~~~~~~~~
+
 This subpackage contains classes for plotting 
 """
 

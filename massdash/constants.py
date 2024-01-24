@@ -1,6 +1,6 @@
 """
 massdash/constants
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 """
 
 import os
@@ -24,3 +24,4 @@ URL_TEST_OSW = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/exam
 URL_TEST_PQP = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/openswath/lib/test.pqp"
 URL_TEST_RAW_MZML = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/raw/test_raw_1.mzML"
 URL_TEST_DREAMDIA_REPORT = "https://github.com/Roestlab/massdash/raw/dev/test/test_data/example_dia/dreamdia/test_dreamdia_report.tsv"
+URL_PRETRAINED_CONFORMER = "https://github.com/Roestlab/massdash/releases/download/v0.0.1-alpha/base_cape.onnx"

@@ -3,7 +3,7 @@ Loading Data
 
 .. currentmodule:: massdash.loaders
 
-To load raw data into MassSeer, a loader object must be initiated. There are two types of loader classes
+To load raw data into MassDash, a loader object must be initiated. There are two types of loader classes
 
 
 1. :py:class:`Chromatogram Loaders<GenericChromatogramLoader>`: Chromatogram Loaders: Raw data stores chromatograms, this allows for faster loading however since extraction has already been performed by the upstream analysis tool. This includes :py:class:`SqMassLoader`
@@ -25,5 +25,5 @@ Since each loader type is linked with a results file each loader can be used to 
    Loading Spectrum Data
    Loading Feature Information
 
-Have an idea for a loader you want to see? Create a issue `here <https://github.com/Roestlab/massseer/issues>`_.
+Have an idea for a loader you want to see? Create a issue `here <https://github.com/Roestlab/massdash/issues>`_.
 

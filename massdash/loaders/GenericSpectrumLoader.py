@@ -1,4 +1,7 @@
 '''
+massdash/loaders/GenericSpectrumLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 This is an abstract class for loading spectra from a file.
 '''
 

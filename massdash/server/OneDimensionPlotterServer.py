@@ -49,13 +49,14 @@ class OneDimensionPlotterServer:
                  feature_map_dict: Dict[str, FeatureMap], 
                  mzml_loader_dict: Dict[str, MzMLDataLoader], 
                  transition_list_ui: TransitionListUISettings, chrom_plot_settings: ChromatogramPlotUISettings, 
-                 peak_picking_settings: PeakPickingUISettings,
+                 peak_picking_settings: PeakPickingUISettings, spectral_library_path: str=None,
                  verbose: bool=False):
         self.feature_map_dict = feature_map_dict 
         self.mzml_loader_dict = mzml_loader_dict
         self.transition_list_ui = transition_list_ui
         self.chrom_plot_settings = chrom_plot_settings
         self.peak_picking_settings = peak_picking_settings
+        self.spectral_library_path = spectral_library_path
         self.plot_obj_dict = {}
         self.verbose = verbose
 
@@ -78,7 +79,7 @@ class OneDimensionPlotterServer:
                 tr_group = feature_map.to_chromatograms()
                 # Perform peak picking if enabled
                 peak_picker = PeakPickingServer(self.peak_picking_settings, self.chrom_plot_settings)
-                tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data={file:tr_group}, mzml_loader_dict=self.mzml_loader_dict, transition_list_ui=self.transition_list_ui)
+                tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data={file:tr_group}, mzml_loader_dict=self.mzml_loader_dict, transition_list_ui=self.transition_list_ui, spec_lib=self.spectral_library_path)
                 plot_settings_dict = self._get_plot_settings('Retention Time (s)', 'Intensity', file, 'chromatogram')
                 plot_obj = self._generate_plot(tr_group, plot_settings_dict, tr_group_feature_data[file])
                 run_plots_list.append(plot_obj)

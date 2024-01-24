@@ -1,5 +1,8 @@
 """
-The :mod:`massseer.loaders` subpackage contains the structures for loading data into MassSeer
+massdash/loaders
+~~~~~~~~~~~~~~~~
+
+The :mod:`massdash.loaders` subpackage contains the structures for loading data into MassDash
 """
 
 from .GenericChromatogramLoader import GenericChromatogramLoader

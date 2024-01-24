@@ -151,6 +151,34 @@ class TransitionGroup:
         """
         return not any(p.empty() for p in self.precursorData) and any(t.empty() for t in self.transitionData)
     
+    def adjust_length(self, length: int) -> None:
+        """
+        Adjusts the length size of the chromatograms, mobilograms, and spectra.
+
+        If the length is smaller than the current length, the data will be sliced to the given length.
+        If the length is larger than the current length, the data will be padded with zeros on both sides.
+
+        E.g. if the data array is [1, 2, 3] and the desired length is 7, 
+        the returned array will be [0, 0, 1, 2, 3, 0, 0].
+
+        E.g. if the data array is [1, 2, 3] and the desired length is 1,
+        the returned data array will be [1].
+
+        Args:
+            length (int): The length of the output array
+
+        Returns:
+            TransitionGroup: A new TransitionGroup object with padded data and intensity.
+        """
+        new_precursorData = []
+        new_transitionData = []
+        for c in self.precursorData:
+            new_precursorData.append(c.adjust_length(length))
+        for c in self.transitionData:
+            new_transitionData.append(c.adjust_length(length))
+        
+        return TransitionGroup(new_precursorData, new_transitionData, self.sequence, self.precursor_charge)
+    
     def plot(self, 
              transitionGroupFeatures: Optional[List[TransitionGroupFeature]] = None, 
              smoothing: Optional[Literal['none', 'sgolay', 'gaussian']] = 'none',
