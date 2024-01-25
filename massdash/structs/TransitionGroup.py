@@ -208,12 +208,6 @@ class TransitionGroup:
 
         plotter = InteractivePlotter(config)
 
-        plotter.plot(self)
-
-        if transitionGroupFeatures is not None:
-            if self.dataType == Chromatogram:
-                plotter.add_peak_boundaries(plotter.fig, transitionGroupFeatures)
-            else:
-                raise NotImplementedError("Peak boundaries are only implemented for chromatograms")
+        plotter.plot(self, transitionGroupFeatures, config.plot_type)
 
         plotter.show()
