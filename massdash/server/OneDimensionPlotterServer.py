@@ -5,19 +5,17 @@ massdash/server/OneDimensionPlotterServer
 
 from typing import Dict
 from os.path import basename
+from collections import defaultdict
 import streamlit as st
 
 # Loaders
-from ..loaders.MzMLDataLoader import MzMLDataLoader
+from ..loaders.GenericChromatogramLoader import GenericChromatogramLoader
 # Plotting
-from ..plotting.GenericPlotter import PlotConfig
-from ..plotting.InteractivePlotter import InteractivePlotter
+from ..plotting import PlotConfig, InteractivePlotter
 # Server
 from .PeakPickingServer import PeakPickingServer
 # Structs
-from ..structs.TransitionGroup import TransitionGroup
-from ..structs.TransitionGroupFeature import TransitionGroupFeature
-from ..structs.FeatureMap import FeatureMap
+from ..structs import TransitionGroup, TransitionGroupFeature, FeatureMapCollection, FeatureMap, TransitionGroupCollection, TransitionGroupFeatureCollection
 # UI
 from ..ui.TransitionListUISettings import TransitionListUISettings
 from ..ui.ChromatogramPlotUISettings import ChromatogramPlotUISettings
@@ -25,7 +23,7 @@ from ..ui.PeakPickingUISettings import PeakPickingUISettings
 
 class OneDimensionPlotterServer:
     """
-    A class that generates chromatogram plots for a given transition group dictionary.
+    A class that generates one dimensional plots from ChromatogramLoader data
 
     Args:
         feature_map_dict (dict): A dictionary containing transition groups.
@@ -46,62 +44,66 @@ class OneDimensionPlotterServer:
     """
 
     def __init__(self, 
-                 feature_map_dict: Dict[str, FeatureMap], 
-                 mzml_loader_dict: Dict[str, MzMLDataLoader], 
-                 transition_list_ui: TransitionListUISettings, chrom_plot_settings: ChromatogramPlotUISettings, 
-                 peak_picking_settings: PeakPickingUISettings, spectral_library_path: str=None,
+                 featureMapCollection: FeatureMapCollection,
+                 chrom_loader: GenericChromatogramLoader,
+                 transition_list_ui: TransitionListUISettings, 
+                 chrom_plot_settings: ChromatogramPlotUISettings, 
+                 peak_picking_settings: PeakPickingUISettings, 
                  verbose: bool=False):
-        self.feature_map_dict = feature_map_dict 
-        self.mzml_loader_dict = mzml_loader_dict
+        self.featureMapCollection = featureMapCollection
+        self.chrom_loader = chrom_loader
         self.transition_list_ui = transition_list_ui
         self.chrom_plot_settings = chrom_plot_settings
         self.peak_picking_settings = peak_picking_settings
-        self.spectral_library_path = spectral_library_path
-        self.plot_obj_dict = {}
+        self.plot_obj_dict = defaultdict(list) # a dictionary of plot objects with the mapping <RunName>:[<PlotObject>] (multiple plots per run allowed)
         self.verbose = verbose
 
-    def generate_chromatogram_plots(self):
+    def generate_plots(self):
         """
-        Generates chromatogram plots for each file in the transition group dictionary.
+        Generates plots for each file in the transition group dictionary.
         """
-        for file, feature_map in self.feature_map_dict.items():
-            run_plots_list = []
-            
-            # Generate Spectrum Plot 
-            if self.chrom_plot_settings.display_spectrum:
-                tr_group = feature_map.to_spectra()
-                plot_settings_dict = self._get_plot_settings('m/z', 'Intensity', file, 'spectra')
-                plot_spectrum_obj = self._generate_plot(tr_group, plot_settings_dict)
-                run_plots_list.append(plot_spectrum_obj)
 
-            # Generate Chromatogram Plot
-            if self.chrom_plot_settings.display_chromatogram:
-                tr_group = feature_map.to_chromatograms()
+
+        if self.chrom_plot_settings.display_spectrum:
+            spectra = self.featureMapCollection.to_spectra()
+            plot_settings_dict = self._get_plot_settings('m/z', 'Intensity', 'spectra')
+            self._generate_plots_helper(spectra, plot_settings_dict)
+
+        if self.chrom_plot_settings.display_chromatogram:
+            chromatograms = self.featureMapCollection.to_chromatograms()
+
+            # Perform peak picking or add features 
+            if self.peak_picking_settings.do_peak_picking == 'Feature File Boundaries':
+                tr_group_feature_data = self.chrom_loader.loadTransitionGroupFeatures(self.transition_list_ui.transition_settings.selected_peptide,
+                    self.transition_list_ui.transition_settings.selected_charge)
+
+            elif self.peak_picking_settings.do_peak_picking in ['pyPeakPickerMRM', 'MRMTransitionGroupPicker', 'ConformerPeakPicker']:
                 # Perform peak picking if enabled
                 peak_picker = PeakPickingServer(self.peak_picking_settings, self.chrom_plot_settings)
-                tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data={file:tr_group}, mzml_loader_dict=self.mzml_loader_dict, transition_list_ui=self.transition_list_ui, spec_lib=self.spectral_library_path)
-                plot_settings_dict = self._get_plot_settings('Retention Time (s)', 'Intensity', file, 'chromatogram')
-                plot_obj = self._generate_plot(tr_group, plot_settings_dict, tr_group_feature_data[file])
-                run_plots_list.append(plot_obj)
+                tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data=chromatograms, 
+                                                                            spec_lib=self.chrom_loader.libraryFile)
+            elif self.peak_picking_settings.do_peak_picking == 'none':
+                tr_group_feature_data = None
+                pass
 
-            # Generate Mobilogram Plot
-            if self.chrom_plot_settings.display_mobilogram:
-                tr_group = feature_map.to_mobilograms()
-                plot_settings_dict = self._get_plot_settings('Ion Mobility (1/K0)', 'Intensity', file, 'mobilogram')
-                plot_mobilo_obj = self._generate_plot(tr_group, plot_settings_dict)
-                run_plots_list.append(plot_mobilo_obj)
+            else:
+                raise ValueError(f"Invalid peak picking algorithm: {self.peak_picking_settings.do_peak_picking}. Valid options are 'Feature File Boundaries', 'pyPeakPickerMRM', 'MRMTransitionGroupPicker', and 'ConformerPeakPicker'.")
 
-            self.plot_obj_dict[file] = run_plots_list
-        return self
-
-    def _get_plot_settings(self, x_label: str, y_label: str, file: str, plot_type=None) -> dict:
+            plot_settings_dict = self._get_plot_settings('Retention Time (s)', 'Intensity', 'chromatogram')
+            self._generate_plots_helper(chromatograms, plot_settings_dict, tr_group_feature_data)
+        
+        if self.chrom_plot_settings.display_mobilogram:
+            mobilograms = self.featureMapCollection.to_mobilograms()
+            plot_settings_dict = self._get_plot_settings('Ion Mobility (1/K0)', 'Intensity', 'mobilogram')
+            self._generate_plots_helper(mobilograms, plot_settings_dict)
+        
+    def _get_plot_settings(self, x_label: str, y_label: str, plot_type=None) -> dict:
         """
         Returns the plot settings dictionary for a given plot type.
 
         Args:
             x_label (str): The label for the x-axis.
             y_label (str): The label for the y-axis.
-            file (str): The file name.
             plot_type (str, optional): The type of plot. Defaults to None.
 
         Returns:
@@ -110,7 +112,6 @@ class OneDimensionPlotterServer:
         plot_settings_dict = self.chrom_plot_settings.get_settings()
         plot_settings_dict['x_axis_label'] = x_label
         plot_settings_dict['y_axis_label'] = y_label
-        plot_settings_dict['title'] = basename(file)
         plot_settings_dict['subtitle'] = f"{self.transition_list_ui.transition_settings.selected_protein} | {self.transition_list_ui.transition_settings.selected_peptide}_{self.transition_list_ui.transition_settings.selected_charge}"
 
         if plot_type:
@@ -118,24 +119,28 @@ class OneDimensionPlotterServer:
 
         return plot_settings_dict
 
-    def _generate_plot(self, tr_group: TransitionGroup, plot_settings_dict: dict, tr_group_feature: TransitionGroupFeature=None):
+    def _generate_plots_helper(self, tr_group_collection: TransitionGroupCollection, 
+                               plot_settings_dict: dict, 
+                               tr_group_feature_collection: TransitionGroupFeatureCollection=None):
         """
         Generates a plot object for a given transition group and plot settings.
 
         Args:
-            tr_group (TransitionGroup): An object representing a transition group.
+            tr_group (TransitionGroupCollection): A collection of TransitionGroup objects with the mapping <RunName>:<TransitionGroup>.
             plot_settings_dict (dict): The plot settings dictionary.
-            tr_group_feature (TransitionGroupFeature, optional): An object representing the transition group feature data. Defaults to None.
+            tr_group_feature (TransitionGroupFeatureCollection, optional): A collection of TransitionGroupFeature objects with the mapping <RunName>:[<TransitionGroupFeature>]. Defaults to None.
 
         Returns:
             bokeh.plotting.figure.Figure: The generated plot object.
         """
-        plot_config = PlotConfig()
-        plot_config.update(plot_settings_dict)
         try:
+            for run, tr_group in tr_group_collection.items():
+                plot_config = PlotConfig()
+            plot_config.update(plot_settings_dict)
+            plot_settings_dict['title'] = basename(run)
             plotter = InteractivePlotter(plot_config, self.verbose)
-            plot_obj = plotter.plot(tr_group, features=tr_group_feature, plot_type=plot_settings_dict['plot_type'])
-            return plot_obj
+            self.plot_obj_dict[run].append(plotter.plot(tr_group, 
+                                                        features=None if tr_group_feature_collection is None else tr_group_feature_collection[run], 
+                                                            plot_type=plot_settings_dict['plot_type']))
         except ValueError:
             st.error("Failed to generate plot! There may be no data for selected transition group.")
-            return None
