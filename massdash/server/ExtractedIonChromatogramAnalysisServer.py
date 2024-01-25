@@ -163,7 +163,7 @@ class ExtractedIonChromatogramAnalysisServer:
                         tr_group.targeted_transition_list = transition_list_ui.target_transition_list
                         print(f"Pretrained model file: {peak_picking_settings.peak_picker_algo_settings.pretrained_model_file}")
                         
-                        peak_picker = ConformerPeakPicker(self.massdash_gui.file_input_settings.osw_file_path, peak_picking_settings.peak_picker_algo_settings.pretrained_model_file, window_size=peak_picking_settings.peak_picker_algo_settings.conformer_window_size, prediction_threshold=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_threshold, prediction_type=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_type)
+                        peak_picker = ConformerPeakPicker(self.massdash_gui.file_input_settings.osw_file_path, peak_picking_settings.peak_picker_algo_settings.pretrained_model_file, prediction_threshold=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_threshold, prediction_type=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_type)
                         # get the trantition in tr_group with the max intensity
                         max_int_transition = np.max([transition.intensity for transition in tr_group.transitionData])
                         peak_features = peak_picker.pick(tr_group, max_int_transition)
