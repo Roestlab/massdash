@@ -132,7 +132,7 @@ class Data1D(ABC):
                 slice_left = slice_right = excess_length // 2
             else: # length % 2 == 1
                 slice_left = excess_length // 2
-                slice_right = excess_length + 1 // 2
+                slice_right = (excess_length + 1) // 2
             new_data = self.data[slice_left:-slice_right]
             new_intensity = self.intensity[slice_left:-slice_right]
         else: # length > len(self.data):
