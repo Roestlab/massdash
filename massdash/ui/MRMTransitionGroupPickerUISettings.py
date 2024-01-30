@@ -70,5 +70,7 @@ class MRMTransitionGroupPickerUISettings:
             elif self.smoother == "sgolay":
                 self.sgolay_frame_length = plot_settings.smoothing_dict['sgolay_frame_length']
                 self.sgolay_polynomial_order = plot_settings.smoothing_dict['sgolay_polynomial_order']
+            elif self.smoother == "none":
+                self.smoother = "original"
             else:
-                st.error(f"Unknown supported smoothing type for MRMTransitionGroupPicker: {self.smoother}\n Needs to be one of 'Savitzky-Golay' or 'Gaussian'.")
+                st.error(f"Unknown supported smoothing type for MRMTransitionGroupPicker: {self.smoother}. Needs to be one of 'Savitzky-Golay' or 'Gaussian'.")
