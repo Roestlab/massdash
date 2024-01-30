@@ -30,11 +30,6 @@ URL_PRETRAINED_CONFORMER = "https://github.com/Roestlab/massdash/releases/downlo
 ## Data Handling
 
 # Data Smoothing
-SMOOTHING_TYPES_FULLNAME = {
-    'No Smoothing': 'none',
-    'Savitzky-Golay': 'sgolay',
-    'Gaussian': 'gauss'
-}
 SMOOTHING_DICT = {'No Smoothing': {'type': 'none'},
                   'Savitzky-Golay': {'type': 'sgolay', 'sgolay_polynomial_order': 3, 'sgolay_frame_length': 11},
                   'Gaussian': {'type': 'gauss', 'gaussian_sigma': 2.0, 'gaussian_window': 11}
