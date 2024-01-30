@@ -5,6 +5,9 @@ massdash/ui/ChromatogramPlotUISettings
 
 import streamlit as st
 
+# Constants
+from ..constants import SMOOTHING_DICT
+
 class ChromatogramPlotUISettings:
     """
     A class for managing the settings for a chromatogram plot.
@@ -105,10 +108,10 @@ class ChromatogramPlotUISettings:
                 self.set_y_range = st.checkbox("Share y-range", value=self.set_y_range, help="Share the y-range of the plots.")
 
             # Perform Smoothing of the chromatograms
-            self.do_smoothing = st.selectbox("Smoothing", ['none', 'sgolay', 'gaussian'], help="The type of smoothing to apply to the chromatograms.")
-
-            self.smoothing_dict['type'] = self.do_smoothing
-            if self.do_smoothing == 'sgolay':
+            self.do_smoothing = st.selectbox("Smoothing", list(SMOOTHING_DICT.keys()), help="The type of smoothing to apply to the chromatograms.")
+            
+            self.smoothing_dict = SMOOTHING_DICT[self.do_smoothing]
+            if self.smoothing_dict['type'] == 'sgolay':
                 # Create two columns for side-by-side widgets
                 col1, col2 = st.columns(2)
 
@@ -118,7 +121,7 @@ class ChromatogramPlotUISettings:
                 # Add widget for sgolay_frame_length in the second column
                 self.smoothing_dict['sgolay_frame_length'] = col2.number_input("Frame Length", min_value=1, max_value=50, value=11, step=1, help="The length of the frame to use for smoothing the chromatograms.")
 
-            if self.do_smoothing == 'gaussian':
+            if self.smoothing_dict['type'] == 'gauss':
                 # Create two columns for side-by-side widgets
                 col1, col2 = st.columns(2)
 
