@@ -6,7 +6,7 @@ massdash/ui/ChromatogramPlotUISettings
 import streamlit as st
 
 # Constants
-from ..constants import SMOOTHING_TYPES_FULLNAME, SMOOTHING_DICT
+from ..constants import SMOOTHING_DICT
 
 class ChromatogramPlotUISettings:
     """
