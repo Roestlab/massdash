@@ -10,7 +10,8 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
       - name: Update version
-        run: ./scripts/update_version.py --file-path ../../massdash/__init__.py
+        run: pwd
+        # run: ./scripts/update_version.py --file-path ../../massdash/__init__.py
       - name: Commit version update
         uses: test-room-7/action-update-file@v1
         with:
