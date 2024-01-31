@@ -10,12 +10,14 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
       - name: Update version
-        run: pwd
+        run: |
+             pwd 
+             ls
              $PWD/.github/workflows/scripts/update_version.py --file-path $PWD/massdash/__init__.py
       - name: Commit version update
         uses: test-room-7/action-update-file@v1
         with:
-              file-path: $PWD/massdash/__init__.py
+              file-path: /home/runner/work/massdash/massdash/massdash/__init__.py
               commit-msg: Bump patch version 
               github-token: ${{ secrets.GITHUB_TOKEN }}
         
