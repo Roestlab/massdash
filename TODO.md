@@ -1,10 +1,6 @@
 # TODOs
-
-- [ ] Add public base conformer model - added code, need to upload model
 - [ ] Add DreamDIA scoring model
-- [ ] Add gauss smoothing to visualization display. See [plotter.py#L169](https://github.com/Roestlab/massdash/blob/ebae2f529262e5b1a435f23432d1b4c30b7ec456/massdash/plotter.py#L169) and [plotting_ui.py#L52](https://github.com/Roestlab/massdash/blob/ebae2f529262e5b1a435f23432d1b4c30b7ec456/massdash/plotting_ui.py#L52)
 - [ ] Generate concensus chrom traces per transition
-- [ ] Docker / or just ssh port
 - [ ] Generate an exectuable
 
 # In Progress
@@ -28,3 +24,6 @@
 - [x] ~~raw mzML data loading~~
 - [x] ~~DIA-NN results inspection on the raw data~~
 - [x] ~~Make available on PyPi closer to time of publication~~
+- [x] ~~Docker / or just ssh port~~
+- [x] ~~Add gauss smoothing to visualization display. See [plotter.py#L169](https://github.com/Roestlab/massdash/blob/ebae2f529262e5b1a435f23432d1b4c30b7ec456/massdash/plotter.py#L169) and [plotting_ui.py#L52](https://github.com/Roestlab/massdash/blob/ebae2f529262e5b1a435f23432d1b4c30b7ec456/massdash/plotting_ui.py#L52)~~
+- [x] ~~Add public base conformer model - added code, need to upload model~~
