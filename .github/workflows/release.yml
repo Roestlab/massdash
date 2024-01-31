@@ -11,11 +11,11 @@ jobs:
       - uses: actions/setup-node@v1
       - name: Update version
         run: pwd
-        # run: ./scripts/update_version.py --file-path ../../massdash/__init__.py
+             $PWD/.github/workflows/scripts/update_version.py --file-path $PWD/massdash/__init__.py
       - name: Commit version update
         uses: test-room-7/action-update-file@v1
         with:
-              file-path: ../../massdash/__init__.py
+              file-path: $PWD/massdash/__init__.py
               commit-msg: Bump patch version 
               github-token: ${{ secrets.GITHUB_TOKEN }}
         
