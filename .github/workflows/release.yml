@@ -12,12 +12,11 @@ jobs:
       - name: Update version
         run: |
              pwd 
-             ls
              $PWD/.github/workflows/scripts/update_version.py --file-path $PWD/massdash/__init__.py
       - name: Commit version update
         uses: test-room-7/action-update-file@v1
         with:
-              file-path: /home/runner/work/massdash/massdash/massdash/__init__.py
+              file-path: massdash/__init__.py
               commit-msg: Bump patch version 
               github-token: ${{ secrets.GITHUB_TOKEN }}
         
