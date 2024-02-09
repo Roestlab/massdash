@@ -18,10 +18,11 @@ def cli():
 # GUI for MassDash.
 @cli.command()
 @click.option('--verbose', '-v', is_flag=True, help="Enables verbose mode.")
-@click.option('--perf', '-t', is_flag=True, help="Enables measuring and tracking of performance.")
+@click.option('--perf/--no_perf', 'perf', default=False, help="Enables or disables performance mode.")
 @click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
 @click.option('--server_port', '-p', default=8501, type=int, help="Port to run the MassDash GUI on.")
-def gui(verbose, perf, perf_output, server_port):
+@click.option('--global_developmentMode/--no_global_developmentMode', 'global_developmentMode', default=True, help="Enables or disables global development mode.")
+def gui(verbose, perf, perf_output, server_port, global_developmentMode):
     """
     GUI for MassDash.
     """
@@ -61,6 +62,9 @@ def gui(verbose, perf, perf_output, server_port):
     if server_port:
         streamlit_args.append('--server.port')
         streamlit_args.append(str(server_port))
+    if not global_developmentMode:
+        streamlit_args.append('--global.developmentMode')
+        streamlit_args.append('false')
     if verbose:
         click.echo(f"Running: streamlit run {filename} {streamlit_args} -- {add_args}")
     sys.argv = ["streamlit", "run", filename, *streamlit_args, "--", *add_args]
