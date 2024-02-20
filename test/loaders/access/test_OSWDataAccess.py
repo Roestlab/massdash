@@ -3,137 +3,71 @@ test/loaders/test_OSWDataAccess
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-import unittest
+import pytest
 from pathlib import Path
-
-import numpy as np
 import pandas as pd
-from snapshottest import TestCase
 
+from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
 from massdash.loaders.access.OSWDataAccess import OSWDataAccess
 from massdash.util import find_git_directory
 
 TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
+@pytest.fixture
+def snapshot_pandas(snapshot):
+    return snapshot.use_extension(PandasSnapshotExtenstion)
 
-class TestOSWDataAccess(TestCase):
-    def setUp(self):
-        self.db_path = f"{str(TEST_PATH)}/test_data/osw/test_data.osw"
-        self.osw_data_access = OSWDataAccess(self.db_path)
+@pytest.fixture
+def osw_data_access():
+    db_path = f"{str(TEST_PATH)}/test_data/osw/test_data.osw"
+    osw_data_access = OSWDataAccess(db_path)
+    yield osw_data_access
+    osw_data_access.conn.close()
 
-    def test_getProteinTable(self):
-        protein_table = self.osw_data_access.getProteinTable()
-        self.assertIsInstance(protein_table, pd.DataFrame)
-        self.assertMatchSnapshot(protein_table.shape)
-        self.assertMatchSnapshot(protein_table)
+def test_getProteinTable(osw_data_access, snapshot_pandas):
+    protein_table = osw_data_access.getProteinTable()
+    assert snapshot_pandas == protein_table 
 
-    def test_getPeptideTable(self):
-        peptide_table = self.osw_data_access.getPeptideTable()
-        self.assertIsInstance(peptide_table, pd.DataFrame)
-        self.assertMatchSnapshot(peptide_table.shape)
-        self.assertMatchSnapshot(peptide_table)
+def test_getPeptideTable(osw_data_access, snapshot_pandas):
+    peptide_table = osw_data_access.getPeptideTable()
+    assert isinstance(peptide_table, pd.DataFrame)
+    assert snapshot_pandas == peptide_table
 
-    def test_getPeptideTableFromProteinID(self):
-        protein_id = 539
-        peptide_table = self.osw_data_access.getPeptideTableFromProteinID(protein_id)
-        self.assertIsInstance(peptide_table, pd.DataFrame)
-        self.assertMatchSnapshot(peptide_table.shape)
-        self.assertMatchSnapshot(peptide_table)
+def test_getPeptideTableFromProteinID(osw_data_access, snapshot_pandas):
+    protein_id = 539
+    peptide_table = osw_data_access.getPeptideTableFromProteinID(protein_id)
+    assert snapshot_pandas == peptide_table
 
-    def test_getPrecursorCharges(self):
-        fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
-        precursor_charges = self.osw_data_access.getPrecursorCharges(fullpeptidename)
-        self.assertIsInstance(precursor_charges, pd.DataFrame)
-        self.assertMatchSnapshot(precursor_charges.shape)
-        self.assertMatchSnapshot(precursor_charges)
+def test_getPrecursorCharges(osw_data_access, snapshot_pandas):
+    fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
+    precursor_charges = osw_data_access.getPrecursorCharges(fullpeptidename)
+    assert snapshot_pandas == precursor_charges
 
-    def test_getPeptideTransitionInfo(self):
-        fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
-        charge = 2
-        peptide_transition_info = self.osw_data_access.getPeptideTransitionInfo(fullpeptidename, charge)
-        self.assertIsInstance(peptide_transition_info, pd.DataFrame)
-        self.assertMatchSnapshot(peptide_transition_info.shape)
-        # self.assertMatchSnapshot(peptide_transition_info)
-    
-    def test_getPrecursorIDFromPeptideAndCharge(self):
-        fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
-        charge = 2
-        precursor_id = self.osw_data_access.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
-        self.assertIsInstance(precursor_id, np.int64)
-        self.assertMatchSnapshot(precursor_id)
+def test_getPeptideTransitionInfo(osw_data_access, snapshot_pandas):
+    fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
+    charge = 2
+    peptide_transition_info = osw_data_access.getPeptideTransitionInfo(fullpeptidename, charge)
+    assert snapshot_pandas == peptide_transition_info 
 
-        ## test invalid
-        fullpeptidename = "INVALID"
-        charge = 0
-        precursor_id = self.osw_data_access.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
-        self.assertIsNone(precursor_id)
-    
-    def test_getTransitionIDAnnotationFromSequence(self):
-        fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
-        charge = 2
-        transition_group_feature = self.osw_data_access.getTransitionIDAnnotationFromSequence(fullpeptidename, charge)
-        self.assertIsInstance(transition_group_feature, pd.DataFrame)
-        self.assertMatchSnapshot(transition_group_feature.shape)
-        self.assertMatchSnapshot(transition_group_feature)
+@pytest.mark.parametrize("fullpeptidename,charge", [("ANS(UniMod:21)SPTTNIDHLK(UniMod:259)", 2), ("INVALID", 0)])
+def test_getTransitionIDAnnotationFromSequence(osw_data_access, snapshot_pandas, fullpeptidename, charge):
+    transition_group_feature = osw_data_access.getTransitionIDAnnotationFromSequence(fullpeptidename, charge)
+    print(transition_group_feature)
+    print(type(transition_group_feature))
+    assert snapshot_pandas == transition_group_feature 
 
-        ## test invalid
-        fullpeptidename = "INVALID"
-        charge = 0
-        transition_group_feature = self.osw_data_access.getTransitionIDAnnotationFromSequence(fullpeptidename, charge)
-        self.assertIsInstance(transition_group_feature, pd.DataFrame)
+@pytest.mark.parametrize("fullpeptidename,charge", [("ANS(UniMod:21)SPTTNIDHLK(UniMod:259)", 2), ("INVALID", 0)])
+def test_getPrecursorIDFromPeptideAndCharge(osw_data_access, snapshot, fullpeptidename, charge):
+    precursor_id = osw_data_access.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
+    assert snapshot == precursor_id 
 
-    def test_getTransitionGroupFeatures(self):
-        fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
-        charge = 2
-        run = "test_chrom_1"
-        transition_group_feature = self.osw_data_access.getTransitionGroupFeatures(fullpeptidename, charge, run)
-        self.assertIsInstance(transition_group_feature, list)
-        self.assertMatchSnapshot(len(transition_group_feature))
-        self.assertMatchSnapshot(transition_group_feature)
+@pytest.mark.parametrize("fullpeptidename,charge,run", [("ANS(UniMod:21)SPTTNIDHLK(UniMod:259)", 2, 'test_chrom_1'), ("INVALID", 0, 'test_chrom_1'), ("ANS(UniMod:21)SPTTNIDHLK(UniMod:259)", 2, 'INVALID'),])
+def test_getTransitionGroupFeatures(osw_data_access, snapshot, fullpeptidename, charge, run):
+    transition_group_feature = osw_data_access.getTransitionGroupFeatures(fullpeptidename, charge, run)
+    assert snapshot == transition_group_feature
 
-        ## test invalid peptide
-        fullpeptidename = "INVALID"
-        charge = 0
-        run = "test_chrom_1"
-        transition_group_feature = self.osw_data_access.getTransitionGroupFeatures(fullpeptidename, charge, run)
-        self.assertIsInstance(transition_group_feature, list)
-        self.assertMatchSnapshot(len(transition_group_feature))
 
-        ## test invalid run 
-        fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
-        charge = 2
-        run = "INVALID"
-        transition_group_feature = self.osw_data_access.getTransitionGroupFeatures(fullpeptidename, charge, run)
-        self.assertIsInstance(transition_group_feature, list)
-        self.assertMatchSnapshot(len(transition_group_feature))
-    
-    def test_getTransitionGroupFeaturesDf(self):
-        fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
-        charge = 2
-        run = "test_chrom_1"
-        transition_group_feature = self.osw_data_access.getTransitionGroupFeaturesDf(fullpeptidename, charge, run)
-        self.assertIsInstance(transition_group_feature, pd.DataFrame)
-        self.assertMatchSnapshot(transition_group_feature.shape)
-        self.assertMatchSnapshot(transition_group_feature)
-
-        ## test invalid peptide
-        fullpeptidename = "INVALID"
-        charge = 0
-        run = "test_chrom_1"
-        transition_group_feature = self.osw_data_access.getTransitionGroupFeaturesDf(fullpeptidename, charge, run)
-        self.assertIsInstance(transition_group_feature, pd.DataFrame)
-        self.assertMatchSnapshot(transition_group_feature.empty)
-
-        ## test invalid run 
-        fullpeptidename = "ANS(UniMod:21)SPTTNIDHLK(UniMod:259)"
-        charge = 2
-        run = "INVALID"
-        transition_group_feature = self.osw_data_access.getTransitionGroupFeaturesDf(fullpeptidename, charge, run)
-        self.assertIsInstance(transition_group_feature, pd.DataFrame)
-        self.assertMatchSnapshot(transition_group_feature.empty)
-    
-    def tearDown(self):
-        self.osw_data_access.conn.close()
-
-if __name__ == '__main__':
-    unittest.main()
+@pytest.mark.parametrize("fullpeptidename,charge,run", [("ANS(UniMod:21)SPTTNIDHLK(UniMod:259)", 2, 'test_chrom_1'), ("INVALID", 0, 'test_chrom_1'), ("ANS(UniMod:21)SPTTNIDHLK(UniMod:259)", 2, 'INVALID'),])
+def test_getTransitionGroupFeaturesDf(osw_data_access, snapshot, fullpeptidename, charge, run):
+    transition_group_feature = osw_data_access.getTransitionGroupFeaturesDf(fullpeptidename, charge, run)
+    assert snapshot == transition_group_feature
