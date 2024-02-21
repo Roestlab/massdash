@@ -69,7 +69,7 @@ while requirements:
 
 if remove_tests:
 	hidden_imports = sorted(
-		[h for h in hidden_imports if "tests" not in h.split(".")]
+		[h for h in hidden_imports if "test" not in h.split(".")]
 	)
 else:
 	hidden_imports = sorted(hidden_imports)
