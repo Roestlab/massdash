@@ -1,8 +1,8 @@
 Package: massdash
 Version: 0.0.8
 Architecture: all
-Maintainer: Röst Lab 
+Maintainer: Roest Lab 
 Description: MassDash
-  A web-based dashboard for streamlined DIA-MS visualization, analysis, prototyping, and optimization. https://github.com/Roestlab/massdash
+  A web-based dashboard for streamlined DIA-MS visualization, analysis,
+  prototyping, and optimization. https://github.com/Roestlab/massdash. 
 XB-Desktop-File: massdash.desktop
-  

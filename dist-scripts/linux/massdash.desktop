@@ -2,6 +2,6 @@
 Version=0.0.8
 Type=Application
 Name=massdash
-Exec=dist/massdash_linux/usr/local/bin/massdash
-Icon=dist/massdash_linux/usr/share/icons/massdash.ico
+Exec=/usr/local/bin/massdash
+Icon=/usr/share/icons/massdash.ico
 Terminal=false
