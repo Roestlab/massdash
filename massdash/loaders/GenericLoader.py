@@ -13,8 +13,7 @@ from .SpectralLibraryLoader import SpectralLibraryLoader
 from .access.OSWDataAccess import OSWDataAccess
 from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
 # Structs
-from ..structs.TransitionGroup import TransitionGroup
-from ..structs.TransitionGroupFeature import TransitionGroupFeature
+from ..structs import TransitionGroup, TransitionGroupFeature, TransitionGroupFeatureCollection, TopTransitionGroupFeatureCollection
 # Utils
 from ..util import LOGGER
 
@@ -93,7 +92,7 @@ class GenericLoader(ABC):
         '''
         pass
 
-    def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> Dict[str, List[TransitionGroupFeature]]:
+    def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> TransitionGroupFeatureCollection:
         '''
         Loads a PeakFeature object from the results file
         Args:
@@ -102,14 +101,14 @@ class GenericLoader(ABC):
         Returns:
             PeakFeature: PeakFeature object containing peak boundaries, intensity and confidence
         '''
-        out = {}
+        out = TransitionGroupFeatureCollection()
         for t in self.dataFiles_str:
             runname = basename(t).split('.')[0]
             out[t] = self.rsltsFile.getTransitionGroupFeatures(runname, pep_id, charge)
         return out
     
 
-    def loadTopTransitionGroupFeature(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
+    def loadTopTransitionGroupFeature(self, pep_id: str, charge: int) -> TopTransitionGroupFeatureCollection:
         '''
         Loads a PeakFeature object from the results file
         Args:
