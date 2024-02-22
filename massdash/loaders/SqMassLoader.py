@@ -14,7 +14,7 @@ from .GenericChromatogramLoader import GenericChromatogramLoader
 from .access.SqMassDataAccess import SqMassDataAccess
 from .access.OSWDataAccess import OSWDataAccess
 # Structs
-from ..structs.TransitionGroup import TransitionGroup
+from ..structs import TransitionGroup, TransitionGroupCollection
 
 class SqMassLoader(GenericChromatogramLoader):
 
@@ -56,7 +56,7 @@ class SqMassLoader(GenericChromatogramLoader):
 
         return pd.concat(out).reset_index().drop('level_1', axis=1).rename(columns=dict(level_0='filename'))
 
-    def loadTransitionGroups(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int) -> TransitionGroupCollection:
         '''
         Loads the transition group for a given peptide ID and charge across all files
         Args:
