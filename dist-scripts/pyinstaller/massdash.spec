@@ -1,23 +1,22 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-import pkgutil
-import os
-import sys ; sys.setrecursionlimit(sys.getrecursionlimit() * 5)
-from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT, BUNDLE, TOC
-import PyInstaller.utils.hooks
-import pkg_resources
+import site
 import importlib.metadata
-import massdash
+import os
+import sys
 
-from PyInstaller.utils.hooks import copy_metadata
+from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT
+from PyInstaller.utils.hooks import collect_all, collect_data_files, copy_metadata
+
 from transformers.dependency_versions_check import pkgs_to_check_at_runtime
 
+sys.setrecursionlimit(sys.getrecursionlimit() * 5)
 
 ##################### User definitions
 exe_name = 'massdash_gui'
 script_name = 'run.py'
 if sys.platform[:6] == "darwin":
-	icon = '../../massdash/assets/img/MassDash_Logo.ico'
+	icon = '../../massdash/assets/img/MassDash_Logo.icns'
 else:
 	icon = '../../massdash/assets/img/MassDash_Logo.ico'
 block_cipher = None
@@ -28,17 +27,14 @@ bundle_name = "massdash"
 #####################
 
 
-requirements = {
-	req.split()[0] for req in importlib.metadata.requires(project)
-}
-requirements.add(project)
-requirements.add("distributed")
+requirements = {project, "streamlit_javascript", "upsetplot", "distributed"}
+datas = [(f"{site.getsitepackages()[0]}/streamlit/runtime", "./streamlit/runtime")]
 hidden_imports = set()
-datas = []
 binaries = []
 checked = set()
 while requirements:
 	requirement = requirements.pop()
+	print(f"Info: Checking {requirement}")
 	checked.add(requirement)
 	if requirement in ["pywin32"]:
 		continue
@@ -51,7 +47,7 @@ while requirements:
 	):
 		continue
 	try:
-		datas_, binaries_, hidden_imports_ = PyInstaller.utils.hooks.collect_all(
+		datas_, binaries_, hidden_imports_ = collect_all(
 			requirement,
 			include_py_files=True
 		)
@@ -97,7 +93,15 @@ for _pkg in ["python","accelerate"]:
 for _pkg in pkgs_to_check_at_runtime:
 	datas += copy_metadata(_pkg)
 
+
+datas += collect_data_files("streamlit")
 datas += copy_metadata("streamlit")
+datas += collect_data_files("pyopenms")
+datas += copy_metadata("pyopenms")
+datas += collect_data_files("massdash")
+datas += copy_metadata("massdash")
+
+hidden_imports = ['pyopenms', 'massdash', 'torchaudio.lib.libtorchaudio']
 
 a = Analysis(
 	[script_name],
@@ -105,7 +109,7 @@ a = Analysis(
 	binaries=binaries,
 	datas=datas,
 	hiddenimports=hidden_imports,
-	hookspath=[],
+	hookspath=['./hooks'],
 	runtime_hooks=[],
 	excludes=[],
 	win_no_prefer_redirects=False,
