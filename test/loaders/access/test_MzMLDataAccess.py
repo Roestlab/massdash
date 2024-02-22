@@ -1,17 +1,22 @@
 import pandas as pd
 import numpy as np
+from pathlib import Path
+import os
 
 import pytest
 from massdash.loaders.access.MzMLDataAccess import MzMLDataAccess
 from massdash.structs import TargetedDIAConfig, TransitionGroupFeature
 from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
 from massdash.testing.NumpySnapshotExtension import NumpySnapshotExtenstion
+from massdash.util import find_git_directory
 
 ## Note: Cached is not tested
 
+TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
+
 @pytest.fixture
 def mzml_data_access():
-    mzml_data_access = MzMLDataAccess("../../test_data/mzml/ionMobilityTest.mzML", readOptions='ondisk')
+    mzml_data_access = MzMLDataAccess(os.path.join(TEST_PATH, 'test_data', 'mzml', 'ionMobilityTest.mzML'), readOptions='ondisk')
     return mzml_data_access
 
 @pytest.fixture

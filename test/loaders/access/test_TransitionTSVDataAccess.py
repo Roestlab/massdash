@@ -1,11 +1,12 @@
+from pathlib import Path
 import pytest
-from massdash.loaders.access.TransitionTSVDataAccess import TransitionTSVDataAccess
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
 import pandas as pd
 
-@pytest.fixture
-def filename():
-    return "../../test_data/example_dia/diann/lib/test_1_lib.tsv"
+from massdash.loaders.access.TransitionTSVDataAccess import TransitionTSVDataAccess
+from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
+from massdash.util import find_git_directory
+
+TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
@@ -13,7 +14,7 @@ def snapshot_pandas(snapshot):
 
 @pytest.fixture
 def data_access():
-    return TransitionTSVDataAccess("../../test_data/example_dia/diann/lib/test_1_lib.tsv")
+    return TransitionTSVDataAccess(f"{TEST_PATH}/test_data/example_dia/diann/lib/test_1_lib.tsv")
 
 def test_resolve_column_names(data_access, snapshot_pandas):
     data_access.data = pd.read_csv(data_access.filename, sep='\t')

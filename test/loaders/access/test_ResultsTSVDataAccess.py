@@ -1,15 +1,19 @@
+from pathlib import Path
 import pytest
-from massdash.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
 from syrupy.extensions.amber import AmberDataSerializer
 
+from massdash.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
+from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
+from massdash.util import find_git_directory
+
+TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
 @pytest.fixture
 def access(request):
     if request.param == 'diann':
-        return ResultsTSVDataAccess("../../test_data/example_dia/diann/report/test_1_diann_report.tsv", 'DIA-NN')
+        return ResultsTSVDataAccess(f"{TEST_PATH}/test_data/example_dia/diann/report/test_1_diann_report.tsv", 'DIA-NN')
     if request.param == 'dream':
-        return ResultsTSVDataAccess("../../test_data/example_dia/dreamdia/test_dreamdia_report.tsv", 'DreamDIA')
+        return ResultsTSVDataAccess(f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv", 'DreamDIA')
 
 @pytest.fixture
 def runname():

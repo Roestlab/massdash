@@ -1,10 +1,15 @@
-from massdash.loaders.access.TransitionPQPDataAccess import TransitionPQPDataAccess
+from pathlib import Path
 import pytest
+
+from massdash.loaders.access.TransitionPQPDataAccess import TransitionPQPDataAccess
 from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
+from massdash.util import find_git_directory
+
+TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
 @pytest.fixture
 def data_access():
-    filename = "../../test_data/example_dia/openswath/lib/test.pqp"
+    filename = f"{TEST_PATH}/test_data/example_dia/openswath/lib/test.pqp"
     data_access = TransitionPQPDataAccess(filename)
     yield data_access
     data_access.close()
