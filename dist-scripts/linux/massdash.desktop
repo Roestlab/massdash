@@ -4,4 +4,4 @@ Type=Application
 Name=massdash
 Exec=/usr/local/bin/massdash
 Icon=/usr/share/icons/massdash.ico
-Terminal=false
+Terminal=true
