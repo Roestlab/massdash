@@ -1,0 +1,34 @@
+# serializer version: 1
+# name: test_getPrecursorIDFromPeptideAndCharge[ANS(UniMod:21)SPTTNIDHLK(UniMod:259)-2]
+  29
+# ---
+# name: test_getPrecursorIDFromPeptideAndCharge[INVALID-0]
+  None
+# ---
+# name: test_getTransitionGroupFeaturesDf[ANS(UniMod:21)SPTTNIDHLK(UniMod:259)-2-INVALID]
+  Empty DataFrame
+  Columns: [filename, leftBoundary, rightBoundary, areaIntensity, qvalue, consensusApex, consensusApexIntensity]
+  Index: []
+# ---
+# name: test_getTransitionGroupFeaturesDf[ANS(UniMod:21)SPTTNIDHLK(UniMod:259)-2-test_chrom_1]
+  Empty DataFrame
+  Columns: [filename, leftBoundary, rightBoundary, areaIntensity, qvalue, consensusApex, consensusApexIntensity]
+  Index: []
+# ---
+# name: test_getTransitionGroupFeaturesDf[INVALID-0-test_chrom_1]
+  Empty DataFrame
+  Columns: [filename, leftBoundary, rightBoundary, areaIntensity, qvalue, consensusApex, consensusApexIntensity]
+  Index: []
+# ---
+# name: test_getTransitionGroupFeatures[ANS(UniMod:21)SPTTNIDHLK(UniMod:259)-2-INVALID]
+  list([
+  ])
+# ---
+# name: test_getTransitionGroupFeatures[ANS(UniMod:21)SPTTNIDHLK(UniMod:259)-2-test_chrom_1]
+  list([
+  ])
+# ---
+# name: test_getTransitionGroupFeatures[INVALID-0-test_chrom_1]
+  list([
+  ])
+# ---
