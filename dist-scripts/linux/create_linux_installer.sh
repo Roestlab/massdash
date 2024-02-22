@@ -32,6 +32,7 @@ cd dist-scripts/linux
 # Create the installer
 echo "[$(date)] INFO - Creating the installer"
 pyinstaller ../pyinstaller/massdash.spec -y
+conda deactivate
 
 # Create the debian package
 echo "[$(date)] INFO - Creating the debian package"
