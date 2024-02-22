@@ -20,7 +20,7 @@ def test_resolve_column_names(data_access, snapshot_pandas):
     data_access._resolve_column_names()
     assert snapshot_pandas == data_access.data
 
-def test_generate_annotation(data_access, snapshot):
+def test_generate_annotation(data_access, snapshot_pandas):
     data_access.data = pd.read_csv(data_access.filename, sep='\t')
     data_access._resolve_column_names()
     data_access.generate_annotation()
