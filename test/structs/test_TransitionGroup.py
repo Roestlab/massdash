@@ -7,6 +7,7 @@ import unittest
 from massdash.structs.TransitionGroup import TransitionGroup
 from massdash.structs.Chromatogram import Chromatogram
 import numpy as np
+import pandas as pd
 
 class TestTransitionGroup(unittest.TestCase):
 
@@ -45,6 +46,12 @@ class TestTransitionGroup(unittest.TestCase):
         self.assertAlmostEqual(self.transitionGroup.median((2.5, 3.5), level='ms2'), 13.5)
         self.assertAlmostEqual(self.transitionGroup.median((1.5, 2.5), level='ms1ms2'), np.median(np.array([5,8,11,14])))
         self.assertAlmostEqual(self.transitionGroup.median((2.5, 3.5), level='ms1ms2'), np.median(np.array([6, 9, 12, 15])))
+    
+    def test_toPandasDf(self):
+        # Test the toPandasDf() method
+        df = self.transitionGroup.toPandasDf()
+        expected = pd.DataFrame({'rt': [1,2,3] * 4, 'intensity': [4,5,6,7,8,9,10,11,12,13,14,15], 'annotation': ['test1', 'test1', 'test1', 'test2', 'test2', 'test2', 'test3', 'test3', 'test3', 'test4', 'test4', 'test4']})
+        pd.testing.assert_frame_equal(df.reset_index(drop=True), expected)
 
 if __name__ == '__main__':
     unittest.main()
