@@ -13,13 +13,13 @@
 # ---
 # name: test_loadTransitionGroupFeatures[diann]
   '''
-  dict({
+  TransitionGroupFeatureCollection({
   })
   '''
 # ---
 # name: test_loadTransitionGroupFeatures[osw]
   '''
-  dict({
+  TransitionGroupFeatureCollection({
   })
   '''
 # ---
