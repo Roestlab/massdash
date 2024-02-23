@@ -16,6 +16,7 @@ from .TopTransitionGroupFeatureCollection import TopTransitionGroupFeatureCollec
 from .TransitionFeature import TransitionFeature
 from .TransitionGroupFeature import TransitionGroupFeature
 from .TransitionGroup import TransitionGroup
+from .TransitionGroupCollection import TransitionGroupCollection
 from .TransitionGroupFeatureCollection import TransitionGroupFeatureCollection
 
 

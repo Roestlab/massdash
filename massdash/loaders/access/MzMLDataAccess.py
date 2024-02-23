@@ -419,6 +419,7 @@ class MzMLDataAccess():
             results_df = results_df.merge(annotation_mz_mapping, on='Annotation', how='left')
         else:
             LOGGER.warn(f"No spectra found for peptide: {feature.sequence}{feature.precursor_charge}. Try adjusting the extraction parameters")
+            results_df = pd.DataFrame(columns=['rt', 'int', 'Annotation'])
 
         return FeatureMap(results_df, feature.sequence, feature.precursor_charge, config)
     
