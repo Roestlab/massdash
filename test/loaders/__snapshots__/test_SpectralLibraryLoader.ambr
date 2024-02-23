@@ -1,0 +1,177 @@
+# serializer version: 1
+# name: test_get_fragment_library_intensity[diann-DYASIDAAPEER-2-b3^1]
+  0.2398542
+# ---
+# name: test_get_fragment_library_intensity[openswath-DYASIDAAPEER-2-y4/0.01y10^2/0.50]
+  5399.8
+# ---
+# name: test_get_peptide_fragment_annotation_list[diann-DYASIDAAPEER-2]
+  list([
+    'b4^1',
+    'y5^1',
+    'b4^1',
+    'y10^1',
+    'b3^1',
+    'b7^1',
+    'y5^1',
+    'b3^1',
+    'y8^1',
+    'b6^1',
+    'y9^1',
+    'b5^1',
+    'y4^1',
+    'b7^1',
+    'y7^1',
+    'y6^1',
+    'y7^1',
+    'y9^1',
+    'b6^1',
+    'y3^1',
+    'y3^1',
+    'b5^1',
+    'b8^1',
+    'y4^1',
+    'y3^1',
+    'y10^2',
+    'y4^1',
+  ])
+# ---
+# name: test_get_peptide_fragment_annotation_list[openswath-DYASIDAAPEER-2]
+  list([
+    'b3/0.01b7-36^2/-0.51',
+    'y4/0.01y10^2/0.50',
+    'y5/0.01y11-18^2/-0.99',
+    'y7/-0.00',
+    'y8/0.00',
+    'y9/0.00b10-46/0.03',
+  ])
+# ---
+# name: test_get_peptide_ion_mobility[diann-im-AFVDFLSDEIK-2]
+  1.0276841808
+# ---
+# name: test_get_peptide_library_intensity[diann-DYASIDAAPEER-2]
+  0.13932478
+# ---
+# name: test_get_peptide_library_intensity[openswath-DYASIDAAPEER-2]
+  3475.6
+# ---
+# name: test_get_peptide_precursor_mz[diann-DYASIDAAPEER-2]
+  668.80402
+# ---
+# name: test_get_peptide_precursor_mz[openswath-DYASIDAAPEER-2]
+  668.804
+# ---
+# name: test_get_peptide_product_charge_list[diann-DYASIDAAPEER-2]
+  list([
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    1,
+  ])
+# ---
+# name: test_get_peptide_product_charge_list[openswath-DYASIDAAPEER-2]
+  list([
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+  ])
+# ---
+# name: test_get_peptide_product_mz_list[diann-DYASIDAAPEER-2]
+  list([
+    437.16724,
+    601.2951,
+    419.15613,
+    1058.5123,
+    350.13519,
+    736.31537,
+    584.26855,
+    332.12408,
+    900.44324,
+    665.27826,
+    987.47528,
+    550.25128,
+    513.23145,
+    718.30426,
+    787.35919,
+    672.33221,
+    770.33264,
+    969.46417,
+    647.26715,
+    433.20523,
+    415.19412,
+    532.24017,
+    807.35248,
+    512.24689,
+    416.17868,
+    529.76007,
+    530.258,
+  ])
+# ---
+# name: test_get_peptide_product_mz_list[openswath-DYASIDAAPEER-2]
+  list([
+    350.141,
+    530.262,
+    601.3,
+    787.356,
+    900.444,
+    987.475,
+  ])
+# ---
+# name: test_get_peptide_retention_time[openswath-DYASIDAAPEER-2]
+  13.3
+# ---
+# name: test_get_unique_charge_states_per_peptide[diann]
+  array([], dtype=int64)
+# ---
+# name: test_get_unique_charge_states_per_peptide[openswath]
+  array([], dtype=int64)
+# ---
+# name: test_get_unique_peptides_per_protein[diann]
+  array([], dtype=object)
+# ---
+# name: test_get_unique_peptides_per_protein[openswath]
+  array([], dtype=object)
+# ---
+# name: test_get_unique_proteins[diann]
+  array(['P0C0G7;P0DB18;P0DB19;P68777;Q5XDW3', 'P69952',
+         'A2RFE3;B5XKM7;P0DA94;P0DA95;P69949;P69951;Q1J7I5;Q1JHQ6;Q48UF7'],
+        dtype=object)
+# ---
+# name: test_get_unique_proteins[openswath]
+  array(['Spyo_Exp3652_DDB_SeqID_514830', 'Spyo_Exp3652_DDB_SeqID_514851'],
+        dtype=object)
+# ---
+# name: test_populateTransitionGroupFeatures[diann]
+  NoneType(
+  )
+# ---
+# name: test_populateTransitionGroupFeatures[openswath]
+  NoneType(
+  )
+# ---
