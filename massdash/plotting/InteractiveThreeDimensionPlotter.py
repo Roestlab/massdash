@@ -51,8 +51,10 @@ class InteractiveThreeDimensionPlotter:
             plots = self.plot_3d_scatter(featureMap, num_cols = self.config.num_plot_columns)
         elif self.config.type_of_3d_plot == "3D Surface Plot" and not self.config.aggregate_mslevels:
             plots = self.plot_individual_3d_surface(featureMap, self.config.num_plot_columns)
-        elif self.config.type_of_3d_plot == "3D Line Plot" and not self.config.aggregate_mslevels:
+        elif self.config.type_of_3d_plot == "3D Line Plot": 
             plots = self.plot_3d_vline(featureMap)
+        else:
+            raise ValueError(f"Error: Invalid type of 3D plot: {self.config.type_of_3d_plot}, must be either '3D Scatter Plot', '3D Surface Plot', or '3D Line Plot'")
         self.fig = plots
         return plots
     

@@ -128,12 +128,16 @@ class FeatureMapPlotterServer:
         Returns:
             None
         """
-        for file, tr_df in self.targeted_data.items():
+        for file, tr_df in self.featureMapCollection.items():
             if not tr_df.empty():
-                plot_settings_dict = self._get_plot_settings(file)
+                # Set the plot settings 
+                plot_settings_dict = self.chrom_plot_settings.get_settings()
+                plot_settings_dict['title'] = basename(file)
+                plot_settings_dict['subtitle'] = f"{self.transition_list_ui.transition_settings.selected_protein} | {self.transition_list_ui.transition_settings.selected_peptide}_{self.transition_list_ui.transition_settings.selected_charge}"
                 plot_config = PlotConfig()
                 plot_config.update(plot_settings_dict)
                 plotter = InteractiveTwoDimensionPlotter(plot_config)
+
                 two_d_plots = plotter.plot(tr_df)
                 p = gridplot(two_d_plots, ncols=self.chrom_plot_settings.num_plot_columns, sizing_mode='stretch_width')
                 self.plot_obj_dict[file] = p
@@ -146,9 +150,11 @@ class FeatureMapPlotterServer:
         Returns:
             None
         """
-        for file, tr_df in self.targeted_data.items():
+        for file, tr_df in self.featureMapCollection.items():
             if not tr_df.empty():
-                plot_settings_dict = self._get_plot_settings(file)
+                plot_settings_dict = self.chrom_plot_settings.get_settings()
+                plot_settings_dict['title'] = basename(file)
+                plot_settings_dict['subtitle'] = f"{self.transition_list_ui.transition_settings.selected_protein} | {self.transition_list_ui.transition_settings.selected_peptide}_{self.transition_list_ui.transition_settings.selected_charge}"
                 plot_config = PlotConfig()
                 plot_config.update(plot_settings_dict)
                 plotter = InteractiveThreeDimensionPlotter(plot_config)
@@ -195,11 +201,11 @@ class FeatureMapPlotterServer:
         try:
             for run, tr_group in tr_group_collection.items():
                 plot_config = PlotConfig()
-            plot_config.update(plot_settings_dict)
-            plot_settings_dict['title'] = basename(run)
-            plotter = InteractivePlotter(plot_config, self.verbose)
-            self.plot_obj_dict[run].append(plotter.plot(tr_group, 
-                                                        features=None if tr_group_feature_collection is None else tr_group_feature_collection[run], 
+                plot_config.update(plot_settings_dict)
+                plot_settings_dict['title'] = basename(run)
+                plotter = InteractivePlotter(plot_config, self.verbose)
+                self.plot_obj_dict[run].append(plotter.plot(tr_group, 
+                                                            features=None if tr_group_feature_collection is None else tr_group_feature_collection[run], 
                                                             plot_type=plot_settings_dict['plot_type']))
         except ValueError:
             st.error("Failed to generate plot! There may be no data for selected transition group.")

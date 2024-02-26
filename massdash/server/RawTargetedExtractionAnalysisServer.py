@@ -197,11 +197,11 @@ class RawTargetedExtractionAnalysisServer:
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
                 plot_server = FeatureMapPlotterServer(featureMaps, 
-                                                          self.mzml_loader, 
-                                                              transition_list_ui, 
-                                                              chrom_plot_settings, 
-                                                              peak_picking_settings, 
-                                                          self.massdash_gui.verbose)
+                                                      self.mzml_loader, 
+                                                      transition_list_ui, 
+                                                      chrom_plot_settings, 
+                                                      peak_picking_settings, 
+                                                      self.massdash_gui.verbose)
                 plot_server.generate_plots()
                 plot_obj_dict = plot_server.plot_obj_dict
             st_log_writer.write(f"Generating plot complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
