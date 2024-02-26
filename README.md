@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Logo_Light.png" alt="MassDash_Logo" width="500">
     <source media="(prefers-color-scheme: light)" srcset="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Logo_Dark.png" alt="MassDash_Logo" width="500">
-    <img alt="MassDash Logo" comment="Placeholder to transition between light color mode and dark color mode - this image is not directly used." src="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png">
+    <img alt="MassDash Logo" comment="Placeholder to transition between light color mode and dark color mode - this image is not directly used." src="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Logo_Dark.png">
   </picture>
 </p>
 
@@ -28,10 +28,10 @@
 pip install massdash --upgrade
 ```
 
-or if you use Anaconda for package and environment management, then you can install from bioconda:
+or, install the latest stable version of MassDash from Bioconda if you are using Anaconda for package and environment management:
 
 ```bash
-conda install bioconda::massdash
+conda install bioconda::massdash --upgrade
 ```
 
 <details>

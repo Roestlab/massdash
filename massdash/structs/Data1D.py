@@ -122,23 +122,23 @@ class Data1D(ABC):
             (new_data, new_intensity) : tuple of padded/truncated data and intensity
 
         """
-
         #### need to slice the array
         if length == len(self.data):
             new_data = self.data
             new_intensity = self.intensity
         elif length < len(self.data):
-            if length % 2 == 0:
-                slice_left = slice_right = length // 2
+            excess_length = len(self.data) - length
+            if excess_length % 2 == 0:
+                slice_left = slice_right = excess_length // 2
             else: # length % 2 == 1
-                slice_left = length // 2 + 1
-                slice_right = length // 2
+                slice_left = excess_length // 2
+                slice_right = (excess_length + 1) // 2
             new_data = self.data[slice_left:-slice_right]
             new_intensity = self.intensity[slice_left:-slice_right]
         else: # length > len(self.data):
             ### infer the chromatogram step size
             step = self.data[1] - self.data[0]
-
+            
             both_even_or_odd = length % 2 == len(self.data) % 2
             if both_even_or_odd:
                 pad_left = pad_right = (length - len(self.data)) // 2

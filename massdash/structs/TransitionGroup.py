@@ -181,7 +181,7 @@ class TransitionGroup:
     
     def plot(self, 
              transitionGroupFeatures: Optional[List[TransitionGroupFeature]] = None, 
-             smoothing: Optional[Literal['none', 'sgolay', 'gaussian']] = 'none',
+             smoothing: Optional[Literal['none', 'sgolay', 'gauss']] = 'none',
              gaussian_sigma: float = 2.0,
              gaussian_window: int = 11,
              sgolay_polynomial_order: int = 3,

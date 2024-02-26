@@ -103,7 +103,7 @@ class InteractivePlotter(GenericPlotter):
                 else:
                     raise ValueError(error_message)
 
-        elif self.smoothing_dict['type'] == 'gaussian':
+        elif self.smoothing_dict['type'] == 'gauss':
             try:
                 window = gaussian(self.smoothing_dict['gaussian_window'], std=self.smoothing_dict['gaussian_sigma'])
                 intensity = convolve(intensity, window, mode='same') / window.sum()
