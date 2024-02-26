@@ -251,6 +251,7 @@ class InteractiveThreeDimensionPlotter:
             horizontal_spacing = 0.05
             vertical_spacing = 0.05
             height_scale_factor = width_scale_factor = 800
+            ratio = 1
         elif self.config.context == "jupyter":
             ratio = 0.75
             horizontal_spacing = 0.03
