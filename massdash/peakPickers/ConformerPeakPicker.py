@@ -41,7 +41,7 @@ class ConformerPeakPicker:
         _convertConformerFeatureToTransitionGroupFeatures: Convert conformer predicted feature to TransitionGroupFeatures.
     """
     
-    def __init__(self, library_file: str, pretrained_model_file: str, prediction_threshold: float = 0.5, prediction_type: Literal['logits', 'sigmoided', 'binarized'] = "logits"):
+    def __init__(self, library: SpectralLibraryLoader, pretrained_model_file: str, prediction_threshold: float = 0.5, prediction_type: Literal['logits', 'sigmoided', 'binarized'] = "logits"):
         """
         Initialize the ConformerPeakPicker class.
 
@@ -49,11 +49,12 @@ class ConformerPeakPicker:
             pretrained_model_file (str): The path to the pretrained model file.
             prediction_threshold (float, optional): The prediction threshold for peak picking. Defaults to 0.5.
             prediction_type (str): The prediction type for peak picking. Defaults to "logits". Valid options are ["logits", "sigmoided", "binarized"].
+            library (SpectralLibraryLoader): The spectral library.
         """
         self.pretrained_model_file = pretrained_model_file
         self.prediction_threshold = prediction_threshold
         self.prediction_type = prediction_type
-        self.library = SpectralLibraryLoader(library_file)
+        self.library = library
         
         self._validate_model()
 

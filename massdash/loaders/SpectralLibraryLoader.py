@@ -11,7 +11,7 @@ import pandas as pd
 from .access.TransitionTSVDataAccess import TransitionTSVDataAccess
 from .access.TransitionPQPDataAccess import TransitionPQPDataAccess
 # Structs
-from ..structs.TransitionGroupFeature import TransitionGroupFeature
+from ..structs import TransitionGroupFeature
 # Utils
 from ..util import LOGGER
 

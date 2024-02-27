@@ -17,19 +17,14 @@ from ..ui.PeakPickingUISettings import PeakPickingUISettings
 from ..ui.ConcensusChromatogramUISettings import ConcensusChromatogramUISettings
 from ..ui.util import st_mutable_write
 # Server
-from .OneDimensionPlotterServer import OneDimensionPlotterServer
-from .TwoDimensionPlotterServer import TwoDimensionPlotterServer
-from .ThreeDimensionPlotterServer import ThreeDimensionPlotterServer
-from .util import check_ion_mobility
+from .FeatureMapPlotterServer import FeatureMapPlotterServer
 # Structs 
-from ..structs.TargetedDIAConfig import TargetedDIAConfig
 from ..structs.TransitionGroupFeature import TransitionGroupFeature
 from ..structs.FeatureMap import FeatureMap
 # Loaders
-from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from ..loaders.MzMLDataLoader import MzMLDataLoader
 # Util
-from ..util import LOGGER, conditional_decorator, check_streamlit, time_block, MeasureBlock
+from ..util import LOGGER, conditional_decorator, check_streamlit, MeasureBlock
 
 class RawTargetedExtractionAnalysisServer:
     
@@ -201,12 +196,14 @@ class RawTargetedExtractionAnalysisServer:
             with MeasureBlock(f"{self.__class__.__name__}::PlotGeneration", self.massdash_gui.perf, self.massdash_gui.perf_output) as perf_metrics:
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
-                if chrom_plot_settings.display_plot_dimension_type == "1D":
-                    plot_obj_dict = OneDimensionPlotterServer(featureMaps, self.mzml_loader, transition_list_ui, chrom_plot_settings, peak_picking_settings, self.massdash_gui.file_input_settings.transition_list_file_path, self.massdash_gui.verbose).generate_chromatogram_plots().plot_obj_dict
-                elif chrom_plot_settings.display_plot_dimension_type == "2D":
-                    plot_obj_dict = TwoDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_two_dimensional_plots().plot_obj_dict
-                elif chrom_plot_settings.display_plot_dimension_type == "3D":
-                    plot_obj_dict = ThreeDimensionPlotterServer(featureMaps, transition_list_ui, chrom_plot_settings).generate_three_dimensional_plots().plot_obj_dict
+                plot_server = FeatureMapPlotterServer(featureMaps, 
+                                                      self.mzml_loader, 
+                                                      transition_list_ui, 
+                                                      chrom_plot_settings, 
+                                                      peak_picking_settings, 
+                                                      self.massdash_gui.verbose)
+                plot_server.generate_plots()
+                plot_obj_dict = plot_server.plot_obj_dict
             st_log_writer.write(f"Generating plot complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
             
             # Show extracted data
