@@ -330,7 +330,9 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
             A dictionary containing the plot objects for each file.
         """
         with plot_container:
-            if len(plot_dict[list(plot_dict.keys())[0]]) == 1:
+            if not plot_dict: # dictionary is empty
+                pass
+            elif len(plot_dict[list(plot_dict.keys())[0]]) == 1:
                 cols = st.columns(chrom_plot_settings.num_plot_columns)
                 for col, (file, run_plots_list) in zip(cols, plot_dict.items()):
                     with col:

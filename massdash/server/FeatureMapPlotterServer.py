@@ -86,7 +86,7 @@ class FeatureMapPlotterServer:
 
         if self.chrom_plot_settings.display_spectrum:
             spectra = self.featureMapCollection.to_spectra()
-            plot_settings_dict = self._get_plot_settings('m/z', 'Intensity', 'spectra')
+            plot_settings_dict = self._get_plot_settings('m/z', 'Intensity', 'spectrum')
             self._generate_plots_helper(spectra, plot_settings_dict)
 
         if self.chrom_plot_settings.display_chromatogram:
