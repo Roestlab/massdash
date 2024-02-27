@@ -27,8 +27,10 @@ from massdash.util import LOGGER, get_download_folder, download_file, reset_app,
 @click.option('--verbose', '-v', is_flag=True, help="Enables verbose mode.")
 @click.option('--perf', '-t', is_flag=True, help="Enables measuring and tracking of performance.")
 @click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
-def main(verbose, perf, perf_output):     
+def main(verbose, perf, perf_output):
+    main_helper(verbose, perf, perf_output)     
 
+def main_helper(verbose, perf, perf_output):
     ###########################
     ## Logging
     LOGGER.name = 'MassDashGUIMain'
@@ -164,4 +166,5 @@ def main(verbose, perf, perf_output):
     st.sidebar.image(OPENMS_LOGO)
     
 if __name__ == "__main__":
-    main()
+    # Note this is configured this way for tests
+    main_helper(False, False, 'MassDash_Performance_Report.txt')
