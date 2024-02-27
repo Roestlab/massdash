@@ -66,7 +66,7 @@ class TransitionGroupFeature(GenericFeature):
         return super().getBoundaries()
 
     @staticmethod
-    def toPanadsDf(transitionGroupFeatureLst: List["TransitionGroupFeature"]) -> pd.DataFrame:
+    def toPandasDf(transitionGroupFeatureLst: List["TransitionGroupFeature"]) -> pd.DataFrame:
         '''
         Convert a list of TransitionGroupFeature objects to a pandas dataframe
         '''

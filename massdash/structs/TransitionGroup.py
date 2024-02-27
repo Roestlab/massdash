@@ -36,9 +36,16 @@ class TransitionGroup:
         '''
         Convert the TransitionGroup to a Pandas DataFrame
         '''
-        transitionDataDf = pd.concat([ i.toPandasDf() for i in self.transitionData])
-        precursorDataDf = pd.concat([ i.toPandasDf() for i in self.precursorData])
-        return pd.concat([precursorDataDf, transitionDataDf])
+        if self.transitionData == [] and self.precursorData == []:
+            return pd.DataFrame()
+        elif self.transitionData == []:
+            return pd.concat([ i.toPandasDf() for i in self.precursorData])
+        elif self.precursorData == []:
+            return pd.concat([ i.toPandasDf() for i in self.transitionData])
+        else:
+            transitionDataDf = pd.concat([ i.toPandasDf() for i in self.transitionData])
+            precursorDataDf = pd.concat([ i.toPandasDf() for i in self.precursorData])
+            return pd.concat([precursorDataDf, transitionDataDf])
 
     def to_pyopenms(self, includePrecursors=True):
         '''
