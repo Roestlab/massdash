@@ -5,21 +5,25 @@ test/loaders/test_GenericLoader
 
 import os
 from typing import Dict
-from massdash.structs.TransitionGroup import TransitionGroup
-from pandas.core.api import DataFrame as DataFrame
+from pathlib import Path
+
+import pandas as pd
 import pytest
-from massdash.loaders.GenericLoader import GenericLoader
 from syrupy.extensions.amber import AmberDataSerializer
 
+from massdash.util import find_git_directory
+from massdash.structs.TransitionGroup import TransitionGroup
+from massdash.loaders.GenericLoader import GenericLoader
+
 class DummyGenericLoader(GenericLoader):
-    def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> DataFrame:
+    def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         return super().loadTopTransitionGroupFeatureDf(pep_id, charge)
     def loadTransitionGroups(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
         return super().loadTransitionGroups(pep_id, charge)
-    def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> DataFrame:
+    def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         return super().loadTransitionGroupFeaturesDf(pep_id, charge)
 
-TEST_PATH = "../test_data/"
+TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test' / 'test_data'
 
 @pytest.fixture
 def loader(request):
