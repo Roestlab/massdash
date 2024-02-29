@@ -64,7 +64,7 @@ class InteractivePlotter(GenericPlotter):
         elif plot_type == 'mobilogram':
             plot =  self.plot_mobilogram(transitionGroup)
         elif plot_type == 'spectrum':
-            plot =  self.plot_spectra(transitionGroup)
+            plot = self.plot_spectra(transitionGroup)
         else:
             raise ValueError("Unsupported plot plot_type")
         
