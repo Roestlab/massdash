@@ -9,10 +9,6 @@ class NumpySnapshotExtenstion(SingleFileSnapshotExtension):
     _file_extension = "dat"
 
     def matches(self, *, serialized_data, snapshot_data):
-        print("numpy matching!!!!")
-
-        print('allclose', np.allclose(np.array(snapshot_data), np.array(serialized_data)))
-
         try:
             if np.allclose(np.array(snapshot_data), np.array(serialized_data)):
                 return True
