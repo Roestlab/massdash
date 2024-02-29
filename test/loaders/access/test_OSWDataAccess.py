@@ -1,5 +1,5 @@
 """
-test/loaders/test_OSWDataAccess
+test/loaders/access/test_OSWDataAccess
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 

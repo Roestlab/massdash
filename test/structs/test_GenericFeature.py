@@ -1,3 +1,7 @@
+"""
+test/structs/test_GenericFeature
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
 from massdash.structs.GenericFeature import GenericFeature
 from typing import Tuple, Optional
 import unittest

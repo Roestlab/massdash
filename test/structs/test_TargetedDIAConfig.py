@@ -1,3 +1,8 @@
+"""
+test/structs/test_TargetedDIAConfig
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import unittest
 from massdash.structs.TargetedDIAConfig import TargetedDIAConfig
 

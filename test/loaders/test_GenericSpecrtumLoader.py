@@ -1,3 +1,8 @@
+"""
+test/loaders/test_GenericSpectrumLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import unittest
 from massdash.loaders.GenericSpectrumLoader import GenericSpectrumLoader
 

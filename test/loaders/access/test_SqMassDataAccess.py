@@ -1,5 +1,5 @@
 """
-test/loaders/test_SqMassDataAccess
+test/loaders/access/test_SqMassDataAccess
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 

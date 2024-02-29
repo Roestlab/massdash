@@ -1,3 +1,7 @@
+"""
+test/structs/test_Spectrum
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
 
 import unittest
 from massdash.structs import Spectrum

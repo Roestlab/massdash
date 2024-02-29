@@ -1,7 +1,10 @@
+"""
+test/loaders/test_GenericChromatogramLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import unittest
 from massdash.loaders.GenericChromatogramLoader import GenericChromatogramLoader
-
-
 
 class DummyGenericChromatogramLoader(GenericChromatogramLoader):
     pass

@@ -1,3 +1,8 @@
+"""
+test/structs/test_TransitionGroupCollection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import unittest
 from massdash.structs import TransitionGroup, Chromatogram
 from massdash.structs.TransitionGroupCollection import TransitionGroupCollection

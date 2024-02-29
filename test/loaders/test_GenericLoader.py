@@ -1,3 +1,8 @@
+"""
+test/loaders/test_GenericLoader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import os
 from typing import Dict
 from massdash.structs.TransitionGroup import TransitionGroup
