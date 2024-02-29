@@ -26,7 +26,7 @@
     qvalue=3.28317e-05,
     rightBoundary=2455.77,
     sequence='DYASIDAAPEER',
-    toPanadsDf="TransitionGroupFeature.toPanadsDf(transitionGroupFeatureLst: List[ForwardRef('TransitionGroupFeature')]) -> pandas.core.frame.DataFrame",
+    toPandasDf="TransitionGroupFeature.toPandasDf(transitionGroupFeatureLst: List[ForwardRef('TransitionGroupFeature')]) -> pandas.core.frame.DataFrame",
   )
 # ---
 # name: test_getTransitionGroupFeatures[diann-test_raw_1-DYASIDAAPEER-2]
@@ -57,7 +57,7 @@
       qvalue=3.28317e-05,
       rightBoundary=2455.77,
       sequence='DYASIDAAPEER',
-      toPanadsDf="TransitionGroupFeature.toPanadsDf(transitionGroupFeatureLst: List[ForwardRef('TransitionGroupFeature')]) -> pandas.core.frame.DataFrame",
+      toPandasDf="TransitionGroupFeature.toPandasDf(transitionGroupFeatureLst: List[ForwardRef('TransitionGroupFeature')]) -> pandas.core.frame.DataFrame",
     ),
   ])
 # ---
