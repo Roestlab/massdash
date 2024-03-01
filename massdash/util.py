@@ -344,6 +344,23 @@ def download_file(url: str, dest_folder: str):
         with open(os.path.join(dest_folder, filename), "wb") as f:
             f.write(response.content)
 
+def rgb_to_hex(rgb):
+    """
+    Converts an RGB color value to its corresponding hexadecimal representation.
+
+    Args:
+        rgb (tuple): A tuple containing the RGB values as floats between 0 and 1.
+
+    Returns:
+        str: The hexadecimal representation of the RGB color.
+
+    Example:
+        >>> rgb_to_hex((0.5, 0.75, 1.0))
+        '#7fbfff'
+    """
+    return "#{:02x}{:02x}{:02x}".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
+
+
 def open_page(url: str):
     """
     Opens a new browser window/tab with the specified URL.
