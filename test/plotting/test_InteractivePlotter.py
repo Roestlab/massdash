@@ -78,6 +78,10 @@ def featureIm():
     left, right, intens, q = 0.95, 1.03, 210, 0.003
     return TransitionGroupFeature(left, right, intens, q)
 
+@pytest.fixture(params=['transition_group', 'transition_group_im', 'transition_group_spectra'])
+def transition_group_all(request):
+    return request.getfixturevalue(request.param)
+
 @pytest.fixture(params=[
     dict(include_ms1=True, include_ms2=False, title=None, subtitle=None, smoothing_type=dict(type='none'), scale_intensity=False),
     dict(include_ms1=False, include_ms2=True, title=None, subtitle=None, smoothing_type=dict(type='none'), scale_intensity=False),
@@ -142,3 +146,14 @@ def test_plot_spectra_default(transition_group_spectra, snapshot_bokeh):
     plot = plotter.plot_spectra(transition_group_spectra)
 
     assert snapshot_bokeh == plot
+
+def test_plot(transition_group_all, snapshot_bokeh):
+    
+        # Create an instance of InteractivePlotter
+        plotter = InteractivePlotter(config=PlotConfig())
+    
+        # Call the plot method
+        plot = plotter.plot(transition_group_all)
+    
+        # Add assertions to verify the expected behavior
+        assert snapshot_bokeh == plot
