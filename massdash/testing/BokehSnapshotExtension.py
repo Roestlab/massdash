@@ -33,8 +33,14 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
     def matches(self, *, serialized_data, snapshot_data):
         json_snapshot = self.extract_bokeh_json(snapshot_data)
         json_serialized = self.extract_bokeh_json(serialized_data)
+        
+        # get the keys which store the json
+        # NOTE: keys are unique identifiers and are not supposed to be equal 
+        # but the json objects they contain should be equal
+        key_json_snapshot = list(json_snapshot.keys())[0] 
+        key_json_serialized = list(json_serialized.keys())[0] 
 
-        BokehSnapshotExtension.compare_json(json_snapshot, json_serialized)
+        return BokehSnapshotExtension.compare_json(json_snapshot[key_json_snapshot], json_serialized[key_json_serialized])
 
     def extract_bokeh_json(self, html: str) -> str:
         parser = BokehHTMLParser()
@@ -45,21 +51,37 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
     def compare_json(json1, json2):
         if isinstance(json1, dict) and isinstance(json2, dict):
             for key in json1.keys():
-                if key == 'id':
-                    continue
-                if key not in json2 or not BokehSnapshotExtension.compare_json(json1[key], json2[key]):
+                if key not in json2:
+                    print(f'Key {key} not in second json')
+                    return False
+                if not BokehSnapshotExtension.compare_json(json1[key], json2[key]):
+                    print(f'Values for key {key} not equal')
                     return False
             return True
         elif isinstance(json1, list) and isinstance(json2, list):
             if len(json1) != len(json2):
+                print('Lists have different lengths')
                 return False
-            for item1, item2 in zip(json1, json2):
-                if not BokehSnapshotExtension.compare_json(item1, item2):
-                    return False
+            json1 = set(map(frozenset, (BokehSnapshotExtension.dict_to_tuple(d) for d in json1)))
+            json2 = set(map(frozenset, (BokehSnapshotExtension.dict_to_tuple(d) for d in json2)))
+            if json1 != json2:
+                print('Sets of dictionaries are not equal')
+                return False
             return True
         else:
+            if json1 != json2:
+                print(f'Values not equal: {json1} != {json2}')
             return json1 == json2
- 
+    
+    @staticmethod
+    def dict_to_tuple(d):
+        if isinstance(d, dict):
+            return tuple((k, BokehSnapshotExtension.dict_to_tuple(v)) for k, v in sorted(d.items()))
+        elif isinstance(d, list):
+            return tuple(BokehSnapshotExtension.dict_to_tuple(x) for x in d)
+        else:
+            return d
+
     def _read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str
     ):
@@ -67,7 +89,6 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
         try:
             with open(snapshot_location, 'r') as f:
                 a = f.read()
-                print(a)
                 return a
         except OSError:
             return None
