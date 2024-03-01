@@ -4,7 +4,6 @@ massdash/structs/TransitionGroupCollection
 """
 import pandas as pd
 import numpy as np
-from ..plotting import PlotConfig, InteractivePlotter
 
 # Internal Imports
 from .GenericStructCollection import GenericStructCollection
