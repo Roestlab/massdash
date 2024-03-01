@@ -87,7 +87,7 @@ def transition_group_all(request):
     dict(include_ms1=False, include_ms2=True, title=None, subtitle=None, smoothing_type=dict(type='none'), scale_intensity=False),
     dict(include_ms1=True, include_ms2=True, title="Title", subtitle="Title", smoothing_type=dict(type='none'), scale_intensity=True),
     dict(include_ms1=True, include_ms2=True, title="Title", subtitle="Title", smoothing_type=dict(type='sgolay', sgolay_polynomial_order=3, sgolay_frame_length=5), scale_intensity=True),
-    dict(include_ms1=True, include_ms2=True, title="Title", subtitle="Title", smoothing_type=dict(type='none', gaussian_sigma=2.0, gaussian_window=5), scale_intensity=True),
+    dict(include_ms1=True, include_ms2=True, title="Title", subtitle="Title", smoothing_type=dict(type='gauss', gaussian_sigma=2.0, gaussian_window=5), scale_intensity=True),
 ])
 def plot_config(request):
     config = PlotConfig()
