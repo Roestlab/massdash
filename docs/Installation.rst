@@ -1,6 +1,8 @@
 Installation
 ============
 
+
+
 The Python Package Index
 ------------------------
 
@@ -13,7 +15,7 @@ MassDash is available as a python package on the python package index, and can b
 Building from Source
 --------------------
 
-The source code is freely open and accessible on Github at https://github.com/Roestlab/massdash under the `BSD-3-Cluase license <https://github.com/Roestlab/massdash?tab=BSD-3-Clause-1-ov-file>`. The package can be installed by cloning and installing from source using pip.
+The source code is freely open and accessible on Github at https://github.com/Roestlab/massdash under the `BSD-3-Clause license <https://github.com/Roestlab/massdash?tab=BSD-3-Clause-1-ov-file>`_. The package can be installed by cloning and installing from source using pip.
 
 First clone the repository:
 
@@ -42,3 +44,13 @@ MassDash is available as a docker image on dockerhub `here <https://github.com/R
 
         docker pull ghcr.io/roestlab/massdash:latest 
 
+Installation Guides
+-------------------
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   installation_docs/windows_installation
+
+1. :doc:`Windows Installation <installation_docs/windows_installation>` - Installation guide for Windows
