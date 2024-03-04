@@ -27,26 +27,6 @@ def featureMap():
     df = pd.read_csv(TEST_PATH / 'featureMap' / 'ionMobilityTestFeatureDf.tsv', sep='\t')
     return FeatureMap(df, sequence='TEST', precursor_charge=2)
 
-'''
-@pytest.fixture(params=[
-    dict(include_ms1=True, include_ms2=True, title="Title", subtitle="Subtitle", smoothing_type=dict(type='none'), type_of_heatmap='m/z vs retention time'),
-    dict(include_ms1=True, include_ms2=False, title=None, subtitle=None, smoothing_type=dict(type='none'), type_of_heatmap='m/z vs ion mobility'),
-    dict(include_ms1=True, include_ms2=False, title=None, subtitle=None, smoothing_type=dict(type='none'), type_of_heatmap='m/z vs ion mobility'),
-    dict(include_ms1=True, include_ms2=True, title="Title", subtitle="Title", smoothing_type=dict(type='none'), scale_intensity=True),
-    dict(include_ms1=True, include_ms2=True, title="Title", subtitle="Title", smoothing_type=dict(type='sgolay', sgolay_polynomial_order=3, sgolay_frame_length=5), scale_intensity=True),
-    dict(include_ms1=True, include_ms2=True, title="Title", subtitle="Title", smoothing_type=dict(type='gauss', gaussian_sigma=2.0, gaussian_window=5), scale_intensity=True),
-])
-def genericPlotter(request):
-    config_dict = dict(include_ms1=True, 
-                       include_ms2=True, 
-                       title="Title", 
-                       subtitle="Subtitle", 
-                       type_of_heatmap='retention time vs ion mobility')
-    config = PlotConfig()
-    config.update(request.param)
-    return InteractiveTwoDimensionPlotter(plot_config=config)
-'''
-
 @pytest.fixture
 def defaultPlotter():
     config = PlotConfig()
