@@ -1,3 +1,8 @@
+"""
+test/plotting/test_InteractiveThreeDimensionPlotter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from pathlib import Path
 import pytest
 import pandas as pd

@@ -1,3 +1,8 @@
+"""
+test/plotting/test_GenericPlotter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from massdash.plotting.GenericPlotter import PlotConfig
 import pytest
 
