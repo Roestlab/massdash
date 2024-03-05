@@ -419,10 +419,12 @@ class MzMLDataAccess():
             results_df = results_df.merge(annotation_mz_mapping, on='Annotation', how='left')
         else:
             LOGGER.warn(f"No spectra found for peptide: {feature.sequence}{feature.precursor_charge}. Try adjusting the extraction parameters")
+            results_df = pd.DataFrame(columns=['rt', 'int', 'Annotation'])
 
         return FeatureMap(results_df, feature.sequence, feature.precursor_charge, config)
     
-    def _find_closest_reference_mz(self, given_mz: np.array, reference_mz_values: np.array, peptide_product_annotation_list: np.array) -> np.array:
+    @staticmethod
+    def _find_closest_reference_mz(given_mz: np.array, reference_mz_values: np.array, peptide_product_annotation_list: np.array) -> np.array:
         """
         Find the closest reference m/z value in the given list to provided m/z values.
         Args:
@@ -432,20 +434,21 @@ class MzMLDataAccess():
         Returns:
             np.array: An array of the closest reference m/z values annotations from the provided list.
         """
-        return peptide_product_annotation_list[np.argmin(np.abs(reference_mz_values - given_mz[:, None]), axis=1)]
+        return peptide_product_annotation_list[np.argmin(np.abs(reference_mz_values - given_mz))]
 
-    def _apply_mz_mapping(self, row: pd.DataFrame, peptide_product_mz_list: List[float], peptide_product_annotation_list: List[str]) -> Literal["float", "np.nan"]:
+    @staticmethod
+    def _apply_mz_mapping(row: pd.Series, peptide_product_mz_list: List[float], peptide_product_annotation_list: List[str]) -> Literal["float", "np.nan"]:
         """
         Apply mz mapping to the given row based on the ms_level.
         Args:
-            row (pd.DataFrame): The row containing the data.
+            row (pd.Series): The row containing the data.
             peptide_product_mz_list (List): The list of peptide product m/z values.
             peptide_product_annotation_list (List): The list of peptide product annotations.
         Returns:
             Union[float, np.nan]: The mapped m/z value.
         """
         if row['ms_level'] == 2:
-            return self._find_closest_reference_mz(np.array([row['mz']]), np.array(peptide_product_mz_list), np.array(peptide_product_annotation_list))[0]
+            return MzMLDataAccess._find_closest_reference_mz(row['mz'], np.array(peptide_product_mz_list), np.array(peptide_product_annotation_list))[0]
         elif row['ms_level'] == 1:
             return 'prec'
         else:

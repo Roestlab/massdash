@@ -56,7 +56,7 @@ class TransitionTSVDataAccess:
         self.filename = filename
 
     def empty(self):
-        return self.data.empty() 
+        return self.data.empty
 
     def __setitem__(self, index, value):
         return self.data.__setitem__(index, value)

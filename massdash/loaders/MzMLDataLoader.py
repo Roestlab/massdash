@@ -12,7 +12,7 @@ import pandas as pd
 from .access.MzMLDataAccess import MzMLDataAccess
 from .GenericSpectrumLoader import GenericSpectrumLoader
 # Structs
-from ..structs import TransitionGroup, FeatureMap, TargetedDIAConfig, FeatureMapCollection, TopTransitionGroupFeatureCollection
+from ..structs import TransitionGroup, FeatureMap, TargetedDIAConfig, FeatureMapCollection, TopTransitionGroupFeatureCollection, TransitionGroupCollection
 # Utils
 from ..util import LOGGER
 
@@ -84,7 +84,7 @@ class MzMLDataLoader(GenericSpectrumLoader):
         '''
         out_feature_map = self.loadFeatureMaps(pep_id, charge, config)
 
-        return { run: data.to_chromatograms() for run, data in out_feature_map.items() }
+        return TransitionGroupCollection({ run: data.to_chromatograms() for run, data in out_feature_map.items() })
     
     def loadTransitionGroupsDf(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, pd.DataFrame]:
         '''
@@ -117,7 +117,7 @@ class MzMLDataLoader(GenericSpectrumLoader):
             pep_id (str): Peptide ID
             charge (int): Charge
         Returns:
-            FeatureMap: FeatureMap object containing peak boundaries, intensity and confidence
+            FeatureMapCollection: FeatureMapCollection containing FeatureMap objects for each file
         '''
         out = FeatureMapCollection()
         top_features = [ self.rsltsFile.getTopTransitionGroupFeature(basename(splitext(d.filename)[0]), pep_id, charge) for d in self.dataFiles]

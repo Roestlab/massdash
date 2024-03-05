@@ -38,6 +38,8 @@ requires = [
     "tk",
     "tqdm",
     "upsetplot",
+    "pytest",
+    "syrupy"
 ]
 
 [tool.flit.scripts]

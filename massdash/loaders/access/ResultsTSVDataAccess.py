@@ -63,6 +63,8 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         elif self.results_type == "DreamDIA":
             self.hash_table_columns = ['full_sequence', 'sequence', 'filename']
             self.rt_multiplier = 1
+        else:
+            raise ValueError(f"Results type {self.results_type} not supported")
             
         pepHash = pd.read_csv(self.filename, sep='\t', usecols=self.hash_table_columns)
 
@@ -184,10 +186,10 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         matching_runs = self.runs[self.runs.str.contains(run_basename_wo_ext)]
         if len(matching_runs) == 0:
-            print("Error: No matching runs found for {run_basename_wo_ext}")
+            print(f"Error: No matching runs found for {run_basename_wo_ext}")
             return None
         elif len(matching_runs) == 1:
             return matching_runs.iloc[0]
         else: ## greater than 1
-            print("Warning: More than one run found for {run_basename_wo_ext}, this can lead to unpredicted behaviour")
+            print(f"Warning: More than one run found for {run_basename_wo_ext}, this can lead to unpredicted behaviour")
             return matching_runs.iloc[0]

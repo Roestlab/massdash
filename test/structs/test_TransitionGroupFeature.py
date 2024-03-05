@@ -21,7 +21,7 @@ class TestTransitionGroupFeature(unittest.TestCase):
         self.assertEqual(self.transitionGroupFeature.getBoundaries(), (self.leftBoundary, self.rightBoundary))
 
     def test_toPanadsDf(self):
-        df = TransitionGroupFeature.toPanadsDf([self.transitionGroupFeature])
+        df = TransitionGroupFeature.toPandasDf([self.transitionGroupFeature])
         self.assertEqual(df.iloc[0]['leftBoundary'], self.leftBoundary)
         self.assertEqual(df.iloc[0]['rightBoundary'], self.rightBoundary)
         self.assertEqual(df.iloc[0]['areaIntensity'], self.areaIntensity)
