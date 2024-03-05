@@ -26,21 +26,35 @@ class ResultsTSVDataAccess(GenericResultsAccess):
 
     }
 
-    def __init__(self, filename: str, results_type: Literal["OpenSWATH", "DIA-NN", "DreamDIA"] = "DIA-NN", verbose: bool = False) -> None:
+    def __init__(self, filename: str, verbose: bool = False) -> None:
         super().__init__(filename, verbose)
         self.filename = filename
-        self.results_type = results_type
+        self.results_type = None # will be set later
         
         self.peptideHash = self._initializePeptideHashTable()
         self.df = self.loadData()   
         self.runs = self.df['filename'].drop_duplicates()  
         self.has_im = 'IM' in self.df.columns
+        self.results_type = self.detectResultsType(filename)
     
+    def detectResultsType(self) -> Literal["OpenSWATH", "DIA-NN", "DreamDIA"]:
+        '''
+        Detects the type of results file by looking at the column names
+        '''
+        diann_dont_check = {'Precursor.Mz'} # Note: remove Precursor.Mz because not all DIA-NN files have this column
+        for rsltType, colDict in ResultsTSVDataAccess.columnMapping.items():
+            if set(colDict.keys()).difference(diann_dont_check).issubset(set(self.df.columns)): 
+                return rsltType
+
+        raise Exception(f"Error: Unsupported file type {self.filename}, could not detect results type")
+
     def loadData(self) -> pd.DataFrame:
         '''
         This method loads the data from self.filename into a pandas dataframe
         '''
         df = pd.read_csv(self.filename, sep='\t')
+
+        self.results_type = self.detectResultsType()
 
         # rename column according to column mapping 
         df = df.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])

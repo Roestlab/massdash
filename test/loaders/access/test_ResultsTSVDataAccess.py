@@ -5,6 +5,7 @@ test/loaders/access/test_ResultsTSVDataAccess
 
 from pathlib import Path
 import pytest
+import pandas as pd
 from syrupy.extensions.amber import AmberDataSerializer
 
 from massdash.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
@@ -13,6 +14,11 @@ from massdash.util import find_git_directory
 
 TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
+class MockResultsTSVDataAccess(ResultsTSVDataAccess):
+    def __init__(self, filename):
+        self.filename = filename
+        self.df = pd.read_csv(filename, sep='\t')
+
 @pytest.fixture
 def access(request):
     if request.param == 'diann':
@@ -20,6 +26,13 @@ def access(request):
     if request.param == 'dream':
         return ResultsTSVDataAccess(f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv", 'DreamDIA')
 
+@pytest.fixture
+def mock_access(request):
+    if request.param == 'DIA-NN':
+        return MockResultsTSVDataAccess(f"{TEST_PATH}/test_data/example_dia/diann/report/test_1_diann_report.tsv")
+    if request.param == 'DreamDIA':
+        return MockResultsTSVDataAccess(f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv")
+    
 @pytest.fixture
 def runname():
     return 'test_raw_1'
@@ -45,6 +58,10 @@ def test_loadData(access, snapshot_pandas):
 def test_initializePeptideHashTable(access, snapshot_pandas):
     hash_table = access._initializePeptideHashTable()
     assert snapshot_pandas == hash_table
+
+@pytest.mark.parametrize("mock_access,expected", [('DIA-NN', 'DIA-NN'), ('DreamDIA', 'DreamDIA')], indirect=['mock_access'])
+def test_detectResultsType(mock_access, expected):
+    assert mock_access.detectResultsType() == expected
 
 #@pytest.mark.parametrize("access,runname,peptide,charge", [('diann', 'test_raw_1', 'DYASIDAAPEER', 2), ('dream', 'test_raw_1', 'DYASIDAAPEER', 2)], indirect=['access'])
 @pytest.mark.parametrize("access,runname,peptide,charge", [('diann', 'test_raw_1', 'DYASIDAAPEER', 2),], indirect=['access'])
