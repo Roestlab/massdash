@@ -1,0 +1,258 @@
+# serializer version: 1
+# name: test_loadTopTransitionGroupFeature[/home/joshua/Development/massdash_alt/massdash/test/test_data/example_dia/diann/report/test_1_diann_report.tsv-AGAANIVPNSTGAAK-2]
+  '''
+  TransitionGroupFeatureCollection({
+    'test_raw_1': list([
+      -------- TransitionGroupFeature --------
+  leftBoundary: 1933.4520000000002
+  rightBoundary: 1967.5919999999999
+  areaIntensity: 10209.3
+  consensusApex: 1950.522
+  consensusApexIntensity: None
+  qvalue: 2.90751e-06
+  consensusApexIM: 0
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+    ]),
+  })
+  '''
+# ---
+# name: test_loadTopTransitionGroupFeature[/home/joshua/Development/massdash_alt/massdash/test/test_data/example_dia/diann/report/test_1_diann_report.tsv-INVALID-2]
+  '''
+  TransitionGroupFeatureCollection({
+    'test_raw_1': list([
+      None,
+    ]),
+  })
+  '''
+# ---
+# name: test_loadTopTransitionGroupFeature[/home/joshua/Development/massdash_alt/massdash/test/test_data/example_dia/openswath/osw/test.osw-AGAANIVPNSTGAAK-2]
+  '''
+  TransitionGroupFeatureCollection({
+    'test_raw_1': list([
+      -------- TransitionGroupFeature --------
+  leftBoundary: 1923.2130126953125
+  rightBoundary: 2001.72900390625
+  areaIntensity: 4390.32825839279
+  consensusApex: 1953.14
+  consensusApexIntensity: 4390.32825839279
+  qvalue: 6.993573006436113e-06
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+    ]),
+    'test_raw_2': list([
+      -------- TransitionGroupFeature --------
+  leftBoundary: 1895.906005859375
+  rightBoundary: 1971.010986328125
+  areaIntensity: 2540.8210337067203
+  consensusApex: 1920.24
+  consensusApexIntensity: 2540.8210337067203
+  qvalue: 6.993573006436113e-06
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+    ]),
+  })
+  '''
+# ---
+# name: test_loadTopTransitionGroupFeature[/home/joshua/Development/massdash_alt/massdash/test/test_data/example_dia/openswath/osw/test.osw-INVALID-2]
+  '''
+  TransitionGroupFeatureCollection({
+    'test_raw_1': list([
+      None,
+    ]),
+    'test_raw_2': list([
+      None,
+    ]),
+  })
+  '''
+# ---
+# name: test_loadTransitionGroupFeatures[/home/joshua/Development/massdash_alt/massdash/test/test_data/example_dia/diann/report/test_1_diann_report.tsv-AGAANIVPNSTGAAK-2]
+  '''
+  TransitionGroupFeatureCollection({
+    'test_raw_1': list([
+      -------- TransitionGroupFeature --------
+  leftBoundary: 1933.4520000000002
+  rightBoundary: 1967.5919999999999
+  areaIntensity: 10209.3
+  consensusApex: 1950.522
+  consensusApexIntensity: None
+  qvalue: 2.90751e-06
+  consensusApexIM: 0
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+    ]),
+  })
+  '''
+# ---
+# name: test_loadTransitionGroupFeatures[/home/joshua/Development/massdash_alt/massdash/test/test_data/example_dia/diann/report/test_1_diann_report.tsv-INVALID-2]
+  '''
+  TransitionGroupFeatureCollection({
+    'test_raw_1': list([
+    ]),
+  })
+  '''
+# ---
+# name: test_loadTransitionGroupFeatures[/home/joshua/Development/massdash_alt/massdash/test/test_data/example_dia/openswath/osw/test.osw-AGAANIVPNSTGAAK-2]
+  '''
+  TransitionGroupFeatureCollection({
+    'test_raw_1': list([
+      -------- TransitionGroupFeature --------
+  leftBoundary: 2206.55908203125
+  rightBoundary: 2250.93701171875
+  areaIntensity: 93.7645
+  consensusApex: 2226.53
+  consensusApexIntensity: 25.361407994046484
+  qvalue: 0.27997408312165795
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+      -------- TransitionGroupFeature --------
+  leftBoundary: 2001.72900390625
+  rightBoundary: 2039.2840576171875
+  areaIntensity: 70.6678
+  consensusApex: 2009.74
+  consensusApexIntensity: 33.88131947814447
+  qvalue: 1.822896508451022e-05
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+      -------- TransitionGroupFeature --------
+  leftBoundary: 2158.76611328125
+  rightBoundary: 2203.14501953125
+  areaIntensity: 113.104
+  consensusApex: 2177.07
+  consensusApexIntensity: 30.8382840089739
+  qvalue: 0.16741273086102035
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+      -------- TransitionGroupFeature --------
+  leftBoundary: 2117.801025390625
+  rightBoundary: 2158.76611328125
+  areaIntensity: 784.279
+  consensusApex: 2138.98
+  consensusApexIntensity: 165.07510208344246
+  qvalue: 0.0009590506619916316
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+      -------- TransitionGroupFeature --------
+  leftBoundary: 1923.2130126953125
+  rightBoundary: 2001.72900390625
+  areaIntensity: 44921.8
+  consensusApex: 1953.14
+  consensusApexIntensity: 4390.32825839279
+  qvalue: 6.993573006436113e-06
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+    ]),
+    'test_raw_2': list([
+      -------- TransitionGroupFeature --------
+  leftBoundary: 2104.14990234375
+  rightBoundary: 2145.115966796875
+  areaIntensity: 417.457
+  consensusApex: 2126.42
+  consensusApexIntensity: 95.16263446243194
+  qvalue: 0.0004287466278223515
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+      -------- TransitionGroupFeature --------
+  leftBoundary: 1971.010986328125
+  rightBoundary: 2039.2860107421875
+  areaIntensity: 1049.18
+  consensusApex: 2000.31
+  consensusApexIntensity: 159.3757949554613
+  qvalue: 3.35632586944344e-05
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+      -------- TransitionGroupFeature --------
+  leftBoundary: 1895.906005859375
+  rightBoundary: 1971.010986328125
+  areaIntensity: 30771.2
+  consensusApex: 1920.24
+  consensusApexIntensity: 2540.8210337067203
+  qvalue: 6.993573006436113e-06
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+      -------- TransitionGroupFeature --------
+  leftBoundary: 2145.115966796875
+  rightBoundary: 2182.6708984375
+  areaIntensity: 60.9997
+  consensusApex: 2162.68
+  consensusApexIntensity: 15.554447237443734
+  qvalue: 0.38296484850166657
+  consensusApexIM: None
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AGAANIVPNSTGAAK
+  software: None,
+    ]),
+  })
+  '''
+# ---
+# name: test_loadTransitionGroupFeatures[/home/joshua/Development/massdash_alt/massdash/test/test_data/example_dia/openswath/osw/test.osw-INVALID-2]
+  '''
+  TransitionGroupFeatureCollection({
+    'test_raw_1': list([
+    ]),
+    'test_raw_2': list([
+    ]),
+  })
+  '''
+# ---

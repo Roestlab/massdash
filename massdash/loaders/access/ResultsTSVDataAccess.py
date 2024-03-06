@@ -6,7 +6,8 @@ massdash/loaders/access/ResultsTSVDataAccess
 import pandas as pd
 import numpy as np
 import re
-from typing import Literal
+from typing import Literal, List
+from pathlib import Path
 
 # Loaders
 from .GenericResultsAccess import GenericResultsAccess
@@ -29,13 +30,13 @@ class ResultsTSVDataAccess(GenericResultsAccess):
     def __init__(self, filename: str, verbose: bool = False) -> None:
         super().__init__(filename, verbose)
         self.filename = filename
-        self.results_type = None # will be set later
+        self.results_type = None # will be set by detectResultsType()
+        self.df = None # will be set by loadData()
         
+        self.loadData()   # set self.df and self.results_type
         self.peptideHash = self._initializePeptideHashTable()
-        self.df = self.loadData()   
         self.runs = self.df['filename'].drop_duplicates()  
         self.has_im = 'IM' in self.df.columns
-        self.results_type = self.detectResultsType(filename)
     
     def detectResultsType(self) -> Literal["OpenSWATH", "DIA-NN", "DreamDIA"]:
         '''
@@ -52,17 +53,17 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         This method loads the data from self.filename into a pandas dataframe
         '''
-        df = pd.read_csv(self.filename, sep='\t')
+        self.df = pd.read_csv(self.filename, sep='\t')
 
         self.results_type = self.detectResultsType()
 
         # rename column according to column mapping 
-        df = df.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
+        self.df = self.df.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
         
         # TODO is this required?
         # Assign dummy Decoy column all 0
-        df['Decoy'] = 0
-        return df
+        self.df['Decoy'] = 0
+        self.df['software'] = self.results_type
 
     def _initializePeptideHashTable(self) -> pd.DataFrame:   
         '''
@@ -167,12 +168,9 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         Returns:
             pd.DataFrame: Dataframe with the TransitionGroupFeatures
         '''
-        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence']
-        if self.has_im:
-            columns.append('consensusApexIM')
         runname_exact = self.getExactRunName(runname)
         if runname_exact is None:
-            return pd.DataFrame(columns=columns)
+            return pd.DataFrame(columns=self.COLUMNS)
         else:
             df = self.df[(self.df['filename'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
 
@@ -183,16 +181,15 @@ class ResultsTSVDataAccess(GenericResultsAccess):
                                     'Qvalue' : 'qvalue',
                                     'PrecursorCharge': 'precursor_charge',
                                     'ModifiedPeptideSequence': 'sequence',
-                                    'PrecursorMz': 'precursor_mz'})
+                                    'PrecursorMz': 'precursor_mz',
+                                    'IM': 'consensusApexIM'})
             
-            if self.has_im:
-                df = df.rename(columns={'IM': 'consensusApexIM'})
 
             df['consensusApex'] = df['consensusApex'] * self.rt_multiplier
             df['leftBoundary'] = df['leftBoundary'] * self.rt_multiplier
             df['rightBoundary'] = df['rightBoundary'] * self.rt_multiplier
             df['consensusApexIntensity'] = np.nan
-            return df[columns]
+            return df[self.COLUMNS]
 
     def getExactRunName(self, run_basename_wo_ext: str) -> str:
         '''
@@ -207,3 +204,12 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         else: ## greater than 1
             print(f"Warning: More than one run found for {run_basename_wo_ext}, this can lead to unpredicted behaviour")
             return matching_runs.iloc[0]
+    
+    def getRunNames(self) -> List[str]:
+        '''
+        Get run names without the file extension
+
+        Returns:
+            list: List of run names
+        '''
+        return [ Path(r).stem for r in self.runs]

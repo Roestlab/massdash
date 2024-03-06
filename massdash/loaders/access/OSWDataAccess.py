@@ -42,6 +42,7 @@ $Authors: Hannes Roest, Justin Sing$
 import sqlite3
 import pandas as pd
 from typing import List, Literal
+from pathlib import Path
 
 # Loaders
 from .GenericResultsAccess import GenericResultsAccess
@@ -93,6 +94,7 @@ class OSWDataAccess(GenericResultsAccess):
     def _initializeRunHashtable(self):
         stmt = "select * from run"
         self.runHashTable = pd.read_sql(stmt, self.conn)
+        self.runHashTable['RUN_NAME'] = self.runHashTable['FILENAME'].apply(lambda x: Path(x).stem)
 
     def _initializePeptideHashtable(self):
         stmt = '''
@@ -246,6 +248,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                                     'IM': 'consensusApexIM',
                                     'PRECURSOR_ID': 'precursor_id',
                                     'RUN_ID': 'run_id'})
+        out['software'] = 'OpenSWATH'
         return out
     
     def _getFeaturesFromPrecursorIdAndRun(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
@@ -428,24 +431,32 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
             return None
 
     def getTransitionGroupFeaturesDf(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> pd.DataFrame:
-        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']
         run_id = self._runIDFromRunName(run_basename_wo_ext)
         precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
         
         if run_id is None or precursor_id is None:
-            return pd.DataFrame(columns=columns)
+            features =  pd.DataFrame(columns=self.COLUMNS)
         else:
-            return self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
+            features =  self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
+
+        features['sequence'] = fullpeptidename
+        features['precursor_charge'] = charge
+        return features[self.COLUMNS]
+
         
     def getTopTransitionGroupFeatureDf(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> pd.DataFrame:
-        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']
+        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'sequence', 'precursor_charge', 'software']
         run_id = self._runIDFromRunName(run_basename_wo_ext)
         precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
         
         if run_id is None or precursor_id is None:
-            return pd.DataFrame(columns=columns)
+            features = pd.DataFrame(columns=columns)
         else:
-            return self._getTopFeatureFromPrecursorIdAndRunDf(run_id, precursor_id)
+            features = self._getTopFeatureFromPrecursorIdAndRunDf(run_id, precursor_id)
+
+        features['sequence'] = fullpeptidename
+        features['precursor_charge'] = charge
+        return features[['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'sequence', 'precursor_charge', 'software']]
 
     def getTransitionGroupFeatures(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> List[TransitionGroupFeature]:
         run_id = self._runIDFromRunName(run_basename_wo_ext)
@@ -481,6 +492,15 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
             return self._getTransitionsFromPrecursorId(precursor_id)
         else:
             return pd.DataFrame(columns=['TRANSITION_ID', 'ANNOTATION'])
+        
+    def getRunNames(self) -> List[str]:
+        '''
+        Infer the run names from the results file, extensions are removed
+
+        Returns:
+            list: The run names
+        '''
+        return self.runHashTable['RUN_NAME'].tolist()
 
     def get_score_tables(self):
         """
