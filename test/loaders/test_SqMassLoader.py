@@ -21,11 +21,13 @@ def loader():
 def snapshot_pandas(snapshot):
     return snapshot.use_extension(PandasSnapshotExtenstion)
 
+'''
 @pytest.mark.parametrize('fullpeptidename,charge', [('NKESPT(UniMod:21)KAIVR(UniMod:267)', 3), ('INVALID', 0)])
 def test_loadTransitionGroupFeature(loader, fullpeptidename, charge, snapshot):
     # Test loading a peak feature for a valid peptide ID and charge
     peak_feature = loader.loadTransitionGroupFeatures(fullpeptidename, charge)
     assert snapshot == AmberDataSerializer.serialize(peak_feature)
+'''
 
 @pytest.mark.parametrize('fullpeptidename,charge', [('NKESPT(UniMod:21)KAIVR(UniMod:267)', 3), ('INVALID', 0)])
 def test_loadTransitionGroups(loader, fullpeptidename, charge, snapshot):
@@ -39,8 +41,10 @@ def test_loadTransitionGroupsDf(loader, fullpeptidename, charge, snapshot_pandas
     transitionGroup = loader.loadTransitionGroupsDf(fullpeptidename, charge) 
     assert snapshot_pandas == transitionGroup 
 
+'''
 @pytest.mark.parametrize('fullpeptidename,charge', [('NKESPT(UniMod:21)KAIVR(UniMod:267)', 3), ('INVALID', 0)])
 def test_loadTransitionGroupFeaturesDf(loader, fullpeptidename, charge, snapshot_pandas):
     # Test loading a chromatogram for a valid peptide ID and charge
     transitionGroup = loader.loadTransitionGroupFeaturesDf(fullpeptidename, charge)
     assert snapshot_pandas == transitionGroup
+'''

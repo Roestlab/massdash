@@ -27,50 +27,11 @@ class MzMLDataLoader(GenericSpectrumLoader):
         libraryFile: (str) The path to the library file (.tsv or .pqp)
         
     '''
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'OpenSWATH', verbose: bool=False, mode: Literal['module', 'gui'] = 'module') -> None:
-        super().__init__(rsltsFile, dataFiles, libraryFile, rsltsFileType, verbose, mode)
-        self.dataFiles = [MzMLDataAccess(f, 'ondisk', verbose=verbose) for f in self.dataFiles_str]
-        self.has_im = np.all([d.has_im for d in self.dataFiles])
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs) 
+        self.dataAccess = [MzMLDataAccess(f, 'ondisk', verbose=self.verbose) for f in self.dataFiles]
+        self.has_im = np.all([d.has_im for d in self.dataAccess])
                    
-    def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
-        '''
-        Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
-
-        Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
-        Returns:
-            DataFrame: DataFrame containing TransitionGroupObject information across all runs 
-        '''
-        out = {}
-        for t in self.dataFiles:
-            runname = basename(t.filename).split('.')[0]
-            out[t.filename] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
-        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
-        # Drop duplicate columns
-        out_df = out_df.loc[:,~out_df.columns.duplicated()]
-        return out_df
-        
-    def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
-        '''
-        Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
-
-        Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
-
-        Returns:
-            DataFrame: DataFrame containing TransitionGroupObject information across all runs 
-        '''
-        out = {}
-        for t in self.dataFiles:
-            runname = basename(t.filename).split('.')[0]
-            out[t.filename] = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
-        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
-        # Drop duplicate columns
-        out_df = out_df.loc[:,~out_df.columns.duplicated()]
-        return out_df
-        
     def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
@@ -120,9 +81,10 @@ class MzMLDataLoader(GenericSpectrumLoader):
             FeatureMapCollection: FeatureMapCollection containing FeatureMap objects for each file
         '''
         out = FeatureMapCollection()
-        top_features = [ self.rsltsFile.getTopTransitionGroupFeature(basename(splitext(d.filename)[0]), pep_id, charge) for d in self.dataFiles]
-        self.libraryFile.populateTransitionGroupFeatures(top_features)
-        for d, t in zip(self.dataFiles, top_features):
+        # use the first results file to get the feature location
+        top_features = [ self.rsltsAccess[0].getTopTransitionGroupFeature(basename(splitext(d.filename)[0]), pep_id, charge) for d in self.dataAccess]
+        self.libraryAccess.populateTransitionGroupFeatures(top_features)
+        for d, t in zip(self.dataAccess, top_features):
             if t is None:
                 LOGGER.debug(f"No feature found for {pep_id} {charge} in {d.filename}")
                 out[d.filename] =  FeatureMap()

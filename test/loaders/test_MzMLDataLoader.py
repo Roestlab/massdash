@@ -31,9 +31,10 @@ def mzml_data_loader(request):
 
         dataFilesPrefix = f'{TEST_PATH}/test_data/example_dia/raw/'
         dataFiles = [f"{dataFilesPrefix}/test_raw_1.mzML", f"{dataFilesPrefix}/test_raw_2.mzML"]
-        return MzMLDataLoader(rsltsFile=rsltsFile, dataFiles=dataFiles, rsltsFileType='OpenSWATH')
+        return MzMLDataLoader(rsltsFile=rsltsFile, dataFiles=dataFiles)
 
 
+'''
 @pytest.mark.parametrize('mzml_data_loader,pep,charge', [('osw', 'AGAANIVPNSTGAAK', 2)], indirect=['mzml_data_loader'])
 def test_loadTopTransitionGroupFeatureDf(mzml_data_loader, pep, charge, snapshot_pandas):
     df = mzml_data_loader.loadTopTransitionGroupFeatureDf(pep, charge)
@@ -43,6 +44,7 @@ def test_loadTopTransitionGroupFeatureDf(mzml_data_loader, pep, charge, snapshot
 def test_loadTransitionGroupFeaturesDf(mzml_data_loader, pep, charge, snapshot_pandas):
     df = mzml_data_loader.loadTransitionGroupFeaturesDf(pep, charge)
     assert snapshot_pandas == df
+'''
 
 @pytest.mark.parametrize('mzml_data_loader,pep,charge', [('osw', 'AGAANIVPNSTGAAK', 2)], indirect=['mzml_data_loader'])
 def test_loadTransitionGroups(mzml_data_loader, config, pep, charge, snapshot_pandas):

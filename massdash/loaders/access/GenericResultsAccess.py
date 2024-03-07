@@ -15,6 +15,8 @@ from ...util import LOGGER
 class GenericResultsAccess(ABC):
     COLUMNS = ['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence', 'software']
     def __init__(self, filename: str, verbose: bool = False) -> None:
+
+        self.filename = filename
         LOGGER.name = __class__.__name__
         if verbose:
             LOGGER.setLevel("DEBUG")

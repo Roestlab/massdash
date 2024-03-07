@@ -3,34 +3,28 @@ massdash/loaders/GenericChromatogramLoader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 import pandas as pd 
 from typing import Dict, List, Union, Literal
 
 # Loader
-from .GenericLoader import GenericLoader
+from .GenericRawDataLoader import GenericRawDataLoader
 # Structs
 from ..structs import TransitionGroup
 
-class GenericChromatogramLoader(GenericLoader):
+class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
     '''
     Abstract class for loading raw chromatogram data
     
     Attributes:
         rsltsFile: (str) The path to the report file (DIANN-TSV or OSW)
         dataFiles: (str/List[str]) The path to the mzML file(s)
-        rsltsFileType: (str) The type of results file (OpenSWATH or DIA-NN)
         verbose: (bool) Whether to print debug messages
         mode: (str) Whether to run in module or GUI mode
     '''
 
-    def __init__(self, 
-                 rsltsFile: str, 
-                 dataFiles: Union[str, List[str]], 
-                 rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'DIA-NN', 
-                 verbose: bool=False, 
-                 mode: Literal['module', 'gui'] = 'module'):
-        super().__init__(rsltsFile, dataFiles, None, rsltsFileType, verbose, mode)
+    def __init__(self, **kwargs): 
+        super().__init__(**kwargs)
     
     @abstractmethod
     def loadTransitionGroups(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
@@ -89,7 +83,6 @@ class GenericChromatogramLoader(GenericLoader):
  
         # load the transitionGroup for plotting
         transitionGroup = list(self.loadTransitionGroups(seq, charge).values())[0]
-        print(transitionGroup)
         if includeBoundaries:
             transitionGroupFeatures = list(self.loadTransitionGroupFeatures(seq, charge).values())[0]
         else:

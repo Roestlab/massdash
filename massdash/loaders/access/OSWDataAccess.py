@@ -62,15 +62,15 @@ class OSWDataAccess(GenericResultsAccess):
         mode (str): The mode to use when intiating the data access object, to control which attributes get initialized.
     """
 
-    def __init__(self, filename: str, verbose: bool=False, mode: Literal['module', 'gui'] = 'module'):
+    def __init__(self, *args, mode: Literal['module', 'gui'] = 'module', **kwargs): 
         """
         Initializes a new instance of the OSWDataAccess class.
 
         Args:
             filename (str): The path to the SQLite database file.
         """
-        super().__init__(filename, verbose)
-        self.conn = sqlite3.connect(filename, check_same_thread=False)
+        super().__init__(*args, **kwargs)
+        self.conn = sqlite3.connect(self.filename, check_same_thread=False)
         self.c = self.conn.cursor()
         
         # hashtable, each run is its own data 

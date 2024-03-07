@@ -5,16 +5,16 @@ massdash/loaders/GenericSpectrumLoader
 This is an abstract class for loading spectra from a file.
 '''
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod, ABCMeta
 import pandas as pd
-from typing import Dict, List, Union, Literal, Optional
+from typing import Dict,Optional
 
 # Loader
-from .GenericLoader import GenericLoader
+from .GenericRawDataLoader import GenericRawDataLoader
 # Structs
 from ..structs import TransitionGroup, TargetedDIAConfig, FeatureMap
 
-class GenericSpectrumLoader(GenericLoader):
+class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
     '''
     Abstract class for loading raw spectrum data
 
@@ -24,8 +24,8 @@ class GenericSpectrumLoader(GenericLoader):
         libraryFile: (str) The path to the library file (.tsv or .pqp)
     '''
     
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'DIA-NN', verbose: bool=False, mode: Literal['module', 'gui'] = 'module'):
-        super().__init__(rsltsFile=rsltsFile, dataFiles=dataFiles, libraryFile=libraryFile, rsltsFileType=rsltsFileType, verbose=verbose, mode=mode)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @abstractmethod
     def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, TransitionGroup]:

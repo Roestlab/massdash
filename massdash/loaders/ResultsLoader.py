@@ -1,5 +1,5 @@
 """
-massdash/loaders/GenericLoader
+massdash/loaders/ResultsLoader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
@@ -29,45 +29,38 @@ class ResultsLoader:
                  verbose: bool=False, 
                  mode: Literal['module', 'gui'] = 'module'):
 
+        # Attributes (set further down)
+        self.rsltsAccess = []
+        self.libraryAccess = None
+        self.runNames = None
+        self.verbose = verbose
+        self.libraryFile = libraryFile
+
+        if isinstance(rsltsFile, str):
+            self.rsltsFile = [rsltsFile]
+
         LOGGER.name = __class__.__name__
-        if verbose:
+        if self.verbose:
             LOGGER.setLevel("DEBUG")
         else:
             LOGGER.setLevel("INFO")
 
-        ## store the file names
-        self.libraryFile_str = libraryFile
- 
         # Make rsltsFile iterable if it is not already
-        if isinstance(rsltsFile, str):
-            self.rsltsFile_str = [rsltsFile]
-        else:
-            self.rsltsFile_str = rsltsFile
-
         ### set the results file depending on the file ending
-        self.rsltsAccess = []
-        for f in self.rsltsFile_str:
+        for f in self.rsltsFile:
             if f.endswith('.osw'):
                 self.rsltsAccess.append(OSWDataAccess(f, verbose=verbose, mode=mode))
             elif f.endswith('.tsv'):
                 self.rsltsAccess.append(ResultsTSVDataAccess(f, verbose=verbose))
             else:
                 raise Exception(f"Error: Unsupported file type {f} or unsupported rsltsFileType {f}")
-        
-        if self.libraryFile_str is None:
-            for f in self.rsltsFile_str:
-                if f.endswith('.osw'): 
-                    self.libraryFile = SpectralLibraryLoader(f)
-                    self.libraryFile.load()
-            else:
-                LOGGER.warn("Library not specified, comparisons to library will not be possible")
-        else:
-            self.libraryFile = SpectralLibraryLoader(self.libraryFile_str)
-            self.libraryFile.load()
-        
+              
         # If called as a Results loader, infer the run names since no raw data will be used.
-        if isinstance(self, ResultsLoader):
-            self.dataFiles_str = self._inferRunNames()
+        self.runNames = self._inferRunNames()
+
+        if self.libraryFile is not None:
+            self.libraryAccess = SpectralLibraryLoader(self.libraryFile)
+            self.libraryAccess.load()
 
 
     def _inferRunNames(self):
@@ -105,7 +98,7 @@ class ResultsLoader:
             DataFrame: DataFrame containing TransitionGroupObject information across all runs
         '''
         out = {}
-        for d in self.dataFiles_str:
+        for d in self.runNames:
             for r in self.rsltsAccess:
                 features = r.getTransitionGroupFeaturesDf(d, pep_id, charge)
                 out[d] = features
@@ -122,7 +115,7 @@ class ResultsLoader:
             PeakFeature: PeakFeature object containing peak boundaries, intensity and confidence
         '''
         out = TransitionGroupFeatureCollection()
-        for t in self.dataFiles_str:
+        for t in self.runNames:
             runname = basename(t).split('.')[0]
             feats = []
             for r in self.rsltsAccess:
@@ -140,7 +133,7 @@ class ResultsLoader:
             DataFrame: DataFrame containing TransitionGroupObject information across all runs 
         '''
         out = {}
-        for d in self.dataFiles_str:
+        for d in self.runNames:
             for r in self.rsltsAccess:
                 features = r.getTopTransitionGroupFeatureDf(d, pep_id, charge)
                 out[d] = features
@@ -157,7 +150,7 @@ class ResultsLoader:
             TransitionGroup: TransitionGroup object containing peak boundaries, intensity and confidence
         '''
         out = TransitionGroupFeatureCollection()
-        for t in self.dataFiles_str:
+        for t in self.runNames:
             runname = basename(t).split('.')[0]
             feats = []
             for r in self.rsltsAccess:
@@ -166,7 +159,7 @@ class ResultsLoader:
         return out
    
     def __str__(self):
-        return f"{__class__.__name__}: rsltsFile={self.rsltsFile_str}, dataFiles={self.dataFiles_str}"
+        return f"{__class__.__name__}: rsltsFile={self.rsltsFile}"
 
     def __repr__(self):
-        return f"{__class__.__name__}: rsltsFile={self.rsltsFile_str}, dataFiles={self.dataFiles_str}"
+        return f"{__class__.__name__}: rsltsFile={self.rsltsFile}"
