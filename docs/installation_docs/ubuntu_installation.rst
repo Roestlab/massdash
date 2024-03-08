@@ -69,7 +69,8 @@ You can launch MassDash's GUI by running the following command in the terminal:
 
 A browser window will open with the MassDash GUI. If the browser window does not open, you can navigate to the following URL in your browser using the local url provided in the Anaconda CMD.exe output, by default it should be `http://localhost:8501/`, unless the port is changed.
 
-**Note:** MassDash warns you that onnxruntime, torch, and torchmeets are not installed. You can ignore this warning if you do not plan to use the MassDash's peak picking conformer model. 
+.. note::
+    MassDash warns you that onnxruntime, torch, and torchmeets are not installed. You can ignore this warning if you do not plan to use the MassDash's peak picking conformer model. 
 
 .. image:: ./assets/img/ubuntu_conda_cmd_massdash_gui_run.png
 
