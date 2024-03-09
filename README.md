@@ -57,6 +57,10 @@ pip install -e .
 
 </details>
 
+<br>
+
+For detailed OS-specific (Windows, MacOS, Ubuntu) installation guides, please refer to the [documentation](https://massdash.readthedocs.io/en/latest/Installation.html).
+
 ## Quick start
 
 Launch MassDash by typing the following command in your terminal:
@@ -139,6 +143,10 @@ docker run -p 8501:8501 singjust/massdash:latest
 ```
 
 **Note:** The MassDash Docker image binds to port 8501 when running MassDash locally.
+
+## Documentation
+
+For more information (API and tutorial walk-throughs), please refer to the [documentation](https://massdash.readthedocs.io/en/latest/index.html).
 
 ## Contribute
 
