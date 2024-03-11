@@ -6,7 +6,7 @@ massdash/loaders/access/ResultsTSVDataAccess
 import pandas as pd
 import numpy as np
 import re
-from typing import Literal, List
+from typing import Literal, List, Optional, Dict, Union
 from pathlib import Path
 
 # Loaders
@@ -22,7 +22,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
     # static variable
     columnMapping = {
         'OpenSwath':{'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge', 'leftWidth': 'RT.Start', 'rightWidth': 'RT.Stop'},
-        'DIA-NN':{'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename'},
+        'DIA-NN':{'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename', 'Precursor.Id':'Precursor'},
         'DreamDIA':{'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'filename', 'quantification': 'Intensity'}
 
     }
@@ -213,3 +213,36 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             list: List of run names
         '''
         return [ Path(r).stem for r in self.runs]
+    
+    def getIdentifiedPrecursors(self, qvalue: float = 0.01, run:Optional[str] = None, precursorLevel = False) -> Union[set, Dict[str, set]]:
+        if precursorLevel:
+            if isinstance(run, str):
+                return set(self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue)]['Precursor'])
+            else:
+                return self.df[(self.df['Qvalue'] <= qvalue)].groupby('filename').apply(lambda x: set(x['Precursor'])).to_dict()
+        else:
+            if isinstance(run, str):
+                return set(self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value'] <= qvalue )]['ModifiedPeptideSequence'])
+            else:
+                return self.df[(self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value']<= qvalue )].groupby('filename').apply(lambda x: set(x['ModifiedPeptideSequence'])).to_dict()
+    
+    def getIdentifiedPrecursorIntensities(self, qvalue: float = 0.01, run: Optional[str] = None) -> pd.DataFrame:
+        if isinstance(run, str):
+            return self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue)][['Precursor', 'Intensity']].copy()
+        else:
+            return self.df[(self.df['Qvalue'] <= qvalue)][['filename', 'Precursor', 'Intensity']].copy()
+
+    def getIdentifiedProteins(self, qvalue: float = 0.01, run:Optional[str] = None) -> Union[set, Dict[str, set]]:
+        if isinstance(run, str):
+            return set(self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue)]['ProteinId'])
+        else:
+            return self.df[(self.df['Qvalue'] <= qvalue)][['ProteinId', 'filename']].groupby(['filename']).apply(lambda x: set(x['ProteinId'])).to_dict()
+
+    def getIdentifiedPeptides(self, qvalue: float = 0.01, run:Optional[str] = None) -> Union[set, Dict[str, set]]:
+        if isinstance(run, str):
+            return set(self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue)]['ModifiedPeptideSequence'])
+        else:
+            return self.df[(self.df['Qvalue'] <= qvalue)][['filename', 'ModifiedPeptideSequence']].groupby('filename').apply(lambda x: set(x['ModifiedPeptideSequence'])).to_dict()
+    
+    def getSoftware(self) -> str:
+        return self.results_type

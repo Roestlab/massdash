@@ -41,7 +41,7 @@ $Authors: Hannes Roest, Justin Sing$
 """
 import sqlite3
 import pandas as pd
-from typing import List, Literal
+from typing import List, Literal, Optional, Dict, Union, Callable
 from pathlib import Path
 
 # Loaders
@@ -76,7 +76,7 @@ class OSWDataAccess(GenericResultsAccess):
         # hashtable, each run is its own data 
         self._initializePeptideHashtable()
         self._initializeRunHashtable()
-        self._initializeFeatureScoreHashtable()
+        #self._initializeFeatureScoreHashtable()
         
         if mode == 'gui':
             self.df = self.load_data()
@@ -263,7 +263,8 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                                               precursor_charge=i['precursor_charge'], 
                                               sequence=i['sequence'], 
                                               consensusApexIntensity=i['consensusApexIntensity'],
-                                              consensusApexIM=i['consensusApexIM'])) # will be -1 if IM is not present
+                                              consensusApexIM=i['consensusApexIM'],
+                                              software='OpenSWATH')) # will be -1 if IM is not present
         return out
     
     def _getTopFeatureFromPrecursorIdAndRun(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
@@ -280,7 +281,8 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                                             sequence=df['sequence'], 
                                             consensusApex=df['consensusApex'],
                                             consensusApexIntensity=df['consensusApexIntensity'],
-                                            consensusApexIM=df['consensusApexIM']) # will be -1 if IM is not present
+                                            consensusApexIM=df['consensusApexIM'],
+                                            software='OpenSWATH') # will be -1 if IM is not present
  
     def _getTopFeatureFromPrecursorIdAndRunDf(self, run_id: str, precursor_id: int) -> List[TransitionGroupFeature]:
         df = self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
@@ -423,6 +425,174 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         
         return data
     
+    def getIdentifiedPrecursors(self, qvalue: float = 0.01, run: Optional[str] = None, precursorLevel=False):
+        """
+        Retrives a set of identified precursors
+
+        Args:
+            run (str): The run name.
+            qvalue (float): The q-value threshold.
+            precursorLevel (bool): True indicates q-value filtering only done on the precursor level
+        """
+        if isinstance(run, str):
+            run_id = self._runIDFromRunName(run)
+            if precursorLevel: #only check q value cutoff on precursor level
+                stmt = f"""SELECT 
+                    PEPTIDE.MODIFIED_SEQUENCE || PRECURSOR.CHARGE  AS Precursor
+                FROM PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+                INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                WHERE FEATURE.RUN_ID = {run_id} AND SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_MS2.RANK == 1"""
+            else:
+                stmt = f"""SELECT
+                    PEPTIDE.MODIFIED_SEQUENCE || PRECURSOR.CHARGE  AS Precursor
+                FROM PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+                INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN SCORE_PEPTIDE ON SCORE_PEPTIDE.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+                WHERE FEATURE.RUN_ID = {run_id} AND SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_PEPTIDE.QVALUE <= {qvalue} AND SCORE_PROTEIN.QVALUE <= {qvalue} and SCORE_MS2.RANK == 1"""
+            rslt = self.conn.execute(stmt)
+            return set([i[0] for i in rslt.fetchall()])
+        else: # get for all runs
+            if precursorLevel: #only check q value cutoff on precursor level
+                stmt = f"""SELECT 
+                    PEPTIDE.MODIFIED_SEQUENCE || PRECURSOR.CHARGE  AS Precursor,
+                    FEATURE.RUN_ID as RUN_ID
+                FROM PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+                INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                WHERE SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_MS2.RANK == 1"""
+            else:
+                stmt = f"""SELECT
+                    PEPTIDE.MODIFIED_SEQUENCE || PRECURSOR.CHARGE  AS Precursor,
+                    FEATURE.RUN_ID as RUN_ID
+                FROM PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+                INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN SCORE_PEPTIDE ON SCORE_PEPTIDE.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+                WHERE SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_PEPTIDE.QVALUE <= {qvalue} AND SCORE_PROTEIN.QVALUE <= {qvalue} and SCORE_MS2.RANK == 1"""
+            df = pd.read_sql(stmt, self.conn)
+            df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
+            return df[['RUN_NAME', 'Precursor']].groupby('RUN_NAME').apply(lambda x: set(x['Precursor'])).to_dict()
+
+    def getIdentifiedPrecursorIntensities(self, qvalue: float = 0.01, run: Optional[str] = None, precursorLevel=False):
+        if isinstance(run, str):
+            run_id = self._runIDFromRunName(run)
+            if precursorLevel:
+                stmt = f"""SELECT 
+                    PEPTIDE.MODIFIED_SEQUENCE || PRECURSOR.CHARGE  AS Precursor,
+                    FEATURE_MS2.AREA_INTENSITY AS Intensity
+                FROM PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+                INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+                WHERE FEATURE.RUN_ID = {run_id} AND SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_MS2.RANK == 1"""
+            else:
+                stmt = f"""SELECT
+                    PEPTIDE.MODIFIED_SEQUENCE || PRECURSOR.CHARGE  AS Precursor,
+                    FEATURE_MS2.AREA_INTENSITY AS Intensity
+                FROM PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+                INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                LEFT JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+                LEFT JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+                LEFT JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                LEFT JOIN SCORE_PEPTIDE ON SCORE_PEPTIDE.PEPTIDE_ID = PEPTIDE.ID
+                LEFT JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+                WHERE FEATURE.RUN_ID = {run_id} AND SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_PEPTIDE.QVALUE <= {qvalue} AND SCORE_PROTEIN.QVALUE <= {qvalue} AND SCORE_MS2.RANK == 1"""
+            return pd.read_sql(stmt, self.conn)
+        else: # get for all runs
+            if precursorLevel:
+                stmt = f"""SELECT 
+                    PEPTIDE.MODIFIED_SEQUENCE || PRECURSOR.CHARGE  AS Precursor,
+                    FEATURE_MS2.AREA_INTENSITY AS Intensity,
+                    FEATURE.RUN_ID as RUN_ID
+                FROM PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+                INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+                INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                INNER JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+                WHERE SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_MS2.RANK == 1"""
+            else:
+                stmt = f"""SELECT
+                    PEPTIDE.MODIFIED_SEQUENCE || PRECURSOR.CHARGE  AS Precursor,
+                    FEATURE_MS2.AREA_INTENSITY AS Intensity,
+                    FEATURE.RUN_ID as RUN_ID
+                FROM PRECURSOR
+                INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR.ID = PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID
+                INNER JOIN PEPTIDE ON PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                INNER JOIN PEPTIDE_PROTEIN_MAPPING ON PEPTIDE_PROTEIN_MAPPING.PEPTIDE_ID = PEPTIDE.ID
+                LEFT JOIN FEATURE ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+                LEFT JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID
+                LEFT JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID
+                LEFT JOIN SCORE_PEPTIDE ON SCORE_PEPTIDE.PEPTIDE_ID = PEPTIDE.ID
+                LEFT JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
+                WHERE SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_PEPTIDE.QVALUE <= {qvalue} AND SCORE_PROTEIN.QVALUE <= {qvalue} AND SCORE_MS2.RANK == 1"""
+            df = pd.read_sql(stmt, self.conn)
+            df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID').drop(columns=['RUN_ID', 'ID', 'FILENAME']).rename(columns={'RUN_NAME': 'runName'})
+            return df
+  
+    def getIdentifiedPeptides(self, qvalue: float = 0.01, run: Optional[str] = None) -> Union[set, Dict[str, set]]:
+        if isinstance(run, str):
+            run_id = self._runIDFromRunName(run)
+            stmt = f"""SELECT
+                PEPTIDE.MODIFIED_SEQUENCE AS Peptide
+                FROM PEPTIDE
+                INNER JOIN SCORE_PEPTIDE ON SCORE_PEPTIDE.PEPTIDE_ID = PEPTIDE.ID
+                WHERE SCORE_PEPTIDE.RUN_ID = {run_id} AND SCORE_PEPTIDE.QVALUE <= {qvalue} AND PEPTIDE.DECOY = 0 """
+            rslt = self.conn.execute(stmt)
+            return set([i[0] for i in rslt.fetchall()])
+        else: # get for all runs
+            stmt = f"""SELECT
+                PEPTIDE.MODIFIED_SEQUENCE AS Peptide,
+                RUN_ID 
+                FROM PEPTIDE
+                INNER JOIN SCORE_PEPTIDE ON SCORE_PEPTIDE.PEPTIDE_ID = PEPTIDE.ID
+                WHERE SCORE_PEPTIDE.QVALUE <= {qvalue} AND PEPTIDE.DECOY = 0 """
+            df = pd.read_sql(stmt, self.conn)
+            df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
+            return df[['RUN_NAME', 'Peptide']].groupby('RUN_NAME').apply(lambda x: set(x['Peptide'])).to_dict()
+ 
+    def getIdentifiedProteins(self, qvalue: float = 0.01, run: Optional[str] = None) -> Union[set, Dict[str, set]]:
+        if isinstance(run, str):
+            run_id = self._runIDFromRunName(run)
+            stmt = f"""SELECT
+                PROTEIN.PROTEIN_ACCESSION AS Protein
+                FROM PROTEIN
+                INNER JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PROTEIN.ID
+                WHERE SCORE_PROTEIN.RUN_ID = {run_id} AND SCORE_PROTEIN.QVALUE <= {qvalue} AND PROTEIN.DECOY = 0 """
+            rslt = self.conn.execute(stmt)
+            return set([i[0] for i in rslt.fetchall()])
+        else: # get all runs
+            stmt = f"""SELECT
+                PROTEIN.PROTEIN_ACCESSION AS Protein,
+                RUN_ID
+                FROM PROTEIN
+                INNER JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PROTEIN.ID
+                WHERE SCORE_PROTEIN.QVALUE <= {qvalue} AND PROTEIN.DECOY = 0 """
+            df = pd.read_sql(stmt, self.conn)
+            df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
+            return df[['RUN_NAME', 'Protein']].groupby('RUN_NAME').apply(lambda x: set(x['Protein'])).to_dict()
+   
+    def getSoftware(self):
+        return "OpenSWATH"
+
     def getPrecursorIDFromPeptideAndCharge(self, fullpeptidename: str, charge: int) -> int:
         try:
             return self.peptideHash.loc[fullpeptidename, charge]['PRECURSOR_ID']
@@ -443,7 +613,6 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         features['precursor_charge'] = charge
         return features[self.COLUMNS]
 
-        
     def getTopTransitionGroupFeatureDf(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> pd.DataFrame:
         columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'sequence', 'precursor_charge', 'software']
         run_id = self._runIDFromRunName(run_basename_wo_ext)
