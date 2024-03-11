@@ -9,7 +9,7 @@ This guide will help you install MassDash on Ubuntu 22.04.
 Prerequisites
 -------------
 
-It is recommended to use Anaconda to manage Python environments and packages. You can download Anaconda from `here <https://www.anaconda.com/download>`_. You can find documentation for installing Anaconda on Ubuntu `here <https://docs.anaconda.com/free/anaconda/install/linux/>`_.
+It is recommended to use Anaconda to manage Python environments and packages. You can download Anaconda from `here <https://www.anaconda.com/download>`_. You can find documentation for installing Anaconda on Ubuntu `here <https://docs.anaconda.com/free/anaconda/install/linux/>`__.
 
 Installation
 ------------

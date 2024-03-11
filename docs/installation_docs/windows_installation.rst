@@ -9,7 +9,7 @@ This guide will walk you through the installation of MassDash on a Windows 10 ma
 Prerequisites
 -------------
 
-It is recommended to use Anaconda to manage Python environments and packages. You can download Anaconda from `here <https://www.anaconda.com/download>`_. You can find documentation for installing Anaconda on windows `here <https://docs.anaconda.com/free/anaconda/install/windows/>`_.
+It is recommended to use Anaconda to manage Python environments and packages. You can download Anaconda from `here <https://www.anaconda.com/download>`_. You can find documentation for installing Anaconda on windows `here <https://docs.anaconda.com/free/anaconda/install/windows/>`__.
 
 Installation
 ------------

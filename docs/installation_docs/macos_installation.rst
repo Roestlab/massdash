@@ -9,7 +9,7 @@ This guide will help you install MassDash on MacOS Big Sur.
 Prerequisites
 -------------
 
-It is recommended to use Anaconda to manage Python environments and packages. You can download Anaconda from `here <https://www.anaconda.com/download>`_. You can find documentation for installing Anaconda on MacOS `here <https://docs.anaconda.com/free/anaconda/install/mac-os/>`_.
+It is recommended to use Anaconda to manage Python environments and packages. You can download Anaconda from `here <https://www.anaconda.com/download>`_. You can find documentation for installing Anaconda on MacOS `here <https://docs.anaconda.com/free/anaconda/install/mac-os/>`__.
 
 Installation
 ------------
