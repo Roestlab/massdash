@@ -56,5 +56,5 @@ Installation Guides
    installation_docs/ubuntu_installation
 
 1. :doc:`Windows Installation <installation_docs/windows_installation>` - Installation guide for Windows
-2. :doc:`Mac Installation <installation_docs/macos_installation>` - Installation guide for Mac OpenSwath
+2. :doc:`Mac Installation <installation_docs/macos_installation>` - Installation guide for Mac BigSur
 3. :doc:`Ubuntu Installation <installation_docs/ubuntu_installation>` - Installation guide for Ubuntu
