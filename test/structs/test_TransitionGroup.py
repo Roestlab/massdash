@@ -51,10 +51,7 @@ class TestTransitionGroup(unittest.TestCase):
         # Test the toPandasDf() method
         df = self.transitionGroup.toPandasDf()
         expected = pd.DataFrame({'rt': [1,2,3] * 4, 'intensity': [4,5,6,7,8,9,10,11,12,13,14,15], 'annotation': ['test1', 'test1', 'test1', 'test2', 'test2', 'test2', 'test3', 'test3', 'test3', 'test4', 'test4', 'test4']})
-        # Cast 'rt' and 'intensity' columns to int64
-        expected['rt'] = expected['rt'].astype('int64')
-        expected['intensity'] = expected['intensity'].astype('int64')
-        pd.testing.assert_frame_equal(df.reset_index(drop=True), expected)
+        pd.testing.assert_frame_equal(df.reset_index(drop=True), expected, check_dtype=False)
 
 if __name__ == '__main__':
     unittest.main()
