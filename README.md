@@ -59,7 +59,7 @@ pip install -e .
 
 <br>
 
-For detailed OS-specific (Windows, MacOS, Ubuntu) installation guides, please refer to the [documentation](https://massdash.readthedocs.io/en/latest/Installation.html).
+For detailed OS-specific (Windows, MacOS, Ubuntu) installation guides, please refer to the [documentation](https://massdash.readthedocs.io/en/latest/Installation.html#installation-guides).
 
 ## Quick start
 
