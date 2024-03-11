@@ -8,7 +8,7 @@
 
 ---
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![pypipv](https://img.shields.io/pypi/pyversions/massdash.svg)](https://img.shields.io/pypi/pyversions/massdash)
 [![pypiv](https://img.shields.io/pypi/v/massdash.svg)](https://pypi.python.org/pypi/massdash)
 [![pypidownload](https://img.shields.io/pypi/dm/massdash?color=orange)](https://pypistats.org/packages/massdash)
 [![biocondav](https://img.shields.io/conda/v/bioconda/massdash?label=bioconda&color=purple)](https://anaconda.org/bioconda/massdash)
