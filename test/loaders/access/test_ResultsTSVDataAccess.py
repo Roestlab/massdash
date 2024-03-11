@@ -122,5 +122,10 @@ def test_getNumIdentifiedPeptides(access, run, snapshot):
 def test_getSoftware(access, expected):
     assert access.getSoftware() == expected
 
+@pytest.mark.parametrize("access", ['diann'], indirect=['access'])
+def test_getExperimentSummary(access, snapshot_pandas):
+    experiment_summary = access.getExperimentSummary()
+    assert snapshot_pandas == experiment_summary
+
 def test_getCV():
     pass

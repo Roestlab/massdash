@@ -24,9 +24,9 @@ def osw_data_access():
     yield osw_data_access
     osw_data_access.conn.close()
 
-@pytest.fixture
-def run():
-    return 'ionMobilityTest2.mzML'
+@pytest.fixture(params=['ionMobilityTest2', None])
+def run(request):
+    return request.param
 
 def test_getProteinTable(osw_data_access, snapshot_pandas):
     protein_table = osw_data_access.getProteinTable()
@@ -56,8 +56,6 @@ def test_getPeptideTransitionInfo(osw_data_access, snapshot_pandas):
 @pytest.mark.parametrize("fullpeptidename,charge", [("AFVDFLSDEIK", 2), ("INVALID", 0)])
 def test_getTransitionIDAnnotationFromSequence(osw_data_access, snapshot_pandas, fullpeptidename, charge):
     transition_group_feature = osw_data_access.getTransitionIDAnnotationFromSequence(fullpeptidename, charge)
-    print(transition_group_feature)
-    print(type(transition_group_feature))
     assert snapshot_pandas == transition_group_feature 
 
 @pytest.mark.parametrize("fullpeptidename,charge", [("AFVDFLSDEIK", 2), ("INVALID", 0)])
@@ -67,13 +65,13 @@ def test_getPrecursorIDFromPeptideAndCharge(osw_data_access, snapshot, fullpepti
 
 @pytest.mark.parametrize("fullpeptidename,charge,run", [("AFVDFLSDEIK", 2, 'ionMobilityTest2'), ("INVALID", 0, 'ionMobilityTest2'), ("AFVDFLSDEIK", 2, 'INVALID'),])
 def test_getTransitionGroupFeatures(osw_data_access, snapshot, fullpeptidename, charge, run):
-    transition_group_feature = osw_data_access.getTransitionGroupFeatures(fullpeptidename, charge, run)
+    transition_group_feature = osw_data_access.getTransitionGroupFeatures(run, fullpeptidename, charge)
+    print(transition_group_feature)
     assert snapshot == transition_group_feature
 
-
 @pytest.mark.parametrize("fullpeptidename,charge,run", [("AFVDFLSDEIK", 2, 'ionMobilityTest2'), ("INVALID", 0, 'ionMobilityTest2'), ("AFVDFLSDEIK", 2, 'INVALID')])
-def test_getTransitionGroupFeaturesDf(osw_data_access, snapshot, fullpeptidename, charge, run):
-    transition_group_feature = osw_data_access.getTransitionGroupFeaturesDf(fullpeptidename, charge, run)
+def test_getTransitionGroupFeaturesDf(osw_data_access, snapshot, run, fullpeptidename, charge):
+    transition_group_feature = osw_data_access.getTransitionGroupFeaturesDf(run, fullpeptidename, charge)
     assert snapshot == transition_group_feature
 
 def test_getRunNames(osw_data_access, snapshot):
@@ -110,6 +108,10 @@ def test_getNumIdentifiedPeptides(osw_data_access, run, snapshot):
 
 def test_getSoftware(osw_data_access):
     assert osw_data_access.getSoftware() == "OpenSWATH"
+
+def test_getExperimentSummary(osw_data_access, snapshot_pandas):
+    experiment_summary = osw_data_access.getExperimentSummary()
+    assert snapshot_pandas == experiment_summary
 
 def test_getCV():
     pass

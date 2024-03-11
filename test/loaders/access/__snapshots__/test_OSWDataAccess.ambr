@@ -97,9 +97,11 @@
   Index: []
 # ---
 # name: test_getTransitionGroupFeaturesDf[AFVDFLSDEIK-2-ionMobilityTest2]
-     leftBoundary  rightBoundary  areaIntensity    qvalue  consensusApex  consensusApexIntensity  precursor_charge     sequence   software
-  0   6235.848633    6248.428223      2848190.0  0.000035        6242.15           352642.161350                 2  AFVDFLSDEIK  OpenSWATH
-  1   6255.645996    6266.515137        35433.9  0.000178        6256.67             2888.987036                 2  AFVDFLSDEIK  OpenSWATH
+     leftBoundary  rightBoundary  ...     sequence   software
+  0   6235.848633    6248.428223  ...  AFVDFLSDEIK  OpenSWATH
+  1   6255.645996    6266.515137  ...  AFVDFLSDEIK  OpenSWATH
+  
+  [2 rows x 9 columns]
 # ---
 # name: test_getTransitionGroupFeaturesDf[INVALID-0-ionMobilityTest2]
   Empty DataFrame

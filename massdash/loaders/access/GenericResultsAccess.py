@@ -157,4 +157,19 @@ class GenericResultsAccess(ABC):
         df_out["CV"] = df_out["std_intensity"] / df_out["mean_intensity"] * 100
 
         return df_out
+    
+    def getExperimentSummary(self) -> pd.DataFrame:
+        '''
+        Get a summary of the experiment
+
+        Returns:
+            DataFrame: DataFrame containing the experiment summary. Each row is a run and the columns are the run metadata (# Precursors, # Pepitdes, # Proteins, Software)'
+        '''
+        numPrecursors = self.getNumIdentifiedPrecursors()
+        numPeptides = self.getNumIdentifiedPeptides()
+        numProteins = self.getNumIdentifiedProteins()
+
+        df = pd.DataFrame([numPrecursors, numPeptides, numProteins], index=['numPrecursors', 'numPeptides', 'numProteins']).T
+        df['software'] = self.getSoftware()
+        return df
 
