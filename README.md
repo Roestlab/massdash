@@ -69,6 +69,8 @@ Launch MassDash by typing the following command in your terminal:
 massdash gui
 ```
 
+For more information on the GUI, please refer to the [documentation](https://massdash.readthedocs.io/en/latest/GUI.html).
+
 <p align="left">
   <img alt="MassDash Landing Page" style="width: 80%;" src="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Landing_Page.png">
 </p>
