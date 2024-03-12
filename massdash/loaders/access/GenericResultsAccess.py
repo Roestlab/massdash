@@ -54,13 +54,12 @@ class GenericResultsAccess(ABC):
         pass
 
     @abstractmethod
-    def getIdentifiedPrecursorIntensities(self, qvalue: float = 0.01, run: Optional[str] = None) -> pd.DataFrame:
+    def getIdentifiedPrecursorIntensities(self, **kwargs) -> pd.DataFrame:
         '''
         Get the identified precursor intensities at a certain q-value.
 
         Args:
-            qvalue: (float) The q-value threshold for identification
-            run: (str) The run name for which to get the identified precursors, if None, get for all runs
+            **kwargs (dict): Additional arguments to be passed to the getIdentifiedPrecursor function
         Returns:
             The identified precursor intensities across all runs (DataFrame with columns: Precursor, runName, Intensity) or for a single run (DataFrame with columns: Precursor, Intensity)
         '''
@@ -142,13 +141,16 @@ class GenericResultsAccess(ABC):
             tmp =  function(**kwargs)
             return { k: len(v) for k, v in tmp.items()}
         
-    def getPrecursorCV(self, qvalue: float = 0.01) -> pd.DataFrame:
+    def getPrecursorCVs(self, **kwargs) -> pd.DataFrame:
         """
         Returns a DataFrame with the coefficient of variation for each precursor.
+
+        Args:
+            **kwargs (dict): Additional arguments to be passed to the getIdentifiedPrecursors function
         """
-        intensity_per_run = self.getIdentifiedPrecursorIntensities(qvalue)
+        intensity_per_run = self.getIdentifiedPrecursorIntensities(**kwargs)
         # Calculate mean and standard deviation for each group
-        df_out = intensity_per_run.groupby(["Precursor", "filename"]).agg(
+        df_out = intensity_per_run.groupby("Precursor").agg(
             mean_intensity=pd.NamedAgg(column="Intensity", aggfunc="mean"),
             std_intensity=pd.NamedAgg(column="Intensity", aggfunc="std")
         ).reset_index()
@@ -169,7 +171,9 @@ class GenericResultsAccess(ABC):
         numPeptides = self.getNumIdentifiedPeptides()
         numProteins = self.getNumIdentifiedProteins()
 
-        df = pd.DataFrame([numPrecursors, numPeptides, numProteins], index=['numPrecursors', 'numPeptides', 'numProteins']).T
-        df['software'] = self.getSoftware()
+        index = list(zip(('numPrecursors', 'numPeptides', 'numProteins'), (self.getSoftware(),)*3))
+
+        df = pd.DataFrame([numPrecursors, numPeptides, numProteins], index=index).T
+        df.columns = pd.MultiIndex.from_tuples(df.columns, names=['metric', 'software'])
         return df
 

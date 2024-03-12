@@ -222,9 +222,9 @@ class ResultsTSVDataAccess(GenericResultsAccess):
                 return self.df[(self.df['Qvalue'] <= qvalue)].groupby('filename').apply(lambda x: set(x['Precursor'])).to_dict()
         else:
             if isinstance(run, str):
-                return set(self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value'] <= qvalue )]['ModifiedPeptideSequence'])
+                return set(self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value'] <= qvalue )]['Precursor'])
             else:
-                return self.df[(self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value']<= qvalue )].groupby('filename').apply(lambda x: set(x['ModifiedPeptideSequence'])).to_dict()
+                return self.df[(self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value']<= qvalue )].groupby('filename').apply(lambda x: set(x['Precursor'])).to_dict()
     
     def getIdentifiedPrecursorIntensities(self, qvalue: float = 0.01, run: Optional[str] = None) -> pd.DataFrame:
         if isinstance(run, str):

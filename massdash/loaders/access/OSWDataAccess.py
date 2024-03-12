@@ -545,7 +545,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 LEFT JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
                 WHERE SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_PEPTIDE.QVALUE <= {qvalue} AND SCORE_PROTEIN.QVALUE <= {qvalue} AND SCORE_MS2.RANK == 1"""
             df = pd.read_sql(stmt, self.conn)
-            df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID').drop(columns=['RUN_ID', 'ID', 'FILENAME']).rename(columns={'RUN_NAME': 'runName'})
+            df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID').drop(columns=['RUN_ID', 'ID', 'FILENAME']).rename(columns={'RUN_NAME': 'filename'})
             return df
   
     def getIdentifiedPeptides(self, qvalue: float = 0.01, run: Optional[str] = None) -> Union[set, Dict[str, set]]:
