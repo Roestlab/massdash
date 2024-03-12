@@ -82,7 +82,9 @@ class ResultsLoader:
         runNames = set()
         for f in self.rsltsAccess:
             runNames = runNames.union(set(f.getRunNames()))
-        return list(runNames)
+        runNames = list(runNames)
+        runNames.sort()
+        return runNames
     
     def _loadSoftware(self):
         '''
@@ -170,10 +172,12 @@ class ResultsLoader:
         out = TransitionGroupFeatureCollection()
         for t in self.runNames:
             runname = basename(t).split('.')[0]
-            feats = []
+            all_feats = []
             for r in self.rsltsAccess:
-                feats.append(r.getTopTransitionGroupFeature(runname, pep_id, charge))
-            out[t] = feats
+                feature = r.getTopTransitionGroupFeature(runname, pep_id, charge)
+                if feature is not None:
+                    all_feats.append(feature)
+            out[t] = all_feats
         return out
     
     def loadIdentifiedPrecursors(self, **kwargs):
@@ -233,14 +237,6 @@ class ResultsLoader:
         '''
         return pd.concat([i.getExperimentSummary().T for i in self.rsltsAccess]).sort_index().T
 
-    def loadNumPeptideIdentifications(self, **kwargs) -> pd.DataFrame:
-        '''
-        Load the number of peptide identifications
-
-        **kwargs: Additional arguments to be passed to the getNumPeptideIdentifications function
-        '''
-        return {i.getSoftware():i.getNumPeptideIdentifications(**kwargs) for i in self.rsltsAccess}
-   
     def loadQuantificationMatrix(self, **kwargs) -> pd.DataFrame:
         '''
         load a quantification matrix

@@ -145,7 +145,8 @@ class ResultsTSVDataAccess(GenericResultsAccess):
                                                       qvalue=row['Qvalue'],
                                                       consensusApexIM=row['IM'] if self.has_im else None,
                                                       sequence=row['ModifiedPeptideSequence'],
-                                                      precursor_charge=row['PrecursorCharge']))
+                                                      precursor_charge=row['PrecursorCharge'],
+                                                      software=self.results_type))
                 return out 
             else: # len(row_indices)-1==0:
                 LOGGER.debug(f"Error: No feature results found for {peptide_tmp} {charge} in {self.filename}")
