@@ -3,3 +3,4 @@ flit
 pylint
 pytest
 syrupy
+tables
