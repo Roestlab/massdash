@@ -29,7 +29,7 @@ def chrom_single_peak():
     rt_arr = np.arange(1, 26)
     intens_single_peak = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
                             2, 3, 4, 5, 4, 3, 2, 1, 0,
-                            0, 0, 0, 0, 0, 0])   
+                            0, 0, 0, 0, 0, 0], dtype=np.float64)   
     return Chromatogram(rt_arr, intens_single_peak)
 
 @pytest.fixture
@@ -38,7 +38,7 @@ def chrom_multiple_peaks():
     intens_multiple_peaks = np.array([0, 0, 0, 1, 2, 3, 4, 5, 4, 3,
                     2, 1, 0, 0, 0, 0, 0, 0, 0,
                     0, 1, 3, 9, 18, 25, 18, 9, 3,
-                    1, 0, 0, 0, 0, 0, 0, 0])
+                    1, 0, 0, 0, 0, 0, 0, 0], dtype=np.float64)
     return Chromatogram(rt_arr_long, intens_multiple_peaks)
 
 
@@ -62,7 +62,6 @@ def test_perform_chromatogram_peak_picking_multiple_chroms(pyPeakPicker, chrom_s
     df = TransitionGroupFeature.toPandasDf(output)
     assert snapshot_pandas == df
 
-'''
 ### Test get Level ###
 @pytest.mark.parametrize("level", ["ms1ms2", "ms2", "ms1"])
 def test_resolve_level(chrom_single_peak, chrom_empty, chrom_multiple_peaks, level, snapshot_pandas):
@@ -74,4 +73,3 @@ def test_resolve_level(chrom_single_peak, chrom_empty, chrom_multiple_peaks, lev
     # convert list of chromatograms to pandas df for snapshot
     tg_tmp = TransitionGroup(output, []) 
     assert snapshot_pandas == tg_tmp.toPandasDf()
-'''
