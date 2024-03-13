@@ -94,9 +94,9 @@ class SqMassLoader(GenericChromatogramLoader):
             features = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
             features = features.rename(columns={'ms2_mscore':'qvalue', 'RT':'consensusApex', 'Intensity':'consensusApexIntensity', 'leftWidth':'leftBoundary', 'rightWidth':'rightBoundary'})
             features = features[['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity']]
-            out[t] = features
+            out[runname] = features
         
-        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='run'))
 
     def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
