@@ -48,6 +48,7 @@ import pandas as pd
 import base64
 import struct
 import zlib
+from pathlib import Path
 
 # Structs
 from ...structs.Chromatogram import Chromatogram
@@ -60,6 +61,7 @@ class SqMassDataAccess:
         self.conn = sqlite3.connect(filename, check_same_thread=False)
         self.c = self.conn.cursor()
         self.filename = filename
+        self.runName = str(Path(filename).stem)
 
     def getPrecursorChromIDs(self, precursor_id):
         """

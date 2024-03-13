@@ -46,15 +46,15 @@ class SqMassLoader(GenericChromatogramLoader):
 
             # only add if there is data
             if not transition_chroms.empty or precursor_chroms.empty:
-                out[t.filename] = pd.concat([precursor_chroms, transition_chroms])
+                out[t.runName] = pd.concat([precursor_chroms, transition_chroms])
             elif transition_chroms.empty:
-                out[t.filename] = precursor_chroms
+                out[t.runName] = precursor_chroms
             elif precursor_chroms.empty:
-                out[t.filename] = transition_chroms
+                out[t.runName] = transition_chroms
             else:
                 print(f"Warning: no data found for peptide in transition file {self.dataFiles}")
 
-        return pd.concat(out).reset_index().drop('level_1', axis=1).rename(columns=dict(level_0='filename'))
+        return pd.concat(out).reset_index().drop('level_1', axis=1).rename(columns=dict(level_0='run'))
 
     def loadTransitionGroups(self, pep_id: str, charge: int) -> TransitionGroupCollection:
         '''
@@ -81,7 +81,7 @@ class SqMassLoader(GenericChromatogramLoader):
             prec_chrom_ids = t.getPrecursorChromIDs(precursor_id)
             precursor_chroms = t.getDataForChromatograms(prec_chrom_ids['chrom_ids'], prec_chrom_ids['native_ids'])
 
-            out[t] = TransitionGroup(precursor_chroms, transition_chroms, pep_id, charge)
+            out[t.runName] = TransitionGroup(precursor_chroms, transition_chroms, pep_id, charge)
         return out
 
     def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:

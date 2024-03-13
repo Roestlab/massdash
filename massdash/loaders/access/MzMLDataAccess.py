@@ -11,6 +11,7 @@ from joblib import Parallel, delayed
 import traceback
 import sys
 import mmap
+from pathlib import Path
 
 # data modules
 import pyopenms as po
@@ -52,6 +53,7 @@ class MzMLDataAccess():
         """
         
         self.filename = filename
+        self.runName = str(Path(filename).stem)
         self.readOptions = readOptions
         self.exp = po.OnDiscMSExperiment()
         self.meta_data = po.MSExperiment()

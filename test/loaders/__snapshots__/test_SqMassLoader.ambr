@@ -2,9 +2,9 @@
 # name: test_loadTransitionGroupFeature[INVALID-0]
   '''
   TransitionGroupFeatureCollection({
-    '/home/joshua/Development/massdash_alt/massdash/test/test_data/xics/test_chrom_1.sqMass': list([
+    'test_chrom_1': list([
     ]),
-    '/home/joshua/Development/massdash_alt/massdash/test/test_data/xics/test_chrom_2.sqMass': list([
+    'test_chrom_2': list([
     ]),
   })
   '''
@@ -12,7 +12,7 @@
 # name: test_loadTransitionGroupFeature[NKESPT(UniMod:21)KAIVR(UniMod:267)-3]
   '''
   TransitionGroupFeatureCollection({
-    '/home/joshua/Development/massdash_alt/massdash/test/test_data/xics/test_chrom_1.sqMass': list([
+    'test_chrom_1': list([
       -------- TransitionGroupFeature --------
   leftBoundary: 818.476013183594
   rightBoundary: 847.557983398438
@@ -66,7 +66,7 @@
   product_mz: None
   sequence: NKESPT(UniMod:21)KAIVR(UniMod:267),
     ]),
-    '/home/joshua/Development/massdash_alt/massdash/test/test_data/xics/test_chrom_2.sqMass': list([
+    'test_chrom_2': list([
       -------- TransitionGroupFeature --------
   leftBoundary: 898.453002929688
   rightBoundary: 949.336975097656
@@ -103,7 +103,7 @@
 # name: test_loadTransitionGroups[NKESPT(UniMod:21)KAIVR(UniMod:267)-3]
   '''
   dict({
-    SqMassDataAccess(filename=/home/joshua/Development/massdash_alt/massdash/test/test_data/xics/test_chrom_1.sqMass): TransitionGroup(
+    'test_chrom_1': TransitionGroup(
       precursorData=list([
         Chromatogram(
           data=array([ 512.8,  516.4,  520. ,  523.7,  527.3,  530.9,  534.6,  538.2,
@@ -650,7 +650,7 @@
         ),
       ]),
     ),
-    SqMassDataAccess(filename=/home/joshua/Development/massdash_alt/massdash/test/test_data/xics/test_chrom_2.sqMass): TransitionGroup(
+    'test_chrom_2': TransitionGroup(
       precursorData=list([
         Chromatogram(
           data=array([ 567.3,  570.9,  574.6,  578.2,  581.8,  585.5,  589.1,  592.7,

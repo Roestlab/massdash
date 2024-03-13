@@ -45,8 +45,8 @@ class MzMLDataLoader(GenericSpectrumLoader):
         out = {}
         for t in self.dataFiles:
             runname = basename(t.filename).split('.')[0]
-            out[t.filename] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
-        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+            out[t.runName] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
+        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='run'))
         # Drop duplicate columns
         out_df = out_df.loc[:,~out_df.columns.duplicated()]
         return out_df
@@ -65,8 +65,8 @@ class MzMLDataLoader(GenericSpectrumLoader):
         out = {}
         for t in self.dataFiles:
             runname = basename(t.filename).split('.')[0]
-            out[t.filename] = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
-        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+            out[t.runName] = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
+        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='run'))
         # Drop duplicate columns
         out_df = out_df.loc[:,~out_df.columns.duplicated()]
         return out_df
@@ -120,12 +120,12 @@ class MzMLDataLoader(GenericSpectrumLoader):
             FeatureMapCollection: FeatureMapCollection containing FeatureMap objects for each file
         '''
         out = FeatureMapCollection()
-        top_features = [ self.rsltsFile.getTopTransitionGroupFeature(basename(splitext(d.filename)[0]), pep_id, charge) for d in self.dataFiles]
+        top_features = [ self.rsltsFile.getTopTransitionGroupFeature(d.runName, pep_id, charge) for d in self.dataFiles]
         self.libraryFile.populateTransitionGroupFeatures(top_features)
         for d, t in zip(self.dataFiles, top_features):
             if t is None:
-                LOGGER.debug(f"No feature found for {pep_id} {charge} in {d.filename}")
-                out[d.filename] =  FeatureMap()
+                LOGGER.debug(f"No feature found for {pep_id} {charge} in {d.runName}")
+                out[d.runName] =  FeatureMap()
             else:
-                out[d.filename] = d.reduce_spectra(t, config)
+                out[d.runName] = d.reduce_spectra(t, config)
         return out
