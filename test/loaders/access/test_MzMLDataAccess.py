@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import os
+import pyopenms as po
 
 import pytest
 from massdash.loaders.access.MzMLDataAccess import MzMLDataAccess
@@ -21,7 +22,12 @@ TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
 @pytest.fixture
 def mzml_data_access():
-    mzml_data_access = MzMLDataAccess(os.path.join(TEST_PATH, 'test_data', 'mzml', 'ionMobilityTest.mzML'), readOptions='ondisk')
+    # resave the experiment for this specific os
+    exp = po.MSExperiment()
+    po.MzMLFile().load(os.path.join(TEST_PATH, 'test_data', 'mzml', 'ionMobilityTest.mzML'), exp)
+    po.MzMLFile().store(os.path.join(TEST_PATH, 'test_data', 'mzml', 'ionMobilityTest_tmp.mzML'), exp)
+
+    mzml_data_access = MzMLDataAccess(os.path.join(TEST_PATH, 'test_data', 'mzml', 'ionMobilityTest_tmp.mzML'), readOptions='ondisk')
     return mzml_data_access
 
 @pytest.fixture
