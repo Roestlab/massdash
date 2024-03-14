@@ -102,7 +102,7 @@
 # ---
 # name: test_loadTransitionGroups[NKESPT(UniMod:21)KAIVR(UniMod:267)-3]
   '''
-  dict({
+  TransitionGroupCollection({
     'test_chrom_1': TransitionGroup(
       precursorData=list([
         Chromatogram(
