@@ -6,9 +6,8 @@ massdash/util
 import os
 import sys
 import importlib
-from typing import Optional
-from pathlib import Path
 from typing import List, Tuple, Optional
+from pathlib import Path
 
 # Logging and performance modules
 from functools import wraps
