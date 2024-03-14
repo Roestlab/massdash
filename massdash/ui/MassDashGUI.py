@@ -79,35 +79,35 @@ class MassDashGUI:
         sqmass_file_path_input (streamlit.text_input): A text input field for the sqMass file path.
         """
         # Add a welcome messageWarning
-                with st.container():
-                    st.title("Welcome to MassDash!")
-                    st.write("MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
-                    st.write("It enables the visualization of chromatograms, algorithm testing, and parameter optimization, crucial for data analysis and experimental design.")
-                    st.write("This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.")
-                    
-                    platform_context = platform.processor()
-                    if platform_context == "":
-                        st.warning("WARNING!: It seems like you are running MassDash via streamlit sharing. Please note that streamlit sharing only allows for uploading files up to 1Gb in size, it is recommended to upload files of 200Mb or less, or use the load example data for demoing MassDash. If you want to use MassDash with larger files, please consider running MassDash locally. See [massdash](https://github.com/Roestlab/massdash)")
-                        st.info("You can filter OSW and sqMass files using `pyprophets filter` module. See [pyprophet](https://github.com/PyProphet/pyprophet)")
-                        st.info("You can filter raw mzML files using OpenMS's `FileFilter` tool. See [OpenMS FileFilter](https://abibuilder.cs.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_FileFilter.html)")
+        with st.container():
+            st.title("Welcome to MassDash!")
+            st.write("MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
+            st.write("It enables the visualization of chromatograms, algorithm testing, and parameter optimization, crucial for data analysis and experimental design.")
+            st.write("This tool is an indispensable asset for researchers and laboratories working with DIA (Data-Independent Acquisition) data.")
+            
+            platform_context = platform.processor()
+            if platform_context == "":
+                st.warning("WARNING!: It seems like you are running MassDash via streamlit sharing. Please note that streamlit sharing only allows for uploading files up to 1Gb in size, it is recommended to upload files of 200Mb or less, or use the load example data for demoing MassDash. If you want to use MassDash with larger files, please consider running MassDash locally. See [massdash](https://github.com/Roestlab/massdash)")
+                st.info("You can filter OSW and sqMass files using `pyprophets filter` module. See [pyprophet](https://github.com/PyProphet/pyprophet)")
+                st.info("You can filter raw mzML files using OpenMS's `FileFilter` tool. See [OpenMS FileFilter](https://abibuilder.cs.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_FileFilter.html)")
 
-                    # Tabs for different data workflows
-                    tab1, tab2, tab3 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data", "Search Results Analysis"])
+            # Tabs for different data workflows
+            tab1, tab2, tab3 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data", "Search Results Analysis"])
 
-                    with tab1:
-                        xic_form = ExtractedIonChromatogramAnalysisFormUI()
-                        xic_form.create_ui()
-                        copy_attributes(xic_form, self)
-                        
-                    with tab2:
-                        raw_data_form = RawTargetedExtractionAnalysisFormUI()
-                        raw_data_form.create_ui()
-                        copy_attributes(raw_data_form, self)
-                        
-                    with tab3:
-                        search_results_form = SearchResultsAnalysisFormUI()
-                        search_results_form.create_ui()
-                        copy_attributes(search_results_form, self)
+            with tab1:
+                xic_form = ExtractedIonChromatogramAnalysisFormUI()
+                xic_form.create_ui()
+                copy_attributes(xic_form, self)
+                
+            with tab2:
+                raw_data_form = RawTargetedExtractionAnalysisFormUI()
+                raw_data_form.create_ui()
+                copy_attributes(raw_data_form, self)
+                
+            with tab3:
+                search_results_form = SearchResultsAnalysisFormUI()
+                search_results_form.create_ui()
+                copy_attributes(search_results_form, self)
 
         return self
 
