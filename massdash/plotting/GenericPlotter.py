@@ -19,6 +19,7 @@ class PlotConfig:
         include_ms1 (bool): A flag indicating whether to include MS1 data.
         include_ms2 (bool): A flag indicating whether to include MS2 data.
         num_plot_columns (int): The number of columns to be displayed in the plot.
+        hide_legends (bool): A flag indicating whether to hide the legends in the plot.
         title (str): The title of the plot.
         subtitle (str): The subtitle of the plot.
         x_axis_label (str): The label for the x-axis.
@@ -41,6 +42,7 @@ class PlotConfig:
         self.include_ms1 = True
         self.include_ms2 = True
         self.num_plot_columns = 2
+        self.hide_legends = False
         self.title = None
         self.subtitle = None
         self.x_axis_label = "Retention Time"
@@ -88,6 +90,7 @@ class GenericPlotter(ABC):
     def __init__(self, config: PlotConfig):
         self.include_ms1 = config.include_ms1
         self.include_ms2 = config.include_ms2
+        self.hide_legends = config.hide_legends
         self.title = config.title
         self.subtitle = config.subtitle
         self.x_axis_label = config.x_axis_label

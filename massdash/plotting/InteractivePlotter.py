@@ -310,11 +310,12 @@ class InteractivePlotter(GenericPlotter):
                 line = self.process_chrom(p, transitionChrom, label, color=colors[i], line_type='solid', is_precursor=False, transitionGroup=transitionGroup)
                 legend_items.append((label, [line]))
         
-        # Add legend items to the legend
-        legend.items = legend_items
+        if not self.hide_legends:
+            # Add legend items to the legend
+            legend.items = legend_items
 
-        # Add the legend to the plot
-        p.add_layout(legend, 'right')
+            # Add the legend to the plot
+            p.add_layout(legend, 'right')
 
         p.legend.location = "top_left"
         # p.legend.click_policy="hide"
