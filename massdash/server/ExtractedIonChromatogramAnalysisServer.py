@@ -196,7 +196,7 @@ class ExtractedIonChromatogramAnalysisServer:
                     plot_settings_dict = chrom_plot_settings.get_settings()
                     plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
                     plot_settings_dict['y_axis_label'] = 'Intensity'
-                    plot_settings_dict['title'] = os.path.basename(file.filename)
+                    plot_settings_dict['title'] = os.path.splitext(os.path.basename(file.filename))[0].split('.')[0]
                     plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
                     
                     if chrom_plot_settings.set_x_range:
