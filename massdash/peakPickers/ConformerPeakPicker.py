@@ -20,7 +20,7 @@ from ..dataProcessing.transformations import min_max_scale, sigmoid
 
 onnxruntime, ONNXRUNTIME_AVAILABLE = check_package("onnxruntime")
 torch, TORCH_AVAILABLE = check_package("torch")
-binary_recall_at_fixed_precision, TORCHMETRICS_AVAILABLE = check_package("torchmetrics", "functional.classification.binary_recall_at_fixed_precision")
+binary_recall_at_fixed_precision, TORCHMETRICS_AVAILABLE = check_package("torchmetrics", ["functional.classification.binary_recall_at_fixed_precision"])
 
 class ConformerPeakPicker:
     """
