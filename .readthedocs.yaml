@@ -29,3 +29,5 @@ python:
     - requirements: requirements.txt
     - requirements: requirements-dev.txt
     - requirements: requirements-optional.txt
+    - method: pip
+      path: .
