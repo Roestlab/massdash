@@ -26,3 +26,6 @@ formats:
 python:
   install:
     - requirements: docs/requirements.txt
+    - requirements: requirements.txt
+    - requirements: requirements-dev.txt
+    - requirements: requirements-optional.txt
