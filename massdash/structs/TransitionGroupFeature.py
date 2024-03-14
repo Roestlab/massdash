@@ -13,6 +13,20 @@ from .GenericFeature import GenericFeature
 class TransitionGroupFeature(GenericFeature):
     '''
     This is a Transition group level feature object PeakFeature Object. All Peak Picking algorithms should output an object of this class 
+
+    Attributes:
+        leftBoundary (float): The left boundary of the feature
+        rightBoundary (float): The right boundary of the feature
+        areaIntensity (float): The area intensity of the feature
+        qvalue (float): The qvalue of the feature
+        consensusApex (float): The consensus apex of the feature
+        consensusApexIntensity (float): The consensus apex intensity of the feature
+        consensusApexIM (float): The consensus apex IM of the feature
+        precursor_mz (float): The precursor mz of the feature
+        precursor_charge (int): The precursor charge of the feature
+        product_annotations (List[str]): The product annotations of the feature
+        product_mz (List[float]): The product mz of the feature
+        sequence (str): The sequence of the feature
     '''
 
     def __init__(self,

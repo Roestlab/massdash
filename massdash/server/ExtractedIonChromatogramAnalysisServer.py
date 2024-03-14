@@ -127,10 +127,10 @@ class ExtractedIonChromatogramAnalysisServer:
             st.write(f"Loading XIC data... Elapsed time: {elapsed_time()}") 
             
             # Perform peak picking based on user settings
-            if peak_picking_settings.do_peak_picking == 'OSW-PyProphet':
+            if peak_picking_settings.do_peak_picking == 'Feature File Boundaries':
                 with time_block() as elapsed_time:
                     tr_group_feature_data = self.xic_data.loadTransitionGroupFeatures(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
-                st.write(f"Loading OSW-PyProphet Peak Boundaries... Elapsed time: {elapsed_time()}")
+                st.write(f"Loading Feature File Peak Boundaries... Elapsed time: {elapsed_time()}")
             elif peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
                 with time_block() as elapsed_time:
                     # Peak picking using pyMRMTransitionGroupPicker
@@ -163,10 +163,10 @@ class ExtractedIonChromatogramAnalysisServer:
                         tr_group.targeted_transition_list = transition_list_ui.target_transition_list
                         print(f"Pretrained model file: {peak_picking_settings.peak_picker_algo_settings.pretrained_model_file}")
                         
-                        peak_picker = ConformerPeakPicker(tr_group, peak_picking_settings.peak_picker_algo_settings.pretrained_model_file, window_size=peak_picking_settings.peak_picker_algo_settings.conformer_window_size, prediction_threshold=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_threshold, prediction_type=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_type)
+                        peak_picker = ConformerPeakPicker(self.massdash_gui.file_input_settings.osw_file_path, peak_picking_settings.peak_picker_algo_settings.pretrained_model_file, prediction_threshold=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_threshold, prediction_type=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_type)
                         # get the trantition in tr_group with the max intensity
                         max_int_transition = np.max([transition.intensity for transition in tr_group.transitionData])
-                        peak_features = peak_picker.pick(max_int_transition)
+                        peak_features = peak_picker.pick(tr_group, max_int_transition)
                         tr_group_feature_data[file.filename] = peak_features
                 st.write(f"Performing Conformer Peak Picking... Elapsed time: {elapsed_time()}")
             else:

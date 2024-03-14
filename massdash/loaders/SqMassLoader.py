@@ -4,21 +4,19 @@ massdash/loaders/SqMassLoader
 """
 
 
-from abc import ABC, abstractmethod
 from typing import List, Dict, Union
 from os.path import basename
 from pandas.core.api import DataFrame as DataFrame
 import pandas as pd
 
 # Loaders
-from .GenericLoader import GenericLoader
+from .GenericChromatogramLoader import GenericChromatogramLoader
 from .access.SqMassDataAccess import SqMassDataAccess
 from .access.OSWDataAccess import OSWDataAccess
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
-from ..structs.TransitionGroupFeature import TransitionGroupFeature
 
-class SqMassLoader(GenericLoader):
+class SqMassLoader(GenericChromatogramLoader):
 
     ''' 
     Class for loading Chromatograms and peak features from SqMass files and OSW files
@@ -26,7 +24,7 @@ class SqMassLoader(GenericLoader):
     '''
 
     def __init__(self, dataFiles: Union[str, List[str]], rsltsFile: str):
-        super().__init__(rsltsFile, dataFiles, rsltsFile, 'OpenSWATH')
+        super().__init__(rsltsFile, dataFiles, 'OpenSWATH')
         self.dataFiles = [SqMassDataAccess(f) for f in self.dataFiles_str]
         self.rsltsFile = OSWDataAccess(self.rsltsFile_str)
 
@@ -83,7 +81,7 @@ class SqMassLoader(GenericLoader):
             prec_chrom_ids = t.getPrecursorChromIDs(precursor_id)
             precursor_chroms = t.getDataForChromatograms(prec_chrom_ids['chrom_ids'], prec_chrom_ids['native_ids'])
 
-            out[t] = TransitionGroup(precursor_chroms, transition_chroms)
+            out[t] = TransitionGroup(precursor_chroms, transition_chroms, pep_id, charge)
         return out
 
     def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:

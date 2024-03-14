@@ -32,19 +32,12 @@ class FeatureMap:
         feature_df (pd.DataFrame): A DataFrame containing the feature map
         has_im (bool): A boolean indicating if the feature map has ion mobility data
         
-    Methods:
-        empty: Check if the FeatureMap is empty.
-        integrate_intensity_across_two_dimensions: Integrate intensity across two dimensions of a DataFrame.
-        get_precursor_chromatograms: Get a list of precursor chromatograms from the feature map.
-        get_transition_chromatograms: Get a list of transition chromatograms from the feature map.
-        get_precursor_mobilograms: Get a list of precursor ion mobility from the feature map.
-        get_transition_mobilograms: Get a list of transition ion mobility from the feature map.
-        get_precursor_spectra: Get a list of precursor spectra from the feature map.
-        get_transition_spectra: Get a list of transition spectra from the feature map.
     '''
-    def __init__(self, feature_df: pd.DataFrame, config: TargetedDIAConfig=None, verbose: bool=False):
+    def __init__(self, feature_df: pd.DataFrame, sequence: str, precursor_charge: int, config: TargetedDIAConfig=None,  verbose: bool=False):
         self.feature_df = feature_df
         self.has_im = 'im' in feature_df.columns and feature_df['im'].notnull().all()
+        self.sequence = sequence
+        self.precursor_charge = precursor_charge
         if not self.has_im and not self.feature_df.empty:
             self.feature_df.drop(columns=['im'], inplace=True)
         self.config = config
@@ -109,7 +102,10 @@ class FeatureMap:
         Returns:
             TransitionGroup: A TransitionGroup object storing chromatograms
         '''
-        return TransitionGroup(self.get_precursor_chromatograms(), self.get_transition_chromatograms())
+        tg = TransitionGroup(self.get_precursor_chromatograms(), self.get_transition_chromatograms())
+        tg.sequence = self.sequence
+        tg.precursor_charge = self.precursor_charge
+        return tg
     
     def to_mobilograms(self) -> TransitionGroup:
         '''
@@ -118,7 +114,10 @@ class FeatureMap:
         Returns:
             TransitionGroup: A TransitionGroup object storing mobilograms
         '''
-        return TransitionGroup(self.get_precursor_mobilograms(), self.get_transition_mobilograms())
+        tg = TransitionGroup(self.get_precursor_mobilograms(), self.get_transition_mobilograms())
+        tg.sequence = self.sequence
+        tg.precursor_charge = self.precursor_charge
+        return tg
     
     def to_spectra(self) -> TransitionGroup:
         '''
@@ -127,8 +126,11 @@ class FeatureMap:
         Returns:
             TransitionGroup: A TransitionGroup object storing spectra
         '''
-        return TransitionGroup(self.get_precursor_spectra(), self.get_transition_spectra())
-
+        tg = TransitionGroup(self.get_precursor_spectra(), self.get_transition_spectra())
+        tg.sequence = self.sequence
+        tg.precursor_charge = self.precursor_charge
+        return tg
+    
     def get_precursor_chromatograms(self) -> List[Chromatogram]:
         '''
         Get a list of precursor chromatograms from the feature map

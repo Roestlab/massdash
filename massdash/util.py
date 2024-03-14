@@ -6,6 +6,8 @@ massdash/util
 import os
 import sys
 import importlib
+from typing import Optional
+from pathlib import Path
 from typing import List, Tuple, Optional
 
 # Logging and performance modules
@@ -19,6 +21,8 @@ from logging.handlers import TimedRotatingFileHandler
 import psutil
 
 import requests
+import streamlit as st
+from streamlit.components.v1 import html
 
 
 #######################################
@@ -338,6 +342,46 @@ def download_file(url: str, dest_folder: str):
         with open(os.path.join(dest_folder, filename), "wb") as f:
             f.write(response.content)
 
+def rgb_to_hex(rgb):
+    """
+    Converts an RGB color value to its corresponding hexadecimal representation.
+
+    Args:
+        rgb (tuple): A tuple containing the RGB values as floats between 0 and 1.
+
+    Returns:
+        str: The hexadecimal representation of the RGB color.
+
+    Example:
+        >>> rgb_to_hex((0.5, 0.75, 1.0))
+        '#7fbfff'
+    """
+    return "#{:02x}{:02x}{:02x}".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
+
+
+def open_page(url: str):
+    """
+    Opens a new browser window/tab with the specified URL.
+
+    Args:
+        url (str): The URL to open in the new window/tab.
+    """
+    open_script = """
+        <script type="text/javascript">
+            window.open('%s', '_blank').focus();
+        </script>
+    """ % (url)
+    html(open_script)
+    
+def reset_app():
+    """
+    Resets the application by clearing cache data and resources, and resetting session state variables.
+    """
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    st.session_state.WELCOME_PAGE_STATE = True
+    st.session_state.workflow = None
+
 #######################################
 ## Decorators
 
@@ -384,3 +428,25 @@ def method_timer(f):
         return result
     return wrap
 
+def find_git_directory(start_path=None):
+    """Find the full path to the nearest '.git' directory by climbing up the directory tree.
+
+    Args:
+        start_path (str or Path, optional): The starting path for the search. If not provided,
+            the current working directory is used.
+
+    Returns:
+        Path or None: The full path to the '.git' directory if found, or None if not found.
+    """
+    # If start_path is not provided, use the current working directory
+    start_path = Path(start_path) if start_path else Path.cwd()
+    # Iterate through parent directories until .git is found
+    current_path = start_path
+    while current_path:
+        git_path = current_path / '.git'
+        if git_path.is_dir():
+            return git_path.resolve()
+        current_path = current_path.parent
+
+    # If .git is not found in any parent directory, return None
+    return None

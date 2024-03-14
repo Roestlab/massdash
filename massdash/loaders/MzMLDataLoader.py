@@ -10,19 +10,14 @@ import pandas as pd
 
 # Loaders
 from .access.MzMLDataAccess import MzMLDataAccess
-from .GenericLoader import GenericLoader
-from .access.OSWDataAccess import OSWDataAccess
-from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
-from .SpectralLibraryLoader import SpectralLibraryLoader
+from .GenericSpectrumLoader import GenericSpectrumLoader
 # Structs
-from ..structs.TransitionGroup import TransitionGroup
-from ..structs.FeatureMap import FeatureMap
-from ..structs.TargetedDIAConfig import TargetedDIAConfig
+from ..structs import TransitionGroup, FeatureMap, TargetedDIAConfig, FeatureMapCollection, TopTransitionGroupFeatureCollection
 # Utils
 from ..util import LOGGER
 
 
-class MzMLDataLoader(GenericLoader):
+class MzMLDataLoader(GenericSpectrumLoader):
     '''
     Class to load data from MzMLFiles using a .osw output file or .tsv report file
     
@@ -114,7 +109,7 @@ class MzMLDataLoader(GenericLoader):
         out_df = out_df.loc[:,~out_df.columns.duplicated()]
         return out_df
 
-    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> Dict[str, FeatureMap]:
+    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> FeatureMapCollection:
         '''
         Loads a dictionary of FeatureMaps (where the keys are the filenames) from the results file
 
@@ -124,13 +119,13 @@ class MzMLDataLoader(GenericLoader):
         Returns:
             FeatureMap: FeatureMap object containing peak boundaries, intensity and confidence
         '''
-        out = {}
+        out = FeatureMapCollection()
         top_features = [ self.rsltsFile.getTopTransitionGroupFeature(basename(splitext(d.filename)[0]), pep_id, charge) for d in self.dataFiles]
         self.libraryFile.populateTransitionGroupFeatures(top_features)
         for d, t in zip(self.dataFiles, top_features):
             if t is None:
                 LOGGER.debug(f"No feature found for {pep_id} {charge} in {d.filename}")
-                return FeatureMap()
+                out[d.filename] =  FeatureMap()
             else:
                 out[d.filename] = d.reduce_spectra(t, config)
         return out

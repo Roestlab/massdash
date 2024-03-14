@@ -1,0 +1,60 @@
+Installation
+============
+
+
+
+The Python Package Index
+------------------------
+
+MassDash is available as a python package on the python package index, and can be installed by pip in a terminal or cmd prompt.
+
+.. code-block:: bash
+
+        pip install massdash
+
+Building from Source
+--------------------
+
+The source code is freely open and accessible on Github at https://github.com/Roestlab/massdash under the `BSD-3-Clause license <https://github.com/Roestlab/massdash?tab=BSD-3-Clause-1-ov-file>`_. The package can be installed by cloning and installing from source using pip.
+
+First clone the repository:
+
+.. code-block:: bash
+
+        git clone git@github.com:Roestlab/massdash.git
+
+Change into the massdash directory
+
+.. code-block:: bash
+        
+        cd massdash
+
+Install using pip
+
+.. code-block:: bash
+
+        pip install -e .
+
+Docker Image
+------------
+
+MassDash is available as a docker image on dockerhub `here <https://github.com/Roestlab/massdash/pkgs/container/massdash>`_, ensure you have docker installed on your system, you can then pull the latest image of MassDash.
+
+.. code-block:: bash
+
+        docker pull ghcr.io/roestlab/massdash:latest 
+
+Installation Guides
+-------------------
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   installation_docs/windows_installation
+   installation_docs/macos_installation
+   installation_docs/ubuntu_installation
+
+1. :doc:`Windows Installation <installation_docs/windows_installation>` - Installation guide for Windows
+2. :doc:`Mac Installation <installation_docs/macos_installation>` - Installation guide for Mac BigSur
+3. :doc:`Ubuntu Installation <installation_docs/ubuntu_installation>` - Installation guide for Ubuntu

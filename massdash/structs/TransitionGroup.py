@@ -18,10 +18,9 @@ class TransitionGroup:
     Class for Storing a transition group
     '''
     def __init__(self, precursorData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]],
-                 transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]]):
+                 transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]], sequence: str = None, precursor_charge: int = None):
         self.precursorData = precursorData
         self.transitionData = transitionData
-        self.type = type(precursorData[0])
         if len(transitionData) > 0:
             self.dataType = type(transitionData[0])
         elif len(precursorData) > 0:
@@ -30,6 +29,8 @@ class TransitionGroup:
             raise ValueError("Precursor and transition data cannot both be empty")
         if len(precursorData) > 0 and len(transitionData) > 0:
             assert(self.dataType == type(transitionData[0])) 
+        self.sequence = sequence
+        self.precursor_charge = precursor_charge
   
 
     def to_pyopenms(self, includePrecursors=True):
@@ -50,6 +51,7 @@ class TransitionGroup:
                 precursor.setNativeID('p' + str(i))
                 chrom = self.precursorData[i].to_pyopenms(id='p' + str(i))
                 transitionGroup.addPrecursorChromatogram(chrom, chrom.getNativeID())
+        
         return transitionGroup
     
     def max(self, boundary: Tuple[float, float], level: Optional[str] = 'ms1ms2') -> float:
@@ -149,37 +151,63 @@ class TransitionGroup:
         """
         return not any(p.empty() for p in self.precursorData) and any(t.empty() for t in self.transitionData)
     
+    def adjust_length(self, length: int) -> None:
+        """
+        Adjusts the length size of the chromatograms, mobilograms, and spectra.
+
+        If the length is smaller than the current length, the data will be sliced to the given length.
+        If the length is larger than the current length, the data will be padded with zeros on both sides.
+
+        E.g. if the data array is [1, 2, 3] and the desired length is 7, 
+        the returned array will be [0, 0, 1, 2, 3, 0, 0].
+
+        E.g. if the data array is [1, 2, 3] and the desired length is 1,
+        the returned data array will be [1].
+
+        Args:
+            length (int): The length of the output array
+
+        Returns:
+            TransitionGroup: A new TransitionGroup object with padded data and intensity.
+        """
+        new_precursorData = []
+        new_transitionData = []
+        for c in self.precursorData:
+            new_precursorData.append(c.adjust_length(length))
+        for c in self.transitionData:
+            new_transitionData.append(c.adjust_length(length))
+        
+        return TransitionGroup(new_precursorData, new_transitionData, self.sequence, self.precursor_charge)
+    
     def plot(self, 
              transitionGroupFeatures: Optional[List[TransitionGroupFeature]] = None, 
-             smoothing: Optional[Literal['none', 'sgolay']] = 'none',
+             smoothing: Optional[Literal['none', 'sgolay', 'gauss']] = 'none',
+             gaussian_sigma: float = 2.0,
+             gaussian_window: int = 11,
              sgolay_polynomial_order: int = 3,
              sgolay_frame_length: int = 11) -> None:
         '''
         Plot the 1D data, meant for jupyter notebook context
         '''
-        from plotting.GenericPlotter import PlotConfig
-        from plotting.InteractivePlotter import InteractivePlotter
+        from ..plotting import PlotConfig
+        from ..plotting import InteractivePlotter
 
         config = PlotConfig()
-        if self.type == Chromatogram:
+        if self.dataType == Chromatogram:
             config.plot_type = "chromatogram"
-        elif self.type == Mobilogram:
+        elif self.dataType == Mobilogram:
             config.plot_type = "mobilogram"
-        elif self.type == Spectrum:
+        elif self.dataType == Spectrum:
             config.plot_type = "spectrum"
         else:
             raise ValueError("Unknown type of 1D data")
 
-        config.smoothing_dict = {'type': smoothing, 'sgolay_polynomial_order': sgolay_polynomial_order, 'sgolay_frame_length': sgolay_frame_length}
+        config.smoothing_dict = {'type': smoothing, 'sgolay_polynomial_order': sgolay_polynomial_order,
+                                 'sgolay_frame_length': sgolay_frame_length,
+                                 'gaussian_sigma': gaussian_sigma, 'gaussian_window': gaussian_window}
 
         plotter = InteractivePlotter(config)
 
-        plotter.plot(self)
-
-        if transitionGroupFeatures is not None:
-            if self.type == Chromatogram:
-                plotter.add_peak_boundaries(plotter.fig, transitionGroupFeatures)
-            else:
-                raise NotImplementedError("Peak boundaries are only implemented for chromatograms")
+        plotter.plot(self, transitionGroupFeatures, config.plot_type)
 
         plotter.show()

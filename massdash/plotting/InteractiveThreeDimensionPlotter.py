@@ -33,14 +33,6 @@ class InteractiveThreeDimensionPlotter:
         df (pd.DataFrame): The input DataFrame containing the data for plotting.
         config (PlotConfig): The configuration for plotting.
         
-    Methods:
-        plot: Plot the data.
-        plot_3d_scatter_general: Make a general 3D scatter plot with options for individual or overall plots.
-        plot_individual_3d_scatter: Make individual 3D scatter plots for each precursor and each product ion.
-        plot_3d_scatter: Make a 3D scatter plot with all MS data on the same plot.
-        plot_3d_vline: Plot a 3D spectrum-chromatogram vertical line plot.
-        plot_individual_3d_surface: Plot individual 3D surface plots for each precursor and each product ion.
-        plot_individual_3d_mesh_cube: Plot individual 3D surface plots for each precursor and each product ion. (EXPERIMENTAL)
     """
     def __init__(self, config: PlotConfig):
         self.config = config
@@ -59,8 +51,10 @@ class InteractiveThreeDimensionPlotter:
             plots = self.plot_3d_scatter(featureMap, num_cols = self.config.num_plot_columns)
         elif self.config.type_of_3d_plot == "3D Surface Plot" and not self.config.aggregate_mslevels:
             plots = self.plot_individual_3d_surface(featureMap, self.config.num_plot_columns)
-        elif self.config.type_of_3d_plot == "3D Line Plot" and not self.config.aggregate_mslevels:
+        elif self.config.type_of_3d_plot == "3D Line Plot": 
             plots = self.plot_3d_vline(featureMap)
+        else:
+            raise ValueError(f"Error: Invalid type of 3D plot: {self.config.type_of_3d_plot}, must be either '3D Scatter Plot', '3D Surface Plot', or '3D Line Plot'")
         self.fig = plots
         return plots
     
@@ -257,6 +251,7 @@ class InteractiveThreeDimensionPlotter:
             horizontal_spacing = 0.05
             vertical_spacing = 0.05
             height_scale_factor = width_scale_factor = 800
+            ratio = 1
         elif self.config.context == "jupyter":
             ratio = 0.75
             horizontal_spacing = 0.03

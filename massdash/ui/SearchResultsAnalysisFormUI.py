@@ -1,3 +1,8 @@
+"""
+massdash/ui/SearchResultsAnalysisFormUI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 from os.path import basename
 from typing import Literal
 import streamlit as st 

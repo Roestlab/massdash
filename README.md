@@ -2,17 +2,20 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Logo_Light.png" alt="MassDash_Logo" width="500">
     <source media="(prefers-color-scheme: light)" srcset="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Logo_Dark.png" alt="MassDash_Logo" width="500">
-    <img alt="MassDash Logo" comment="Placeholder to transition between light color mode and dark color mode - this image is not directly used." src="https://github.com/Roestlab/massdash/blob/dev/massdash/assets/img/MassDash_Logo_Dark.png">
+    <img alt="MassDash Logo" comment="Placeholder to transition between light color mode and dark color mode - this image is not directly used." src="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Logo_Dark.png">
   </picture>
 </p>
 
 ---
 
-[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![pypiv](https://img.shields.io/pypi/v/massdash.svg)](https://pypi.python.org/pypi/massdash)
 [![pypidownload](https://img.shields.io/pypi/dm/massdash?color=orange)](https://pypistats.org/packages/massdash)
+[![biocondav](https://img.shields.io/conda/v/bioconda/massdash?label=bioconda&color=purple)](https://anaconda.org/bioconda/massdash)
 [![dockerv](https://img.shields.io/docker/v/singjust/massdash?label=docker&color=green)](https://hub.docker.com/r/singjust/massdash)
 [![dockerpull](https://img.shields.io/docker/pulls/singjust/massdash?color=green)](https://hub.docker.com/r/singjust/massdash)
+[![continuous-integration](https://github.com/Roestlab/massdash/workflows/continuous-integration/badge.svg)](https://github.com/Roestlab/massdash/actions)
+[![readthedocs](https://img.shields.io/readthedocs/massdash)](https://massdash.readthedocs.io/en/latest/index.html)
 [![Licence](https://img.shields.io/badge/License-BSD_3--Clause-orange.svg)](https://raw.githubusercontent.com/RoestLab/massdash/main/LICENSE)
 
 **MassDash** is a powerful platform designed for researchers and analysts in the field of mass spectrometry. By providing a centralized web-based dashboard, MassDash facilitates data analysis and experiment design by enabling users to visualize chromatograms, test algorithms, and optimize parameters. This tool offers a flexible environment for mass spectrometry research, with notable specailty in handling Data-Independent Acquisition (DIA) data.
@@ -23,6 +26,12 @@
 
 ```bash
 pip install massdash --upgrade
+```
+
+or, install the latest stable version of MassDash from Bioconda if you are using Anaconda for package and environment management:
+
+```bash
+conda install bioconda::massdash --upgrade
 ```
 
 <details>
@@ -48,6 +57,10 @@ pip install -e .
 
 </details>
 
+<br>
+
+For detailed OS-specific (Windows, MacOS, Ubuntu) installation guides, please refer to the [documentation](https://massdash.readthedocs.io/en/latest/Installation.html#installation-guides).
+
 ## Quick start
 
 Launch MassDash by typing the following command in your terminal:
@@ -55,6 +68,8 @@ Launch MassDash by typing the following command in your terminal:
 ```bash
 massdash gui
 ```
+
+For more information on the GUI, please refer to the [documentation](https://massdash.readthedocs.io/en/latest/GUI.html).
 
 <p align="left">
   <img alt="MassDash Landing Page" style="width: 80%;" src="https://github.com/Roestlab/massdash/raw/dev/massdash/assets/img/MassDash_Landing_Page.png">
@@ -131,6 +146,10 @@ docker run -p 8501:8501 singjust/massdash:latest
 
 **Note:** The MassDash Docker image binds to port 8501 when running MassDash locally.
 
+## Documentation
+
+For more information (API and tutorial walk-throughs), please refer to the [documentation](https://massdash.readthedocs.io/en/latest/index.html).
+
 ## Contribute
 
 * [Issues Tracker](https://github.com/Roestlab/massdash/issues)
@@ -143,3 +162,7 @@ If you are having issues or would like to propose a new feature, please use the 
 ## License
 
 This project is licensed under the BSD 3-Clause license.
+
+## Citation
+
+Sing, J. C., Charkow, J., AlHigaylan, M., Horecka, I., Xu, L., & Roest, H. L. (2024). MassDash: A Web-based Dashboard for Targeted Mass Spectrometry Visualization (p. 2024.01.15.575772). bioRxiv. https://doi.org/10.1101/2024.01.15.575772

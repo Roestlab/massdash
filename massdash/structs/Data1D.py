@@ -9,7 +9,9 @@ import numpy as np
 import pandas as pd
 
 class Data1D(ABC):
-    ''' Abstract class of storing a 1D data set where have the data vs intensity'''
+    ''' 
+    Abstract class of storing a 1D data set where have the data vs intensity
+    '''
 
     def __init__(self, data: np.array, intensity: np.array, label: str='None') -> None:
         self.intensity = np.array(intensity)
@@ -97,6 +99,65 @@ class Data1D(ABC):
             return self.filter(boundary).median()
         else:
             return np.median(self.intensity)
+
+    def adjust_length(self, length):
+        """
+        Adjusts the length of the Data1D object.
+
+        If the length is smaller than the current length, the data will be sliced to the given length.
+        If the length is larger than the current length, the data will be padded with zeros on both sides.
+
+        E.g. if the data array is [1, 2, 3] and the desired length is 7, 
+        the returned array will be [0, 0, 1, 2, 3, 0, 0].
+
+        E.g. if the data array is [1, 2, 3] and the desired length is 1,
+        the returned data array will be [1].
+
+        Pad the data and intensity arrays with zeros to a given length. Modifies the object in place.
+
+        Args:
+            length (int): The length of the output array
+        
+        Returns: 
+            (new_data, new_intensity) : tuple of padded/truncated data and intensity
+
+        """
+        #### need to slice the array
+        if length == len(self.data):
+            new_data = self.data
+            new_intensity = self.intensity
+        elif length < len(self.data):
+            excess_length = len(self.data) - length
+            if excess_length % 2 == 0:
+                slice_left = slice_right = excess_length // 2
+            else: # length % 2 == 1
+                slice_left = excess_length // 2
+                slice_right = (excess_length + 1) // 2
+            new_data = self.data[slice_left:-slice_right]
+            new_intensity = self.intensity[slice_left:-slice_right]
+        else: # length > len(self.data):
+            ### infer the chromatogram step size
+            step = self.data[1] - self.data[0]
+            
+            both_even_or_odd = length % 2 == len(self.data) % 2
+            if both_even_or_odd:
+                pad_left = pad_right = (length - len(self.data)) // 2
+
+                new_intensity = np.copy(self.intensity)
+                new_intensity = np.pad(new_intensity, (pad_left, pad_right), 'constant', constant_values=0)
+            else:
+                pad_left = (length - len(self.data)) // 2 + 1
+                pad_right = (length - len(self.data)) // 2
+                #### length is odd, unequal paddings #####
+            
+            #### Pad the data to left and right ####
+            data_right = np.linspace(self.data[-1] + step, self.data[-1] + step * pad_right, num=pad_right)
+            data_left = np.linspace(self.data[0] - step * pad_left, self.data[0] - step, num=pad_left)
+            new_data = np.concatenate((data_left, self.data, data_right))
+            new_intensity = np.copy(self.intensity)
+            new_intensity = np.pad(new_intensity, (pad_left, pad_right), 'constant', constant_values=0)
+        return (new_data, new_intensity)
+
 
     @abstractmethod
     def toPandasDf(self) -> pd.DataFrame:

@@ -1,3 +1,8 @@
+"""
+massdash/ui/FileInputSearchResultsAnalysisUISettings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 import streamlit as st
 import pandas as pd
 

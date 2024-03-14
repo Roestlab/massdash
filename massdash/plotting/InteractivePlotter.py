@@ -8,7 +8,7 @@ import streamlit as st
 
 # Data modules
 import numpy as np
-from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter, gaussian, convolve
 
 # Plotting modules
 from bokeh.plotting import figure
@@ -36,15 +36,6 @@ class InteractivePlotter(GenericPlotter):
         config (PlotConfig): The configuration object for the plot.
         verbose (bool): Enables verbose mode.
         
-    Methods:
-        plot: Plots the given transitionGroup using the specified plot type.
-        process_chrom: Process a chromatogram and add it to a Bokeh figure.
-        add_peak_boundaries: Adds peak boundaries to a Bokeh figure.
-        plot_chromatogram: Plots a chromatogram for a given TransitionGroup.
-        process_mobilo: Process a mobilogram and add it to a Bokeh figure.
-        plot_mobilogram: Plots the mobilogram for a given TransitionGroup.
-        process_spectra: Process a spectrum and add it to a Bokeh figure.
-        plot_spectra: Plots the spectra data for a given transition group.
     """
     def __init__(self, config: PlotConfig, verbose: bool=False):
         super().__init__(config)
@@ -56,7 +47,7 @@ class InteractivePlotter(GenericPlotter):
         else:
             LOGGER.setLevel("INFO")
 
-    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectra'] = 'chromatogram') -> figure:
+    def plot(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = None, plot_type: Literal['chromatogram', 'mobilogram', 'spectrum'] = 'chromatogram', feature_legend_labels:Optional[List[str]] = []) -> figure:
         """
         Plots the given transitionGroup using the specified plot type.
 
@@ -69,11 +60,11 @@ class InteractivePlotter(GenericPlotter):
             figure: The generated plot as a Bokeh figure object.
         """
         if plot_type == 'chromatogram':
-            plot =  self.plot_chromatogram(transitionGroup, features)
+            plot =  self.plot_chromatogram(transitionGroup, features, feature_legend_labels)
         elif plot_type == 'mobilogram':
             plot =  self.plot_mobilogram(transitionGroup)
-        elif plot_type == 'spectra':
-            plot =  self.plot_spectra(transitionGroup)
+        elif plot_type == 'spectrum':
+            plot = self.plot_spectra(transitionGroup)
         else:
             raise ValueError("Unsupported plot plot_type")
         
@@ -111,6 +102,20 @@ class InteractivePlotter(GenericPlotter):
                     st.error(error_message)
                 else:
                     raise ValueError(error_message)
+
+        elif self.smoothing_dict['type'] == 'gauss':
+            try:
+                window = gaussian(self.smoothing_dict['gaussian_window'], std=self.smoothing_dict['gaussian_sigma'])
+                intensity = convolve(intensity, window, mode='same') / window.sum()
+
+            except ValueError as ve:
+                error_message = f"Error: {ve}"
+
+                if check_streamlit():
+                    st.error(error_message)
+                else:
+                    raise ValueError(error_message)
+
         elif self.smoothing_dict['type'] == 'none':
             pass
         else:
@@ -143,13 +148,18 @@ class InteractivePlotter(GenericPlotter):
 
         return line
 
-    def add_peak_boundaries(self, p: figure, features: List[TransitionGroupFeature], legend_labels:Optional[List[str]] = []) -> None:
+    def __add_peak_boundaries(self, 
+                            p: figure, 
+                            features: List[TransitionGroupFeature],
+                            transitionGroup: TransitionGroup,
+                            legend_labels:Optional[List[str]] = []) -> None:
         """
         Adds peak boundaries to a Bokeh figure.
 
         Args:
             p (figure): The Bokeh figure to add the peak boundaries to.
             features (List[TransitionGroupFeature]): A list of peak features to highlight on the plot.
+            transitionGroup (TransitionGroup): The TransitionGroup object containing precursor and transition data.
             legend_labels (List[str], optional): A list of labels for the peak features. Defaults to [].
         """
         if len(features) <= 8:
@@ -158,7 +168,8 @@ class InteractivePlotter(GenericPlotter):
             dark2_palette = Viridis256[0:len(features)]
 
         createBoundaryLegend = False
-        if len(legend_labels) == 0:
+        
+        if len(legend_labels) > 0:
             if len(legend_labels) != len(features):
                 raise ValueError("The number of legend labels must match the number of features")
             createBoundaryLegend = True
@@ -176,7 +187,7 @@ class InteractivePlotter(GenericPlotter):
                     'bottom_int'    : [0]})
             else:
                 source = ColumnDataSource(data = {
-                    'Intensity' : [feature.areaIntensity],
+                    'Intensity' : [transitionGroup.max((feature.leftBoundary, feature.rightBoundary), level=self.ms_level_str)],
                     'leftWidth'   : [feature.leftBoundary],
                     'rightWidth'   : [feature.rightBoundary],
                     'ms2_mscore' : [feature.qvalue],
@@ -211,10 +222,11 @@ class InteractivePlotter(GenericPlotter):
         if createBoundaryLegend:
             legend = Legend(items=legend_items, title='TransitionGroupFeatures', glyph_width=1)
             p.add_layout(legend, 'above')
+        self.fig = p
 
         return p
 
-    def plot_chromatogram(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]]) -> figure:
+    def plot_chromatogram(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]], feature_legend_labels:Optional[List[str]] = []) -> figure:
         """
         Plots a chromatogram for a given TransitionGroup.
 
@@ -316,7 +328,7 @@ class InteractivePlotter(GenericPlotter):
 
         # Add peak boundaries if available
         if features is not None:
-            p = self.add_peak_boundaries(p, features)
+            p = self.__add_peak_boundaries(p, features, transitionGroup, feature_legend_labels)
 
         return p
 
