@@ -103,7 +103,7 @@ class MzMLDataLoader(GenericSpectrumLoader):
         # for each run, groupby intensity and rt to get chromatogram
         out_transitions = { run:df.feature_df[['Annotation', 'int', 'rt']].groupby(['Annotation', 'rt']).sum().reset_index() for run, df in out_feature_map.items() }
 
-        out_df =  pd.concat(out_transitions).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        out_df =  pd.concat(out_transitions).reset_index().drop(columns='level_1').rename(columns=dict(level_0='run'))
         
         # Drop duplicate columns
         out_df = out_df.loc[:,~out_df.columns.duplicated()]

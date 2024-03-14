@@ -71,7 +71,7 @@ class SqMassLoader(GenericChromatogramLoader):
  
         if transitionMetaInfo.empty:
             return None
-        out = {}
+        out = TransitionGroupCollection()
         for t in self.dataFiles:
             ### Get Transition chromatogram IDs
 
