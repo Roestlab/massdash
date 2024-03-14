@@ -78,10 +78,7 @@ class MassDashGUI:
         osw_file_path (streamlit.text_input): A text input field for the OpenSwath file path.
         sqmass_file_path_input (streamlit.text_input): A text input field for the sqMass file path.
         """
-        # Add a welcome message
-        # welcome_container = st.empty()FileInputXICDataUISettings
-        if st.session_state.WELCOME_PAGE_STATE:
-            with self.welcome_container:
+        # Add a welcome messageWarning
                 with st.container():
                     st.title("Welcome to MassDash!")
                     st.write("MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
@@ -90,7 +87,7 @@ class MassDashGUI:
                     
                     platform_context = platform.processor()
                     if platform_context == "":
-                        st.warning("Warning: It seems like you are running MassDash via streamlit sharing. Please note that streamlit sharing only allows for uploading files up to 1Gb in size. If you want to use MassDash with larger files, please consider running MassDash locally. See [massdash](https://github.com/Roestlab/massdash)")
+                        st.warning("WARNING!: It seems like you are running MassDash via streamlit sharing. Please note that streamlit sharing only allows for uploading files up to 1Gb in size, it is recommended to upload files of 200Mb or less, or use the load example data for demoing MassDash. If you want to use MassDash with larger files, please consider running MassDash locally. See [massdash](https://github.com/Roestlab/massdash)")
                         st.info("You can filter OSW and sqMass files using `pyprophets filter` module. See [pyprophet](https://github.com/PyProphet/pyprophet)")
                         st.info("You can filter raw mzML files using OpenMS's `FileFilter` tool. See [OpenMS FileFilter](https://abibuilder.cs.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_FileFilter.html)")
 
