@@ -46,7 +46,7 @@ def snapshot_numpy(snapshot):
 
 @pytest.fixture
 def peptide_product_annotation_list():
-    return np.array(["A", "B", "C", "D", "E"])
+    return np.array(["b4^1", "b5^2", "y4^1", "y5^2", "y6^2"])
 
 @pytest.fixture
 def reference_mz_values():
@@ -110,12 +110,12 @@ def test_reduce_spectra(mzml_data_access, snapshot_pandas): # also tests msExper
     feature_map = mzml_data_access.reduce_spectra(feature, config)
     assert snapshot_pandas == feature_map.feature_df
 
-@pytest.mark.parametrize("mz,expected_annot", [(150.01, 'B'), (249.99, 'D')])
+@pytest.mark.parametrize("mz,expected_annot", [(150.01, 'b5^2'), (249.99, 'y5^2')])
 def test_find_closest_reference_mz(reference_mz_values, peptide_product_annotation_list, mz, expected_annot):
     closest_mz_annot = MzMLDataAccess._find_closest_reference_mz(mz, reference_mz_values, peptide_product_annotation_list)
     assert expected_annot == closest_mz_annot
 
-@pytest.mark.parametrize("level,mz,expected_annot", [(1, 100, 'prec'), (2, 200.01, 'C'), (2, 299.89, 'E')])
+@pytest.mark.parametrize("level,mz,expected_annot", [(1, 100, 'prec'), (2, 200.01, 'y4^1'), (2, 299.89, 'y6^2')])
 def test_apply_mz_mapping(reference_mz_values, peptide_product_annotation_list, level, mz, expected_annot):
     row = pd.Series(dict(mz=mz, ms_level=level))
     result = MzMLDataAccess._apply_mz_mapping(row, reference_mz_values, peptide_product_annotation_list)

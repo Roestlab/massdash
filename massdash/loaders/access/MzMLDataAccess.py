@@ -450,7 +450,7 @@ class MzMLDataAccess():
             Union[float, np.nan]: The mapped m/z value.
         """
         if row['ms_level'] == 2:
-            return MzMLDataAccess._find_closest_reference_mz(row['mz'], np.array(peptide_product_mz_list), np.array(peptide_product_annotation_list))[0]
+            return MzMLDataAccess._find_closest_reference_mz(row['mz'], np.array(peptide_product_mz_list), np.array(peptide_product_annotation_list))
         elif row['ms_level'] == 1:
             return 'prec'
         else:
