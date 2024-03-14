@@ -9,6 +9,8 @@ from .Chromatogram import Chromatogram
 from .Data1D import Data1D
 from .FeatureMap import FeatureMap
 from .FeatureMapCollection import FeatureMapCollection
+from .GenericFeature import GenericFeature
+from .GenericStructCollection import GenericStructCollection
 from .Mobilogram import Mobilogram
 from .Spectrum import Spectrum
 from .TargetedDIAConfig import TargetedDIAConfig
@@ -25,6 +27,8 @@ __all__ = [
             "Data1D",
             "FeatureMap", 
             "FeatureMapCollection",
+            "GenericFeature",
+            "GenericStructCollection",
             "Mobilogram", 
             "TargetedDIAConfig",
             "TransitionFeature", 

@@ -13,8 +13,7 @@ import sys
 import pytest
 from massdash.loaders.access.MzMLDataAccess import MzMLDataAccess
 from massdash.structs import TargetedDIAConfig, TransitionGroupFeature
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
-from massdash.testing.NumpySnapshotExtension import NumpySnapshotExtenstion
+from massdash.testing import PandasSnapshotExtension, NumpySnapshotExtension
 from massdash.util import find_git_directory
 
 ## Note: Cached is not tested
@@ -38,11 +37,11 @@ def mzml_data_access():
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
-    return snapshot.use_extension(PandasSnapshotExtenstion)
+    return snapshot.use_extension(PandasSnapshotExtension)
 
 @pytest.fixture
 def snapshot_numpy(snapshot):
-    return snapshot.use_extension(NumpySnapshotExtenstion)
+    return snapshot.use_extension(NumpySnapshotExtension)
 
 @pytest.fixture
 def peptide_product_annotation_list():

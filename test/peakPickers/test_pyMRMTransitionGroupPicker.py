@@ -8,11 +8,11 @@ import pytest
 
 from massdash.peakPickers import pyMRMTransitionGroupPicker
 from massdash.structs import Chromatogram, TransitionGroup, TransitionFeature, TransitionGroupFeature
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
+from massdash.testing import PandasSnapshotExtension
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
-    return snapshot.use_extension(PandasSnapshotExtenstion)
+    return snapshot.use_extension(PandasSnapshotExtension)
 
 @pytest.fixture(params=['chrom_empty', 'chrom_single_peak', 'chrom_multiple_peaks'])
 def chrom(request):
