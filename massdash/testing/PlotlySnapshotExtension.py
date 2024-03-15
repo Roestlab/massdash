@@ -3,12 +3,16 @@ from syrupy.data import SnapshotCollection
 from syrupy.extensions.single_file import SingleFileSnapshotExtension
 from syrupy.types import SerializableData
 from plotly.io import to_json
+import json
+import numpy as np
 
 class PlotlySnapshotExtension(SingleFileSnapshotExtension):
     _file_extension = "json"
 
     def matches(self, *, serialized_data, snapshot_data):
-        return PlotlySnapshotExtension.compare_json(serialized_data, snapshot_data)
+        json1 = json.loads(serialized_data)
+        json2 = json.loads(snapshot_data)
+        return PlotlySnapshotExtension.compare_json(json1, json2)
 
     @staticmethod
     def compare_json(json1, json2):
@@ -25,11 +29,23 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
             if len(json1) != len(json2):
                 print('Lists have different lengths')
                 return False
-            json1 = set(map(frozenset, (PlotlySnapshotExtension.dict_to_tuple(d) for d in json1)))
-            json2 = set(map(frozenset, (PlotlySnapshotExtension.dict_to_tuple(d) for d in json2)))
-            if json1 != json2:
-                print('Sets of dictionaries are not equal')
-                return False
+            if isinstance(json1[0], dict):
+                json1 = set(map(frozenset, (PlotlySnapshotExtension.dict_to_tuple(d) for d in json1)))
+                json2 = set(map(frozenset, (PlotlySnapshotExtension.dict_to_tuple(d) for d in json2)))
+            
+            # check equality
+            
+            # check if floating point convert to numpy array to do partial equality
+            if isinstance(json1, list) and isinstance(json1[0], float): # have to recheck if json1 is a list, and not a set
+                json1 = np.array(json1)
+                json2 = np.array(json2)
+                if not np.allclose(json1, json2):
+                    print('Lists contents not equal')
+                    return False
+            else:
+                if json1 != json2:
+                    print('Lists contents not equal')
+                    return False
             return True
         else:
             if json1 != json2:
