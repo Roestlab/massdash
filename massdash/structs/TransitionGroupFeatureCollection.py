@@ -12,3 +12,9 @@ class TransitionGroupFeatureCollection(defaultdict, GenericStructCollection):
     '''
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return str(__class__.__name__) + '\n' + '\n'.join(f'{k}: {v}' for k, v in self.items())
+    
+    def __repr__(self) -> str:
+        return str(__class__.__name__) + '\n' + '\n'.join(f'{k}: {v}' for k, v in self.items())

@@ -4,8 +4,8 @@
 # ---
 # name: test_loadTransitionGroups[NKESPT(UniMod:21)KAIVR(UniMod:267)-3]
   '''
-  dict({
-    SqMassDataAccess(filename=/home/joshua/Development/massdash_alt/massdash/test/test_data/xics/test_chrom_1.sqMass): TransitionGroup(
+  TransitionGroupCollection({
+    'test_chrom_1': TransitionGroup(
       precursorData=list([
         Chromatogram(
           data=array([ 512.8,  516.4,  520. ,  523.7,  527.3,  530.9,  534.6,  538.2,
@@ -552,7 +552,7 @@
         ),
       ]),
     ),
-    SqMassDataAccess(filename=/home/joshua/Development/massdash_alt/massdash/test/test_data/xics/test_chrom_2.sqMass): TransitionGroup(
+    'test_chrom_2': TransitionGroup(
       precursorData=list([
         Chromatogram(
           data=array([ 567.3,  570.9,  574.6,  578.2,  581.8,  585.5,  589.1,  592.7,

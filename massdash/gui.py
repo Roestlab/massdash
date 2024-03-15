@@ -28,7 +28,7 @@ from massdash.util import LOGGER, get_download_folder, download_file, reset_app,
 @click.option('--perf', '-t', is_flag=True, help="Enables measuring and tracking of performance.")
 @click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
 def main(verbose, perf, perf_output):     
-
+    
     ###########################
     ## Logging
     LOGGER.name = 'MassDashGUIMain'

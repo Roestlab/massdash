@@ -64,7 +64,7 @@ class MzMLDataLoader(GenericSpectrumLoader):
         # for each run, groupby intensity and rt to get chromatogram
         out_transitions = { run:df.feature_df[['Annotation', 'int', 'rt']].groupby(['Annotation', 'rt']).sum().reset_index() for run, df in out_feature_map.items() }
 
-        out_df =  pd.concat(out_transitions).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        out_df =  pd.concat(out_transitions).reset_index().drop(columns='level_1').rename(columns=dict(level_0='run'))
         
         # Drop duplicate columns
         out_df = out_df.loc[:,~out_df.columns.duplicated()]
@@ -86,8 +86,8 @@ class MzMLDataLoader(GenericSpectrumLoader):
         self.libraryAccess.populateTransitionGroupFeatures(top_features)
         for d, t in zip(self.dataAccess, top_features):
             if t is None:
-                LOGGER.debug(f"No feature found for {pep_id} {charge} in {d.filename}")
-                out[d.filename] =  FeatureMap()
+                LOGGER.debug(f"No feature found for {pep_id} {charge} in {d.runName}")
+                out[d.runName] =  FeatureMap()
             else:
-                out[d.filename] = d.reduce_spectra(t, config)
+                out[d.runName] = d.reduce_spectra(t, config)
         return out

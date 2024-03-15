@@ -7,12 +7,13 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import os
+import pyopenms as po
+import sys
 
 import pytest
 from massdash.loaders.access.MzMLDataAccess import MzMLDataAccess
 from massdash.structs import TargetedDIAConfig, TransitionGroupFeature
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
-from massdash.testing.NumpySnapshotExtension import NumpySnapshotExtenstion
+from massdash.testing import PandasSnapshotExtension, NumpySnapshotExtension
 from massdash.util import find_git_directory
 
 ## Note: Cached is not tested
@@ -21,20 +22,30 @@ TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
 @pytest.fixture
 def mzml_data_access():
-    mzml_data_access = MzMLDataAccess(os.path.join(TEST_PATH, 'test_data', 'mzml', 'ionMobilityTest.mzML'), readOptions='ondisk')
-    return mzml_data_access
+    # resave the experiment for this specific os
+    if sys.platform == 'win32':
+
+        exp = po.MSExperiment()
+        po.MzMLFile().load(os.path.join(TEST_PATH, 'test_data', 'mzml', 'ionMobilityTest.mzML'), exp)
+        po.MzMLFile().store(os.path.join(TEST_PATH, 'test_data', 'mzml', 'ionMobilityTest_tmp.mzML'), exp)
+
+        mzml_data_access = MzMLDataAccess(os.path.join(TEST_PATH, 'test_data', 'mzml', 'ionMobilityTest_tmp.mzML'), readOptions='ondisk')
+        return mzml_data_access
+    else:
+        mzml_data_access = MzMLDataAccess(os.path.join(TEST_PATH, 'test_data', 'mzml', 'ionMobilityTest.mzML'), readOptions='ondisk')
+        return mzml_data_access
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
-    return snapshot.use_extension(PandasSnapshotExtenstion)
+    return snapshot.use_extension(PandasSnapshotExtension)
 
 @pytest.fixture
 def snapshot_numpy(snapshot):
-    return snapshot.use_extension(NumpySnapshotExtenstion)
+    return snapshot.use_extension(NumpySnapshotExtension)
 
 @pytest.fixture
 def peptide_product_annotation_list():
-    return np.array(["A", "B", "C", "D", "E"])
+    return np.array(["b4^1", "b5^2", "y4^1", "y5^2", "y6^2"])
 
 @pytest.fixture
 def reference_mz_values():
@@ -98,12 +109,12 @@ def test_reduce_spectra(mzml_data_access, snapshot_pandas): # also tests msExper
     feature_map = mzml_data_access.reduce_spectra(feature, config)
     assert snapshot_pandas == feature_map.feature_df
 
-@pytest.mark.parametrize("mz,expected_annot", [(150.01, 'B'), (249.99, 'D')])
+@pytest.mark.parametrize("mz,expected_annot", [(150.01, 'b5^2'), (249.99, 'y5^2')])
 def test_find_closest_reference_mz(reference_mz_values, peptide_product_annotation_list, mz, expected_annot):
     closest_mz_annot = MzMLDataAccess._find_closest_reference_mz(mz, reference_mz_values, peptide_product_annotation_list)
     assert expected_annot == closest_mz_annot
 
-@pytest.mark.parametrize("level,mz,expected_annot", [(1, 100, 'prec'), (2, 200.01, 'C'), (2, 299.89, 'E')])
+@pytest.mark.parametrize("level,mz,expected_annot", [(1, 100, 'prec'), (2, 200.01, 'y4^1'), (2, 299.89, 'y6^2')])
 def test_apply_mz_mapping(reference_mz_values, peptide_product_annotation_list, level, mz, expected_annot):
     row = pd.Series(dict(mz=mz, ms_level=level))
     result = MzMLDataAccess._apply_mz_mapping(row, reference_mz_values, peptide_product_annotation_list)

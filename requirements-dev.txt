@@ -1,4 +1,6 @@
 flake8
 flit
 pylint
-snapshottest
+pytest
+syrupy
+tables

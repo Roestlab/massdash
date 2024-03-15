@@ -10,13 +10,13 @@ from syrupy.extensions.amber import AmberDataSerializer
 from massdash.structs import TransitionGroupFeature
 from massdash.loaders.SpectralLibraryLoader import SpectralLibraryLoader
 from massdash.util import find_git_directory
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
+from massdash.testing import PandasSnapshotExtension
 
 TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
-    return snapshot.use_extension(PandasSnapshotExtenstion)
+    return snapshot.use_extension(PandasSnapshotExtension)
 
 
 @pytest.fixture

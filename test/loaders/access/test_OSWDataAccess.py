@@ -7,7 +7,7 @@ import pytest
 from pathlib import Path
 import pandas as pd
 
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
+from massdash.testing import PandasSnapshotExtension
 from massdash.loaders.access.OSWDataAccess import OSWDataAccess
 from massdash.util import find_git_directory
 
@@ -15,7 +15,7 @@ TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
-    return snapshot.use_extension(PandasSnapshotExtenstion)
+    return snapshot.use_extension(PandasSnapshotExtension)
 
 @pytest.fixture
 def osw_data_access():

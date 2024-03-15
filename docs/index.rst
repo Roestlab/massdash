@@ -7,7 +7,7 @@ MassDash
 .. |pypidownload| image:: https://img.shields.io/pypi/dm/massdash?color=orange
    :target: https://pypistats.org/packages/massdash
 
-.. |Python 3.8+| image:: https://img.shields.io/badge/python-3.8+-blue.svg
+.. |Python 3.8+| image:: https://img.shields.io/badge/python-3.9+-blue.svg
    :target: https://www.python.org/downloads/
 
 .. |dockerv| image:: https://img.shields.io/docker/v/singjust/massdash?label=docker&color=green

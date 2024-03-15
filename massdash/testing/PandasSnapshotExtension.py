@@ -1,3 +1,7 @@
+"""
+massdash/testing/PandasSnapshotExtension
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
 # Taken from https://github.com/atharva-2001/syrupy-pandas-numpy/blob/main/tests/test_pd.py
 from typing import Any
 from syrupy.data import SnapshotCollection
@@ -6,7 +10,7 @@ import pandas as pd
 from syrupy.types import SerializableData
 import pytest
 
-class PandasSnapshotExtenstion(SingleFileSnapshotExtension):
+class PandasSnapshotExtension(SingleFileSnapshotExtension):
     _file_extension = "hdf"
 
     def matches(self, *, serialized_data, snapshot_data):

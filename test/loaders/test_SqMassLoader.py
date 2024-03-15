@@ -9,7 +9,7 @@ from syrupy.extensions.amber import AmberDataSerializer
 
 from massdash.loaders import SqMassLoader
 from massdash.util import find_git_directory
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
+from massdash.testing import PandasSnapshotExtension
 
 TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
@@ -19,7 +19,7 @@ def loader():
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
-    return snapshot.use_extension(PandasSnapshotExtenstion)
+    return snapshot.use_extension(PandasSnapshotExtension)
 
 '''
 @pytest.mark.parametrize('fullpeptidename,charge', [('NKESPT(UniMod:21)KAIVR(UniMod:267)', 3), ('INVALID', 0)])
