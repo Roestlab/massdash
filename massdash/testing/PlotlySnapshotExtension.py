@@ -4,7 +4,6 @@ from syrupy.extensions.single_file import SingleFileSnapshotExtension
 from syrupy.types import SerializableData
 from plotly.io import to_json
 import json
-import numpy as np
 import math
 
 class PlotlySnapshotExtension(SingleFileSnapshotExtension):
@@ -36,7 +35,7 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
             return True
         else:
             if isinstance(json1, float):
-                if not math.isclose(json1, json2, abs_tol=1):
+                if not math.isclose(json1, json2):
                     print(f'Values not equal: {json1} != {json2}')
                     return False
             else:
