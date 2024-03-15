@@ -30,22 +30,8 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
             if len(json1) != len(json2):
                 print('Lists have different lengths')
                 return False
-            if isinstance(json1[0], dict):
-                json1 = set(map(frozenset, (PlotlySnapshotExtension.dict_to_tuple(d) for d in json1)))
-                json2 = set(map(frozenset, (PlotlySnapshotExtension.dict_to_tuple(d) for d in json2)))
-            
-            # check equality
-            
-            # check if floating point convert to numpy array to do partial equality
-            if isinstance(json1, list) and isinstance(json1[0], float): # have to recheck if json1 is a list, and not a set
-                json1 = np.array(json1)
-                json2 = np.array(json2)
-                if not np.allclose(json1, json2):
-                    print('Lists contents not equal')
-                    return False
-            else:
-                if json1 != json2:
-                    print('Lists contents not equal')
+            for i, j in zip(json1, json2):
+                if not PlotlySnapshotExtension.compare_json(i, j):
                     return False
             return True
         else:
