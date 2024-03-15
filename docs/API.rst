@@ -21,6 +21,8 @@ Abstract Classes
    :template: class.rst
 
    structs.Data1D
+   structs.GenericFeature
+   structs.GenericStructCollection
  
 Classes 
 -------
@@ -39,6 +41,23 @@ Classes
    structs.TransitionFeature
    structs.FeatureMap
    structs.TargetedDIAConfig
+
+Collections
+-----------
+-----------
+.. currentmodule:: massdash
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+   
+   structs.TransitionGroupCollection
+   structs.TransitionGroupFeatureCollection
+   structs.FeatureMapCollection
+   structs.TopTransitionGroupFeatureCollection
+
+
 
 
 :mod:`massdash.loaders`: Classes for loading data 
@@ -136,3 +155,19 @@ Classes
    MRMTransitionGroupPicker
    pyMRMTransitionGroupPicker
    ConformerPeakPicker
+
+:mod:`massdash.testing`: Classes for testing 
+********************************************
+.. automodule:: massdash.testing
+   :no-members:
+   :no-inherited-members:
+
+.. currentmodule:: massdash.testing
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+   :template: class.rst
+
+   NumpySnapshotExtension
+   PandasSnapshotExtension

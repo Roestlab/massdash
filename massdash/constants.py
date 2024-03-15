@@ -10,11 +10,11 @@ MASSDASH_DIRNAME = os.path.dirname(__file__)
 
 ######################
 ## Icons
-MASSDASH_ICON = Image.open(os.path.join(MASSDASH_DIRNAME, 'assets/img/MassDash_Logo.ico'))
-MASSDASH_LOGO_LIGHT = os.path.join(MASSDASH_DIRNAME, 'assets/img/MassDash_Logo_Light.png')
-MASSDASH_LOGO_DARK = os.path.join(MASSDASH_DIRNAME, 'assets/img/MassDash_Logo_Dark.png')
-OPENMS_LOGO = os.path.join(MASSDASH_DIRNAME, 'assets/img/OpenMS.png')
-    
+MASSDASH_ICON = Image.open(os.path.normpath(os.path.join(MASSDASH_DIRNAME, 'assets/img/MassDash_Logo.ico')))
+MASSDASH_LOGO_LIGHT = Image.open(os.path.normpath(os.path.join(MASSDASH_DIRNAME, 'assets/img/MassDash_Logo_Light.png')))
+MASSDASH_LOGO_DARK = Image.open(os.path.normpath(os.path.join(MASSDASH_DIRNAME, 'assets/img/MassDash_Logo_Dark.png')))
+OPENMS_LOGO = Image.open(os.path.normpath(os.path.join(MASSDASH_DIRNAME, 'assets/img/OpenMS.png')))
+
 ######################
 ## URLS
 

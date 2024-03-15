@@ -14,8 +14,7 @@ from massdash.loaders import SpectralLibraryLoader
 from massdash.structs import TransitionGroup, TransitionGroupFeature, Chromatogram
 from massdash.util import download_file, find_git_directory
 from massdash.constants import URL_PRETRAINED_CONFORMER
-from massdash.testing.NumpySnapshotExtension import NumpySnapshotExtenstion
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
+from massdash.testing import NumpySnapshotExtension, PandasSnapshotExtension
 
 TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
@@ -32,11 +31,11 @@ class DummyConformerPeakPicker(ConformerPeakPicker):
 
 @pytest.fixture
 def snapshot_numpy(snapshot):
-    return snapshot.use_extension(NumpySnapshotExtenstion)
+    return snapshot.use_extension(NumpySnapshotExtension)
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
-    return snapshot.use_extension(PandasSnapshotExtenstion)
+    return snapshot.use_extension(PandasSnapshotExtension)
 
 @pytest.fixture(params=['chrom_empty', 'chrom_single_peak', 'chrom_multiple_peaks'])
 def chrom(request):

@@ -23,3 +23,9 @@ class TransitionGroupCollection(GenericStructCollection):
         tmp['run'] = tmp.index.get_level_values(0)
         tmp = tmp.reset_index(drop=True)
         return tmp
+    
+    def __str__(self) -> str:
+        return str(__class__.__name__) + '\n' + '\n'.join(f'{k}: {v}' for k, v in self.items())
+    
+    def __repr__(self) -> str:
+        return str(__class__.__name__) + '\n' + '\n'.join(f'{k}: {v}' for k, v in self.items())

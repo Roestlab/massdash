@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from massdash.loaders.access.TransitionPQPDataAccess import TransitionPQPDataAccess
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
+from massdash.testing import PandasSnapshotExtension
 from massdash.util import find_git_directory
 
 TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
@@ -21,7 +21,7 @@ def data_access():
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
-    return snapshot.use_extension(PandasSnapshotExtenstion)
+    return snapshot.use_extension(PandasSnapshotExtension)
 
 def test_getTransitionList(data_access, snapshot_pandas):
     # test getTransitionList() method

@@ -1,3 +1,8 @@
+"""
+massdash/testing/NumpySnapshotExtension
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 # Taken from https://github.com/atharva-2001/syrupy-pandas-numpy/blob/main/tests/test_np.py
 from typing import Any
 import numpy as np
@@ -5,14 +10,10 @@ from syrupy.data import SnapshotCollection
 from syrupy.extensions.single_file import SingleFileSnapshotExtension
 from syrupy.types import SerializableData
 
-class NumpySnapshotExtenstion(SingleFileSnapshotExtension):
+class NumpySnapshotExtension(SingleFileSnapshotExtension):
     _file_extension = "dat"
 
     def matches(self, *, serialized_data, snapshot_data):
-        print("numpy matching!!!!")
-
-        print('allclose', np.allclose(np.array(snapshot_data), np.array(serialized_data)))
-
         try:
             if np.allclose(np.array(snapshot_data), np.array(serialized_data)):
                 return True

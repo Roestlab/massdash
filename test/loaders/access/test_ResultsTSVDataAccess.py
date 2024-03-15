@@ -8,7 +8,7 @@ import pytest
 from syrupy.extensions.amber import AmberDataSerializer
 
 from massdash.loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
+from massdash.testing import PandasSnapshotExtension
 from massdash.util import find_git_directory
 
 TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
@@ -34,7 +34,7 @@ def charge():
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
-    return snapshot.use_extension(PandasSnapshotExtenstion)
+    return snapshot.use_extension(PandasSnapshotExtension)
 
 @pytest.mark.parametrize("access", ['diann', 'dream'], indirect=True)
 def test_loadData(access, snapshot_pandas):
