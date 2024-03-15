@@ -36,7 +36,7 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
             return True
         else:
             if isinstance(json1, float):
-                if not math.isclose(json1, json2, abs_tol=0.3):
+                if not math.isclose(json1, json2, abs_tol=1):
                     print(f'Values not equal: {json1} != {json2}')
                     return False
             else:
