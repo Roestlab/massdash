@@ -263,6 +263,27 @@ def check_package(package_name: str, module_path: Optional[str]=None):
         print(f"{package_name} is not installed. Please install it using 'pip install {package_name}'.")
         return None, False
 
+def check_function(package_name: str, function_name: str, module_path: Optional[str]=None):
+    """
+    Check if a function is available in a Python package.
+
+    Args:
+        package_name (str): The name of the package to check.
+        function_name (str): The name of the function to check.
+        module_path (str, optional): The path to the module within the package. Defaults to None.
+
+    Returns:
+        bool: True if the function is available, False otherwise.
+    """
+    try:
+        if module_path is None:
+            module = importlib.import_module(package_name)
+        else:
+            module = importlib.import_module(f"{package_name}.{module_path}")
+        return getattr(module, function_name), True
+    except ImportError:
+        print(f"{package_name} is not installed. Please install it using 'pip install {package_name}'.")
+        return None, False
 
 def file_basename_without_extension(file_path):
     """

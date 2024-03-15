@@ -16,7 +16,7 @@ class Spectrum(Data1D):
         super().__init__(mz, intensity, label)
         
     def toPandasDf(self) -> pd.DataFrame:
-        return super().toPandasDfHelper_(self, 'mz')
+        return super().toPandasDfHelper_('mz')
     
     def adjust_length(self, length: int) -> 'Spectrum':
         """

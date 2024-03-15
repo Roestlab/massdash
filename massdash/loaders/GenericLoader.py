@@ -104,7 +104,7 @@ class GenericLoader(ABC):
         out = TransitionGroupFeatureCollection()
         for t in self.dataFiles_str:
             runname = basename(t).split('.')[0]
-            out[t] = self.rsltsFile.getTransitionGroupFeatures(runname, pep_id, charge)
+            out[runname] = self.rsltsFile.getTransitionGroupFeatures(runname, pep_id, charge)
         return out
     
 
@@ -120,7 +120,7 @@ class GenericLoader(ABC):
         out = {}
         for t in self.dataFiles_str:
             runname = basename(t).split('.')[0]
-            out[t] = self.rsltsFile.getTopTransitionGroupFeature(runname, pep_id, charge)
+            out[runname] = self.rsltsFile.getTopTransitionGroupFeature(runname, pep_id, charge)
         return out
     
     @abstractmethod

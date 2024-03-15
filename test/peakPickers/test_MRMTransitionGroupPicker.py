@@ -8,15 +8,11 @@ import unittest
 
 import numpy as np
 import pyopenms as po
-from snapshottest import TestCase
 
 from massdash.peakPickers.MRMTransitionGroupPicker import MRMTransitionGroupPicker
-from massdash.structs.TransitionGroup import TransitionGroup
-from massdash.structs.TransitionGroupFeature import TransitionGroupFeature
-from massdash.structs.Chromatogram import Chromatogram
+from massdash.structs import TransitionGroup, TransitionGroupFeature, Chromatogram
 
-
-class TestMRMTransitionGroupPicker(TestCase):
+class TestMRMTransitionGroupPicker(unittest.TestCase):
 
     def setUp(self):
         rtdata_1 = np.array([1474.34, 1477.11, 1479.88, 1482.64, 1485.41, 1488.19, 1490.95, 1493.72, 1496.48, 1499.25, 1502.03, 1504.8, 1507.56, 1510.33, 1513.09, 1515.87, 1518.64, 1521.42])
@@ -119,7 +115,6 @@ class TestMRMTransitionGroupPicker(TestCase):
         picker = MRMTransitionGroupPicker("original")
         tg_feature = picker.pick(self.tg_1)
 
-        print(tg_feature)
         self.assertEqual(len(tg_feature), 1)
         self.assertAlmostEqual(tg_feature[0].consensusApex, 1498.86, places=3)
         self.assertAlmostEqual(tg_feature[0].areaIntensity, 232025.296875, places=3)
@@ -133,7 +128,6 @@ class TestMRMTransitionGroupPicker(TestCase):
         picker = MRMTransitionGroupPicker("original")
         picker.setGeneralParameters(background_subtraction="original")
         tg_feature = picker.pick(self.tg_1)
-        print(tg_feature)
         self.assertEqual(len(tg_feature), 1)
         self.assertAlmostEqual(tg_feature[0].consensusApex, 1498.86, places=3)
         self.assertAlmostEqual(tg_feature[0].areaIntensity, 41390.84, places=3)
@@ -146,7 +140,6 @@ class TestMRMTransitionGroupPicker(TestCase):
         picker = MRMTransitionGroupPicker("gauss", gauss_width=10.0)
         picker.setGeneralParameters(signal_to_noise=1.0, resample_boundary=1.0, recalculate_peaks_max_z=1.0, recalculate_peaks="false")
         tg_feature = picker.pick(self.tg_2)
-        print(tg_feature)
         self.assertEqual(len(tg_feature), 1)
         self.assertAlmostEqual(tg_feature[0].consensusApex, 14, places=5)
         self.assertAlmostEqual(tg_feature[0].areaIntensity, 302, places=5) 
@@ -158,7 +151,6 @@ class TestMRMTransitionGroupPicker(TestCase):
         ### Transition group #2 black box test ##
         picker = MRMTransitionGroupPicker("sgolay")
         tg_feature = picker.pick(self.tg_2)
-        print(tg_feature)
         self.assertEqual(len(tg_feature), 1)
         self.assertAlmostEqual(tg_feature[0].consensusApex, 14, places=5)
         self.assertAlmostEqual(tg_feature[0].areaIntensity, 353, places=5) ### not sure if this is correct
@@ -171,7 +163,6 @@ class TestMRMTransitionGroupPicker(TestCase):
         picker = MRMTransitionGroupPicker("original")
         picker.setGeneralParameters(use_precursors="true")
         tg_feature = picker.pick(self.tg_3)
-        print(tg_feature)
         self.assertEqual(len(tg_feature), 1)
         self.assertAlmostEqual(tg_feature[0].consensusApex, 14, places=5)
         self.assertAlmostEqual(tg_feature[0].areaIntensity, 45, places=5)
