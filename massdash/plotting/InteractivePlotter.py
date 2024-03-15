@@ -317,13 +317,13 @@ class InteractivePlotter(GenericPlotter):
             # Add the legend to the plot
             p.add_layout(legend, 'right')
 
-        p.legend.location = "top_left"
-        # p.legend.click_policy="hide"
-        p.legend.click_policy="mute"
+            p.legend.location = "top_left"
+            # p.legend.click_policy="hide"
+            p.legend.click_policy="mute"
+            p.legend.title = "Transition"
+            p.legend.label_text_font_size = "10pt"
 
         # Customize the plot
-        p.legend.title = "Transition"
-        p.legend.label_text_font_size = "10pt"
         p.grid.visible = True
         p.toolbar_location = "above"
 
