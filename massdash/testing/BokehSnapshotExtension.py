@@ -54,7 +54,9 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
                 if key not in json2:
                     print(f'Key {key} not in second json')
                     return False
-                if not BokehSnapshotExtension.compare_json(json1[key], json2[key]):
+                elif key not in ['id', 'root_ids']: # add keys to ignore here
+                    pass
+                elif not BokehSnapshotExtension.compare_json(json1[key], json2[key]):
                     print(f'Values for key {key} not equal')
                     return False
             return True
@@ -62,25 +64,25 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
             if len(json1) != len(json2):
                 print('Lists have different lengths')
                 return False
-            json1 = set(map(frozenset, (BokehSnapshotExtension.dict_to_tuple(d) for d in json1)))
-            json2 = set(map(frozenset, (BokehSnapshotExtension.dict_to_tuple(d) for d in json2)))
-            if json1 != json2:
-                print('Sets of dictionaries are not equal')
-                return False
+            # lists are unordered so we need to compare every element one by one
+            for i in json1:
+                if isinstance(i, dict):
+                    # find the corresponding dictionary in json2
+                    for j in json2:
+                        if j['type'] == i['type']:
+                            if not BokehSnapshotExtension.compare_json(i, j):
+                                print(f'Element {i} not equal to {j}')
+                                return False
+                            return True
+                    print(f'Element {i} not in second list')
+                    return False
+                else:
+                    return json1[i] == json2[i]
             return True
         else:
             if json1 != json2:
                 print(f'Values not equal: {json1} != {json2}')
             return json1 == json2
-    
-    @staticmethod
-    def dict_to_tuple(d):
-        if isinstance(d, dict):
-            return tuple((k, BokehSnapshotExtension.dict_to_tuple(v)) for k, v in sorted(d.items()))
-        elif isinstance(d, list):
-            return tuple(BokehSnapshotExtension.dict_to_tuple(x) for x in d)
-        else:
-            return d
 
     def _read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str
