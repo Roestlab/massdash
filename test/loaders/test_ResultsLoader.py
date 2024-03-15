@@ -4,19 +4,18 @@ test/loaders/test_ResultsLoader.py
 
 from pathlib import Path
 import pytest
+import pandas as pd
 from syrupy.extensions.amber import AmberDataSerializer
 
 from massdash.loaders import ResultsLoader
 from massdash.util import find_git_directory
-from massdash.testing.PandasSnapshotExtension import PandasSnapshotExtenstion
-#from massdash.testing.BokehSnapshotExtension import BokehSnapshotExtension
-#from massdash.testing.
+from massdash.testing import PandasSnapshotExtension
 
 TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
-    return snapshot.use_extension(PandasSnapshotExtenstion)
+    return snapshot.use_extension(PandasSnapshotExtension)
 
 @pytest.fixture(params=[
     f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw",

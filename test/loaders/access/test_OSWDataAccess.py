@@ -70,9 +70,9 @@ def test_getTransitionGroupFeatures(osw_data_access, snapshot, fullpeptidename, 
     assert snapshot == transition_group_feature
 
 @pytest.mark.parametrize("fullpeptidename,charge,run", [("AFVDFLSDEIK", 2, 'ionMobilityTest2'), ("INVALID", 0, 'ionMobilityTest2'), ("AFVDFLSDEIK", 2, 'INVALID')])
-def test_getTransitionGroupFeaturesDf(osw_data_access, snapshot, run, fullpeptidename, charge):
+def test_getTransitionGroupFeaturesDf(osw_data_access, snapshot_pandas, run, fullpeptidename, charge):
     transition_group_feature = osw_data_access.getTransitionGroupFeaturesDf(run, fullpeptidename, charge)
-    assert snapshot == transition_group_feature
+    assert snapshot_pandas == transition_group_feature
 
 def test_getRunNames(osw_data_access, snapshot):
     runnames = osw_data_access.getRunNames()
