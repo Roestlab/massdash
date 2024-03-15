@@ -10,8 +10,7 @@ import numpy as np
 from bokeh.models import CrosshairTool
 
 
-from massdash.testing.NumpySnapshotExtension import NumpySnapshotExtenstion
-from massdash.testing.BokehSnapshotExtension import BokehSnapshotExtension
+from massdash.testing import NumpySnapshotExtension, BokehSnapshotExtension
 from massdash.plotting.InteractiveTwoDimensionPlotter import InteractiveTwoDimensionPlotter
 from massdash.structs.FeatureMap import FeatureMap
 from massdash.plotting.GenericPlotter import PlotConfig
@@ -25,7 +24,7 @@ def snapshot_bokeh(snapshot):
 
 @pytest.fixture
 def snapshot_numpy(snapshot):
-    return snapshot.use_extension(NumpySnapshotExtenstion)
+    return snapshot.use_extension(NumpySnapshotExtension)
 
 @pytest.fixture
 def featureMap():

@@ -5,7 +5,7 @@ test/plotting/test_InteractivePlotter
 import pytest
 import numpy as np
 
-from massdash.testing.BokehSnapshotExtension import BokehSnapshotExtension
+from massdash.testing import BokehSnapshotExtension
 from massdash.plotting import InteractivePlotter, PlotConfig
 from massdash.structs.TransitionGroup import TransitionGroup, Chromatogram, Mobilogram, Spectrum, TransitionGroupFeature
 
