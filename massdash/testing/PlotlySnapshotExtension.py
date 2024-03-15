@@ -5,6 +5,7 @@ from syrupy.types import SerializableData
 from plotly.io import to_json
 import json
 import numpy as np
+import math
 
 class PlotlySnapshotExtension(SingleFileSnapshotExtension):
     _file_extension = "json"
@@ -48,9 +49,15 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
                     return False
             return True
         else:
-            if json1 != json2:
-                print(f'Values not equal: {json1} != {json2}')
-            return json1 == json2
+            if isinstance(json1, float):
+                if not math.isclose(json1, json2):
+                    print(f'Values not equal: {json1} != {json2}')
+                    return False
+            else:
+                if json1 != json2:
+                    print(f'Values not equal: {json1} != {json2}')
+                    return False
+            return True
     
     @staticmethod
     def dict_to_tuple(d):
