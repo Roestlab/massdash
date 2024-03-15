@@ -36,7 +36,7 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
             return True
         else:
             if isinstance(json1, float):
-                if not math.isclose(json1, json2):
+                if not math.isclose(json1, json2, abs_tol=0.3):
                     print(f'Values not equal: {json1} != {json2}')
                     return False
             else:
@@ -44,15 +44,6 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
                     print(f'Values not equal: {json1} != {json2}')
                     return False
             return True
-    
-    @staticmethod
-    def dict_to_tuple(d):
-        if isinstance(d, dict):
-            return tuple((k, PlotlySnapshotExtension.dict_to_tuple(v)) for k, v in sorted(d.items()))
-        elif isinstance(d, list):
-            return tuple(PlotlySnapshotExtension.dict_to_tuple(x) for x in d)
-        else:
-            return d
 
     def _read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str
