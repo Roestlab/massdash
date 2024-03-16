@@ -485,7 +485,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 WHERE SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_PEPTIDE.QVALUE <= {qvalue} AND SCORE_PROTEIN.QVALUE <= {qvalue} and SCORE_MS2.RANK == 1"""
             df = pd.read_sql(stmt, self.conn)
             df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
-            return df[['RUN_NAME', 'Precursor']].groupby('RUN_NAME').apply(lambda x: set(x['Precursor'])).to_dict()
+            return df[['RUN_NAME', 'Precursor']].groupby('RUN_NAME').apply(lambda x: set(x['Precursor']), include_groups=False).to_dict()
 
     def getIdentifiedPrecursorIntensities(self, qvalue: float = 0.01, run: Optional[str] = None, precursorLevel=False):
         if isinstance(run, str):
@@ -567,7 +567,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 WHERE SCORE_PEPTIDE.QVALUE <= {qvalue} AND PEPTIDE.DECOY = 0 """
             df = pd.read_sql(stmt, self.conn)
             df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
-            return df[['RUN_NAME', 'Peptide']].groupby('RUN_NAME').apply(lambda x: set(x['Peptide'])).to_dict()
+            return df[['RUN_NAME', 'Peptide']].groupby('RUN_NAME').apply(lambda x: set(x['Peptide']), include_groups=False).to_dict()
  
     def getIdentifiedProteins(self, qvalue: float = 0.01, run: Optional[str] = None) -> Union[set, Dict[str, set]]:
         if isinstance(run, str):
@@ -588,7 +588,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 WHERE SCORE_PROTEIN.QVALUE <= {qvalue} AND PROTEIN.DECOY = 0 """
             df = pd.read_sql(stmt, self.conn)
             df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
-            return df[['RUN_NAME', 'Protein']].groupby('RUN_NAME').apply(lambda x: set(x['Protein'])).to_dict()
+            return df[['RUN_NAME', 'Protein']].groupby('RUN_NAME').apply(lambda x: set(x['Protein']), include_groups=False).to_dict()
    
     def getSoftware(self):
         return "OpenSWATH"

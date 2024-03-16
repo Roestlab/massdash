@@ -20,10 +20,14 @@
 # name: test_getIdentifiedPrecursors[diann]
   dict({
     'test_raw_1': set({
-      'AGAANIVPNSTGAAK',
-      'DYASIDAAPEER',
-      'IEDQLGEVAQYK',
-      'KVVITAPGGNDVK',
+      'AGAANIVPNSTGAAK2',
+      'AGAANIVPNSTGAAK3',
+      'DYASIDAAPEER2',
+      'DYASIDAAPEER3',
+      'IEDQLGEVAQYK2',
+      'IEDQLGEVAQYK3',
+      'KVVITAPGGNDVK2',
+      'KVVITAPGGNDVK3',
     }),
   })
 # ---
@@ -86,7 +90,7 @@
   product_annotations: None
   product_mz: None
   sequence: DYASIDAAPEER
-  software: None>,
+  software: DIA-NN>,
     leftBoundary=2421.63,
     precursor_charge=2,
     precursor_mz=None,
@@ -95,7 +99,7 @@
     qvalue=3.28317e-05,
     rightBoundary=2455.77,
     sequence='DYASIDAAPEER',
-    software=None,
+    software='DIA-NN',
     toPandasDf="TransitionGroupFeature.toPandasDf(transitionGroupFeatureLst: List[ForwardRef('TransitionGroupFeature')]) -> pandas.core.frame.DataFrame",
   )
 # ---
@@ -119,7 +123,7 @@
   product_annotations: None
   product_mz: None
   sequence: DYASIDAAPEER
-  software: None>,
+  software: DIA-NN>,
       leftBoundary=2421.63,
       precursor_charge=2,
       precursor_mz=None,
@@ -128,7 +132,7 @@
       qvalue=3.28317e-05,
       rightBoundary=2455.77,
       sequence='DYASIDAAPEER',
-      software=None,
+      software='DIA-NN',
       toPandasDf="TransitionGroupFeature.toPandasDf(transitionGroupFeatureLst: List[ForwardRef('TransitionGroupFeature')]) -> pandas.core.frame.DataFrame",
     ),
   ])

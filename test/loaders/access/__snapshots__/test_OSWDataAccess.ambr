@@ -91,23 +91,6 @@
     '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_27.d_mergeFiles',
   ])
 # ---
-# name: test_getTransitionGroupFeaturesDf[AFVDFLSDEIK-2-INVALID]
-  Empty DataFrame
-  Columns: [leftBoundary, rightBoundary, areaIntensity, qvalue, consensusApex, consensusApexIntensity, precursor_charge, sequence, software]
-  Index: []
-# ---
-# name: test_getTransitionGroupFeaturesDf[AFVDFLSDEIK-2-ionMobilityTest2]
-     leftBoundary  rightBoundary  ...     sequence   software
-  0   6235.848633    6248.428223  ...  AFVDFLSDEIK  OpenSWATH
-  1   6255.645996    6266.515137  ...  AFVDFLSDEIK  OpenSWATH
-  
-  [2 rows x 9 columns]
-# ---
-# name: test_getTransitionGroupFeaturesDf[INVALID-0-ionMobilityTest2]
-  Empty DataFrame
-  Columns: [leftBoundary, rightBoundary, areaIntensity, qvalue, consensusApex, consensusApexIntensity, precursor_charge, sequence, software]
-  Index: []
-# ---
 # name: test_getTransitionGroupFeatures[AFVDFLSDEIK-2-INVALID]
   list([
   ])
