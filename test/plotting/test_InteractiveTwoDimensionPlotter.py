@@ -58,19 +58,19 @@ def test_get_plot_parameters(defaultPlotter, index, columns, featureMap, snapsho
 @pytest.mark.parametrize('index,columns,smoothing_dict,normalization_dict', [
     # mz vs rt
     ('mz', 'rt', dict(type='none'), dict(type='none')),
-    ('mz', 'rt', dict(type='gauss', sigma=1.2), dict(type='none')),
+    ('mz', 'rt', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     ('mz', 'rt', dict(type='none'), dict(type='equalization', bins=2)),
-    ('mz', 'rt', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2)),
+    ('mz', 'rt', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2)),
     # mz vs im
     ('mz', 'im', dict(type='none'), dict(type='none')),
-    ('mz', 'im', dict(type='gauss', sigma=1.2), dict(type='none')),
+    ('mz', 'im', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     ('mz', 'im', dict(type='none'), dict(type='equalization', bins=2)),
-    ('mz', 'im', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2)),
+    ('mz', 'im', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2)),
     # im vs rt
     ('im', 'rt', dict(type='none'), dict(type='none')),
-    ('im', 'rt', dict(type='gauss', sigma=1.2), dict(type='none')),
+    ('im', 'rt', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     ('im', 'rt', dict(type='none'), dict(type='equalization', bins=2)),
-    ('im', 'rt', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2))])
+    ('im', 'rt', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2))])
 def test_prepare_array(featureMap, index, columns, smoothing_dict, normalization_dict, snapshot_numpy):
     arr = featureMap.feature_df.pivot_table(index=index, columns=columns, values='int', aggfunc="sum")
     config = PlotConfig()
@@ -154,53 +154,53 @@ def test_plot_aggregated_heatmap(defaultPlotter, featureMap, include_ms1, includ
 ## include ms1 and ms2
     # mz vs rt
     (True, True, 'm/z vs retention time', dict(type='none'), dict(type='none')),
-    (True, True, 'm/z vs retention time', dict(type='gauss', sigma=1.2), dict(type='none')),
+    (True, True, 'm/z vs retention time', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     (True, True, 'm/z vs retention time', dict(type='none'), dict(type='equalization', bins=2)),
-    (True, True, 'm/z vs retention time', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2)),
+    (True, True, 'm/z vs retention time', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2)),
     # mz vs im
     (True, True, 'm/z vs ion mobility', dict(type='none'), dict(type='none')),
-    (True, True, 'm/z vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='none')),
+    (True, True, 'm/z vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     (True, True, 'm/z vs ion mobility', dict(type='none'), dict(type='equalization', bins=2)),
-    (True, True, 'm/z vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2)),
+    (True, True, 'm/z vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2)),
     # im vs rt
     (True, True, 'retention time vs ion mobility', dict(type='none'), dict(type='none')),
-    (True, True, 'retention time vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='none')),
+    (True, True, 'retention time vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     (True, True, 'retention time vs ion mobility', dict(type='none'), dict(type='equalization', bins=2)),
-    (True, True, 'retention time vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2)),
+    (True, True, 'retention time vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2)),
 
     ## Only MS1
     # mz vs rt
     (True, False, 'm/z vs retention time', dict(type='none'), dict(type='none')),
-    (True, False, 'm/z vs retention time', dict(type='gauss', sigma=1.2), dict(type='none')),
+    (True, False, 'm/z vs retention time', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     (True, False, 'm/z vs retention time', dict(type='none'), dict(type='equalization', bins=2)),
-    (True, False, 'm/z vs retention time', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2)),
+    (True, False, 'm/z vs retention time', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2)),
     # mz vs im
     (True, False, 'm/z vs ion mobility', dict(type='none'), dict(type='none')),
-    (True, False, 'm/z vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='none')),
+    (True, False, 'm/z vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     (True, False, 'm/z vs ion mobility', dict(type='none'), dict(type='equalization', bins=2)),
-    (True, False, 'm/z vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2)),
+    (True, False, 'm/z vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2)),
     # im vs rt
     (True, False, 'retention time vs ion mobility', dict(type='none'), dict(type='none')),
-    (True, False, 'retention time vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='none')),
+    (True, False, 'retention time vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     (True, False, 'retention time vs ion mobility', dict(type='none'), dict(type='equalization', bins=2)),
-    (True, False, 'retention time vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2)),
+    (True, False, 'retention time vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2)),
 
     ## Only MS2
     # mz vs rt
     (False, True, 'm/z vs retention time', dict(type='none'), dict(type='none')),
-    (False, True, 'm/z vs retention time', dict(type='gauss', sigma=1.2), dict(type='none')),
+    (False, True, 'm/z vs retention time', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     (False, True, 'm/z vs retention time', dict(type='none'), dict(type='equalization', bins=2)),
-    (False, True, 'm/z vs retention time', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2)),
+    (False, True, 'm/z vs retention time', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2)),
     # mz vs im
     (False, True, 'm/z vs ion mobility', dict(type='none'), dict(type='none')),
-    (False, True, 'm/z vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='none')),
+    (False, True, 'm/z vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     (False, True, 'm/z vs ion mobility', dict(type='none'), dict(type='equalization', bins=2)),
-    (False, True, 'm/z vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2)),
+    (False, True, 'm/z vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2)),
     # im vs rt
     (False, True, 'retention time vs ion mobility', dict(type='none'), dict(type='none')),
-    (False, True, 'retention time vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='none')),
+    (False, True, 'retention time vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='none')),
     (False, True, 'retention time vs ion mobility', dict(type='none'), dict(type='equalization', bins=2)),
-    (False, True, 'retention time vs ion mobility', dict(type='gauss', sigma=1.2), dict(type='equalization', bins=2))])
+    (False, True, 'retention time vs ion mobility', dict(type='gauss', gaussian_sigma=1.2), dict(type='equalization', bins=2))])
 def test_plot_individual_heatmaps(featureMap, include_ms1, include_ms2, heatmap, smoothing_dict, normalization_dict, snapshot, snapshot_bokeh):
     config = PlotConfig()
     config.update(dict(include_ms1=include_ms1, include_ms2=include_ms2, smoothing_type=smoothing_dict, normalization_dict=normalization_dict, type_of_heatmap=heatmap, title="Title", subtitle="Subtitle"))
