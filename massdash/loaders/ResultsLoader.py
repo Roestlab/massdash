@@ -158,7 +158,7 @@ class ResultsLoader:
                 features = r.getTopTransitionGroupFeatureDf(d, pep_id, charge)
                 out[d] = features
         
-        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runName'))
 
     def loadTopTransitionGroupFeature(self, pep_id: str, charge: int) -> TransitionGroupFeatureCollection:
         '''
@@ -248,11 +248,12 @@ class ResultsLoader:
             DataFrame: DataFrame containing the quantification matrix, columns are the software tool, index are the precursor and the values are the intensities
         '''
         tmp =  pd.concat({ i.getSoftware():i.getIdentifiedPrecursorIntensities(**kwargs) for i in self.rsltsAccess }).drop_duplicates()
+        print(tmp)
         return (tmp
                 .drop_duplicates()
                 .reset_index()
                 .rename(columns={'level_0':'Software'})
-                .pivot(index='Precursor', columns=['Software', 'filename'], values='Intensity'))
+                .pivot(index='Precursor', columns=['Software', 'runName'], values='Intensity'))
 
     def computeCV(self, **kwargs) -> pd.DataFrame:
         '''
@@ -289,7 +290,7 @@ class ResultsLoader:
             raise Exception(f"Error: Unsupported level {level}, supported levels are 'precursor', 'peptide' or 'protein'")
 
         if aggregate:
-            # Get number of rows grouped by column entry and filename
+            # Get number of rows grouped by column entry and runName
 
             # get the median and std of identification rates
             median = { s:np.median(list(r.values())) for s, r in counts.items() }
@@ -336,7 +337,7 @@ class ResultsLoader:
             p = figure(x_range=FactorRange(*self.runNames), plot_height=450, plot_width=600)
 
             # Axis titles
-            p.xaxis.axis_label = "Filename"
+            p.xaxis.axis_label = "runName"
             p.yaxis.axis_label = "Number of identifications"
 
             # Create a color cycle for bars
@@ -399,7 +400,7 @@ class ResultsLoader:
         # Take the log2 of the Intensity column
         quantMatrix['log2_intensity'] = np.log2(quantMatrix['Intensity'])
         
-        p = px.violin(quantMatrix, x="filename", y="log2_intensity", color="Software", box=True, labels = {"filename":'Run', "log2_intensity": "log2(Intensity)"})
+        p = px.violin(quantMatrix, x="runName", y="log2_intensity", color="Software", box=True, labels = {"runName":'Run', "log2_intensity": "log2(Intensity)"})
         
         # Update label and axis text size
         p.update_layout(
@@ -457,7 +458,7 @@ class ResultsLoader:
     def plotUpset(self, level= Literal['precursor', 'peptide', 'protein'], **kwargs):
         """
         Create an UpSet plot showing the intersection of ModifiedPeptideSequence's between entries
-        (with unique ModifiedPeptideSequence across filenames)
+        (with unique ModifiedPeptideSequence across runNames)
         """
         import upsetplot
         import matplotlib.pyplot as plt

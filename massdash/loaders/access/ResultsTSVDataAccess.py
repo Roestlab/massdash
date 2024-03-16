@@ -22,8 +22,8 @@ class ResultsTSVDataAccess(GenericResultsAccess):
     # static variable
     columnMapping = {
         'OpenSwath':{'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge', 'leftWidth': 'RT.Start', 'rightWidth': 'RT.Stop'},
-        'DIA-NN':{'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'filename', 'Precursor.Id':'Precursor'},
-        'DreamDIA':{'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'filename', 'quantification': 'Intensity'}
+        'DIA-NN':{'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'runName', 'Precursor.Id':'Precursor'},
+        'DreamDIA':{'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'runName', 'quantification': 'Intensity'}
 
     }
 
@@ -35,7 +35,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         
         self.loadData()   # set self.df and self.results_type
         self.peptideHash = self._initializePeptideHashTable()
-        self.runs = self.df['filename'].drop_duplicates()  
+        self.runs = self.df['runName'].drop_duplicates()  
         self.has_im = 'IM' in self.df.columns
     
     def detectResultsType(self) -> Literal["OpenSWATH", "DIA-NN", "DreamDIA"]:
@@ -119,7 +119,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             LOGGER.debug(f"Error: No matching runs found for {runname}")
             return []
         else:
-            targetPeptide = self.peptideHash[(self.peptideHash['filename'] == runname_exact) & (self.peptideHash['ModifiedPeptideSequence'] == peptide) & (self.peptideHash['PrecursorCharge'] == charge)]
+            targetPeptide = self.peptideHash[(self.peptideHash['runName'] == runname_exact) & (self.peptideHash['ModifiedPeptideSequence'] == peptide) & (self.peptideHash['PrecursorCharge'] == charge)]
 
             # return the row indices and add 1 to each index to account for the header row
             rows_to_load = [0] + [idx + 1 for idx in targetPeptide.index.tolist()]
@@ -173,7 +173,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         if runname_exact is None:
             return pd.DataFrame(columns=self.COLUMNS)
         else:
-            df = self.df[(self.df['filename'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
+            df = self.df[(self.df['runName'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
 
             df = df.rename(columns={'RT.Start': 'leftBoundary', 
                                     'RT.Stop': 'rightBoundary', 
@@ -218,32 +218,32 @@ class ResultsTSVDataAccess(GenericResultsAccess):
     def getIdentifiedPrecursors(self, qvalue: float = 0.01, run:Optional[str] = None, precursorLevel = False) -> Union[set, Dict[str, set]]:
         if precursorLevel:
             if isinstance(run, str):
-                return set(self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue)]['Precursor'])
+                return set(self.df[(self.df['runName'] == run) & (self.df['Qvalue'] <= qvalue)]['Precursor'])
             else:
-                return self.df[(self.df['Qvalue'] <= qvalue)].groupby('filename').apply(lambda x: set(x['Precursor'])).to_dict()
+                return self.df[(self.df['Qvalue'] <= qvalue)].groupby('runName').apply(lambda x: set(x['Precursor']), include_groups=False).to_dict()
         else:
             if isinstance(run, str):
-                return set(self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value'] <= qvalue )]['Precursor'])
+                return set(self.df[(self.df['runName'] == run) & (self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value'] <= qvalue )]['Precursor'])
             else:
-                return self.df[(self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value']<= qvalue )].groupby('filename').apply(lambda x: set(x['Precursor'])).to_dict()
+                return self.df[(self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value']<= qvalue )].groupby('runName').apply(lambda x: set(x['Precursor']), include_groups=False).to_dict()
     
     def getIdentifiedPrecursorIntensities(self, qvalue: float = 0.01, run: Optional[str] = None) -> pd.DataFrame:
         if isinstance(run, str):
-            return self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue)][['Precursor', 'Intensity']].copy()
+            return self.df[(self.df['runName'] == run) & (self.df['Qvalue'] <= qvalue)][['Precursor', 'Intensity']].copy()
         else:
-            return self.df[(self.df['Qvalue'] <= qvalue)][['filename', 'Precursor', 'Intensity']].copy()
+            return self.df[(self.df['Qvalue'] <= qvalue)][['runName', 'Precursor', 'Intensity']].copy()
 
     def getIdentifiedProteins(self, qvalue: float = 0.01, run:Optional[str] = None) -> Union[set, Dict[str, set]]:
         if isinstance(run, str):
-            return set(self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue)]['ProteinId'])
+            return set(self.df[(self.df['runName'] == run) & (self.df['Qvalue'] <= qvalue)]['ProteinId'])
         else:
-            return self.df[(self.df['Qvalue'] <= qvalue)][['ProteinId', 'filename']].groupby(['filename']).apply(lambda x: set(x['ProteinId'])).to_dict()
+            return self.df[(self.df['Qvalue'] <= qvalue)][['ProteinId', 'runName']].groupby(['runName']).apply(lambda x: set(x['ProteinId']), include_groups=False).to_dict()
 
     def getIdentifiedPeptides(self, qvalue: float = 0.01, run:Optional[str] = None) -> Union[set, Dict[str, set]]:
         if isinstance(run, str):
-            return set(self.df[(self.df['filename'] == run) & (self.df['Qvalue'] <= qvalue)]['ModifiedPeptideSequence'])
+            return set(self.df[(self.df['runName'] == run) & (self.df['Qvalue'] <= qvalue)]['ModifiedPeptideSequence'])
         else:
-            return self.df[(self.df['Qvalue'] <= qvalue)][['filename', 'ModifiedPeptideSequence']].groupby('filename').apply(lambda x: set(x['ModifiedPeptideSequence'])).to_dict()
+            return self.df[(self.df['Qvalue'] <= qvalue)][['runName', 'ModifiedPeptideSequence']].groupby('runName').apply(lambda x: set(x['ModifiedPeptideSequence'])).to_dict()
     
     def getSoftware(self) -> str:
         return self.results_type
