@@ -1,21 +1,30 @@
-# Unit Tests
+# Testing 
 
-Tests are performed using unittest and snapshottest. You will need to have snapshottest installed to run tests, to compare output to previous expected output state.
+Tests are performed using [Pytest](https://docs.pytest.org/en/8.0.x/) and [Syrupy](https://github.com/tophat/syrupy). <br> [Syrupy](https://github.com/tophat/syrupy) is used to compare output to previous expected output states. 
 
-Install snapshottest with
+Install required dependecies using
 
-`pip install snapshottest`
+`pip install -r requirements-dev.txt`
 
-## Running unittests
+For conformer tests, optional dependencies are also required and can be installed with.
 
-Execute the following command in test/:
+`pip install -r requirements-optional.txt`
+
+## Running Tests
+
+Execute the following command in massdash/ base folder:
 
 ```bash
-python -m unittest 
+python -m pytest --snapshot-warn-unused test/
 ```
 
 For verbose output:
-
 ```bash
-python -m unittest -v
+python -m pytest --snapshot-warn-unused test/
 ```
+
+To update snapshots:
+```bash
+python -m pytest --snapshot-update test/
+```
+> **_NOTE:_**  CI github testing sometimes fails on mac failing to find pytest. If this occurs please rerun. 
