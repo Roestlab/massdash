@@ -8,19 +8,16 @@ from syrupy.data import SnapshotCollection
 from syrupy.extensions.single_file import SingleFileSnapshotExtension
 import pandas as pd
 from syrupy.types import SerializableData
-import pytest
 
 class PandasSnapshotExtension(SingleFileSnapshotExtension):
     _file_extension = "hdf"
 
     def matches(self, *, serialized_data, snapshot_data):
         try:
-            if pd.testing.assert_frame_equal(
-                serialized_data, snapshot_data
-            )  is not None:
+            if pd.testing.assert_frame_equal(serialized_data, snapshot_data) is not None:
                 return False
             else: return True
-            
+
         except:
             return False
 
@@ -46,3 +43,9 @@ class PandasSnapshotExtension(SingleFileSnapshotExtension):
 
     def serialize(self, data: SerializableData, **kwargs: Any) -> str:
         return data
+    
+    def diff_lines(self, serialized_data, snapshot_data):
+        try:
+            pd.testing.assert_frame_equal(serialized_data, snapshot_data)
+        except AssertionError as e:
+            return str(e).split('\n')

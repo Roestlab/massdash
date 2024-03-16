@@ -15,8 +15,8 @@ class NumpySnapshotExtension(SingleFileSnapshotExtension):
 
     def matches(self, *, serialized_data, snapshot_data):
         try:
-            if np.allclose(np.array(snapshot_data), np.array(serialized_data)):
-                return True
+            if np.testing.assert_allclose(np.array(snapshot_data), np.array(serialized_data), atol=1e-08, rtol=1e-05) is not None:
+                return False
             else: return True
         except:
             return False
@@ -44,3 +44,9 @@ class NumpySnapshotExtension(SingleFileSnapshotExtension):
 
     def serialize(self, data: SerializableData, **kwargs: Any) -> str:
         return data
+    
+    def diff_lines(self, serialized_data, snapshot_data):
+        try:
+            np.testing.assert_allclose(np.array(snapshot_data), np.array(serialized_data), atol=1e-08, rtol=1e-05)
+        except AssertionError as e:
+            return str(e).split('\n')

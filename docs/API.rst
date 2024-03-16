@@ -171,3 +171,5 @@ Classes
 
    NumpySnapshotExtension
    PandasSnapshotExtension
+   BokehSnapshotExtension
+   PlotlySnapshotExtension
