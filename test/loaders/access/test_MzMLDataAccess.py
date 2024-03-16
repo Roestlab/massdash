@@ -89,8 +89,8 @@ def test_filter_single_spectrum(mzml_data_access, spec_indice, snapshot_numpy):
     fda = filtered_spectrum.getFloatDataArrays()[0]
     im = fda.get_data()
     mz, intens = filtered_spectrum.get_peaks()
-    peaks = np.column_stack([mz, intens, im])
-    assert snapshot_numpy == peaks 
+    peaks = np.array([mz, intens, im]).flatten() # need to flatten or get shape mismatch
+    assert snapshot_numpy == peaks
 
 def test_reduce_spectra(mzml_data_access, snapshot_pandas): # also tests msExperimentToFeatureMap()
     product_mzs = [504.2664, 591.2984, 704.3825, 851.4509, 966.4779, 1065.5463]
