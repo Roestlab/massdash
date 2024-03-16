@@ -185,7 +185,7 @@ class InteractiveTwoDimensionPlotter:
         arr[np.isnan(arr)] = 0
 
         if self.config.smoothing_dict['type'] == 'gauss':
-            arr = gaussian_filter(arr, sigma=self.config.smoothing_dict['sigma'])
+            arr = gaussian_filter(arr, sigma=self.config.smoothing_dict['gaussian_sigma'])
 
         if self.config.normalization_dict['type'] == 'equalization':
             arr = equalize2D(arr, self.config.normalization_dict['bins'])
