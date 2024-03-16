@@ -48,4 +48,9 @@ class PandasSnapshotExtension(SingleFileSnapshotExtension):
         try:
             pd.testing.assert_frame_equal(serialized_data, snapshot_data)
         except AssertionError as e:
-            return str(e).split('\n')
+            return (["Snapshot:"] +
+                    snapshot_data.to_string().split('\n') + 
+                    ['-------------------------------'] +
+                    ["Serialized:"] +
+                    serialized_data.to_string().split('\n') +
+                    str(e).split('\n'))
