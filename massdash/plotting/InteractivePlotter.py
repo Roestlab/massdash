@@ -269,13 +269,21 @@ class InteractivePlotter(GenericPlotter):
                 ]
 
         # Create a Bokeh figure
-        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=450, tooltips=TOOLTIPS)
 
         # Add title
         if self.title is not None:
             p.title.text = self.title
-            p.title.text_font_size = "16pt"
+            p.title.text_font_size = "13pt"
             p.title.align = "center"
+        
+        p.xaxis.axis_label_text_font_size = "11pt"
+        p.yaxis.axis_label_text_font_size = "11pt"
+
+        # Change x-axis tick text font size
+        p.xaxis.major_label_text_font_size = "11pt"  
+        p.yaxis.major_label_text_font_size = "11pt"
+
 
         if self.subtitle is not None:
             # Create a subtitle
