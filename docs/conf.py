@@ -65,3 +65,6 @@ numfig = True
 def setup(app):
     app.add_css_file("custom.css") 
 
+
+# --- Always execute notebooks -------------
+nbsphinx_execute = 'always'

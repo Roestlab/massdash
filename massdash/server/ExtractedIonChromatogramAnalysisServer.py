@@ -144,7 +144,7 @@ class ExtractedIonChromatogramAnalysisServer:
                     for file, tr_group in tr_group_data.items():
                         peak_picker = pyMRMTransitionGroupPicker(mslevel, peak_picker=peak_picker_param.peak_picker)
                         peak_features = peak_picker.pick(tr_group)
-                        tr_group_feature_data[file.filename] = peak_features
+                        tr_group_feature_data[file] = peak_features
                 st.write(f"Performing pyPeakPickerMRM Peak Picking... Elapsed time: {elapsed_time()}")
             elif peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
                 with time_block() as elapsed_time:
@@ -153,7 +153,7 @@ class ExtractedIonChromatogramAnalysisServer:
                     for file, tr_group in tr_group_data.items():
                         peak_picker = MRMTransitionGroupPicker(peak_picking_settings.peak_picker_algo_settings.smoother)
                         peak_features = peak_picker.pick(tr_group)
-                        tr_group_feature_data[file.filename] = peak_features
+                        tr_group_feature_data[file] = peak_features
                 st.write(f"Performing MRMTransitionGroupPicker Peak Picking... Elapsed time: {elapsed_time()}")
             elif peak_picking_settings.do_peak_picking == 'Conformer':
                 with time_block() as elapsed_time:
@@ -163,14 +163,17 @@ class ExtractedIonChromatogramAnalysisServer:
                         tr_group.targeted_transition_list = transition_list_ui.target_transition_list
                         print(f"Pretrained model file: {peak_picking_settings.peak_picker_algo_settings.pretrained_model_file}")
                         
-                        peak_picker = ConformerPeakPicker(self.massdash_gui.file_input_settings.osw_file_path, peak_picking_settings.peak_picker_algo_settings.pretrained_model_file, prediction_threshold=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_threshold, prediction_type=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_type)
+                        peak_picker = ConformerPeakPicker(SpectralLibraryLoader(self.massdash_gui.file_input_settings.osw_file_path),
+                                                          peak_picking_settings.peak_picker_algo_settings.pretrained_model_file, 
+                                                          prediction_threshold=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_threshold, 
+                                                          prediction_type=peak_picking_settings.peak_picker_algo_settings.conformer_prediction_type)
                         # get the trantition in tr_group with the max intensity
                         max_int_transition = np.max([transition.intensity for transition in tr_group.transitionData])
                         peak_features = peak_picker.pick(tr_group, max_int_transition)
-                        tr_group_feature_data[file.filename] = peak_features
+                        tr_group_feature_data[file] = peak_features
                 st.write(f"Performing Conformer Peak Picking... Elapsed time: {elapsed_time()}")
             else:
-                tr_group_feature_data = {file.filename: None for file in tr_group_data.keys()}
+                tr_group_feature_data = {file: None for file in tr_group_data.keys()}
 
             with time_block() as elapsed_time:
                 
@@ -199,7 +202,6 @@ class ExtractedIonChromatogramAnalysisServer:
                     plot_settings_dict = chrom_plot_settings.get_settings()
                     plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
                     plot_settings_dict['y_axis_label'] = 'Intensity'
-                    # plot_settings_dict['title'] = os.path.splitext(os.path.basename(file.filename))[0].split('.')[0]
                     plot_settings_dict['title'] = filename_mapping[file.filename]
                     plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
                     
@@ -217,12 +219,12 @@ class ExtractedIonChromatogramAnalysisServer:
                     if not tr_group.empty():
                         plotter = InteractivePlotter(plot_config)
                         # Check if there is available feature data
-                        if file.filename in tr_group_feature_data.keys():
-                            feature_data =  tr_group_feature_data[file.filename]
+                        if file in tr_group_feature_data.keys():
+                            feature_data =  tr_group_feature_data[file]
                         else:
                             feature_data = None
                         plot_obj = plotter.plot(tr_group, feature_data)
-                        plot_obj_dict[file.filename] = plot_obj
+                        plot_obj_dict[file] = plot_obj
 
             st.write(f"Generating chromatogram plots... Elapsed time: {elapsed_time()}")
 

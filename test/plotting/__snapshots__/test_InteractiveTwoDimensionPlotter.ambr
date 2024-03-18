@@ -1,0 +1,109 @@
+# serializer version: 1
+# name: test_plot_individual_heatmaps[False-True-m/z vs ion mobility-smoothing_dict28-normalization_dict28]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-m/z vs ion mobility-smoothing_dict29-normalization_dict29]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-m/z vs ion mobility-smoothing_dict30-normalization_dict30]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-m/z vs ion mobility-smoothing_dict31-normalization_dict31]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-m/z vs retention time-smoothing_dict24-normalization_dict24]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-m/z vs retention time-smoothing_dict25-normalization_dict25]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-m/z vs retention time-smoothing_dict26-normalization_dict26]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-m/z vs retention time-smoothing_dict27-normalization_dict27]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-retention time vs ion mobility-smoothing_dict32-normalization_dict32]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-retention time vs ion mobility-smoothing_dict33-normalization_dict33]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-retention time vs ion mobility-smoothing_dict34-normalization_dict34]
+  6
+# ---
+# name: test_plot_individual_heatmaps[False-True-retention time vs ion mobility-smoothing_dict35-normalization_dict35]
+  6
+# ---
+# name: test_plot_individual_heatmaps[True-False-m/z vs ion mobility-smoothing_dict16-normalization_dict16]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-m/z vs ion mobility-smoothing_dict17-normalization_dict17]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-m/z vs ion mobility-smoothing_dict18-normalization_dict18]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-m/z vs ion mobility-smoothing_dict19-normalization_dict19]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-m/z vs retention time-smoothing_dict12-normalization_dict12]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-m/z vs retention time-smoothing_dict13-normalization_dict13]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-m/z vs retention time-smoothing_dict14-normalization_dict14]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-m/z vs retention time-smoothing_dict15-normalization_dict15]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-retention time vs ion mobility-smoothing_dict20-normalization_dict20]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-retention time vs ion mobility-smoothing_dict21-normalization_dict21]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-retention time vs ion mobility-smoothing_dict22-normalization_dict22]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-False-retention time vs ion mobility-smoothing_dict23-normalization_dict23]
+  1
+# ---
+# name: test_plot_individual_heatmaps[True-True-m/z vs ion mobility-smoothing_dict4-normalization_dict4]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-m/z vs ion mobility-smoothing_dict5-normalization_dict5]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-m/z vs ion mobility-smoothing_dict6-normalization_dict6]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-m/z vs ion mobility-smoothing_dict7-normalization_dict7]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-m/z vs retention time-smoothing_dict0-normalization_dict0]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-m/z vs retention time-smoothing_dict1-normalization_dict1]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-m/z vs retention time-smoothing_dict2-normalization_dict2]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-m/z vs retention time-smoothing_dict3-normalization_dict3]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-retention time vs ion mobility-smoothing_dict10-normalization_dict10]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-retention time vs ion mobility-smoothing_dict11-normalization_dict11]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-retention time vs ion mobility-smoothing_dict8-normalization_dict8]
+  7
+# ---
+# name: test_plot_individual_heatmaps[True-True-retention time vs ion mobility-smoothing_dict9-normalization_dict9]
+  7
+# ---

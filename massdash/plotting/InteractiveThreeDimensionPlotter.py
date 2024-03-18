@@ -295,6 +295,8 @@ class InteractiveThreeDimensionPlotter:
                 x = group_df['rt'].values
                 y = group_df['mz'].values
                 x_title, y_title, z_title = 'RT', 'MZ', 'IM'
+            else:
+                raise ValueError(f"Error: Invalid type of comparison: {self.config.type_of_comparison}, must be either 'retention time vs ion mobility', 'retention time vs m/z', 'ion mobility vs m/z', or 'retention time vs ion mobility vs m/z'")
             
             # Smooth
             if self.config.smoothing_dict['type'] == 'sgolay':

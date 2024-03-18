@@ -1,0 +1,11 @@
+# serializer version: 1
+# name: test_getPrecursorChromIDs
+  dict({
+    'chrom_ids': list([
+      424,
+    ]),
+    'native_ids': list([
+      '30_Precursor_i0',
+    ]),
+  })
+# ---

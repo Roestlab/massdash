@@ -1,0 +1,63 @@
+# serializer version: 1
+# name: test_getTopTransitionGroupFeature[diann-test_raw_1-DYASIDAAPEER-2]
+  TransitionGroupFeature(
+    areaIntensity=21663.5,
+    consensusApex=2438.7000000000003,
+    consensusApexIM=0,
+    consensusApexIntensity=None,
+    getBoundaries=<bound method TransitionGroupFeature.getBoundaries of -------- TransitionGroupFeature --------
+  leftBoundary: 2421.63
+  rightBoundary: 2455.77
+  areaIntensity: 21663.5
+  consensusApex: 2438.7000000000003
+  consensusApexIntensity: None
+  qvalue: 3.28317e-05
+  consensusApexIM: 0
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: DYASIDAAPEER>,
+    leftBoundary=2421.63,
+    precursor_charge=2,
+    precursor_mz=None,
+    product_annotations=None,
+    product_mz=None,
+    qvalue=3.28317e-05,
+    rightBoundary=2455.77,
+    sequence='DYASIDAAPEER',
+    toPandasDf="TransitionGroupFeature.toPandasDf(transitionGroupFeatureLst: List[ForwardRef('TransitionGroupFeature')]) -> pandas.core.frame.DataFrame",
+  )
+# ---
+# name: test_getTransitionGroupFeatures[diann-test_raw_1-DYASIDAAPEER-2]
+  list([
+    TransitionGroupFeature(
+      areaIntensity=21663.5,
+      consensusApex=2438.7000000000003,
+      consensusApexIM=0,
+      consensusApexIntensity=None,
+      getBoundaries=<bound method TransitionGroupFeature.getBoundaries of -------- TransitionGroupFeature --------
+  leftBoundary: 2421.63
+  rightBoundary: 2455.77
+  areaIntensity: 21663.5
+  consensusApex: 2438.7000000000003
+  consensusApexIntensity: None
+  qvalue: 3.28317e-05
+  consensusApexIM: 0
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: DYASIDAAPEER>,
+      leftBoundary=2421.63,
+      precursor_charge=2,
+      precursor_mz=None,
+      product_annotations=None,
+      product_mz=None,
+      qvalue=3.28317e-05,
+      rightBoundary=2455.77,
+      sequence='DYASIDAAPEER',
+      toPandasDf="TransitionGroupFeature.toPandasDf(transitionGroupFeatureLst: List[ForwardRef('TransitionGroupFeature')]) -> pandas.core.frame.DataFrame",
+    ),
+  ])
+# ---
