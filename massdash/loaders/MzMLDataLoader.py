@@ -12,9 +12,7 @@ import pandas as pd
 from .access.MzMLDataAccess import MzMLDataAccess
 from .GenericSpectrumLoader import GenericSpectrumLoader
 # Structs
-from ..structs.TransitionGroup import TransitionGroup
-from ..structs.FeatureMap import FeatureMap
-from ..structs.TargetedDIAConfig import TargetedDIAConfig
+from ..structs import TransitionGroup, FeatureMap, TargetedDIAConfig, FeatureMapCollection, TopTransitionGroupFeatureCollection, TransitionGroupCollection
 # Utils
 from ..util import LOGGER
 
@@ -47,8 +45,8 @@ class MzMLDataLoader(GenericSpectrumLoader):
         out = {}
         for t in self.dataFiles:
             runname = basename(t.filename).split('.')[0]
-            out[t.filename] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
-        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+            out[t.runName] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
+        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='run'))
         # Drop duplicate columns
         out_df = out_df.loc[:,~out_df.columns.duplicated()]
         return out_df
@@ -67,8 +65,8 @@ class MzMLDataLoader(GenericSpectrumLoader):
         out = {}
         for t in self.dataFiles:
             runname = basename(t.filename).split('.')[0]
-            out[t.filename] = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
-        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+            out[t.runName] = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
+        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='run'))
         # Drop duplicate columns
         out_df = out_df.loc[:,~out_df.columns.duplicated()]
         return out_df
@@ -86,7 +84,7 @@ class MzMLDataLoader(GenericSpectrumLoader):
         '''
         out_feature_map = self.loadFeatureMaps(pep_id, charge, config)
 
-        return { run: data.to_chromatograms() for run, data in out_feature_map.items() }
+        return TransitionGroupCollection({ run: data.to_chromatograms() for run, data in out_feature_map.items() })
     
     def loadTransitionGroupsDf(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, pd.DataFrame]:
         '''
@@ -105,13 +103,13 @@ class MzMLDataLoader(GenericSpectrumLoader):
         # for each run, groupby intensity and rt to get chromatogram
         out_transitions = { run:df.feature_df[['Annotation', 'int', 'rt']].groupby(['Annotation', 'rt']).sum().reset_index() for run, df in out_feature_map.items() }
 
-        out_df =  pd.concat(out_transitions).reset_index().drop(columns='level_1').rename(columns=dict(level_0='filename'))
+        out_df =  pd.concat(out_transitions).reset_index().drop(columns='level_1').rename(columns=dict(level_0='run'))
         
         # Drop duplicate columns
         out_df = out_df.loc[:,~out_df.columns.duplicated()]
         return out_df
 
-    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> Dict[str, FeatureMap]:
+    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> FeatureMapCollection:
         '''
         Loads a dictionary of FeatureMaps (where the keys are the filenames) from the results file
 
@@ -119,15 +117,15 @@ class MzMLDataLoader(GenericSpectrumLoader):
             pep_id (str): Peptide ID
             charge (int): Charge
         Returns:
-            FeatureMap: FeatureMap object containing peak boundaries, intensity and confidence
+            FeatureMapCollection: FeatureMapCollection containing FeatureMap objects for each file
         '''
-        out = {}
-        top_features = [ self.rsltsFile.getTopTransitionGroupFeature(basename(splitext(d.filename)[0]), pep_id, charge) for d in self.dataFiles]
+        out = FeatureMapCollection()
+        top_features = [ self.rsltsFile.getTopTransitionGroupFeature(d.runName, pep_id, charge) for d in self.dataFiles]
         self.libraryFile.populateTransitionGroupFeatures(top_features)
         for d, t in zip(self.dataFiles, top_features):
             if t is None:
-                LOGGER.debug(f"No feature found for {pep_id} {charge} in {d.filename}")
-                return FeatureMap()
+                LOGGER.debug(f"No feature found for {pep_id} {charge} in {d.runName}")
+                out[d.runName] =  FeatureMap()
             else:
-                out[d.filename] = d.reduce_spectra(t, config)
+                out[d.runName] = d.reduce_spectra(t, config)
         return out

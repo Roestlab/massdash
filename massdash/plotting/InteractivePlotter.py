@@ -64,7 +64,7 @@ class InteractivePlotter(GenericPlotter):
         elif plot_type == 'mobilogram':
             plot =  self.plot_mobilogram(transitionGroup)
         elif plot_type == 'spectrum':
-            plot =  self.plot_spectra(transitionGroup)
+            plot = self.plot_spectra(transitionGroup)
         else:
             raise ValueError("Unsupported plot plot_type")
         
@@ -226,7 +226,7 @@ class InteractivePlotter(GenericPlotter):
 
         return p
 
-    def plot_chromatogram(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]], feature_legend_labels:Optional[List[str]] = []) -> figure:
+    def plot_chromatogram(self, transitionGroup: TransitionGroup, features: Optional[List[TransitionGroupFeature]] = [], feature_legend_labels:Optional[List[str]] = []) -> figure:
         """
         Plots a chromatogram for a given TransitionGroup.
 

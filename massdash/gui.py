@@ -12,7 +12,7 @@ from PIL import Image
 
 # Constants
 from massdash.constants import MASSDASH_ICON, MASSDASH_LOGO_LIGHT, MASSDASH_LOGO_DARK, OPENMS_LOGO
-from massdash.constants import URL_TEST_SQMASS, URL_TEST_OSW, URL_TEST_PQP, URL_TEST_RAW_MZML, URL_TEST_DREAMDIA_REPORT
+from massdash.constants import URL_TEST_SQMASS, URL_TEST_OSW, URL_TEST_PQP, URL_TEST_RAW_MZML, URL_TEST_DREAMDIA_REPORT, URL_TEST_RAW_MZML_IM, URL_TEST_OSW_IM
 # Server
 from massdash.server.ExtractedIonChromatogramAnalysisServer import ExtractedIonChromatogramAnalysisServer
 from massdash.server.RawTargetedExtractionAnalysisServer import RawTargetedExtractionAnalysisServer
@@ -28,7 +28,7 @@ from massdash.util import LOGGER, get_download_folder, download_file, reset_app,
 @click.option('--perf', '-t', is_flag=True, help="Enables measuring and tracking of performance.")
 @click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
 def main(verbose, perf, perf_output):     
-
+    
     ###########################
     ## Logging
     LOGGER.name = 'MassDashGUIMain'
@@ -88,14 +88,28 @@ def main(verbose, perf, perf_output):
         diann_report_file_path_input = tmp_download_folder + "/test.osw"
         download_file(URL_TEST_OSW, tmp_download_folder)
         feature_file_type = "OpenSWATH"
-        # st.stop("Toy dataset not available yet.")
         massdash_gui.show_file_input_settings(diann_report_file_path_input, raw_file_path_input, transition_list_file_path, feature_file_type)
         
         # Remove welcome message container if dataset is loaded
         massdash_gui.welcome_container.empty()
 
         st.session_state.WELCOME_PAGE_STATE = False
+    
+    elif st.session_state.workflow == 'raw_data' and st.session_state.clicked['load_toy_dataset_raw_data_im']:
+        tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
+        transition_list_file_path = tmp_download_folder + "/ionMobilityTest.osw"
+        raw_file_path_input = tmp_download_folder +  "/ionMobilityTest.mzML"
+        download_file(URL_TEST_RAW_MZML_IM, tmp_download_folder)
+        osw_report_file_path_input = tmp_download_folder + "/ionMobilityTest.osw"
+        download_file(URL_TEST_OSW_IM, tmp_download_folder)
+        feature_file_type = "OpenSWATH"
+        massdash_gui.show_file_input_settings(osw_report_file_path_input, raw_file_path_input, transition_list_file_path, feature_file_type)
 
+        # Remove welcome message container if dataset is loaded
+        massdash_gui.welcome_container.empty()
+
+        st.session_state.WELCOME_PAGE_STATE = False
+  
     if st.session_state.workflow == "search_results_analysis" and st.session_state.clicked['load_toy_dataset_search_results_analysis']:
         tmp_download_folder = get_download_folder() + "/massdash_example_dataset/"
         feature_file_path = tmp_download_folder + "/test.osw"
@@ -122,7 +136,7 @@ def main(verbose, perf, perf_output):
         massdash_gui.welcome_container.empty()
         st.session_state.WELCOME_PAGE_STATE = False
 
-    if st.session_state.workflow == "raw_data" and massdash_gui.transition_list_file_path!="*.pqp" and massdash_gui.raw_file_path_input!="*.mzML" and not st.session_state.clicked['load_toy_dataset_raw_data']:
+    if st.session_state.workflow == "raw_data" and massdash_gui.transition_list_file_path!="*.pqp" and massdash_gui.raw_file_path_input!="*.mzML" and not st.session_state.clicked['load_toy_dataset_raw_data'] and not st.session_state.clicked['load_toy_dataset_raw_data_im']:
         massdash_gui.show_file_input_settings(massdash_gui.feature_file_path, massdash_gui.raw_file_path_input, massdash_gui.transition_list_file_path, massdash_gui.feature_file_type)
         # Remove welcome message container if dataset is loaded
         massdash_gui.welcome_container.empty()

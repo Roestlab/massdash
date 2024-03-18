@@ -44,9 +44,14 @@ class RawTargetedExtractionAnalysisFormUI:
 
         st.title("Raw Targeted Data Extraction")
 
-        load_toy_dataset = st.button('Load Raw Targeted Data Extraction Example', on_click=clicked , args=['load_toy_dataset_raw_data'], key='load_toy_dataset_raw_data', help="Loads the raw targeted data extraction example dataset.")
+        col1, col2, col3 = st.columns([0.2, 0.2, 0.6])
+        load_toy_dataset = col1.button('Load Raw Targeted Data Extraction Example', on_click=clicked , args=['load_toy_dataset_raw_data'], key='load_toy_dataset_raw_data', help="Loads the raw targeted data extraction example dataset.")
+        load_toy_dataset_im = col2.button('Load Raw IM Targeted Data Extraction Example', on_click=clicked , args=['load_toy_dataset_raw_data_im'], key='load_toy_dataset_raw_data_im', help="Loads the raw targeted data with IM extraction example dataset.")
         
         if load_toy_dataset:
+            st.session_state.workflow = "raw_data"
+            st.session_state.WELCOME_PAGE_STATE = False
+        if load_toy_dataset_im:
             st.session_state.workflow = "raw_data"
             st.session_state.WELCOME_PAGE_STATE = False
         

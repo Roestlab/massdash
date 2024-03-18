@@ -263,6 +263,27 @@ def check_package(package_name: str, module_path: Optional[str]=None):
         print(f"{package_name} is not installed. Please install it using 'pip install {package_name}'.")
         return None, False
 
+def check_function(package_name: str, function_name: str, module_path: Optional[str]=None):
+    """
+    Check if a function is available in a Python package.
+
+    Args:
+        package_name (str): The name of the package to check.
+        function_name (str): The name of the function to check.
+        module_path (str, optional): The path to the module within the package. Defaults to None.
+
+    Returns:
+        bool: True if the function is available, False otherwise.
+    """
+    try:
+        if module_path is None:
+            module = importlib.import_module(package_name)
+        else:
+            module = importlib.import_module(f"{package_name}.{module_path}")
+        return getattr(module, function_name), True
+    except ImportError:
+        print(f"{package_name} is not installed. Please install it using 'pip install {package_name}'.")
+        return None, False
 
 def file_basename_without_extension(file_path):
     """
@@ -322,6 +343,23 @@ def download_file(url: str, dest_folder: str):
         LOGGER.info(f"Downloading {url} to {dest_folder}")
         with open(os.path.join(dest_folder, filename), "wb") as f:
             f.write(response.content)
+
+def rgb_to_hex(rgb):
+    """
+    Converts an RGB color value to its corresponding hexadecimal representation.
+
+    Args:
+        rgb (tuple): A tuple containing the RGB values as floats between 0 and 1.
+
+    Returns:
+        str: The hexadecimal representation of the RGB color.
+
+    Example:
+        >>> rgb_to_hex((0.5, 0.75, 1.0))
+        '#7fbfff'
+    """
+    return "#{:02x}{:02x}{:02x}".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
+
 
 def open_page(url: str):
     """

@@ -51,8 +51,10 @@ class InteractiveThreeDimensionPlotter:
             plots = self.plot_3d_scatter(featureMap, num_cols = self.config.num_plot_columns)
         elif self.config.type_of_3d_plot == "3D Surface Plot" and not self.config.aggregate_mslevels:
             plots = self.plot_individual_3d_surface(featureMap, self.config.num_plot_columns)
-        elif self.config.type_of_3d_plot == "3D Line Plot" and not self.config.aggregate_mslevels:
+        elif self.config.type_of_3d_plot == "3D Line Plot": 
             plots = self.plot_3d_vline(featureMap)
+        else:
+            raise ValueError(f"Error: Invalid type of 3D plot: {self.config.type_of_3d_plot}, must be either '3D Scatter Plot', '3D Surface Plot', or '3D Line Plot'")
         self.fig = plots
         return plots
     
@@ -249,6 +251,7 @@ class InteractiveThreeDimensionPlotter:
             horizontal_spacing = 0.05
             vertical_spacing = 0.05
             height_scale_factor = width_scale_factor = 800
+            ratio = 1
         elif self.config.context == "jupyter":
             ratio = 0.75
             horizontal_spacing = 0.03
@@ -292,6 +295,8 @@ class InteractiveThreeDimensionPlotter:
                 x = group_df['rt'].values
                 y = group_df['mz'].values
                 x_title, y_title, z_title = 'RT', 'MZ', 'IM'
+            else:
+                raise ValueError(f"Error: Invalid type of comparison: {self.config.type_of_comparison}, must be either 'retention time vs ion mobility', 'retention time vs m/z', 'ion mobility vs m/z', or 'retention time vs ion mobility vs m/z'")
             
             # Smooth
             if self.config.smoothing_dict['type'] == 'sgolay':

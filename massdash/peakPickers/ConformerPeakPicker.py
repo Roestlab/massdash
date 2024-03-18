@@ -13,14 +13,14 @@ from ..structs.TransitionGroup import TransitionGroup
 from ..structs.TransitionGroupFeature import TransitionGroupFeature
 from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # Utils
-from ..util import check_package, LOGGER
+from ..util import check_package, check_function, LOGGER
 # Transformations
 from ..dataProcessing.transformations import min_max_scale, sigmoid
 
 
 onnxruntime, ONNXRUNTIME_AVAILABLE = check_package("onnxruntime")
 torch, TORCH_AVAILABLE = check_package("torch")
-binary_recall_at_fixed_precision, TORCHMETRICS_AVAILABLE = check_package("torchmetrics", "functional.classification.binary_recall_at_fixed_precision")
+binary_recall_at_fixed_precision, TORCHMETRICS_AVAILABLE = check_function("torchmetrics", "binary_recall_at_fixed_precision", "functional.classification")
 
 class ConformerPeakPicker:
     """
@@ -41,7 +41,7 @@ class ConformerPeakPicker:
         _convertConformerFeatureToTransitionGroupFeatures: Convert conformer predicted feature to TransitionGroupFeatures.
     """
     
-    def __init__(self, library_file: str, pretrained_model_file: str, prediction_threshold: float = 0.5, prediction_type: Literal['logits', 'sigmoided', 'binarized'] = "logits"):
+    def __init__(self, library: SpectralLibraryLoader, pretrained_model_file: str, prediction_threshold: float = 0.5, prediction_type: Literal['logits', 'sigmoided', 'binarized'] = "logits"):
         """
         Initialize the ConformerPeakPicker class.
 
@@ -49,11 +49,12 @@ class ConformerPeakPicker:
             pretrained_model_file (str): The path to the pretrained model file.
             prediction_threshold (float, optional): The prediction threshold for peak picking. Defaults to 0.5.
             prediction_type (str): The prediction type for peak picking. Defaults to "logits". Valid options are ["logits", "sigmoided", "binarized"].
+            library (SpectralLibraryLoader): The spectral library.
         """
         self.pretrained_model_file = pretrained_model_file
         self.prediction_threshold = prediction_threshold
         self.prediction_type = prediction_type
-        self.library = SpectralLibraryLoader(library_file)
+        self.library = library
         
         self._validate_model()
 
@@ -137,6 +138,7 @@ class ConformerPeakPicker:
                                             consensusApex=f['rt_apex']))
         return transitionGroupFeatures
     
+    '''
     @staticmethod
     def _find_thresholds(preds: np.ndarray, target: np.ndarray, min_precisions: float) -> List[tuple]:
         """
@@ -166,6 +168,7 @@ class ConformerPeakPicker:
             thresholds.append((min_precision, recall, threshold))
 
         return thresholds
+    '''
 
     def _preprocess(self, transition_group) -> np.ndarray:
         """

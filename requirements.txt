@@ -14,4 +14,3 @@ streamlit-javascript
 tk
 tqdm
 upsetplot
-massdash
