@@ -383,6 +383,9 @@ def reset_app():
     st.cache_resource.clear()
     st.session_state.WELCOME_PAGE_STATE = True
     st.session_state.workflow = None
+    # set everything to unclicked
+    for k in st.session_state.clicked.keys():
+        st.session_state.clicked[k] = False
 
 #######################################
 ## Decorators
