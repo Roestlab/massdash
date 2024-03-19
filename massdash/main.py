@@ -21,8 +21,10 @@ def cli():
 @click.option('--perf/--no_perf', 'perf', default=False, help="Enables or disables performance mode.")
 @click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
 @click.option('--server_port', '-p', default=8501, type=int, help="Port to run the MassDash GUI on.")
+@click.option('--server_headless/--no_server_headless', 'server_headless', default=False, help="Run streamlit in headless mode.")
 @click.option('--global_developmentMode/--no_global_developmentMode', 'global_developmentMode', default=True, help="Enables or disables global development mode.")
-def gui(verbose, perf, perf_output, server_port, global_developmentMode):
+@click.option('--browser_gatherUsageStats/--no_browser_gatherUsageStats', 'browser_gatherUsageStats', default=False, help="Enables or disables streamlit to collect summary statistics and metadata.")
+def gui(verbose, perf, perf_output, server_port, server_headless, global_developmentMode, browser_gatherUsageStats):
     """
     GUI for MassDash.
     """
@@ -62,8 +64,14 @@ def gui(verbose, perf, perf_output, server_port, global_developmentMode):
     if server_port:
         streamlit_args.append('--server.port')
         streamlit_args.append(str(server_port))
+    if server_headless:
+        streamlit_args.append('--server.headless')
+        streamlit_args.append('true')
     if not global_developmentMode:
         streamlit_args.append('--global.developmentMode')
+        streamlit_args.append('false')
+    if not browser_gatherUsageStats:
+        streamlit_args.append('--browser.gatherUsageStats')
         streamlit_args.append('false')
     if verbose:
         click.echo(f"Running: streamlit run {filename} {streamlit_args} -- {add_args}")

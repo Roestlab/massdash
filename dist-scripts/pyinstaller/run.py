@@ -2,7 +2,7 @@
 if __name__ == "__main__":
     try:
         import massdash.main
-        massdash.main.gui(['--verbose', '--server_port', '8501', '--no_global_developmentMode'], standalone_mode=False)
+        massdash.main.gui(['--verbose', '--server_port', '8501', '--no_global_developmentMode', '--no_browser_gatherUsageStats'], standalone_mode=False)
     except ImportError:
         import sys
         import traceback
