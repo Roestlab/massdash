@@ -22,7 +22,7 @@ pip install torch
 pip install torchmetrics
 pip install setuptools
 pip install build
-pip install pyinstaller
+pip install pyinstaller==6.4.0
 echo "[$(date)] INFO - Building and installing massdash"
 python -m build
 pip install dist/massdash-0.0.8-py3-none-any.whl
