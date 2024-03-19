@@ -153,7 +153,12 @@ def main(verbose, perf, perf_output):
         show_xic_exp.main()
         
     if st.session_state.workflow == "raw_data" and not st.session_state.WELCOME_PAGE_STATE:
+        if st.session_state.clicked['load_toy_dataset_raw_data']:
+            is_toy_dataset = True
+        else:
+            is_toy_dataset = False
         show_raw_exp = RawTargetedExtractionAnalysisServer(massdash_gui)
+        show_raw_exp.is_toy_dataset = is_toy_dataset
         show_raw_exp.main()
         
     if st.session_state.workflow == "search_results_analysis" and not st.session_state.WELCOME_PAGE_STATE:
