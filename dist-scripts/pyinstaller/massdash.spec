@@ -13,7 +13,7 @@ from transformers.dependency_versions_check import pkgs_to_check_at_runtime
 sys.setrecursionlimit(sys.getrecursionlimit() * 5)
 
 ##################### User definitions
-exe_name = 'massdash_gui'
+exe_name = 'massdash'
 script_name = 'run.py'
 if sys.platform[:6] == "darwin":
 	icon = '../../massdash/assets/img/MassDash_Logo.icns'
@@ -26,9 +26,14 @@ remove_tests = True
 bundle_name = "massdash"
 #####################
 
+# Get the list of site-packages directories
+site_packages = site.getsitepackages()
 
-requirements = {project, "streamlit_javascript", "upsetplot", "distributed"}
-datas = [(f"{site.getsitepackages()[0]}/streamlit/runtime", "./streamlit/runtime")]
+# Find the index of the first element containing "site-packages"
+index = next((i for i, s in enumerate(site_packages) if "site-packages" in s), None)
+
+requirements = {'numpy', 'tk', project, "streamlit_javascript", "upsetplot", "distributed", 'torchaudio.lib.libtorchaudio'}
+datas = [(f"{site_packages[index]}/streamlit/runtime", "./streamlit/runtime")]
 hidden_imports = set()
 binaries = []
 checked = set()
@@ -74,18 +79,18 @@ else:
 hidden_imports = [h for h in hidden_imports if "__pycache__" not in h]
 datas = [d for d in datas if ("__pycache__" not in d[0]) and (d[1] not in [".", "Resources", "scripts"])]
 
-#if sys.platform[:5] == "win32":
-#	base_path = os.path.dirname(sys.executable)
-#	library_path = os.path.join(base_path, "Library", "bin")
-#	dll_path = os.path.join(base_path, "DLLs")
-#	libcrypto_dll_path = os.path.join(dll_path, "libcrypto-1_1-x64.dll")
-#	libssl_dll_path = os.path.join(dll_path, "libssl-1_1-x64.dll")
-#	libcrypto_lib_path = os.path.join(library_path, "libcrypto-1_1-x64.dll")
-#	libssl_lib_path = os.path.join(library_path, "libssl-1_1-x64.dll")
-#	if not os.path.exists(libcrypto_dll_path):
-#		datas.append((libcrypto_lib_path, "."))
-#	if not os.path.exists(libssl_dll_path):
-#		datas.append((libssl_lib_path, "."))
+# if sys.platform[:5] == "win32":
+# 	base_path = os.path.dirname(sys.executable)
+# 	library_path = os.path.join(base_path, "Library", "bin")
+# 	dll_path = os.path.join(base_path, "DLLs")
+# 	libcrypto_dll_path = os.path.join(dll_path, "libcrypto-3-x64.dll")
+# 	libssl_dll_path = os.path.join(dll_path, "libssl-3-x64.dll")
+# 	libcrypto_lib_path = os.path.join(library_path, "libcrypto-3-x64.dll")
+# 	libssl_lib_path = os.path.join(library_path, "libssl-3-x64.dll")
+# 	if not os.path.exists(libcrypto_dll_path):
+# 		datas.append((libcrypto_lib_path, "."))
+# 	if not os.path.exists(libssl_dll_path):
+# 		datas.append((libssl_lib_path, "."))
 
 for _pkg in ["python","accelerate"]:
 	if _pkg in pkgs_to_check_at_runtime:
@@ -98,10 +103,16 @@ datas += collect_data_files("streamlit")
 datas += copy_metadata("streamlit")
 datas += collect_data_files("pyopenms")
 datas += copy_metadata("pyopenms")
+datas += collect_data_files("joblib")
+datas += copy_metadata("joblib")
+datas += collect_data_files("tk")
+datas += copy_metadata("tk")
+# datas += collect_data_files("tkinter.filedialog")
+# datas += copy_metadata("tkinter.filedialog")
 datas += collect_data_files("massdash")
 datas += copy_metadata("massdash")
 
-hidden_imports = ['pyopenms', 'massdash', 'torchaudio.lib.libtorchaudio']
+hidden_imports = ['pyopenms', 'joblib', 'tkinter', 'tkinter.filedialog', 'massdash', 'torchaudio.lib.libtorchaudio']
 
 a = Analysis(
 	[script_name],
@@ -117,6 +128,7 @@ a = Analysis(
 	cipher=block_cipher,
 	noarchive=False
 )
+
 pyz = PYZ(
 	a.pure,
 	a.zipped_data,
