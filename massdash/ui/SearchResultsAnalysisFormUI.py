@@ -85,10 +85,9 @@ class SearchResultsAnalysisFormUI:
             st.session_state.workflow = "search_results_analysis"
     
     def create_ui(self, isStreamlitCloud: bool = False):
-        st.write("This workflow is designed to analyze and investigate the search results from a DIA experiment (s). and for comparisons between search results.")
-        
         st.title("Search Results Analysis")
-        
+        st.write("This workflow is designed to analyze and investigate the search results from a DIA experiment(s) and for comparisons between search results.")
+
         load_toy_dataset = st.button('Load Search Results Analysis Example', on_click=clicked , args=['load_toy_dataset_search_results_analysis'], key='load_toy_dataset_search_results_analysis', help="Loads the search results analysis example dataset.")
         
         if load_toy_dataset:

@@ -21,7 +21,8 @@ def cli():
 @click.option('--perf', '-t', is_flag=True, help="Enables measuring and tracking of performance.")
 @click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
 @click.option('--server_port', '-p', default=8501, type=int, help="Port to run the MassDash GUI on.")
-def gui(verbose, perf, perf_output, server_port):
+@click.option('--cloud', '-c', is_flag=True, help="Set to True to emulate running on streamlit cloud, if False detect if running on streamlit cloud.")
+def gui(verbose, perf, perf_output, server_port, cloud):
     """
     GUI for MassDash.
     """
@@ -41,6 +42,8 @@ def gui(verbose, perf, perf_output, server_port):
         add_args.append('--verbose')
     if perf:
         add_args.append('--perf')
+    if cloud:
+        add_args.append('--cloud')
     if perf_output and perf:
         add_args.append('--perf_output')
         add_args.append(perf_output)

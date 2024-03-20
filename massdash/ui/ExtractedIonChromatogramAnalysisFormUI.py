@@ -36,9 +36,8 @@ class ExtractedIonChromatogramAnalysisFormUI:
         Returns:
             None
         """
-        st.write("This workflow is designed for post-extracted ion chromatogram data. For example sqMass files generated from an OpenSwathWorkflow experiment.")
-
-        st.title("OpenSwath")
+        st.title("Extracted Ion Chromatograms")
+        st.write("This workflow is designed for post-extracted ion chromatogram data. For example `.sqMass` files generated from an OpenSwathWorkflow experiment.")
 
         load_toy_dataset = st.button('Load OpenSwath Example', on_click=clicked , args=['load_toy_dataset_xic_data'], key =  'load_toy_dataset_xic_data', help="Loads the OpenSwath example dataset.")
         

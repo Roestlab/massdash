@@ -4,7 +4,6 @@ massdash/ui/MassDashGUI
 """
 
 import streamlit as st
-import platform
 
 # UI
 from .FileInputXICDataUISettings import FileInputXICDataUISettings
@@ -28,7 +27,7 @@ class MassDashGUI:
         show_welcome_message: Displays a welcome message and input fields for OpenSwath and DIA-NN workflows.
         show_file_input_settings: Displays the file input settings.
     """
-    def __init__(self, verbose, perf, perf_output="MassDash_Performance_Report.txt"):
+    def __init__(self, verbose, perf, perf_output="MassDash_Performance_Report.txt", isStreamlitCloud: bool = False):
         """
         Initializes the MassDashGUI class.
 
@@ -36,6 +35,7 @@ class MassDashGUI:
             verbose (bool): Enables verbose mode.
             perf (bool): Enables performance mode.
             perf_output (str): The path to the performance output file.
+            isStreamlitCloud (bool): set to True if running on streamlit cloud, False otherwise.
 
         Returns:
             None
@@ -45,7 +45,7 @@ class MassDashGUI:
         self.verbose = verbose
         self.perf = perf
         self.perf_output = perf_output
-        self.isStreamlitCloud = platform.processor() == "" # will be "" if running on streamlit cloud
+        self.isStreamlitCloud = isStreamlitCloud
         
         # initialize load_toy_dataset key in clicked session state
         # This is needed because streamlit buttons return True when clicked and then default back to False.
@@ -87,8 +87,8 @@ class MassDashGUI:
                     st.title("Welcome to MassDash!")
                     st.write("MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
                     st.write("It enables the visualization of chromatograms, algorithm testing, and parameter optimization, crucial for data analysis and experimental design.")
-                    if self.platform_context == "":
-                        st.warning("WARNING!: It seems like you are running MassDash via streamlit sharing. Please note that streamlit sharing only allows for uploading files up to 1Gb in size, it is recommended to upload files of 200Mb or less, or use the load example data for demoing MassDash. If you want to use MassDash with larger files, please consider running MassDash locally. See [massdash](https://github.com/Roestlab/massdash)")
+                    if self.isStreamlitCloud:
+                        st.warning("WARNING: It seems like you are running MassDash via streamlit sharing. Please note that only example files are avaliable on streamlit sharing. If you want to use MassDash with your own experiments larger files, please consider running MassDash locally. For installation instructions click [here](https://github.com/Roestlab/massdash)")
 
                     # Tabs for different data workflows
                     tab1, tab2, tab3 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data", "Search Results Analysis"])

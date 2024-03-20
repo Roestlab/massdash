@@ -40,9 +40,8 @@ class RawTargetedExtractionAnalysisFormUI:
         Returns:
             None
         """
-        st.write("This workflow is designed for raw mass spectrometry data. For example .mzML files generated from a DIA experiment.")
-
         st.title("Raw Targeted Data Extraction")
+        st.write("This workflow is designed for raw mass spectrometry data. For example `.mzML` files generated from a DIA experiment.")
 
         col1, col2, col3 = st.columns([0.2, 0.2, 0.6])
         load_toy_dataset = col1.button('Load Raw Targeted Data Extraction Example', on_click=clicked , args=['load_toy_dataset_raw_data'], key='load_toy_dataset_raw_data', help="Loads the raw targeted data extraction example dataset.")
