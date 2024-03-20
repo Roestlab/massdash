@@ -218,9 +218,13 @@ class ExtractedIonChromatogramAnalysisServer:
                         # Check if there is available feature data
                         if file in tr_group_feature_data.keys():
                             feature_data =  tr_group_feature_data[file]
+                            if peak_picking_settings.do_peak_picking == 'Feature File Boundaries':
+                                feature_legend_labels = [ "Feature {i}: q={q:.2e}".format(i=i, q=feature.qvalue) for i, feature in enumerate(feature_data)]
+                            else:
+                                feature_legend_labels = [peak_picking_settings.do_peak_picking]
+                            plot_obj = plotter.plot(tr_group, features=feature_data, feature_legend_labels=feature_legend_labels)
                         else:
-                            feature_data = None
-                        plot_obj = plotter.plot(tr_group, feature_data)
+                            plot_obj = plotter.plot(tr_group)
                         plot_obj_dict[file] = plot_obj
 
             st.write(f"Generating chromatogram plots... Elapsed time: {elapsed_time()}")
