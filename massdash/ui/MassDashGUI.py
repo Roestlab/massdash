@@ -4,6 +4,7 @@ massdash/ui/MassDashGUI
 """
 
 import streamlit as st
+import platform
 
 # UI
 from .FileInputXICDataUISettings import FileInputXICDataUISettings
@@ -44,6 +45,7 @@ class MassDashGUI:
         self.verbose = verbose
         self.perf = perf
         self.perf_output = perf_output
+        self.isStreamlitCloud = platform.processor() == "" # will be "" if running on streamlit cloud
         
         # initialize load_toy_dataset key in clicked session state
         # This is needed because streamlit buttons return True when clicked and then default back to False.
@@ -85,23 +87,25 @@ class MassDashGUI:
                     st.title("Welcome to MassDash!")
                     st.write("MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry.")
                     st.write("It enables the visualization of chromatograms, algorithm testing, and parameter optimization, crucial for data analysis and experimental design.")
+                    if self.platform_context == "":
+                        st.warning("WARNING!: It seems like you are running MassDash via streamlit sharing. Please note that streamlit sharing only allows for uploading files up to 1Gb in size, it is recommended to upload files of 200Mb or less, or use the load example data for demoing MassDash. If you want to use MassDash with larger files, please consider running MassDash locally. See [massdash](https://github.com/Roestlab/massdash)")
 
                     # Tabs for different data workflows
                     tab1, tab2, tab3 = st.tabs(["Extracted Ion Chromatograms", "Raw Mass Spectrometry Data", "Search Results Analysis"])
 
                     with tab1:
                         xic_form = ExtractedIonChromatogramAnalysisFormUI()
-                        xic_form.create_ui()
+                        xic_form.create_ui(self.isStreamlitCloud)
                         copy_attributes(xic_form, self)
                         
                     with tab2:
                         raw_data_form = RawTargetedExtractionAnalysisFormUI()
-                        raw_data_form.create_ui()
+                        raw_data_form.create_ui(self.isStreamlitCloud)
                         copy_attributes(raw_data_form, self)
                         
                     with tab3:
                         search_results_form = SearchResultsAnalysisFormUI()
-                        search_results_form.create_ui()
+                        search_results_form.create_ui(self.isStreamlitCloud)
                         copy_attributes(search_results_form, self)
 
         return self
