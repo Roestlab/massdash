@@ -16,7 +16,7 @@ class Mobilogram(Data1D):
         super().__init__(im, intensity, label)
 
     def toPandasDf(self) -> pd.DataFrame:
-        return super().toPandasDfHelper_(self, 'im')
+        return super().toPandasDfHelper_('im')
     
     def adjust_length(self, length: int) -> 'Mobilogram':
         """

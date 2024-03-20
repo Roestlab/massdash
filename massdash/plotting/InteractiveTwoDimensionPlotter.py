@@ -15,28 +15,13 @@ from bokeh.models import HoverTool, CrosshairTool, Title
 from bokeh.plotting import figure
 from matplotlib import cm
 
+from ..util import rgb_to_hex
 # Plotting
 from .GenericPlotter import PlotConfig
 # Structs
 from ..structs.FeatureMap import FeatureMap
 #Transofmrations
 from ..dataProcessing.transformations import equalize2D
-
-def rgb_to_hex(rgb):
-    """
-    Converts an RGB color value to its corresponding hexadecimal representation.
-
-    Args:
-        rgb (tuple): A tuple containing the RGB values as floats between 0 and 1.
-
-    Returns:
-        str: The hexadecimal representation of the RGB color.
-
-    Example:
-        >>> rgb_to_hex((0.5, 0.75, 1.0))
-        '#7fbfff'
-    """
-    return "#{:02x}{:02x}{:02x}".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
 
 class InteractiveTwoDimensionPlotter:
     """
@@ -200,7 +185,7 @@ class InteractiveTwoDimensionPlotter:
         arr[np.isnan(arr)] = 0
 
         if self.config.smoothing_dict['type'] == 'gauss':
-            arr = gaussian_filter(arr, sigma=self.config.smoothing_dict['sigma'])
+            arr = gaussian_filter(arr, sigma=self.config.smoothing_dict['gaussian_sigma'])
 
         if self.config.normalization_dict['type'] == 'equalization':
             arr = equalize2D(arr, self.config.normalization_dict['bins'])

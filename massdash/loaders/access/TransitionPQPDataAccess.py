@@ -44,6 +44,9 @@ class TransitionPQPDataAccess:
         self.conn = sqlite3.connect(filename, check_same_thread=False)
         self.c = self.conn.cursor()
     
+    def close(self):
+        self.conn.close()
+
     def load(_self) -> None:
         '''
         Load the transition PQP file
@@ -143,7 +146,7 @@ class TransitionPQPDataAccess:
         return all(col in self.data.columns for col in TransitionPQPDataAccess.REQUIRED_PQP_COLUMNS)
     
     def empty(self):
-        return self.data.empty() 
+        return self.data.empty
 
     def __setitem__(self, index, value):
         return self.data.__setitem__(index, value)

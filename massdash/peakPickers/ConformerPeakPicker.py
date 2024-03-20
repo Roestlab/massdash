@@ -13,7 +13,7 @@ from ..structs.TransitionGroup import TransitionGroup
 from ..structs.TransitionGroupFeature import TransitionGroupFeature
 from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # Utils
-from ..util import check_package, LOGGER
+from ..util import check_package, check_function, LOGGER
 # Transformations
 from ..dataProcessing.transformations import min_max_scale, sigmoid
 
@@ -138,6 +138,7 @@ class ConformerPeakPicker:
                                             consensusApex=f['rt_apex']))
         return transitionGroupFeatures
     
+    '''
     @staticmethod
     def _find_thresholds(preds: np.ndarray, target: np.ndarray, min_precisions: float) -> List[tuple]:
         """
@@ -167,6 +168,7 @@ class ConformerPeakPicker:
             thresholds.append((min_precision, recall, threshold))
 
         return thresholds
+    '''
 
     def _preprocess(self, transition_group) -> np.ndarray:
         """

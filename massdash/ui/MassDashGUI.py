@@ -50,7 +50,7 @@ class MassDashGUI:
         # This is needed because streamlit buttons return True when clicked and then default back to False.
         # See: https://discuss.streamlit.io/t/how-to-make-st-button-content-stick-persist-in-its-own-section/45694/2
         if 'clicked' not in st.session_state:
-            st.session_state.clicked  = {'load_toy_dataset_xic_data':False, 'load_toy_dataset_raw_data':False, 'load_toy_dataset_search_results_analysis':False}
+            st.session_state.clicked  = {'load_toy_dataset_xic_data':False, 'load_toy_dataset_raw_data':False, 'load_toy_dataset_raw_data_im':False,'load_toy_dataset_search_results_analysis':False}
             
         if 'workflow' not in st.session_state:
             st.session_state.workflow = None
