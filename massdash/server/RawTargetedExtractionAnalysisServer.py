@@ -37,6 +37,7 @@ class RawTargetedExtractionAnalysisServer:
         self.feature_data = None
         self.transition_list = None
         self.mzml_loader = None
+        self.is_toy_dataset = False # Set to true to load the default extraction params for the toy dataset
 
         LOGGER.name = "RawTargetedExtractionAnalysisServer"
         if massdash_gui.verbose:
@@ -170,7 +171,7 @@ class RawTargetedExtractionAnalysisServer:
             transition_list_ui.show_search_results_information(features) 
 
             # Create UI for extraction parameters
-            transition_list_ui.show_extraction_parameters()
+            transition_list_ui.show_extraction_parameters(toyDefault=self.is_toy_dataset)
 
             # Create UI settings for chromatogram plotting, peak picking, and consensus chromatogram
             chrom_plot_settings = ChromatogramPlotUISettings()
