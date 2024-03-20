@@ -11,7 +11,8 @@ pyopenms
 scipy
 streamlit>=1.30.0
 streamlit-javascript
-tk
 tqdm
 upsetplot
+onnxruntime
+torchmetrics
 massdash @ git+https://github.com/Roestlab/massdash.git@patch/streamlit_deployment
