@@ -8,6 +8,8 @@ import sys
 import os
 from streamlit.web import cli as stcli
 
+from .constants import USER_PLATFORM_SYSTEM
+
 @click.group(chain=True)
 @click.version_option()
 def cli():
@@ -26,6 +28,9 @@ def gui(verbose, perf, perf_output, server_port, cloud):
     """
     GUI for MassDash.
     """
+    # If user is on MacOS, set KMP_DUPLICATE_LIB_OK to True to avoid MKL errors due to two OpenMP libraries being loaded
+    if USER_PLATFORM_SYSTEM == "Darwin":
+        os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
     click.echo("Starting MassDash GUI...")
     if verbose:

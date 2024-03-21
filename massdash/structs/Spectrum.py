@@ -10,7 +10,7 @@ from .Data1D import Data1D
 
 class Spectrum(Data1D):
     ''' 
-    This is a single spectrum object. Holds the data and metadata of a spectrum
+    A single spectrum object storing mz and intensity data.
     '''
     def __init__(self, mz, intensity, label):
         super().__init__(mz, intensity, label)

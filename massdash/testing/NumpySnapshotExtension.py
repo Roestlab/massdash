@@ -11,6 +11,9 @@ from syrupy.extensions.single_file import SingleFileSnapshotExtension
 from syrupy.types import SerializableData
 
 class NumpySnapshotExtension(SingleFileSnapshotExtension):
+    """
+    Handles Numpy Snapshots. Snapshots are stored as dat files and the numpy arrays are compared using numpy testing methods.
+    """
     _file_extension = "dat"
 
     def matches(self, *, serialized_data, snapshot_data):

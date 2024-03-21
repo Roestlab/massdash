@@ -11,6 +11,9 @@ import numpy as np
 from .GenericFeature import GenericFeature
 
 class TransitionFeature(GenericFeature):
+    """
+    An object storing attributes on the detected feature in a Transition
+    """
     def __init__(self, 
                  leftBoundary: Optional[float] = None, 
                  rightBoundary: Optional[float] = None, 
