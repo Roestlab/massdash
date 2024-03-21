@@ -192,6 +192,8 @@ class ExtractedIonChromatogramAnalysisServer:
                 plot_obj_dict = {}
 
                 # Iterate through each file and generate chromatogram plots
+
+                noFeaturesWarning = [] # list to store files with no features found so can output warning
                 for file, tr_group in tr_group_data.items():
                     tr_group.targeted_transition_list = transition_list_ui.target_transition_list
 
@@ -217,13 +219,24 @@ class ExtractedIonChromatogramAnalysisServer:
                         plotter = InteractivePlotter(plot_config)
                         # Check if there is available feature data
                         if file in tr_group_feature_data.keys():
-                            feature_data =  tr_group_feature_data[file]
-                            if peak_picking_settings.do_peak_picking == 'Feature File Boundaries':
-                                feature_legend_labels = [ "Feature {i}: q={q:.2e}".format(i=i, q=feature.qvalue) for i, feature in enumerate(feature_data)]
-                            elif peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
-                                feature_legend_labels = [ "Feature {i}".format(i=i) for i in range(len(feature_data))]
+                            performPlotFeatures = True # bool flag to check if features are available for the current file
+                            feature_data =  tr_group_feature_data[file] # get the feature data
+
+                            # check different conditions to determine if features should be plotted and how features should be plotted
+                            if peak_picking_settings.do_peak_picking == 'none':
+                                performPlotFeatures = False
                             else:
-                                feature_legend_labels = [peak_picking_settings.do_peak_picking]
+                                if len(feature_data) == 0: # no features found even though peak picking was performed
+                                    noFeaturesWarning.append(file)
+                                    performPlotFeatures = False
+                                # display features differently dependening on the peak picking method
+                                elif peak_picking_settings.do_peak_picking == 'Feature File Boundaries': # also display q values
+                                    feature_legend_labels = [ f"Feature {i+1}: q={feature.qvalue:.2e}" for i, feature in enumerate(feature_data)]
+                                else:
+                                    feature_legend_labels = [ f"Feature {i+1}" for i in range(len(feature_data))]
+                        
+                        # plot the chromatograms (do not display yet)
+                        if performPlotFeatures:
                             plot_obj = plotter.plot(tr_group, features=feature_data, feature_legend_labels=feature_legend_labels)
                         else:
                             plot_obj = plotter.plot(tr_group)
@@ -233,6 +246,8 @@ class ExtractedIonChromatogramAnalysisServer:
 
         with time_block() as elapsed_time:
             # Show extracted ion chromatograms
+            for i in noFeaturesWarning:
+                st.warning(f"No features found for file {i}.")
             transition_list_ui.show_extracted_ion_chromatograms(plot_container, chrom_plot_settings, concensus_chromatogram_settings, plot_obj_dict)
         status.write(f"Drawing extracted ion chromatograms... Elapsed time: {elapsed_time()}")
 
