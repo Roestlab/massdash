@@ -6,14 +6,6 @@ massdash/ui/util
 from os import getcwd
 from os.path import dirname
 import streamlit as st
-import platform
-
-if platform.processor() is not None:
-    from tkinter import Tk, filedialog
-else:
-    Tk = None
-    filedialog = None
-    st.write("Warning: Tkinter is not available on this platform. File browsing is disabled.")
 
 def clicked(button):
     """
@@ -68,7 +60,11 @@ def tk_file_dialog(file_type: list = [], title: str = "Select File", parent_dir:
 
     Returns:
         str: The path to the selected file.
+    
+    Warning:
+        This function is not avaliable in a streamlit cloud context.
     """
+    from tkinter import Tk, filedialog
     root = Tk()
     root.withdraw()
     file_type.extend([("All files", "*.*")])
