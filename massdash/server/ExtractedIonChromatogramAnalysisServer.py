@@ -102,7 +102,7 @@ class ExtractedIonChromatogramAnalysisServer:
         chrom_plot_settings = ChromatogramPlotUISettings()
         chrom_plot_settings.create_ui()
 
-        peak_picking_settings = PeakPickingUISettings()
+        peak_picking_settings = PeakPickingUISettings(self.massdash_gui.isStreamlitCloud)
         peak_picking_settings.create_ui(chrom_plot_settings)
 
         concensus_chromatogram_settings = ConcensusChromatogramUISettings()
@@ -191,8 +191,7 @@ class ExtractedIonChromatogramAnalysisServer:
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
 
-                filename_mapping = infer_unique_filenames([file.filename for file in tr_group_data.keys()])
-                # st.write(filename_mapping)
+                filename_mapping = infer_unique_filenames([file for file in tr_group_data.keys()])
 
                 # Iterate through each file and generate chromatogram plots
 
@@ -204,7 +203,7 @@ class ExtractedIonChromatogramAnalysisServer:
                     plot_settings_dict = chrom_plot_settings.get_settings()
                     plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
                     plot_settings_dict['y_axis_label'] = 'Intensity'
-                    plot_settings_dict['title'] = filename_mapping[file.filename]
+                    plot_settings_dict['title'] = filename_mapping[file]
                     plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
                     
                     if chrom_plot_settings.set_x_range:
