@@ -3,14 +3,16 @@ Click
 joblib
 matplotlib
 matplotlib-venn
-numpy
-pandas
+numpy==1.26
+pandas==2.2
 plotly
 psutil
 pyopenms
-scipy
+scipy==1.12
 streamlit>=1.30.0
 streamlit-javascript
-tk
 tqdm
 upsetplot
+onnxruntime==1.16.3
+torchmetrics==1.2.1
+massdash @ git+https://github.com/Roestlab/massdash.git@dist/streamlit_deployment
