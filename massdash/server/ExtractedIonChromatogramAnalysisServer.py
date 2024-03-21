@@ -32,7 +32,7 @@ from ..peakPickers.ConformerPeakPicker import ConformerPeakPicker
 from ..plotting.GenericPlotter import PlotConfig
 from ..plotting.InteractivePlotter import InteractivePlotter
 # Util
-from ..util import LOGGER, time_block
+from ..util import LOGGER, time_block, infer_unique_filenames
 from .util import get_string_mslevels_from_bool
 
 class ExtractedIonChromatogramAnalysisServer:
@@ -191,6 +191,9 @@ class ExtractedIonChromatogramAnalysisServer:
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
 
+                filename_mapping = infer_unique_filenames([file.filename for file in tr_group_data.keys()])
+                # st.write(filename_mapping)
+
                 # Iterate through each file and generate chromatogram plots
 
                 noFeaturesWarning = [] # list to store files with no features found so can output warning
@@ -201,7 +204,7 @@ class ExtractedIonChromatogramAnalysisServer:
                     plot_settings_dict = chrom_plot_settings.get_settings()
                     plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
                     plot_settings_dict['y_axis_label'] = 'Intensity'
-                    plot_settings_dict['title'] = file
+                    plot_settings_dict['title'] = filename_mapping[file.filename]
                     plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
                     
                     if chrom_plot_settings.set_x_range:
