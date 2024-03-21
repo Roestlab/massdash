@@ -20,6 +20,7 @@ from logging.handlers import TimedRotatingFileHandler
 import psutil
 
 import requests
+import socketserver
 import streamlit as st
 from streamlit.components.v1 import html
 
@@ -360,6 +361,10 @@ def rgb_to_hex(rgb):
     """
     return "#{:02x}{:02x}{:02x}".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
 
+def get_free_port():
+    with socketserver.TCPServer(("localhost", 0), None) as s:
+        free_port = s.server_address[1]
+    return free_port
 
 def open_page(url: str):
     """
