@@ -220,6 +220,8 @@ class ExtractedIonChromatogramAnalysisServer:
                             feature_data =  tr_group_feature_data[file]
                             if peak_picking_settings.do_peak_picking == 'Feature File Boundaries':
                                 feature_legend_labels = [ "Feature {i}: q={q:.2e}".format(i=i, q=feature.qvalue) for i, feature in enumerate(feature_data)]
+                            elif peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
+                                feature_legend_labels = [ "Feature {i}".format(i=i) for i in range(len(feature_data))]
                             else:
                                 feature_legend_labels = [peak_picking_settings.do_peak_picking]
                             plot_obj = plotter.plot(tr_group, features=feature_data, feature_legend_labels=feature_legend_labels)
