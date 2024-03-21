@@ -11,7 +11,9 @@
 [![pypipv](https://img.shields.io/pypi/pyversions/massdash.svg)](https://img.shields.io/pypi/pyversions/massdash)
 [![pypiv](https://img.shields.io/pypi/v/massdash.svg)](https://pypi.python.org/pypi/massdash)
 [![pypidownload](https://img.shields.io/pypi/dm/massdash?color=orange)](https://pypistats.org/packages/massdash)
+<!-- 
 [![biocondav](https://img.shields.io/conda/v/bioconda/massdash?label=bioconda&color=purple)](https://anaconda.org/bioconda/massdash)
+-->
 [![dockerv](https://img.shields.io/docker/v/singjust/massdash?label=docker&color=green)](https://hub.docker.com/r/singjust/massdash)
 [![dockerpull](https://img.shields.io/docker/pulls/singjust/massdash?color=green)](https://hub.docker.com/r/singjust/massdash)
 [![continuous-integration](https://github.com/Roestlab/massdash/workflows/continuous-integration/badge.svg)](https://github.com/Roestlab/massdash/actions)
@@ -23,17 +25,24 @@
 
 ## Installation
 
+[![installwindows](https://img.shields.io/badge/install-windows-blue?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_windows.exe)](https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_windows.exe)
+[![installmacos](https://img.shields.io/badge/install-macos-white?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_macos.pkg)](https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_macos.pkg)
+[![installubuntu](https://img.shields.io/badge/install-ubuntu-purple?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_linux.deb)](https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_linux.deb)
+
+For a one-click installation, click on the corresponding badge corresponding to your operating system, or visit the [latest release page](https://github.com/Roestlab/massdash/releases/tag/v0.0.8) and download the installer for your operating system.
+
 **Recommended**: Install the latest stable version of MassDash from the Python Package Index (PyPI):
 
 ```bash
 pip install massdash --upgrade
 ```
-
+<!-- 
 or, install the latest stable version of MassDash from Bioconda if you are using Anaconda for package and environment management:
 
 ```bash
 conda install bioconda::massdash --upgrade
 ```
+-->
 
 <details>
    <summary>Installing from source</summary>
