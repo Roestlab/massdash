@@ -32,6 +32,10 @@ site_packages = site.getsitepackages()
 # Find the index of the first element containing "site-packages"
 index = next((i for i, s in enumerate(site_packages) if "site-packages" in s), None)
 
+print("Getting datas and hidden imports for requirements.")
+if sys.platform[:6] == "darwin":
+	os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
 requirements = {'numpy', 'tk', project, "streamlit_javascript", "upsetplot", "distributed", 'torchaudio.lib.libtorchaudio'}
 datas = [(f"{site_packages[index]}/streamlit/runtime", "./streamlit/runtime")]
 hidden_imports = set()
@@ -67,6 +71,8 @@ while requirements:
 		hidden_imports_.remove(None)
 	requirements |= hidden_imports_ - checked
 	hidden_imports |= hidden_imports_
+
+print("Finished getting data and hidden imports from requirements.")
 
 if remove_tests:
 	hidden_imports = sorted(
