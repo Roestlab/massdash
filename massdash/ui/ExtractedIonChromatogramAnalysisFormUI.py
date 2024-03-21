@@ -26,7 +26,7 @@ class ExtractedIonChromatogramAnalysisFormUI:
         self.osw_file_path = None
         self.sqmass_file_path_input = None
         
-    def create_ui(self):    
+    def create_ui(self, isStreamlitCloud: bool = False):    
         """
         Creates the user interface for the ExtractedIonChromatogramAnalysisForm.
 
@@ -36,9 +36,8 @@ class ExtractedIonChromatogramAnalysisFormUI:
         Returns:
             None
         """
-        st.write("This workflow is designed for post-extracted ion chromatogram data. For example sqMass files generated from an OpenSwathWorkflow experiment.")
-
-        st.title("OpenSwath")
+        st.title("Extracted Ion Chromatograms")
+        st.write("This workflow is designed for post-extracted ion chromatogram data. For example `.sqMass` files generated from an OpenSwathWorkflow experiment.")
 
         load_toy_dataset = st.button('Load OpenSwath Example', on_click=clicked , args=['load_toy_dataset_xic_data'], key =  'load_toy_dataset_xic_data', help="Loads the OpenSwath example dataset.")
         
@@ -46,13 +45,15 @@ class ExtractedIonChromatogramAnalysisFormUI:
             st.session_state.workflow = "xic_data"
             st.session_state.WELCOME_PAGE_STATE = False
         
-        with st.container(border=True):
-            self.osw_file_path = display_input_section("Input OSW file", "osw_file_path", [("OpenSwath Files", ".osw")], "Select OpenSwath File", "*.osw")
-            self.sqmass_file_path_input = display_input_section("Input sqMass file/directory", "sqmass_file_path_input", [("sqMass Files", ".sqMass")], "Select sqMass File", "*.sqMass")
+        # Do not add the file input section if running on streamlit cloud
+        if not isStreamlitCloud:
+            with st.container(border=True):
+                self.osw_file_path = display_input_section("Input OSW file", "osw_file_path", [("OpenSwath Files", ".osw")], "Select OpenSwath File", "*.osw")
+                self.sqmass_file_path_input = display_input_section("Input sqMass file/directory", "sqmass_file_path_input", [("sqMass Files", ".sqMass")], "Select sqMass File", "*.sqMass")
+                    
+                # Submit button for form
+                begin_button = st.button('Begin Visualization', key='begin_button', help="Begin the visualization.")
                 
-            # Submit button for form
-            begin_button = st.button('Begin Visualization', key='begin_button', help="Begin the visualization.")
-            
-            if begin_button:
-                st.session_state.workflow = "xic_data"
-                st.session_state.WELCOME_PAGE_STATE = False
+                if begin_button:
+                    st.session_state.workflow = "xic_data"
+                    st.session_state.WELCOME_PAGE_STATE = False

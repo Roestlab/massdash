@@ -29,6 +29,7 @@ class ChromatogramPlotUISettings:
         self.include_ms1 = True
         self.include_ms2 = True
         self.num_plot_columns = 2
+        self.hide_legends = False
         self.link_plot_ranges = False
         self.set_x_range = False
         self.set_y_range = False
@@ -97,6 +98,9 @@ class ChromatogramPlotUISettings:
         with st.sidebar.expander("Advanced Settings"):
             # Display plots in N columns
             self.num_plot_columns = st.number_input("Number of Columns", min_value=1, value=self.num_plot_columns, help="The number of columns to display the plots in.")
+            
+            # Toggle to hide legends
+            self.hide_legends = st.checkbox("Hide Legends", value=False, help="Hide the legends in the chromatogram plot.")
 
             # Add Checkboxes for setting x-range and y-range
             col1, col2, col3 = st.columns(3)
@@ -145,6 +149,7 @@ class ChromatogramPlotUISettings:
             "include_ms1": self.include_ms1,
             "include_ms2": self.include_ms2,
             "num_plot_columns": self.num_plot_columns,
+            "hide_legends": self.hide_legends,
             "set_x_range": self.set_x_range,
             "set_y_range": self.set_y_range,
             "do_smoothing": self.do_smoothing,

@@ -120,7 +120,7 @@ class SearchResultsAnalysisServer:
             plot_container = st.container()
 
             # get overlapping columnn names
-            overlapping_columns = set.intersection(*[set(df.columns) for df in ident_data_dict.values()])
+            overlapping_columns = list(set.intersection(*[set(df.columns) for df in ident_data_dict.values()]))
             # st.write(f"overlapping_columns: {overlapping_columns}")
             ident_data = pd.concat([df[overlapping_columns] for df in ident_data_dict.values()], axis=0)
             # st.write(ident_data)

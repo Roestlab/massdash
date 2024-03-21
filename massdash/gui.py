@@ -9,6 +9,7 @@ import logging
 import streamlit as st
 from streamlit_javascript import st_javascript
 from PIL import Image
+import platform
 
 # Constants
 from massdash.constants import MASSDASH_ICON, MASSDASH_LOGO_LIGHT, MASSDASH_LOGO_DARK, OPENMS_LOGO
@@ -27,7 +28,8 @@ from massdash.util import LOGGER, get_download_folder, download_file, reset_app,
 @click.option('--verbose', '-v', is_flag=True, help="Enables verbose mode.")
 @click.option('--perf', '-t', is_flag=True, help="Enables measuring and tracking of performance.")
 @click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
-def main(verbose, perf, perf_output):     
+@click.option('--cloud', '-c', is_flag=True, help="Set to True to emulate running on streamlit cloud, if False detect if running on streamlit cloud.")
+def main(verbose, perf, perf_output, cloud):     
     
     ###########################
     ## Logging
@@ -46,7 +48,11 @@ def main(verbose, perf, perf_output):
 
     st.session_state.WELCOME_PAGE_STATE = True
 
-    massdash_gui = MassDashGUI(verbose=verbose, perf=perf, perf_output=perf_output)
+
+    # determine if should run in a streamlit cloud context
+    isStreamlitCloud = cloud or platform.processor() == "" # will be "" if running on streamlit cloud
+
+    massdash_gui = MassDashGUI(verbose=verbose, perf=perf, perf_output=perf_output, isStreamlitCloud=isStreamlitCloud)
     if st.session_state.WELCOME_PAGE_STATE:
         massdash_gui.show_welcome_message()
     
@@ -153,7 +159,12 @@ def main(verbose, perf, perf_output):
         show_xic_exp.main()
         
     if st.session_state.workflow == "raw_data" and not st.session_state.WELCOME_PAGE_STATE:
+        if st.session_state.clicked['load_toy_dataset_raw_data']:
+            is_toy_dataset = True
+        else:
+            is_toy_dataset = False
         show_raw_exp = RawTargetedExtractionAnalysisServer(massdash_gui)
+        show_raw_exp.is_toy_dataset = is_toy_dataset
         show_raw_exp.main()
         
     if st.session_state.workflow == "search_results_analysis" and not st.session_state.WELCOME_PAGE_STATE:

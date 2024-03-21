@@ -37,6 +37,8 @@ class RawTargetedExtractionAnalysisServer:
         self.feature_data = None
         self.transition_list = None
         self.mzml_loader = None
+        self.is_toy_dataset = False # Set to true to load the default extraction params for the toy dataset
+        self.isStreamlitCloud = False # Set to True if running (or emulate running) on streamlit cloud, if False not on the cloud
 
         LOGGER.name = "RawTargetedExtractionAnalysisServer"
         if massdash_gui.verbose:
@@ -170,7 +172,7 @@ class RawTargetedExtractionAnalysisServer:
             transition_list_ui.show_search_results_information(features) 
 
             # Create UI for extraction parameters
-            transition_list_ui.show_extraction_parameters()
+            transition_list_ui.show_extraction_parameters(toyDefault=self.is_toy_dataset)
 
             # Create UI settings for chromatogram plotting, peak picking, and consensus chromatogram
             chrom_plot_settings = ChromatogramPlotUISettings()
@@ -220,7 +222,11 @@ class RawTargetedExtractionAnalysisServer:
             elapsed = timeit.default_timer() - start_time
             LOGGER.info("Targeted extraction complete! Elapsed time: %s", timedelta(seconds=elapsed))
             status.update(label=f"Info: Targeted extraction and plot rendering complete! Elapsed time: {timedelta(seconds=elapsed)}", state="complete", expanded=False)
-        
+
+        if chrom_plot_settings.display_plot_dimension_type == "1D":
+            for i in plot_server.noFeaturesWarning:
+                st.warning(f"Warning: No features found for {i}!")
+
         if chrom_plot_settings.display_extracted_data_as_df:
             transition_list_ui.show_extracted_dataframes(featureMaps)
             

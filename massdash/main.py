@@ -22,11 +22,12 @@ def cli():
 @click.option('--verbose', '-v', is_flag=True, help="Enables verbose mode.")
 @click.option('--perf/--no_perf', 'perf', default=False, help="Enables or disables performance mode.")
 @click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
+@click.option('--cloud', '-c', is_flag=True, help="Set to True to emulate running on streamlit cloud, if False detect if running on streamlit cloud.")
 @click.option('--server_port', '-p', default=8501, type=int, help="Port to run the MassDash GUI on.")
 @click.option('--server_headless/--no_server_headless', 'server_headless', default=False, help="Run streamlit in headless mode.")
 @click.option('--global_developmentMode/--no_global_developmentMode', 'global_developmentMode', default=True, help="Enables or disables global development mode.")
 @click.option('--browser_gatherUsageStats/--no_browser_gatherUsageStats', 'browser_gatherUsageStats', default=False, help="Enables or disables streamlit to collect summary statistics and metadata.")
-def gui(verbose, perf, perf_output, server_port, server_headless, global_developmentMode, browser_gatherUsageStats):
+def gui(verbose, perf, perf_output, cloud, server_port, server_headless, global_developmentMode, browser_gatherUsageStats):
     """
     GUI for MassDash.
     """
@@ -48,6 +49,8 @@ def gui(verbose, perf, perf_output, server_port, server_headless, global_develop
         add_args.append('--verbose')
     if perf:
         add_args.append('--perf')
+    if cloud:
+        add_args.append('--cloud')
     if perf_output and perf:
         add_args.append('--perf_output')
         add_args.append(perf_output)
