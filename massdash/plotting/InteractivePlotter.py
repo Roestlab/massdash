@@ -273,13 +273,21 @@ class InteractivePlotter(GenericPlotter):
                 ]
 
         # Create a Bokeh figure
-        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=450, tooltips=TOOLTIPS)
 
         # Add title
         if self.title is not None:
             p.title.text = self.title
-            p.title.text_font_size = "16pt"
+            p.title.text_font_size = "13pt"
             p.title.align = "center"
+        
+        p.xaxis.axis_label_text_font_size = "11pt"
+        p.yaxis.axis_label_text_font_size = "11pt"
+
+        # Change x-axis tick text font size
+        p.xaxis.major_label_text_font_size = "11pt"  
+        p.yaxis.major_label_text_font_size = "11pt"
+
 
         if self.subtitle is not None:
             # Create a subtitle
@@ -314,19 +322,20 @@ class InteractivePlotter(GenericPlotter):
                 line = self.process_chrom(p, transitionChrom, label, color=colors[i], line_type='solid', is_precursor=False, transitionGroup=transitionGroup)
                 legend_items.append((label, [line]))
         
-        # Add legend items to the legend
-        legend.items = legend_items
+        if not self.hide_legends:
+            # Add legend items to the legend
+            legend.items = legend_items
 
-        # Add the legend to the plot
-        p.add_layout(legend, 'right')
+            # Add the legend to the plot
+            p.add_layout(legend, 'right')
 
-        p.legend.location = "top_left"
-        # p.legend.click_policy="hide"
-        p.legend.click_policy="mute"
+            p.legend.location = "top_left"
+            # p.legend.click_policy="hide"
+            p.legend.click_policy="mute"
+            p.legend.title = "Transition"
+            p.legend.label_text_font_size = "10pt"
 
         # Customize the plot
-        p.legend.title = "Transition"
-        p.legend.label_text_font_size = "10pt"
         p.grid.visible = True
         p.toolbar_location = "above"
 
