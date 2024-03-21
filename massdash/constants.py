@@ -4,7 +4,10 @@ massdash/constants
 """
 
 import os
+import platform
 from PIL import Image
+
+USER_PLATFORM_SYSTEM = platform.system()
 
 MASSDASH_DIRNAME = os.path.dirname(__file__)
 
