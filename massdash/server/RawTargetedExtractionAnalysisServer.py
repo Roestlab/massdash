@@ -221,7 +221,11 @@ class RawTargetedExtractionAnalysisServer:
             elapsed = timeit.default_timer() - start_time
             LOGGER.info("Targeted extraction complete! Elapsed time: %s", timedelta(seconds=elapsed))
             status.update(label=f"Info: Targeted extraction and plot rendering complete! Elapsed time: {timedelta(seconds=elapsed)}", state="complete", expanded=False)
-        
+
+        if chrom_plot_settings.display_plot_dimension_type == "1D":
+            for i in plot_server.noFeaturesWarning:
+                st.warning(f"Warning: No features found for {i}!")
+
         if chrom_plot_settings.display_extracted_data_as_df:
             transition_list_ui.show_extracted_dataframes(featureMaps)
             
