@@ -38,6 +38,7 @@ class RawTargetedExtractionAnalysisServer:
         self.transition_list = None
         self.mzml_loader = None
         self.is_toy_dataset = False # Set to true to load the default extraction params for the toy dataset
+        self.isStreamlitCloud = False # Set to True if running (or emulate running) on streamlit cloud, if False not on the cloud
 
         LOGGER.name = "RawTargetedExtractionAnalysisServer"
         if massdash_gui.verbose:

@@ -102,7 +102,7 @@ class ExtractedIonChromatogramAnalysisServer:
         chrom_plot_settings = ChromatogramPlotUISettings()
         chrom_plot_settings.create_ui()
 
-        peak_picking_settings = PeakPickingUISettings()
+        peak_picking_settings = PeakPickingUISettings(self.massdash_gui.isStreamlitCloud)
         peak_picking_settings.create_ui(chrom_plot_settings)
 
         concensus_chromatogram_settings = ConcensusChromatogramUISettings()

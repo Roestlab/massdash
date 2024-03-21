@@ -60,7 +60,6 @@ class FeatureMapPlotterServer:
         self.verbose = verbose
         self.noFeaturesWarning = [] # runs with no features found (only relevant for 1D plots with peak picking enabled)
 
-
     def generate_plots(self):
         """
         Generates plots based on user settings

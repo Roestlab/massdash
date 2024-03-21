@@ -10,7 +10,7 @@ import streamlit as st
 from .ChromatogramPlotUISettings import ChromatogramPlotUISettings
 # Utils
 from ..constants import URL_PRETRAINED_CONFORMER
-from ..util import download_file
+from ..util import download_file, get_download_folder
 
 DIRNAME = os.path.dirname(__file__)
 
@@ -31,23 +31,27 @@ class ConformerPickerUISettings:
         self.conformer_prediction_threshold = 0.5
         self.conformer_prediction_type = "logits"
 
-    def create_ui(self, plot_settings: ChromatogramPlotUISettings):
+    def create_ui(self, plot_settings: ChromatogramPlotUISettings, isStreamlitCloud: bool = False):
         """
         Creates the user interface for the ConformerPicker app.
 
         Parameters:
-        -----------
-        plot_settings : ChromatogramPlotUISettings
-            The plot settings for the chromatogram.
+            plot_settings (ChromatogramPlotUISettings): The plot settings for the chromatogram.
+            isStreamlitCloud (bool): Set to True if running (or emulate running) on streamlit cloud, if False not on the cloud
         """
         self.shipped_model = st.sidebar.checkbox("Use shipped model", value=True, help="Use the shipped model which picks peaks across 175 points")
-        if  self.shipped_model:
+        if self.shipped_model:
             self.pretrained_model_file = os.path.join(DIRNAME, '..', 'assets', 'models', 'conformer', 'base_cape.onnx')
             # Check if the model file exists
             if not os.path.exists(self.pretrained_model_file):
-                with st.spinner(f"Downloading pretrained model: {self.pretrained_model_file}..."):
-                    tmp_download_folder = os.path.join(DIRNAME, '..', 'assets', 'models', 'conformer')
-                    download_file(URL_PRETRAINED_CONFORMER, tmp_download_folder)
+                if isStreamlitCloud:
+                    with st.spinner(f"Downloading pretrained model: {self.pretrained_model_file}..."):
+                        tmp_download_folder = get_download_folder()
+                        download_file(URL_PRETRAINED_CONFORMER, tmp_download_folder)
+                else:
+                    with st.spinner(f"Downloading pretrained model: {self.pretrained_model_file}..."):
+                        tmp_download_folder = os.path.join(DIRNAME, '..', 'assets', 'models', 'conformer')
+                        download_file(URL_PRETRAINED_CONFORMER, tmp_download_folder)
         else:
             self.pretrained_model_file = st.sidebar.text_input("Pretrained model file", value="", help="The pretrained model file to use.")
         
