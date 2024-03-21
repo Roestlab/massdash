@@ -152,7 +152,8 @@ class InteractivePlotter(GenericPlotter):
                             p: figure, 
                             features: List[TransitionGroupFeature],
                             transitionGroup: TransitionGroup,
-                            legend_labels:Optional[List[str]] = []) -> None:
+                            legend_labels:Optional[List[str]] = [],
+                            boundary_width:float = 0.3) -> None:
         """
         Adds peak boundaries to a Bokeh figure.
 
@@ -161,8 +162,11 @@ class InteractivePlotter(GenericPlotter):
             features (List[TransitionGroupFeature]): A list of peak features to highlight on the plot.
             transitionGroup (TransitionGroup): The TransitionGroup object containing precursor and transition data.
             legend_labels (List[str], optional): A list of labels for the peak features. Defaults to [].
+            boundary_width (float, optional): The width of the peak boundary lines. Defaults to 0.1.
         """
-        if len(features) <= 8:
+        if len(features) == 1:
+            dark2_palette = ['black'] # Use black for single feature
+        elif len(features) <= 8:
             dark2_palette = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666']
         else:
             dark2_palette = Viridis256[0:len(features)]
@@ -194,12 +198,12 @@ class InteractivePlotter(GenericPlotter):
                     'bottom_int'    : [0]})
             
             # Left border
-            leftWidth_line = p.vbar(x='leftWidth', bottom='bottom_int', top='Intensity', width=0.1, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+            leftWidth_line = p.vbar(x='leftWidth', bottom='bottom_int', top='Intensity', width=boundary_width, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
             if createBoundaryLegend:
                 legend_items.append((legend_labels[idx], [leftWidth_line]))
 
             # Right border
-            p.vbar(x='rightWidth', bottom='bottom_int', top='Intensity', width=0.1, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+            p.vbar(x='rightWidth', bottom='bottom_int', top='Intensity', width=boundary_width, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
 
             # Add a point to the left border to attached the hover tool to
             leftWidth_apex_point = p.circle(source=source, x='leftWidth', y='Intensity', name='leftWidth_apex_point', alpha=0) 
