@@ -1,0 +1,3 @@
+#!/bin/sh
+export KMP_DUPLICATE_LIB_OK=TRUE
+open -a Terminal "${BASH_SOURCE%/*}/massdash"
