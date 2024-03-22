@@ -24,6 +24,14 @@ def osw_data_access():
     yield osw_data_access
     osw_data_access.conn.close()
 
+@pytest.fixture
+def osw_data_access2():
+    db_path = f"{str(TEST_PATH)}/test_data/osw/ionMobilityTest.osw"
+    osw_data_access = OSWDataAccess(db_path)
+    yield osw_data_access
+    osw_data_access.conn.close()
+
+
 @pytest.fixture(params=['ionMobilityTest2', None])
 def run(request):
     return request.param
@@ -113,5 +121,29 @@ def test_getExperimentSummary(osw_data_access, snapshot_pandas):
     experiment_summary = osw_data_access.getExperimentSummary()
     assert snapshot_pandas == experiment_summary
 
+def test_initializeValidScores(osw_data_access2, snapshot):
+    # Open test.osw file because has full .osw output unlike ion mobility
+    osw_data_access2._initializeValidScores()
+
+    assert snapshot == osw_data_access2.validScores
+
+@pytest.mark.parametrize("score_table,score,context", [("SCORE_MS2", "SCORE", None),
+                                                       ("FEATURE_MS2", "VAR_XCORR_COELUTION", None),
+                                                       ("FEATURE_MS1", "VAR_XCORR_COELUTION_COMBINED", None),
+                                                       ("SCORE_PROTEIN", "SCORE", "global"),
+                                                       ("SCORE_PROTEIN", "SCORE", "run-specific"),
+                                                       ("SCORE_PROTEIN", "SCORE", "experiment-wide"),
+                                                       ("SCORE_PEPTIDE", "SCORE", "global"),
+                                                       ("SCORE_PEPTIDE", "SCORE", "run-specific"),
+                                                       ("SCORE_PEPTIDE", "SCORE", "experiment-wide")])
+def test_getScoreTable(osw_data_access2, score_table, score, context, snapshot_pandas):
+    df = osw_data_access2.getScoreTable(score_table, score, context)
+    assert snapshot_pandas == df
+
+
+
+
+
 def test_getCV():
+
     pass

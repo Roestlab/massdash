@@ -76,6 +76,7 @@ class OSWDataAccess(GenericResultsAccess):
         # hashtable, each run is its own data 
         self._initializePeptideHashtable()
         self._initializeRunHashtable()
+        self._initializeValidScores()
         #self._initializeFeatureScoreHashtable()
         
         if mode == 'gui':
@@ -670,6 +671,98 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
             list: The run names
         '''
         return self.runHashTable['RUN_NAME'].tolist()
+
+    def _initializeValidScores(self):
+        # get valid scores for selection 
+        print("Initializing valid scores for selection")
+        validScores = {}
+        if check_sqlite_table(self.conn, "SCORE_MS2"):
+            validScores['SCORE_MS2'] = ["SCORE"]
+        if check_sqlite_table(self.conn, "SCORE_MS1"):
+            validScores['SCORE_MS1'] = ["SCORE"]
+        if check_sqlite_table(self.conn, "SCORE_TRANSITION"):
+            validScores['SCORE_TRANSITION'] = ["SCORE"]
+        if check_sqlite_table(self.conn, "SCORE_PEPTIDE"):
+            validScores['SCORE_PEPTIDE'] = ["SCORE"]
+        if check_sqlite_table(self.conn, "SCORE_PROTEIN"):
+            validScores['SCORE_PROTEIN'] = ["SCORE"]
+        if check_sqlite_table(self.conn, "SCORE_IPF"):
+            validScores['SCORE_IPF'] = ["SCORE"]
+        if check_sqlite_table(self.conn, "FEATURE_MS2"):
+            validScores['FEATURE_MS2'] = []
+            stmt = "select * from FEATURE_MS2"
+            exec = self.conn.execute(stmt)
+            one = exec.fetchone()
+            columns = [ d[0] for d in exec.description ]
+            for c, v in zip(columns, one):
+                if isinstance(v, (int, float)) and c.startswith("VAR"):
+                    validScores['FEATURE_MS2'].append(c)
+        if check_sqlite_table(self.conn, "FEATURE_MS1"):
+            validScores['FEATURE_MS1'] = []
+            stmt = "select * from FEATURE_MS1"
+            exec = self.conn.execute(stmt)
+            one = exec.fetchone()
+            columns = [ d[0] for d in exec.description ]
+            for c, v in zip(columns, one):
+                if isinstance(v, (int, float)) and c.startswith("VAR"):
+                    validScores['FEATURE_MS1'].append(c)
+
+        self.validScores = validScores 
+    
+    def getScoreTable(self, 
+                      score_table: Literal['SCORE_MS2', 'SCORE_MS1', 'SCORE_TRANSITION', 'SCORE_PEPTIDE', 'SCORE_PROTEIN', 'SCORE_IPF', 'FEATURE_MS2', 'FEATURE_MS1'], 
+                      score: str, # must be in valid scores
+                      context: Literal['run-specific', 'experiment-wide', 'global'] = None) -> pd.DataFrame:
+        ''' Plots the distributions of rank 1 features'''
+        if score not in self.validScores[score_table]:
+            print(self.validScores)
+            raise ValueError(f"Score {score} in {score_table} table not a valid score for plotting")
+
+        # get the query
+        if score_table in ['FEATURE_MS1', 'FEATURE_MS2']:
+            stmt = f'''
+            SELECT {score_table}.{score} as SCORE,
+                DECOY,
+                RUN_ID
+            FROM {score_table}
+            INNER JOIN
+            PRECURSOR ON {score_table}.PRECURSOR_ID = PRECURSOR.ID
+            SCORE_MS2 ON {score_table}.ID = SCORE_MS2.FEATURE_ID
+            WHERE RANK == 1
+            '''
+        elif score_table in ['SCORE_MS2']:
+            stmt = f'''
+            SELECT {score_table}.{score} as SCORE,
+            DECOY,
+            RUN_ID
+            FROM {score_table}
+            INNER JOIN FEATURE ON {score_table}.FEATURE_ID = FEATURE.ID
+            INNER JOIN PRECURSOR ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+            WHERE RANK == 1
+            '''
+        elif score_table in ['SCORE_PEPTIDE', 'SCORE_PROTEIN']:
+            analyte = score_table.split('_')[1]
+            if context in ['run-specific', 'experiment-wide']:
+                stmt = f'''
+                SELECT {score_table}.{score} as SCORE,
+                DECOY,
+                RUN_ID
+                FROM {score_table}
+                INNER JOIN {analyte} ON {score_table}.{analyte}_ID = {analyte}.ID
+                WHERE CONTEXT == {context} '''
+            else: # no run id because global context
+                stmt = f'''
+                SELECT {score_table}.{score} as SCORE,
+                DECOY,
+                FROM {score_table}
+                INNER JOIN {analyte} ON {score_table}.{analyte}_ID = {analyte}.ID
+                WHERE CONTEXT == {context} '''
+        else:
+            raise ValueError(f"Score table {score_table} not recognized or not yet implemented")
+        
+        df = pd.read_sql(stmt, self.conn)
+        df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
+        return df[['RUN_NAME', 'DECOY', 'SCORE']]
 
     def get_score_tables(self):
         """

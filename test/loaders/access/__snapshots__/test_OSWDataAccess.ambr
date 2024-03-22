@@ -131,3 +131,53 @@
   list([
   ])
 # ---
+# name: test_initializeValidScores
+  dict({
+    'FEATURE_MS1': list([
+      'VAR_MASSDEV_SCORE',
+      'VAR_MI_CONTRAST_SCORE',
+      'VAR_MI_COMBINED_SCORE',
+      'VAR_ISOTOPE_CORRELATION_SCORE',
+      'VAR_ISOTOPE_OVERLAP_SCORE',
+      'VAR_XCORR_COELUTION_CONTRAST',
+      'VAR_XCORR_COELUTION_COMBINED',
+      'VAR_XCORR_SHAPE_CONTRAST',
+      'VAR_XCORR_SHAPE_COMBINED',
+    ]),
+    'FEATURE_MS2': list([
+      'VAR_BSERIES_SCORE',
+      'VAR_DOTPROD_SCORE',
+      'VAR_INTENSITY_SCORE',
+      'VAR_ISOTOPE_CORRELATION_SCORE',
+      'VAR_ISOTOPE_OVERLAP_SCORE',
+      'VAR_LIBRARY_CORR',
+      'VAR_LIBRARY_DOTPROD',
+      'VAR_LIBRARY_MANHATTAN',
+      'VAR_LIBRARY_RMSD',
+      'VAR_LIBRARY_ROOTMEANSQUARE',
+      'VAR_LIBRARY_SANGLE',
+      'VAR_LOG_SN_SCORE',
+      'VAR_MANHATTAN_SCORE',
+      'VAR_MASSDEV_SCORE',
+      'VAR_MASSDEV_SCORE_WEIGHTED',
+      'VAR_MI_SCORE',
+      'VAR_MI_WEIGHTED_SCORE',
+      'VAR_MI_RATIO_SCORE',
+      'VAR_NORM_RT_SCORE',
+      'VAR_XCORR_COELUTION',
+      'VAR_XCORR_COELUTION_WEIGHTED',
+      'VAR_XCORR_SHAPE',
+      'VAR_XCORR_SHAPE_WEIGHTED',
+      'VAR_YSERIES_SCORE',
+    ]),
+    'SCORE_MS2': list([
+      'SCORE',
+    ]),
+    'SCORE_PEPTIDE': list([
+      'SCORE',
+    ]),
+    'SCORE_PROTEIN': list([
+      'SCORE',
+    ]),
+  })
+# ---
