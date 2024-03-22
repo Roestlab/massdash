@@ -429,7 +429,7 @@ def reset_app():
 
 def close_app():
     """
-    Closes 
+    Closes the MassDash app by terminating the Streamlit process and closing the browser tab.
     """
     # Give a bit of delay for user experience
     sleep(5)
