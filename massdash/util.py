@@ -19,7 +19,12 @@ from datetime import timedelta
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import psutil
-import pyautogui
+
+try:
+    import pyautogui
+except Exception:
+    # For unittesting or when headless, pyautogui requires a display
+    pyautogui = None
 
 import requests
 import streamlit as st
@@ -436,23 +441,28 @@ def close_app():
     with st.spinner("Shutting down MassDash..."):
         # Give a bit of delay for user experience
         sleep(5)
+        
         # Close streamlit browser tab
-        LOGGER.info("Closing MassDash app browser tab...")
-        try:
-            if USER_PLATFORM_SYSTEM == "Darwin":
-                pyautogui.hotkey('command', 'w')
-            else:
-                pyautogui.hotkey('ctrl', 'w')
-        except Exception as error:
-            LOGGER.exception(error)
-            LOGGER.info("We tried closing MassDash's browser window, but failed. You will have to close it manually. If you are using MacOS, this is most likely due to a permissions error. You can fix this by doing: System Preferences -> Security & Privacy -> Accessibility -> Terminal 'check'")
+        if pyautogui is not None:
+            msg = "Closing MassDash app browser tab..."
+            LOGGER.info(msg)
+            try:
+                if USER_PLATFORM_SYSTEM == "Darwin":
+                    pyautogui.hotkey('command', 'w')
+                else:
+                    pyautogui.hotkey('ctrl', 'w')
+            except Exception as error:
+                LOGGER.exception(error)
+                LOGGER.info("We tried closing MassDash's browser window, but failed. You will have to close it manually. If you are using MacOS, this is most likely due to a permissions error. You can fix this by doing: System Preferences -> Security & Privacy -> Accessibility -> Terminal 'check'")
+
         # Terminate streamlit python process
         pid = os.getpid()
-        LOGGER.info(f"Terminating MassDash app process with PID: {pid}")
+        msg =f"Terminating MassDash app process with PID: {pid}"
+        LOGGER.info(msg)
         try:
             p = psutil.Process(pid)
             p.terminate()
-        except Execution as error:
+        except Exception as error:
             LOGGER.exception(error)
 
 #######################################
