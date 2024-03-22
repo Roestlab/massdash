@@ -13,16 +13,24 @@ from collections import Counter
 # Logging and performance modules
 from functools import wraps
 import contextlib
-from time import time
+from time import time, sleep
 from timeit import default_timer
 from datetime import timedelta
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import psutil
 
+try:
+    import pyautogui
+except Exception:
+    # For unittesting or when headless, pyautogui requires a display
+    pyautogui = None
+
 import requests
 import streamlit as st
 from streamlit.components.v1 import html
+
+from .constants import USER_PLATFORM_SYSTEM
 
 
 #######################################
@@ -425,6 +433,37 @@ def reset_app():
     # set everything to unclicked
     for k in st.session_state.clicked.keys():
         st.session_state.clicked[k] = False
+
+def close_app():
+    """
+    Closes the MassDash app by terminating the Streamlit process and closing the browser tab.
+    """
+    with st.spinner("Shutting down MassDash..."):
+        # Give a bit of delay for user experience
+        sleep(5)
+        
+        # Close streamlit browser tab
+        if pyautogui is not None:
+            msg = "Closing MassDash app browser tab..."
+            LOGGER.info(msg)
+            try:
+                if USER_PLATFORM_SYSTEM == "Darwin":
+                    pyautogui.hotkey('command', 'w')
+                else:
+                    pyautogui.hotkey('ctrl', 'w')
+            except Exception as error:
+                LOGGER.exception(error)
+                LOGGER.info("We tried closing MassDash's browser window, but failed. You will have to close it manually. If you are using MacOS, this is most likely due to a permissions error. You can fix this by doing: System Preferences -> Security & Privacy -> Accessibility -> Terminal 'check'")
+
+        # Terminate streamlit python process
+        pid = os.getpid()
+        msg =f"Terminating MassDash app process with PID: {pid}"
+        LOGGER.info(msg)
+        try:
+            p = psutil.Process(pid)
+            p.terminate()
+        except Exception as error:
+            LOGGER.exception(error)
 
 #######################################
 ## Decorators
