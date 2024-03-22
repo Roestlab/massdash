@@ -37,7 +37,7 @@ Key Features Include:
 [![installubuntu](https://img.shields.io/badge/install-ubuntu-purple?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_linux.deb)](https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_linux.deb)
 [![demoapp](https://img.shields.io/badge/demo-massdash.streamlit.app-brightgreen?link=https%3A%2F%2Fmassdash-test.streamlit.app%2F)](https://massdash.streamlit.app/)
 
-For a one-click installation, click on the corresponding badge corresponding to your operating system, or visit the [latest release page](https://github.com/Roestlab/massdash/releases/tag/v0.0.8) and download the installer for your operating system.
+For a one-click installation, click on the corresponding badge corresponding to your operating system, or visit the [latest release page](https://github.com/Roestlab/massdash/releases/latest) and download the installer for your operating system.
 
 ## (Recommended) Pip Installation
 

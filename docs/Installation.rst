@@ -59,7 +59,7 @@ For those unfamilliar with commandline and only plan on using the GUI, a one cli
 
 |installwindows| |installmacos| |installubuntu|
 
-For a one-click installation, click on the corresponding badge corresponding to your operating system, or visit the `latest release page <https://github.com/Roestlab/massdash/releases/tag/v0.0.8>`_ and download the installer for your operating system.
+For a one-click installation, click on the corresponding badge corresponding to your operating system, or visit the `latest release page <https://github.com/Roestlab/massdash/releases/latest>`_ and download the installer for your operating system.
 
 
 Demo App
