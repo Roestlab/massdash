@@ -38,3 +38,30 @@ Once you are redirected to the browser URL hosting MassDash, you will see a welc
 
    
 Each workflow has a load example data button that will load test data files, which are available as part of the github repository, or alternatively, you can enter the file paths for the input data, and press the Begin Visualization button to load the data and workflow. Click on an above analysis tab to learn more. 
+
+Headless GUI
+++++++++++++
+
+The GUI can also be launched on a server via ssh forwarding. 
+On the server install massdash using PyPi as indicated :doc:`here <Installation>`.
+
+Next launch the GUI using the command below:
+
+.. code-block:: bash
+
+   massdash gui
+
+Two URLs with an IP address and port number will appear in the terminal after launching MassDash; for example:
+
+.. code-block::
+
+   Network URL: http://192.168.142.176:8501
+   External URL: http://142.150.84.40:8501
+
+Enter the following command in a local machine's terminal, replacing :code:`XXXX` with the URL port number (e.g., 8501):
+
+.. code-block:: bash
+
+   ssh -fNL XXXX:localhost:XXXX your_user_name@remote_ip_address
+
+You can now view MassDash on the local machine's browser by clicking on either of the provided URLs.
