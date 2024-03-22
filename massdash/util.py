@@ -13,12 +13,13 @@ from collections import Counter
 # Logging and performance modules
 from functools import wraps
 import contextlib
-from time import time
+from time import time, sleep
 from timeit import default_timer
 from datetime import timedelta
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import psutil
+import pyautogui
 
 import requests
 import streamlit as st
@@ -425,6 +426,21 @@ def reset_app():
     # set everything to unclicked
     for k in st.session_state.clicked.keys():
         st.session_state.clicked[k] = False
+
+def close_app():
+    """
+    Closes 
+    """
+    # Give a bit of delay for user experience
+    sleep(5)
+    # Close streamlit browser tab
+    LOGGER.info("Closing MassDash app browser tab...")
+    pyautogui.hotkey('ctrl', 'w')
+    # Terminate streamlit python process
+    pid = os.getpid()
+    LOGGER.info(f"Terminating MassDash app process with PID: {pid}")
+    p = psutil.Process(pid)
+    p.terminate()
 
 #######################################
 ## Decorators
