@@ -93,14 +93,16 @@ class GenericLoader(ABC):
         pass
 
     def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> TransitionGroupFeatureCollection:
-        '''
-        Loads a PeakFeature object from the results file
+        """
+        Load TransitionGroupFeature objects from the results file for the given peptide precursor
+
         Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
+            pep_id (str): Peptide Sequence
+            charge (int): Charge of the peptide precursor to fetch
+
         Returns:
-            PeakFeature: PeakFeature object containing peak boundaries, intensity and confidence
-        '''
+            TransitionGroupFeatureCollection: TransitionGroupFeatureCollection object containing peak boundaries, intensity and confidence for the specified peptide precursor
+        """
         out = TransitionGroupFeatureCollection()
         for t in self.dataFiles_str:
             runname = basename(t).split('.')[0]
@@ -109,14 +111,16 @@ class GenericLoader(ABC):
     
 
     def loadTopTransitionGroupFeature(self, pep_id: str, charge: int) -> TopTransitionGroupFeatureCollection:
-        '''
-        Loads a PeakFeature object from the results file
+        """
+        Load the top TransitionGroupFeature object from the results file for the given peptide precursor
+
         Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
+            pep_id (str): Peptide Sequence 
+            charge (int): Charge of the peptide precursor to fetch
+
         Returns:
-            TransitionGroup: TransitionGroup object containing peak boundaries, intensity and confidence
-        '''
+            TopTransitionGroupFeatureCollection: TopTransitionGroupFeatureCollection object containing peak boundaries, intensity and confidence for the top feature of the specified peptide precursor
+        """
         out = {}
         for t in self.dataFiles_str:
             runname = basename(t).split('.')[0]
@@ -127,9 +131,11 @@ class GenericLoader(ABC):
     def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
         Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
+
         Args:
             pep_id (str): Peptide ID
             charge (int): Charge
+
         Returns:
             DataFrame: DataFrame containing TransitionGroupObject information across all runs 
         '''

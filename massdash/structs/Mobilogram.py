@@ -10,7 +10,7 @@ from .Data1D import Data1D
 
 class Mobilogram(Data1D):
     ''' 
-    This is a single mobilogram object. Holds the data and metadata of a mobilogram
+    A single mobilogram object storing intensity and ion mobility data.
     '''
     def __init__(self, im, intensity, label):
         super().__init__(im, intensity, label)

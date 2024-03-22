@@ -1,3 +1,7 @@
+"""
+massdash/testing/BokehSnapshotExtension
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
 from typing import Any
 from bokeh.embed import file_html
 import json
@@ -28,9 +32,20 @@ class BokehHTMLParser(HTMLParser):
             self.bokehJson = data
 
 class BokehSnapshotExtension(SingleFileSnapshotExtension):
+    """
+    Handles Bokeh Snapshots. Snapshots are stored as html files and the bokeh .json output from the html files are compared.
+    """
     _file_extension = "html"
 
     def matches(self, *, serialized_data, snapshot_data):
+        """
+        Determine if the serialized data matches the snapshot data.
+
+        Args:
+            serialized_data: Data produced by the test
+            snapshot_data: Saved data from a previous test run
+
+        """
         json_snapshot = self.extract_bokeh_json(snapshot_data)
         json_serialized = self.extract_bokeh_json(serialized_data)
         
@@ -42,13 +57,32 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
 
         return BokehSnapshotExtension.compare_json(json_snapshot[key_json_snapshot], json_serialized[key_json_serialized])
 
-    def extract_bokeh_json(self, html: str) -> str:
+    def extract_bokeh_json(self, html: str) -> json:
+        """
+        Extract the bokeh json from the html file.
+
+        Args:
+            html (str): string containing the html data
+
+        Returns:
+            json: bokeh json found in the html
+        """
         parser = BokehHTMLParser()
         parser.feed(html)
         return json.loads(parser.bokehJson)
 
     @staticmethod
     def compare_json(json1, json2):
+        """
+        Compare two bokeh json objects. This function acts recursively 
+
+        Args:
+            json1: first object
+            json2: second object 
+
+        Returns:
+           bool: True if the objects are equal, False otherwise
+        """
         if isinstance(json1, dict) and isinstance(json2, dict):
             for key in json1.keys():
                 if key not in json2:
@@ -109,4 +143,13 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
             f.write(data)
 
     def serialize(self, data: SerializableData, **kwargs: Any) -> str:
+        """
+        Serialize the bokeh plot as an html string (which is output to a file)
+
+        Args:
+            data (SerializableData): Data to serialize
+
+        Returns:
+            str: html string
+        """
         return file_html(data, CDN)
