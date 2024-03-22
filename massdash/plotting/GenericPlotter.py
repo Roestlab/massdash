@@ -90,7 +90,7 @@ class PlotConfig:
 
 class GenericPlotter(ABC):
     """ 
-    This is a generic plotter class 
+    A Generic plotter abstract class.
     """
 
     def __init__(self, config: PlotConfig):
