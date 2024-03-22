@@ -25,6 +25,8 @@ import requests
 import streamlit as st
 from streamlit.components.v1 import html
 
+from .constants import USER_PLATFORM_SYSTEM
+
 
 #######################################
 ## Logging Utils
@@ -431,16 +433,27 @@ def close_app():
     """
     Closes the MassDash app by terminating the Streamlit process and closing the browser tab.
     """
-    # Give a bit of delay for user experience
-    sleep(5)
-    # Close streamlit browser tab
-    LOGGER.info("Closing MassDash app browser tab...")
-    pyautogui.hotkey('ctrl', 'w')
-    # Terminate streamlit python process
-    pid = os.getpid()
-    LOGGER.info(f"Terminating MassDash app process with PID: {pid}")
-    p = psutil.Process(pid)
-    p.terminate()
+    with st.spinner("Shutting down MassDash..."):
+        # Give a bit of delay for user experience
+        sleep(5)
+        # Close streamlit browser tab
+        LOGGER.info("Closing MassDash app browser tab...")
+        try:
+            if USER_PLATFORM_SYSTEM == "Darwin":
+                pyautogui.hotkey('command', 'w')
+            else:
+                pyautogui.hotkey('ctrl', 'w')
+        except Exception as error:
+            LOGGER.exception(error)
+            LOGGER.info("We tried closing MassDash's browser window, but failed. You will have to close it manually. If you are using MacOS, this is most likely due to a permissions error. You can fix this by doing: System Preferences -> Security & Privacy -> Accessibility -> Terminal 'check'")
+        # Terminate streamlit python process
+        pid = os.getpid()
+        LOGGER.info(f"Terminating MassDash app process with PID: {pid}")
+        try:
+            p = psutil.Process(pid)
+            p.terminate()
+        except Execution as error:
+            LOGGER.exception(error)
 
 #######################################
 ## Decorators

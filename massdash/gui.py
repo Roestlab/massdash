@@ -67,8 +67,11 @@ def main(verbose, perf, perf_output, cloud):
     documentation_button = cols[1].button("📖 Doc", key="documentation_button", help="Open the MassDash documentation in a new tab.", use_container_width=True, on_click=open_page, args=(MASSDASH_DOC_URL,))
     MASSDASH_GITHUB_URL = "https://github.com/Roestlab/massdash"
     github_button = cols[2].button("🐙 GitHub", key="github_button", help="Open the MassDash GitHub repository in a new tab.", use_container_width=True, on_click=open_page, args=(MASSDASH_GITHUB_URL,))
-    stop_button = st.sidebar.button("🛑 Exit", key="stop_button", help="Stop the MassDash app.", on_click=close_app, use_container_width=True)
-
+    try:
+        stop_button = st.sidebar.button("🛑 Exit", key="stop_button", help="Stop the MassDash app.", on_click=close_app, use_container_width=True)
+    except Exception:
+        pass
+        
     st.sidebar.divider()
 
     if st.session_state.workflow == "xic_data" and st.session_state.clicked['load_toy_dataset_xic_data']:
