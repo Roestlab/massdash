@@ -12,7 +12,9 @@ jobs:
       - name: Update version
         run: |
              pwd 
-             $PWD/.github/workflows/scripts/update_version.py --file-path $PWD/massdash/__init__.py
+             $PWD/.github/workflows/scripts/update_init_version.py --file-path $PWD/massdash/__init__.py
+             $PWD/.github/workflows/scripts/version_update_script.py --file-path $PWD/README.md --init_file_path $PWD/massdash/__init__.py
+             $PWD/.github/workflows/scripts/version_update_script.py --file-path $PWD/docs/Installation.rst --init_file_path $PWD/massdash/__init__.py
       - name: Commit version update
         uses: test-room-7/action-update-file@v1
         with:
