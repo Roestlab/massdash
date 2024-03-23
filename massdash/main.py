@@ -9,6 +9,7 @@ import os
 from streamlit.web import cli as stcli
 
 from .constants import USER_PLATFORM_SYSTEM
+from .util import check_free_port
 
 @click.group(chain=True)
 @click.version_option()
@@ -31,9 +32,10 @@ def gui(verbose, perf, perf_output, cloud, server_port, server_headless, global_
     """
     GUI for MassDash.
     """
+    # If user is on MacOS, set KMP_DUPLICATE_LIB_OK to True to avoid MKL errors due to two OpenMP libraries being loaded
     if USER_PLATFORM_SYSTEM == "Darwin":
         os.environ['KMP_DUPLICATE_LIB_OK']='True'
-    
+
     click.echo("Starting MassDash GUI...")
     if verbose:
         click.echo("Arguments:")
@@ -69,8 +71,12 @@ def gui(verbose, perf, perf_output, cloud, server_port, server_headless, global_
                 sys.exit(0)
     streamlit_args = []
     if server_port:
+        # Check if port is free, if not find a free port
+        free_port, port_is_free = check_free_port(server_port)
+        if not port_is_free:
+            click.echo(f"Port {server_port} is not free. Using port {free_port} instead.")
         streamlit_args.append('--server.port')
-        streamlit_args.append(str(server_port))
+        streamlit_args.append(str(free_port))
     if server_headless:
         streamlit_args.append('--server.headless')
         streamlit_args.append('true')
@@ -80,6 +86,7 @@ def gui(verbose, perf, perf_output, cloud, server_port, server_headless, global_
     if not browser_gatherUsageStats:
         streamlit_args.append('--browser.gatherUsageStats')
         streamlit_args.append('false')
+        
     if verbose:
         click.echo(f"Running: streamlit run {filename} {streamlit_args} -- {add_args}")
     sys.argv = ["streamlit", "run", filename, *streamlit_args, "--", *add_args]

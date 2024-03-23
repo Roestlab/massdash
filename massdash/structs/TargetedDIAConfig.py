@@ -94,6 +94,14 @@ class TargetedDIAConfig:
 
         Args:
             config_dict (dict): A dictionary containing configuration values.
+        
+        Example:
+            config_dict = {
+                'rt_window': 50,
+                'im_window': 0.06,
+                'mslevel': [1, 2]
+            }
+            config.update(config_dict)
         """
         for key, value in config_dict.items():
             if hasattr(self, key):

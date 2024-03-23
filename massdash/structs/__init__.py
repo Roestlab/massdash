@@ -2,7 +2,7 @@
 massdash/structs
 ~~~~~~~~~~~~~~~~
 
-This subpackage contains the structures for storing MassDash data
+Internal Data Structures for storing data 
 """
 
 from .Chromatogram import Chromatogram

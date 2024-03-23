@@ -7,6 +7,9 @@ import json
 import math
 
 class PlotlySnapshotExtension(SingleFileSnapshotExtension):
+    """
+    Handles Plotly Snapshots. Snapshots are stored as json files and the json output from the files are compared.
+    """
     _file_extension = "json"
 
     def matches(self, *, serialized_data, snapshot_data):
@@ -15,7 +18,17 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
         return PlotlySnapshotExtension.compare_json(json1, json2)
 
     @staticmethod
-    def compare_json(json1, json2):
+    def compare_json(json1, json2) -> bool:
+        """
+        Compare two plotly json objects. This function acts recursively
+
+        Args:
+            json1: first json
+            json2: second json
+
+        Returns:
+            bool: True if the objects are equal, False otherwise
+        """
         if isinstance(json1, dict) and isinstance(json2, dict):
             for key in json1.keys():
                 if key not in json2:
@@ -69,4 +82,13 @@ class PlotlySnapshotExtension(SingleFileSnapshotExtension):
                 f.write(data)
 
     def serialize(self, data: SerializableData, **kwargs: Any) -> str:
+        """
+        Serialize the data to a json string
+
+        Args:
+            data (SerializableData): plotly data to serialize
+
+        Returns:
+            str: json string of plotly plot
+        """
         return to_json(data, pretty=True, engine='json')

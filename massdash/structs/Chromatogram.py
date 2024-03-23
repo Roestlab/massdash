@@ -12,7 +12,7 @@ from .Data1D import Data1D
 
 class Chromatogram(Data1D):
     ''' 
-    This is a single chromatogram object. Holds the data and metadata of a chromatogram
+    A single chromatogram object storing retention time and intensity data.
     '''
     def __init__(self, rt, intensity, label = 'None'):
         super().__init__(rt, intensity, label)
@@ -20,7 +20,9 @@ class Chromatogram(Data1D):
     def to_pyopenms(self, id: Optional[str] = None):
         '''
         Converts the Chromatogram to an OpenMS Chromatogram
-        id (str): The nativeID of the chromatogram
+
+        Args:
+            id (str): The nativeID of the chromatogram
         '''
         chrom = po.MSChromatogram()
         chrom.set_peaks((self.data, self.intensity))
