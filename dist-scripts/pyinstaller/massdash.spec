@@ -8,7 +8,7 @@ import sys
 from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT
 from PyInstaller.utils.hooks import collect_all, collect_data_files, copy_metadata
 
-from transformers.dependency_versions_check import pkgs_to_check_at_runtime
+# from transformers.dependency_versions_check import pkgs_to_check_at_runtime
 
 sys.setrecursionlimit(sys.getrecursionlimit() * 5)
 
@@ -36,7 +36,7 @@ print("Getting datas and hidden imports for requirements.")
 if sys.platform[:6] == "darwin":
 	os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
-requirements = {'numpy', 'tk', project, "streamlit_javascript", "upsetplot", "distributed", 'torchaudio.lib.libtorchaudio'}
+requirements = {'numpy', 'tk', project, "streamlit_javascript", "upsetplot", "distributed"}
 datas = [(f"{site_packages[index]}/streamlit/runtime", "./streamlit/runtime")]
 hidden_imports = set()
 binaries = []
@@ -98,11 +98,11 @@ datas = [d for d in datas if ("__pycache__" not in d[0]) and (d[1] not in [".", 
 # 	if not os.path.exists(libssl_dll_path):
 # 		datas.append((libssl_lib_path, "."))
 
-for _pkg in ["python","accelerate"]:
-	if _pkg in pkgs_to_check_at_runtime:
-		pkgs_to_check_at_runtime.remove(_pkg)
-for _pkg in pkgs_to_check_at_runtime:
-	datas += copy_metadata(_pkg)
+# for _pkg in ["python","accelerate"]:
+# 	if _pkg in pkgs_to_check_at_runtime:
+# 		pkgs_to_check_at_runtime.remove(_pkg)
+# for _pkg in pkgs_to_check_at_runtime:
+# 	datas += copy_metadata(_pkg)
 
 
 datas += collect_data_files("streamlit")
@@ -118,7 +118,7 @@ datas += copy_metadata("tk")
 datas += collect_data_files("massdash")
 datas += copy_metadata("massdash")
 
-hidden_imports = ['pyopenms', 'joblib', 'tkinter', 'tkinter.filedialog', 'massdash', 'torchaudio.lib.libtorchaudio']
+hidden_imports = ['pyopenms', 'joblib', 'tkinter', 'tkinter.filedialog', 'massdash']
 
 a = Analysis(
 	[script_name],

@@ -3,11 +3,11 @@ if __name__ == "__main__":
     try:
         import os
         import massdash.main
-        from massdash.util import get_free_port
+        from massdash.util import check_free_port
         if sys.platform[:6] == "darwin":
 	        os.environ['KMP_DUPLICATE_LIB_OK']='True'
-        use_port = str(get_free_port())
-        massdash.main.gui(['--verbose', '--server_port', use_port, '--no_global_developmentMode', '--no_browser_gatherUsageStats'], standalone_mode=False)
+        use_port, port_available = check_free_port(8501)
+        massdash.main.gui(['--verbose', '--server_port', str(use_port), '--no_global_developmentMode', '--no_browser_gatherUsageStats'], standalone_mode=False)
     except ImportError:
         import sys
         import traceback

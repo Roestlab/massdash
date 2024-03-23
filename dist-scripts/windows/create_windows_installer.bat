@@ -22,9 +22,9 @@ pip install -r requirements.txt
 @REM pip install numpy==1.24.2
 pip install tk
 pip install onnxruntime
-pip install torch
-pip install torchmetrics
-pip install transformers
+@REM pip install torch
+@REM pip install torchmetrics
+@REM pip install transformers
 pip install setuptools
 pip install build
 pip install pyinstaller==6.4.0

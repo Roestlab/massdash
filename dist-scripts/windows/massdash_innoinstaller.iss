@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "massdash"
-#define MyAppVersion "0.0.8"
+#define MyAppVersion "0.0.9"
 #define MyAppPublisher "University of Toronto, Roest Lab"
 #define MyAppURL "https://github.com/Roestlab/massdash"
 #define MyAppExeName "massdash.exe"
