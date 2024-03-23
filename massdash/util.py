@@ -27,6 +27,8 @@ except Exception:
     pyautogui = None
 
 import requests
+import socket
+import socketserver
 import streamlit as st
 from streamlit.components.v1 import html
 
@@ -407,6 +409,27 @@ def rgb_to_hex(rgb):
     """
     return "#{:02x}{:02x}{:02x}".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
 
+def check_free_port(free_port: int = 8501):
+    """
+    Check if the specified port is available. If not, find a free port.
+    
+    Args:
+        free_port (int): The port to check for availability.
+        
+    Returns:
+        tuple: A tuple containing the free port and a boolean indicating if the port is free.
+    """
+    port_is_free = True
+    # Creates a new socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Check if the port is available
+    if sock.connect_ex(('localhost', free_port)) == 0:
+        port_is_free = False
+        with socketserver.TCPServer(("localhost", 0), None) as s:
+            free_port = s.server_address[1]
+    # Close the socket
+    sock.close()
+    return free_port, port_is_free
 
 def open_page(url: str):
     """
