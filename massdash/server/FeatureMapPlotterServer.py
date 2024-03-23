@@ -58,7 +58,7 @@ class FeatureMapPlotterServer:
         self.peak_picking_settings = peak_picking_settings
         self.plot_obj_dict = defaultdict(list) # a dictionary of plot objects with the mapping <RunName>:[<PlotObject>] (multiple plots per run allowed)
         self.verbose = verbose
-
+        self.noFeaturesWarning = [] # runs with no features found (only relevant for 1D plots with peak picking enabled)
 
     def generate_plots(self):
         """
@@ -103,8 +103,7 @@ class FeatureMapPlotterServer:
                 tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data=chromatograms, 
                                                                             spec_lib=self.chrom_loader.libraryFile)
             elif self.peak_picking_settings.do_peak_picking == 'none':
-                tr_group_feature_data = None
-                pass
+                tr_group_feature_data = TransitionGroupFeatureCollection()
 
             else:
                 raise ValueError(f"Invalid peak picking algorithm: {self.peak_picking_settings.do_peak_picking}. Valid options are 'Feature File Boundaries', 'pyPeakPickerMRM', 'MRMTransitionGroupPicker', and 'Conformer'.")
@@ -186,7 +185,7 @@ class FeatureMapPlotterServer:
 
     def _generate_plots_helper(self, tr_group_collection: TransitionGroupCollection, 
                                plot_settings_dict: dict, 
-                               tr_group_feature_collection: TransitionGroupFeatureCollection=None):
+                               tr_group_feature_collection: TransitionGroupFeatureCollection=TransitionGroupFeatureCollection()):
         """
         Generates a plot object for a given transition group and plot settings.
 
@@ -204,9 +203,28 @@ class FeatureMapPlotterServer:
                 plot_config.update(plot_settings_dict)
                 plot_settings_dict['title'] = basename(run)
                 plotter = InteractivePlotter(plot_config, self.verbose)
+                feature_legend_labels = []
+
+                if run in tr_group_feature_collection.keys():
+                    feature_data =  tr_group_feature_collection[run] # get the feature data
+
+                    # check different conditions to determine if features should be plotted and how features should be plotted
+                    if self.peak_picking_settings.do_peak_picking == 'none':
+                        pass
+                    elif len(feature_data) == 0: # no features found even though peak picking was performed
+                        self.noFeaturesWarning.append(run)
+                    # display features differently dependening on the peak picking method
+                    elif self.peak_picking_settings.do_peak_picking == 'Feature File Boundaries': # also display q values
+                        feature_legend_labels = [ f"Feature {i+1}: q={feature.qvalue:.2e}" for i, feature in enumerate(feature_data)]
+                    else:
+                        feature_legend_labels = [ f"Feature {i+1}" for i in range(len(feature_data))]
+                
+                # plot the chromatograms (do not display yet)
                 self.plot_obj_dict[run].append(plotter.plot(tr_group, 
-                                                            features=None if tr_group_feature_collection is None else tr_group_feature_collection[run], 
-                                                            plot_type=plot_settings_dict['plot_type']))
+                                                    features=None if not tr_group_feature_collection else tr_group_feature_collection[run], 
+                                                    plot_type=plot_settings_dict['plot_type'],
+                                                    feature_legend_labels=feature_legend_labels))
+
         except ValueError:
             st.error("Failed to generate plot! There may be no data for selected transition group.")
   

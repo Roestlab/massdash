@@ -8,6 +8,9 @@ import sys
 import os
 from streamlit.web import cli as stcli
 
+from .constants import USER_PLATFORM_SYSTEM
+from .util import check_free_port
+
 @click.group(chain=True)
 @click.version_option()
 def cli():
@@ -21,10 +24,14 @@ def cli():
 @click.option('--perf', '-t', is_flag=True, help="Enables measuring and tracking of performance.")
 @click.option('--perf_output', '-o', default='MassDash_Performance_Report.txt', type=str, help="Name of the performance report file to writeout to.")
 @click.option('--server_port', '-p', default=8501, type=int, help="Port to run the MassDash GUI on.")
-def gui(verbose, perf, perf_output, server_port):
+@click.option('--cloud', '-c', is_flag=True, help="Set to True to emulate running on streamlit cloud, if False detect if running on streamlit cloud.")
+def gui(verbose, perf, perf_output, server_port, cloud):
     """
     GUI for MassDash.
     """
+    # If user is on MacOS, set KMP_DUPLICATE_LIB_OK to True to avoid MKL errors due to two OpenMP libraries being loaded
+    if USER_PLATFORM_SYSTEM == "Darwin":
+        os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
     click.echo("Starting MassDash GUI...")
     if verbose:
@@ -41,6 +48,8 @@ def gui(verbose, perf, perf_output, server_port):
         add_args.append('--verbose')
     if perf:
         add_args.append('--perf')
+    if cloud:
+        add_args.append('--cloud')
     if perf_output and perf:
         add_args.append('--perf_output')
         add_args.append(perf_output)
@@ -59,8 +68,13 @@ def gui(verbose, perf, perf_output, server_port):
                 sys.exit(0)
     streamlit_args = []
     if server_port:
+        # Check if port is free, if not find a free port
+        free_port, port_is_free = check_free_port(server_port)
+        if not port_is_free:
+            click.echo(f"Port {server_port} is not free. Using port {free_port} instead.")
         streamlit_args.append('--server.port')
-        streamlit_args.append(str(server_port))
+        streamlit_args.append(str(free_port))
+        
     if verbose:
         click.echo(f"Running: streamlit run {filename} {streamlit_args} -- {add_args}")
     sys.argv = ["streamlit", "run", filename, *streamlit_args, "--", *add_args]

@@ -36,6 +36,7 @@ requires = [
     "tk",
     "tqdm",
     "upsetplot",
+    "pyautogui",
     "pytest",
     "syrupy"
 ]

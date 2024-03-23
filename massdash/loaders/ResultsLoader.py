@@ -28,8 +28,7 @@ import plotly.express as px
 
 class ResultsLoader:
     ''' 
-    Class for loading Chromatograms and peak features
-    Classes which inherit from this should contain one results file and one transition file
+    Class for loading Results files. Base class for GenericLoader
     '''
     def __init__(self, 
                  rsltsFile: Union[str, List[str]], 
@@ -126,14 +125,16 @@ class ResultsLoader:
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname'))
 
     def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> TransitionGroupFeatureCollection:
-        '''
-        Loads a PeakFeature object from the results file
+        """
+        Load TransitionGroupFeature objects from the results file for the given peptide precursor
+
         Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
+            pep_id (str): Peptide Sequence
+            charge (int): Charge of the peptide precursor to fetch
+
         Returns:
-            PeakFeature: PeakFeature object containing peak boundaries, intensity and confidence
-        '''
+            TransitionGroupFeatureCollection: TransitionGroupFeatureCollection object containing peak boundaries, intensity and confidence for the specified peptide precursor
+        """
         out = TransitionGroupFeatureCollection()
         for t in self.runNames:
             runname = basename(t).split('.')[0]
@@ -145,10 +146,12 @@ class ResultsLoader:
     
     def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
-        Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
+        Loads a pandas dataframe of TransitionGroupFeatures across all runs 
+
         Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
+            pep_id (str): Peptide Sequence
+            charge (int): peptide Charge
+
         Returns:
             DataFrame: DataFrame containing TransitionGroupObject information across all runs 
         '''
@@ -163,11 +166,13 @@ class ResultsLoader:
     def loadTopTransitionGroupFeature(self, pep_id: str, charge: int) -> TransitionGroupFeatureCollection:
         '''
         Loads a PeakFeature object from the results file
+
         Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
+            pep_id (str): Peptide Sequence
+            charge (int): Peptide Charge
+
         Returns:
-            TransitionGroup: TransitionGroup object containing peak boundaries, intensity and confidence
+            TransitionGroupFeatureCollection: object containing a list of collection of TransitionGroupFeatures (e.g. peak boundaries, intensity and confidence)
         '''
         out = TransitionGroupFeatureCollection()
         for t in self.runNames:

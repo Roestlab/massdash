@@ -2,7 +2,7 @@
 massdash/testing
 ~~~~~~~~~~~~~~~~
 
-The :mod:`massdash.testing` subpackage contains classes for testing massdash. SnapShotExtension classes are based off of syrupy snapshots
+This package contains classes for testing massdash. SnapShotExtension classes are based off of syrupy snapshots
 """
 
 from .BokehSnapshotExtension import BokehSnapshotExtension

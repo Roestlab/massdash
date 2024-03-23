@@ -6,7 +6,8 @@ massdash/ui/util
 from os import getcwd
 from os.path import dirname
 import streamlit as st
-from tkinter import Tk, filedialog
+
+from ..constants import USER_PLATFORM_SYSTEM
 
 def clicked(button):
     """
@@ -61,7 +62,11 @@ def tk_file_dialog(file_type: list = [], title: str = "Select File", parent_dir:
 
     Returns:
         str: The path to the selected file.
+    
+    Warning:
+        This function is not avaliable in a streamlit cloud context.
     """
+    from tkinter import Tk, filedialog
     root = Tk()
     root.withdraw()
     file_type.extend([("All files", "*.*")])
@@ -91,9 +96,10 @@ def display_input_section(title, key_base: str, file_extension: str, dialog_titl
     with st_cols[0]:
         st.write("\n")
         st.write("\n")
-        dialog_button = st.button("📁", key=f'{key_base}_browse', help=f"Browse for the {title} file.")
-        if dialog_button:
-            st.session_state.tmp_input_dict[key_base] = tk_file_dialog(file_extension, dialog_title, get_parent_directory(st.session_state.tmp_input_dict[key_base]))    
+        if USER_PLATFORM_SYSTEM != "Darwin":
+            dialog_button = st.button("📁", key=f'{key_base}_browse', help=f"Browse for the {title} file.")
+            if dialog_button:
+                st.session_state.tmp_input_dict[key_base] = tk_file_dialog(file_extension, dialog_title, get_parent_directory(st.session_state.tmp_input_dict[key_base]))    
     with st_cols[1]:
         input_value = st.text_input("Enter file path", value=st.session_state.tmp_input_dict[key_base],
                                     placeholder=placeholder, key=f'{key_base}_tmp',

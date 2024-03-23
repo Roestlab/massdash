@@ -22,21 +22,38 @@ MassDash
 |pypiv| |pypidownload| |Python| |dockerv| |dockerpull| |Licence|
 
 
-Welcome to MassDash Documentation! MassDash is a powerful platform designed for researchers and analysts in the field of mass spectrometry. By providing a centralized web-based dashboard, MassDash facilitates data analysis and experiment design by enabling users to visualize chromatograms, test algorithms, and optimize parameters. This tool offers a flexible environment for mass spectrometry research, with notable specailty in handling Data-Independent Acquisition (DIA) data.
+Welcome to MassDash Documentation! MassDash is a visualization and data exploration platform for Data-Independent Acquisition mass spectrometry data. 
 
+Key Features Include:
 
-Features
+* **Chromatogram Visualization** - Easily view and analyze chromatograms for an in-depth examination of peptide precursors of interest.
+* **2D and 3D Visualizations** - Visualization of ion mobility enhacanced mass spectrometry and other 2D and 3D plots.
+* **On the fly parameter optimization** - Adjust peak picking parameters on the fly or experiment with novel deep learning based peak picking approaches. 
+* **Algorithm testing** -  Develop and fine-tune custom algorithms by interfacing with MassDash's various data analysis algorithms and workflows.
+* **Usage Flexibility** - User-friendly web based dashboard for quick visualizations, advanced python package for more complex applications 
+
+Contribute
+**********
+
+* `Issues Tracker <https://github.com/Roestlab/massdash/issues>`_
+* `Source Code <https://github.com/Roestlab/massdash/tree/main/massdash>`_
+
+Support
+*******
+
+If you are having issues or would like to propose a new feature, please use the `issues tracker <https://github.com/Roestlab/massdash/issues>`_.
+
+License
+*******
+
+This project is licensed under the BSD 3-Clause license.
+
+Citation
 ********
+If MassDash was usefull in your research please cite the following:
 
-MassDash empowers researchers to streamline mass spectrometry workflows, experiment with data analysis algorithms, and optimize parameters to enhance research accuracy and efficiency. Below are some of MassDash's notable features:
+Sing, J. C., Charkow, J., AlHigaylan, M., Horecka, I., Xu, L., & Roest, H. L. (2024). MassDash: A Web-based Dashboard for Targeted Mass Spectrometry Visualization (p. 2024.01.15.575772). bioRxiv. https://doi.org/10.1101/2024.01.15.575772
 
-- **Chromatogram visualization**: Easily view and analyze chromatograms for an in-depth examination of mass spectrometry data.
-- **Algorithm testing**: Develop and fine-tune custom algorithms by interfacing with MassDash's various data analysis algorithms and workflows.
-- **Parameter optimization**: Ensure optimal results for your experiment by optimizing parameters for data analysis workflows, such as OpenSwathWorkflow.
-- **User-friendly dashboard**: MassDash's dashboard is designed with users in mind, facilitating research productivity in both beginners and experts in the field.
-- **Data exploration**: Explore mass spectrometry data with our suite of tools and gain insights to make informed research decisions.
-- **Customization**: Flexibly tailor data analysis parameters and results for specific research needs.
-- **Rapid prototyping**: Save time and resource when developing mass spectrometry workflows by quickly prototyping and testing research ideas.
 
 Please Click below for More Information:
 

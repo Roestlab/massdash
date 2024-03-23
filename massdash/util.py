@@ -6,22 +6,33 @@ massdash/util
 import os
 import sys
 import importlib
-from typing import Optional
+from typing import Optional, List
 from pathlib import Path
+from collections import Counter
 
 # Logging and performance modules
 from functools import wraps
 import contextlib
-from time import time
+from time import time, sleep
 from timeit import default_timer
 from datetime import timedelta
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import psutil
 
+try:
+    import pyautogui
+except Exception:
+    # For unittesting or when headless, pyautogui requires a display
+    pyautogui = None
+
 import requests
+import socket
+import socketserver
 import streamlit as st
 from streamlit.components.v1 import html
+
+from .constants import USER_PLATFORM_SYSTEM
 
 
 #######################################
@@ -112,7 +123,7 @@ def time_block():
     start = end = default_timer()
     yield lambda: timedelta(seconds=end - start)
     end = default_timer()
-    
+
 @contextlib.contextmanager
 def measure_memory_block():
     """
@@ -161,7 +172,7 @@ class MeasureBlock:
             with open(self.perf_output, 'a', encoding='utf-8') as f:
                 f.write(f'{self.metric_name}\t{self.execution_time}\t{self.memory_usage}\n')
 
-        
+
 #######################################
 ## Data Handling Utils
 
@@ -180,7 +191,7 @@ def copy_attributes(source_instance, destination_instance):
     for attr_name, attr_value in vars(source_instance).items():
         # Set the attribute in the destination instance
         setattr(destination_instance, attr_name, attr_value)
-    
+
 def check_streamlit():
     """
     Function to check whether python code is run within streamlit
@@ -309,6 +320,44 @@ def file_basename_without_extension(file_path):
     
     return base_name
 
+def infer_unique_filenames(filenames: List, sep: str='_'):
+    """
+    Infer unique filenames by removing substrings that occur in all filenames.
+
+    Args:
+        filenames (list): A list of filenames.
+        sep (str, optional): The separator used to split filenames into parts. Defaults to '_'.
+
+    Returns:
+        dict: A dictionary mapping original filenames to the filtered filenames.
+    """
+    if len(filenames) == 1:
+        return {filenames[0]: filenames[0]}
+    
+    # Create dictionary mapping filenames to their parts
+    filename_dict = {filename: filename.split(sep) for filename in filenames}
+
+    # Flatten the list of substrings
+    all_substrings = [substring for sublist in filename_dict.values() for substring in sublist]
+
+    # Count occurrences of each substring
+    substring_counts = Counter(all_substrings)
+
+    # Get the total number of filenames
+    total_files = len(filenames)
+
+    # Remove substrings that occur in all filenames
+    remove_substrings = [substring for substring, count in substring_counts.items() if count == total_files]
+
+    # Pop substrings from filename_dict
+    for filename in filename_dict:
+        filename_dict[filename] = [substring for substring in filename_dict[filename] if substring not in remove_substrings]
+
+    # Join the remaining substrings and maintain mapping to original filenames in dict
+    filtered_filenames = {filename: sep.join(substrings) for filename, substrings in filename_dict.items()}
+
+    return filtered_filenames
+
 def get_download_folder():
     """
     Get the download folder based on the user's operating system.
@@ -360,6 +409,27 @@ def rgb_to_hex(rgb):
     """
     return "#{:02x}{:02x}{:02x}".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
 
+def check_free_port(free_port: int = 8501):
+    """
+    Check if the specified port is available. If not, find a free port.
+    
+    Args:
+        free_port (int): The port to check for availability.
+        
+    Returns:
+        tuple: A tuple containing the free port and a boolean indicating if the port is free.
+    """
+    port_is_free = True
+    # Creates a new socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Check if the port is available
+    if sock.connect_ex(('localhost', free_port)) == 0:
+        port_is_free = False
+        with socketserver.TCPServer(("localhost", 0), None) as s:
+            free_port = s.server_address[1]
+    # Close the socket
+    sock.close()
+    return free_port, port_is_free
 
 def open_page(url: str):
     """
@@ -374,7 +444,7 @@ def open_page(url: str):
         </script>
     """ % (url)
     html(open_script)
-    
+
 def reset_app():
     """
     Resets the application by clearing cache data and resources, and resetting session state variables.
@@ -383,6 +453,40 @@ def reset_app():
     st.cache_resource.clear()
     st.session_state.WELCOME_PAGE_STATE = True
     st.session_state.workflow = None
+    # set everything to unclicked
+    for k in st.session_state.clicked.keys():
+        st.session_state.clicked[k] = False
+
+def close_app():
+    """
+    Closes the MassDash app by terminating the Streamlit process and closing the browser tab.
+    """
+    with st.spinner("Shutting down MassDash..."):
+        # Give a bit of delay for user experience
+        sleep(5)
+        
+        # Close streamlit browser tab
+        if pyautogui is not None:
+            msg = "Closing MassDash app browser tab..."
+            LOGGER.info(msg)
+            try:
+                if USER_PLATFORM_SYSTEM == "Darwin":
+                    pyautogui.hotkey('command', 'w')
+                else:
+                    pyautogui.hotkey('ctrl', 'w')
+            except Exception as error:
+                LOGGER.exception(error)
+                LOGGER.info("We tried closing MassDash's browser window, but failed. You will have to close it manually. If you are using MacOS, this is most likely due to a permissions error. You can fix this by doing: System Preferences -> Security & Privacy -> Accessibility -> Terminal 'check'")
+
+        # Terminate streamlit python process
+        pid = os.getpid()
+        msg =f"Terminating MassDash app process with PID: {pid}"
+        LOGGER.info(msg)
+        try:
+            p = psutil.Process(pid)
+            p.terminate()
+        except Exception as error:
+            LOGGER.exception(error)
 
 #######################################
 ## Decorators

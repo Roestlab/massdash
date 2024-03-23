@@ -10,6 +10,9 @@ import pandas as pd
 from syrupy.types import SerializableData
 
 class PandasSnapshotExtension(SingleFileSnapshotExtension):
+    """
+    Handles Pandas Snapshots. Snapshots are stored as hdf files and the dataframes are compared using pandas testing methods
+    """
     _file_extension = "hdf"
 
     def matches(self, *, serialized_data, snapshot_data):

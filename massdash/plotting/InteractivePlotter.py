@@ -152,7 +152,8 @@ class InteractivePlotter(GenericPlotter):
                             p: figure, 
                             features: List[TransitionGroupFeature],
                             transitionGroup: TransitionGroup,
-                            legend_labels:Optional[List[str]] = []) -> None:
+                            legend_labels:Optional[List[str]] = [],
+                            boundary_width:float = 0.3) -> None:
         """
         Adds peak boundaries to a Bokeh figure.
 
@@ -161,8 +162,11 @@ class InteractivePlotter(GenericPlotter):
             features (List[TransitionGroupFeature]): A list of peak features to highlight on the plot.
             transitionGroup (TransitionGroup): The TransitionGroup object containing precursor and transition data.
             legend_labels (List[str], optional): A list of labels for the peak features. Defaults to [].
+            boundary_width (float, optional): The width of the peak boundary lines. Defaults to 0.1.
         """
-        if len(features) <= 8:
+        if len(features) == 1:
+            dark2_palette = ['black'] # Use black for single feature
+        elif len(features) <= 8:
             dark2_palette = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666']
         else:
             dark2_palette = Viridis256[0:len(features)]
@@ -194,12 +198,12 @@ class InteractivePlotter(GenericPlotter):
                     'bottom_int'    : [0]})
             
             # Left border
-            leftWidth_line = p.vbar(x='leftWidth', bottom='bottom_int', top='Intensity', width=0.1, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+            leftWidth_line = p.vbar(x='leftWidth', bottom='bottom_int', top='Intensity', width=boundary_width, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
             if createBoundaryLegend:
                 legend_items.append((legend_labels[idx], [leftWidth_line]))
 
             # Right border
-            p.vbar(x='rightWidth', bottom='bottom_int', top='Intensity', width=0.1, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+            p.vbar(x='rightWidth', bottom='bottom_int', top='Intensity', width=boundary_width, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
 
             # Add a point to the left border to attached the hover tool to
             leftWidth_apex_point = p.circle(source=source, x='leftWidth', y='Intensity', name='leftWidth_apex_point', alpha=0) 
@@ -269,13 +273,21 @@ class InteractivePlotter(GenericPlotter):
                 ]
 
         # Create a Bokeh figure
-        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=400, tooltips=TOOLTIPS)
+        p = figure(x_axis_label=self.x_axis_label, y_axis_label=self.y_axis_label, width=800, height=450, tooltips=TOOLTIPS)
 
         # Add title
         if self.title is not None:
             p.title.text = self.title
-            p.title.text_font_size = "16pt"
+            p.title.text_font_size = "13pt"
             p.title.align = "center"
+        
+        p.xaxis.axis_label_text_font_size = "11pt"
+        p.yaxis.axis_label_text_font_size = "11pt"
+
+        # Change x-axis tick text font size
+        p.xaxis.major_label_text_font_size = "11pt"  
+        p.yaxis.major_label_text_font_size = "11pt"
+
 
         if self.subtitle is not None:
             # Create a subtitle
@@ -310,19 +322,20 @@ class InteractivePlotter(GenericPlotter):
                 line = self.process_chrom(p, transitionChrom, label, color=colors[i], line_type='solid', is_precursor=False, transitionGroup=transitionGroup)
                 legend_items.append((label, [line]))
         
-        # Add legend items to the legend
-        legend.items = legend_items
+        if not self.hide_legends:
+            # Add legend items to the legend
+            legend.items = legend_items
 
-        # Add the legend to the plot
-        p.add_layout(legend, 'right')
+            # Add the legend to the plot
+            p.add_layout(legend, 'right')
 
-        p.legend.location = "top_left"
-        # p.legend.click_policy="hide"
-        p.legend.click_policy="mute"
+            p.legend.location = "top_left"
+            # p.legend.click_policy="hide"
+            p.legend.click_policy="mute"
+            p.legend.title = "Transition"
+            p.legend.label_text_font_size = "10pt"
 
         # Customize the plot
-        p.legend.title = "Transition"
-        p.legend.label_text_font_size = "10pt"
         p.grid.visible = True
         p.toolbar_location = "above"
 

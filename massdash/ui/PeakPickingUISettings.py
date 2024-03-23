@@ -21,6 +21,7 @@ class PeakPickingUISettings:
     peak_pick_on_displayed_chrom : bool
         Whether to perform peak picking on the displayed chromatogram. Defaults to True.
     peak_picker_algo_settings : pyPeakPickerMRMUISettings/MRMTransitionGroupPickerUISettings
+    isStreamlitCloud (bool): Set to True if running (or emulate running) on streamlit cloud, if False not on the cloud
     
     Methods:
     create_ui : None
@@ -28,10 +29,11 @@ class PeakPickingUISettings:
     gety_settings : dict
         Returns the current algorithm settings as a dictionary.
     """
-    def __init__(self):
+    def __init__(self, isStreamlitCloud: bool = False):
         self.do_peak_picking = 'none'
         self.peak_pick_on_displayed_chrom = True
         self.peak_picker_algo_settings = None
+        self.isStreamlitCloud = isStreamlitCloud # Set to True if running (or emulate running) on streamlit cloud, if False not on the cloud
             
     def create_ui(self, plot_settings: ChromatogramPlotUISettings):
         """
@@ -61,7 +63,7 @@ class PeakPickingUISettings:
             self.peak_picker_algo_settings.create_ui(plot_settings)
         elif self.do_peak_picking == "Conformer":
             self.peak_picker_algo_settings = ConformerPickerUISettings(self)
-            self.peak_picker_algo_settings.create_ui(plot_settings)
+            self.peak_picker_algo_settings.create_ui(plot_settings, self.isStreamlitCloud)
 
     def get_settings(self):
         """

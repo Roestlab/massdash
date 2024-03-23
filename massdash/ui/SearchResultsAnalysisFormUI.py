@@ -84,17 +84,17 @@ class SearchResultsAnalysisFormUI:
             st.session_state.clicked['load_toy_dataset_search_results_analysis'] = False
             st.session_state.workflow = "search_results_analysis"
     
-    def create_ui(self):
-        st.write("This workflow is designed to analyze and investigate the search results from a DIA experiment (s). and for comparisons between search results.")
-        
+    def create_ui(self, isStreamlitCloud: bool = False):
         st.title("Search Results Analysis")
-        
+        st.write("This workflow is designed to analyze and investigate the search results from a DIA experiment(s) and for comparisons between search results.")
+
         load_toy_dataset = st.button('Load Search Results Analysis Example', on_click=clicked , args=['load_toy_dataset_search_results_analysis'], key='load_toy_dataset_search_results_analysis', help="Loads the search results analysis example dataset.")
         
         if load_toy_dataset:
             st.session_state.workflow = "search_results_analysis"
             st.session_state.WELCOME_PAGE_STATE = False
             
-        # Create form for inputting file paths and submit button
-        self.create_forum(st_container=st, st_type="main")
+        if not isStreamlitCloud:
+            # Create form for inputting file paths and submit button
+            self.create_forum(st_container=st, st_type="main")
     
