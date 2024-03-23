@@ -50,7 +50,7 @@ def update_version(file_path, init_file_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Update the version number in the input file based on the current version in the __init__.py file.")
-    parser.add_argument("--file_path", type=str, help="Path to the input file")
+    parser.add_argument("--file-path", type=str, help="Path to the input file")
     parser.add_argument("--init_file_path", type=str, help="Path to the __init__.py file to get the version number from")
 
     args = parser.parse_args()
