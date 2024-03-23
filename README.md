@@ -17,7 +17,7 @@
 [![dockerv](https://img.shields.io/docker/v/singjust/massdash?label=docker&color=green)](https://hub.docker.com/r/singjust/massdash)
 [![dockerpull](https://img.shields.io/docker/pulls/singjust/massdash?color=green)](https://hub.docker.com/r/singjust/massdash)
 [![continuous-integration](https://github.com/Roestlab/massdash/workflows/continuous-integration/badge.svg)](https://github.com/Roestlab/massdash/actions)
-[![demoapp](https://img.shields.io/badge/demo-massdash.streamlit.app-brightgreen?link=https%3A%2F%2Fmassdash-test.streamlit.app%2F)](https://massdash-test.streamlit.app/)
+[![demoapp](https://img.shields.io/badge/demo-massdash.streamlit.app-brightgreen?link=https%3A%2F%2Fmassdash.streamlit.app%2F)](https://massdash.streamlit.app/)
 [![readthedocs](https://img.shields.io/readthedocs/massdash)](https://massdash.readthedocs.io/en/latest/index.html)
 [![Licence](https://img.shields.io/badge/License-BSD_3--Clause-orange.svg)](https://raw.githubusercontent.com/RoestLab/massdash/main/LICENSE)
 
@@ -35,7 +35,7 @@ Key Features Include:
 [![installwindows](https://img.shields.io/badge/install-windows-blue?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_windows.exe)](https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_windows.exe)
 [![installmacos](https://img.shields.io/badge/install-macos-white?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_macos.pkg)](https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_macos.pkg)
 [![installubuntu](https://img.shields.io/badge/install-ubuntu-purple?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_linux.deb)](https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_linux.deb)
-[![demoapp](https://img.shields.io/badge/demo-massdash.streamlit.app-brightgreen?link=https%3A%2F%2Fmassdash-test.streamlit.app%2F)](https://massdash.streamlit.app/)
+[![demoapp](https://img.shields.io/badge/demo-massdash.streamlit.app-brightgreen?link=https%3A%2F%2Fmassdash.streamlit.app%2F)](https://massdash.streamlit.app/)
 
 For a one-click installation, click on the corresponding badge corresponding to your operating system, or visit the [latest release page](https://github.com/Roestlab/massdash/releases/latest) and download the installer for your operating system.
 
@@ -88,7 +88,7 @@ For more information on the GUI, please refer to the [documentation](https://mas
 
 ## Demo
 
-To run a demo version of MassDash, you can visit the streamlit cloud hosted demo version [here](https://massdash-test.streamlit.app/). Note that full functionality is not avaliable in the demo app.
+To run a demo version of MassDash, you can visit the streamlit cloud hosted demo version [here](https://massdash.streamlit.app/). Note that full functionality is not avaliable in the demo app.
 
 
 ## Documentation
