@@ -726,9 +726,13 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         Returns:
             pd.DataFrame: A pandas DataFrame with 3 columns: Decoy, Score, and Run Name
         """
+        score = score.upper()
+        score_table = score_table.upper()
         if score not in self.validScores[score_table]:
-            print(self.validScores)
             raise ValueError(f"Score {score} in {score_table} table not a valid score for plotting")
+        
+        if context is None and score_table in ['SCORE_PEPTIDE', 'SCORE_PROTEIN']:
+            raise ValueError("Context must be specified for peptide and protein level scores")
 
         # get the query
         if score_table in ['FEATURE_MS1', 'FEATURE_MS2']:
@@ -737,9 +741,9 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 DECOY,
                 RUN_ID
             FROM {score_table}
-            INNER JOIN
-            PRECURSOR ON {score_table}.PRECURSOR_ID = PRECURSOR.ID
-            SCORE_MS2 ON {score_table}.ID = SCORE_MS2.FEATURE_ID
+            INNER JOIN PRECURSOR ON {score_table}.FEATURE_ID = PRECURSOR.ID
+            INNER JOIN SCORE_MS2 ON {score_table}.FEATURE_ID = SCORE_MS2.FEATURE_ID 
+            INNER JOIN FEATURE ON {score_table}.FEATURE_ID = FEATURE.ID
             WHERE RANK == 1
             '''
         elif score_table in ['SCORE_MS2']:
@@ -761,20 +765,25 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 RUN_ID
                 FROM {score_table}
                 INNER JOIN {analyte} ON {score_table}.{analyte}_ID = {analyte}.ID
-                WHERE CONTEXT == {context} '''
+                WHERE CONTEXT == "{context}" '''
             else: # no run id because global context
                 stmt = f'''
                 SELECT {score_table}.{score} as SCORE,
-                DECOY,
+                DECOY
                 FROM {score_table}
                 INNER JOIN {analyte} ON {score_table}.{analyte}_ID = {analyte}.ID
-                WHERE CONTEXT == {context} '''
+                WHERE CONTEXT == "{context}" '''
+                print(stmt)
         else:
             raise ValueError(f"Score table {score_table} not recognized or not yet implemented")
         
         df = pd.read_sql(stmt, self.conn)
-        df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
-        return df[['RUN_NAME', 'DECOY', 'SCORE']]
+        if context != 'global':
+            df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
+            return df[['RUN_NAME', 'DECOY', 'SCORE']]
+        else: # context is global, no runs associated
+            return df[['DECOY', 'SCORE']]
+
 
     def get_score_tables(self):
         """

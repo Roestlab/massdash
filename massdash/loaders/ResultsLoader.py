@@ -43,6 +43,8 @@ class ResultsLoader:
         self.verbose = verbose
         self.libraryFile = libraryFile
         self.software = None
+        self._oswAccess = None
+        self._oswAccessChecked = False
 
         if isinstance(rsltsFile, str):
             self.rsltsFile = [rsltsFile]
@@ -484,6 +486,61 @@ class ResultsLoader:
 
         fig = plt.figure(figsize=(7, 3))
         return upset.plot(fig = fig)
+
+    def getOSWAccessPtr(self):
+        '''
+        Get the OSWDataAccess object
+
+        Raises:
+            Exception: Multiple OSW files found
+        '''
+        if self._oswAccessChecked and self._oswAccess is None: # osw Access checked for, none found
+            LOGGER.exception("OSW file already checked, either none found or multiple OSW files found")
+            return self._oswAccess
+        elif self._oswAccessChecked and self._oswAccess is not None: # osw Access already found
+            return self._oswAccess
+        else: # check for osw
+            self._oswAccessChecked = True
+            oswAccessFound = False
+            for i in self.rsltsAccess:
+                if not oswAccessFound and isinstance(i, OSWDataAccess):
+                    oswAccessFound = True
+                    self._oswAccess = i
+                elif oswAccessFound and isinstance(i, OSWDataAccess):
+                    LOGGER.exception("Multiple OSW files found, only one OSW file is currently supported")
+                    self._oswAccess = None
+                    return None
+                else:
+                    pass
+            if not oswAccessFound:
+                return None
+
+        return self._oswAccess
+
+    def loadPrecursorScoreDistribution(self):
+        return self.loadScoreDistribution(score_table='SCORE_MS2', score='Score')
+    
+    def loadPeptideScoreDistribution(self, context: Literal['run-specific', 'experiment-wide', 'global'] = None):
+        return self.loadScoreDistribution(score_table='SCORE_PEPTIDE', score='Score', context=context)
+
+    def loadProteinScoreDistribution(self, context: Literal['run-specific', 'experiment-wide', 'global'] = None):
+        return self.loadScoreDistribution(score_table='SCORE_PROTEIN', score='Score', context=context)
+    
+    def loadScoreDistribution(self, **kwargs):
+        """
+        Loads score distribution for a given file
+
+        Args:
+            **kwargs: kwargs to pass to the getScoreDistribution function, score_table and score must be specified
+
+        Returns:
+            pd.DataFrame: DataFrame with columns: Decoy, Score, Run
+        """
+
+        if self.getOSWAccessPtr() is not None:
+            return self._oswAccess.getScoreTable(**kwargs)
+        else:
+            LOGGER.exception("No OSW file found, OSW file required for loading scoring distributions")
   
     def __str__(self):
         return f"{__class__.__name__}: rsltsFile={self.rsltsFile}"

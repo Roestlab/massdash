@@ -10,6 +10,7 @@ from syrupy.extensions.amber import AmberDataSerializer
 from massdash.loaders import ResultsLoader
 from massdash.util import find_git_directory
 from massdash.testing import PandasSnapshotExtension
+from massdash.loaders.access.OSWDataAccess import OSWDataAccess
 
 TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 
@@ -26,6 +27,10 @@ def snapshot_pandas(snapshot):
 ])
 def resultsLoader(request):
     return ResultsLoader(rsltsFile=request.param, libraryFile=None, verbose=False, mode='module')
+
+@pytest.fixture
+def oswResultsLoader():
+    return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", libraryFile=None, verbose=False, mode='module')
 
 @pytest.fixture(params=['AGAANIVPNSTGAAK', 'INVALID'])
 def precursor(request):
@@ -85,6 +90,33 @@ def test_loadQuantificationMatrix(resultsLoader, snapshot_pandas):
 
 def test_computeCV(resultsLoader, snapshot_pandas):
     assert snapshot_pandas == resultsLoader.computeCV()
+
+@pytest.mark.parametrize('rsltsFiles,expected', (
+        [f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", OSWDataAccess],
+        [f"{TEST_PATH}/test_data/example_dia/diann/report/test_1_diann_report.tsv", None],
+        [[f"{TEST_PATH}/test_data/example_dia/diann/report/test_diann_report_combined.tsv", f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"], OSWDataAccess],
+        [[f"{TEST_PATH}/test_data/osw/ionMobilityTest.osw", f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"], None] # multiple osw files
+)  )
+def test_getOSWAccessPtr(rsltsFiles, expected):
+    resultsLoader = ResultsLoader(rsltsFile=rsltsFiles, libraryFile=None, verbose=False, mode='module')
+    if expected is None:
+        assert expected is resultsLoader.getOSWAccessPtr()
+    else: # expected is OSWDataAccess
+        assert isinstance(resultsLoader.getOSWAccessPtr(), expected)
+
+def test_loadPrecursorScoreDistribution(oswResultsLoader, snapshot_pandas):
+    assert snapshot_pandas == oswResultsLoader.loadPrecursorScoreDistribution()
+
+@pytest.mark.parametrize('context', ('global', 'run-specific', 'experiment-wide'))
+def test_loadPeptideScoreDistribution(oswResultsLoader, context, snapshot_pandas):
+    assert snapshot_pandas == oswResultsLoader.loadPeptideScoreDistribution(context=context)
+
+@pytest.mark.parametrize('context', ('global', 'run-specific', 'experiment-wide'))
+def test_loadProteinScoreDistribution(oswResultsLoader, context, snapshot_pandas):
+    assert snapshot_pandas == oswResultsLoader.loadProteinScoreDistribution(context=context)
+
+def test_loadScoreDistribution(oswResultsLoader, snapshot_pandas):
+    pass # This just invokes getScoreTable from OSWDataAccess if getOSWAccessPtr is working properly this should work
 
 def test_flattenDict():
     arg_in = {'a': {'a1': 1, 'a2': 2}, 'b': {'b1' : 1, 'b2': 2} }

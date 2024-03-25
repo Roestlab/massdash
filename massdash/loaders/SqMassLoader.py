@@ -15,6 +15,8 @@ from .access.SqMassDataAccess import SqMassDataAccess
 from .access.OSWDataAccess import OSWDataAccess
 # Structs
 from ..structs import TransitionGroup, TransitionGroupCollection
+# Utils
+from massdash.util import LOGGER
 
 class SqMassLoader(GenericChromatogramLoader):
 
@@ -26,19 +28,12 @@ class SqMassLoader(GenericChromatogramLoader):
     def __init__(self, **kwargs):
         super().__init__(**kwargs) 
         self.dataAccess = [SqMassDataAccess(f) for f in self.dataFiles]
-        oswAccessFound = False
         
         ## Check for OSW file in the list of results files, OSW file is required for parsing sqMass files
         ## Currently only 
-        print(self.rsltsAccess)
-        for i in self.rsltsAccess:
-            if not oswAccessFound and isinstance(i, OSWDataAccess):
-                oswAccessFound = True
-                self.oswAccess = i
-            elif oswAccessFound and isinstance(i, OSWDataAccess):
-                raise Exception("Only one OSW file is allowed in SqMassLoader")
-        if not oswAccessFound:
-            raise Exception("No OSW file found in SqMassLoader, OSW file required for parsing sqMass files")
+        self.oswAccess = self.getOSWAccessPtr()
+        if self.oswAccess is None:
+            raise LOGGER.exception("No OSW file found in SqMassLoader, OSW file required for parsing sqMass files")
                 
     def loadTransitionGroupsDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         transitionMetaInfo = self.oswAccess.getTransitionIDAnnotationFromSequence(pep_id, charge)

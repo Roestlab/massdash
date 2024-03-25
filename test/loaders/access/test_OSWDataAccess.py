@@ -26,7 +26,7 @@ def osw_data_access():
 
 @pytest.fixture
 def osw_data_access2():
-    db_path = f"{str(TEST_PATH)}/test_data/osw/ionMobilityTest.osw"
+    db_path = f"{str(TEST_PATH)}/test_data/example_dia/openswath/osw/test.osw"
     osw_data_access = OSWDataAccess(db_path)
     yield osw_data_access
     osw_data_access.conn.close()
@@ -139,10 +139,6 @@ def test_initializeValidScores(osw_data_access2, snapshot):
 def test_getScoreTable(osw_data_access2, score_table, score, context, snapshot_pandas):
     df = osw_data_access2.getScoreTable(score_table, score, context)
     assert snapshot_pandas == df
-
-
-
-
 
 def test_getCV():
 
