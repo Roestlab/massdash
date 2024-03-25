@@ -49,7 +49,7 @@ from .GenericResultsAccess import GenericResultsAccess
 # Structs
 from ...structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from ...util import check_sqlite_column_in_table, check_sqlite_table
+from ...util import check_sqlite_column_in_table, check_sqlite_table, LOGGER
 
 class OSWDataAccess(GenericResultsAccess):
     """
@@ -713,7 +713,19 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                       score_table: Literal['SCORE_MS2', 'SCORE_MS1', 'SCORE_TRANSITION', 'SCORE_PEPTIDE', 'SCORE_PROTEIN', 'SCORE_IPF', 'FEATURE_MS2', 'FEATURE_MS1'], 
                       score: str, # must be in valid scores
                       context: Literal['run-specific', 'experiment-wide', 'global'] = None) -> pd.DataFrame:
-        ''' Plots the distributions of rank 1 features'''
+        """
+        Get a Pandas DataFrame of target and decoy scores for a given score table and score.
+
+        Args:
+            score_table Literal["SCORE_MS2", "SCORE_MS1", "SCORE_TRANSITION", "SCORE_PEPTIDE", "SCORE_PROTEIN", "SCORE_IPF", "FEATURE_MS2", "FEATURE_MS1"]] (str): Table which score is found in 
+            score (str): The score to retrieve
+
+        Raises:
+            ValueError: Score is not valid score for plotting
+
+        Returns:
+            pd.DataFrame: A pandas DataFrame with 3 columns: Decoy, Score, and Run Name
+        """
         if score not in self.validScores[score_table]:
             print(self.validScores)
             raise ValueError(f"Score {score} in {score_table} table not a valid score for plotting")
