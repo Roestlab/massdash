@@ -741,9 +741,9 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 DECOY,
                 RUN_ID
             FROM {score_table}
-            INNER JOIN PRECURSOR ON {score_table}.FEATURE_ID = PRECURSOR.ID
             INNER JOIN SCORE_MS2 ON {score_table}.FEATURE_ID = SCORE_MS2.FEATURE_ID 
             INNER JOIN FEATURE ON {score_table}.FEATURE_ID = FEATURE.ID
+            INNER JOIN PRECURSOR ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
             WHERE RANK == 1
             '''
         elif score_table in ['SCORE_MS2']:
@@ -778,11 +778,11 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
             raise ValueError(f"Score table {score_table} not recognized or not yet implemented")
         
         df = pd.read_sql(stmt, self.conn)
-        if context != 'global':
+        if context == 'global' and score_table in ['SCORE_PEPTIDE', 'SCORE_PROTEIN']: # no run name for global context
+            return df[['DECOY', 'SCORE']]
+        else:
             df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
             return df[['RUN_NAME', 'DECOY', 'SCORE']]
-        else: # context is global, no runs associated
-            return df[['DECOY', 'SCORE']]
 
 
     def get_score_tables(self):
