@@ -12,13 +12,11 @@ import timeit
 from datetime import timedelta
 
 # UI
-from ..ui.MassDashGUI import MassDashGUI
 from ..ui.SearchResultsAnalysisUI import SearchResultsAnalysisUI
 # Loaders
-from ..loaders.access.OSWDataAccess import OSWDataAccess
-from ..loaders.access.ResultsTSVDataAccess import ResultsTSVDataAccess
+from ..loaders import ResultsLoader
 # Plotting
-from ..plotting.SearchResultAnalysisPlots import SearchResultAnalysisPlots
+from ..plotting.SearchResultAnalysisPlotter import SearchResultAnalysisPlotter, SearchResultAnalysisPlotConfig
 # Utils
 from ..util import conditional_decorator, check_streamlit
 
@@ -41,7 +39,7 @@ class SearchResultsAnalysisServer:
         self.analysis = None
 
     @conditional_decorator(st.cache_resource, check_streamlit)
-    def load_search_result_entries(_self, _feature_file_entries: dict) -> None:
+    def load_results(_self, _feature_file_entries: dict) -> None:
         """
         Loads the search result entries from the file input settings.
 
@@ -49,56 +47,73 @@ class SearchResultsAnalysisServer:
         feature_file_entries_dict : dict
             A dictionary containing the search result entries.
         """
-        data_access_dict = {}
-        for entry, entry_data in _feature_file_entries.items():
-            print(f"Loading search results from {entry_data['search_results_file_path']}")
-            if entry_data['search_results_file_type'] == "OpenSWATH":
-                data_access = OSWDataAccess(entry_data['search_results_file_path'], mode='gui')
-                data_access_dict[entry_data['search_results_exp_name']] = data_access   
-            elif entry_data['search_results_file_type'] == "DIA-NN":
-                data_access = ResultsTSVDataAccess(entry_data['search_results_file_path'], entry_data['search_results_file_type'])
-                data_access_dict[entry_data['search_results_exp_name']] = data_access
-            elif entry_data['search_results_file_type'] == "DreamDIA":
-                data_access = ResultsTSVDataAccess(entry_data['search_results_file_path'], entry_data['search_results_file_type'])
-                data_access_dict[entry_data['search_results_exp_name']] = data_access
-            else:
-                raise ValueError(f"Search results file type {entry_data['search_results_file_type']} not supported.")
-        return data_access_dict
+        return ResultsLoader(rsltsFile=_feature_file_entries)
     
     @conditional_decorator(st.cache_resource, check_streamlit)
-    def get_data(_self, _data_access_dict, qvalue_threshold):
-        data_dict = {}
-        for entry, data_access in _data_access_dict.items():
-            if isinstance(data_access, OSWDataAccess):
-                data_dict[entry] = data_access.df[ data_access.df['Qvalue'] < qvalue_threshold ]
-                # Add entry name to dataframe   
-                data_dict[entry]['entry'] = entry
-            if isinstance(data_access, ResultsTSVDataAccess):
-                data_dict[entry] = data_access.df[ data_access.df['Qvalue'] < qvalue_threshold ]
-                # Add entry name to dataframe   
-                data_dict[entry]['entry'] = entry
-            
-        return data_dict
-    
-    @conditional_decorator(st.cache_resource, check_streamlit)
-    def load_score_distribution_data(_self, _data_access_dict, score_column=None, score_table_context=None):
+    def plot_identifications(_self, _plotter, _resultsLoader: ResultsLoader) -> None:
         """
-        Loads the score distribution data from the data access object.
+        Plots the identifications.
 
         Args:
-        data_access_dict : dict
-            A dictionary containing the data access objects.
-        score_column : str
-            The score column to be loaded.
+        plotter : object
+            An object representing the plotter.
+        resultsLoader : object
+            An object representing the results loader.
         """
-        score_distributions_dict = {}
-        for entry, data_access in _data_access_dict.items():
-            print(f"Getting score distribution for {entry}")
-            score_distributions_dict[entry] = data_access.get_score_distribution(score_table=score_column, context=score_table_context)
-        return score_distributions_dict
-                
+        return _plotter.plotIdentifications(_resultsLoader)
+    
+    @conditional_decorator(st.cache_resource, check_streamlit)
+    def plot_quantifications(_self, _plotter, _resultsLoader: ResultsLoader) -> None:
+        """
+        Plots the quantifications.
 
+        Args:
+        plotter : object
+            An object representing the plotter.
+        resultsLoader : object
+            An object representing the results loader.
+        """
+        return _plotter.plotQuantifications(_resultsLoader)
+    
+    @conditional_decorator(st.cache_resource, check_streamlit)
+    def plot_cv(_self, _plotter, _resultsLoader: ResultsLoader) -> None:
+        """
+        Plots the coefficient of variation.
 
+        Args:
+        plotter : object
+            An object representing the plotter.
+        resultsLoader : object
+            An object representing the results loader.
+        """
+        return _plotter.plotCV(_resultsLoader)
+    
+    @conditional_decorator(st.cache_resource, check_streamlit)
+    def plot_upset(_self, _plotter, _resultsLoader: ResultsLoader) -> None:
+        """
+        Plots the UpSet diagram.
+
+        Args:
+        plotter : object
+            An object representing the plotter.
+        resultsLoader : object
+            An object representing the results loader.
+        """
+        return _plotter.plotUpset(_resultsLoader)
+    
+    @conditional_decorator(st.cache_resource, check_streamlit)
+    def plot_score_distribution(_self, _plotter, _resultsLoader: ResultsLoader) -> None:
+        """
+        Plots the score distribution.
+
+        Args:
+        plotter : object
+            An object representing the plotter.
+        resultsLoader : object
+            An object representing the results loader.
+        """
+        return _plotter.plotScoreDistribution(_resultsLoader, _self.analysis_settings.selected_score_table, _self.analysis_settings.selected_score_col, _self.analysis_settings.selected_score_table_context)
+  
     def main(self) -> None:
         """
         Main function for the search results analysis server.
@@ -108,72 +123,42 @@ class SearchResultsAnalysisServer:
         self.analysis_type.analysis_type()
 
         # self.load_search_result_entries.clear()
-        search_results_access_dict = self.load_search_result_entries(self.massdash_gui.file_input_settings.feature_file_entries)
+        resultsLoader = self.load_results(self.massdash_gui.file_input_settings.feature_file_entries)
 
         # Create a UI for the analysis
         if self.analysis_type.analysis == "Results":
-            
             self.analysis_type.show_identification_settings()
-            # self.get_data.clear()
-            ident_data_dict = self.get_data(search_results_access_dict, self.analysis_type.qvalue_threshold)
-
+            plot_dict = {}
             plot_container = st.container()
-
-            # get overlapping columnn names
-            overlapping_columns = list(set.intersection(*[set(df.columns) for df in ident_data_dict.values()]))
-            # st.write(f"overlapping_columns: {overlapping_columns}")
-            ident_data = pd.concat([df[overlapping_columns] for df in ident_data_dict.values()], axis=0)
-            # st.write(ident_data)
-            
             search_results_plots_container = st.container()
             search_results_plots_container.empty()
-            
-            plot_dict = {}
-            
-            plotter = SearchResultAnalysisPlots()
+
+            config = SearchResultAnalysisPlotConfig()
+            config.update(dict(aggregate=self.analysis_type.aggregate_identifications))
+            plotter = SearchResultAnalysisPlotter()
             if "Identification" in self.analysis_type.plot_types:
-                pobj = plotter.plot_identifications(ident_data, self.analysis_type.aggregate_identifications)
-                plot_dict['identifications'] = pobj
+                plot_dict['identifications'] = self.plot_identifications(plotter, resultsLoader)
 
             if "Quantification" in self.analysis_type.plot_types:
-                pobj2 = plotter.plot_quantifications(ident_data)
-                plot_dict['quantifications'] = pobj2
+                plot_dict['quantifications'] = self.plot_quantifications(plotter, resultsLoader) 
             
             if "CV" in self.analysis_type.plot_types: 
-                pboj3 = plotter.plot_coefficient_of_variation(ident_data)
-                plot_dict['coefficient_of_variation'] = pboj3
+                plot_dict['coefficient_of_variation'] = self.plot_cv(plotter, resultsLoader)
             
             if "UpSet" in self.analysis_type.plot_types:
-                # Get unique values in entry column
-                unique_entries = ident_data['entry'].unique()
-                if len(unique_entries) > 1:
-                    pobj4 = plotter.plot_upset_diagram(ident_data)
-                    plot_dict['upset_diagram'] = pobj4
+                plot_dict['upset_diagram'] = self.plot_upset(plotter, resultsLoader) 
             
             self.analysis_type.show_plots(plot_container, plot_dict, num_cols=self.analysis_type.num_cols)
             
-        elif self.analysis_type.analysis == "Score Distributions":
-            self.analysis_type.show_score_tables(search_results_access_dict)
-            
-            if self.analysis_type.selected_score_table in ["SCORE_MS1", "SCORE_MS2", "SCORE_TRANSITION"]:
-                score_df = self.load_score_distribution_data(search_results_access_dict, self.analysis_type.selected_score_table)
-            elif self.analysis_type.selected_score_table in ["SCORE_PEPTIDE", "SCORE_IPF", "SCORE_PROTEIN", "SCORE_GENE"]:
-                self.analysis_type.show_score_table_contexts(search_results_access_dict)
-                score_df = self.load_score_distribution_data(search_results_access_dict, self.analysis_type.selected_score_table, self.analysis_type.selected_score_table_context)
-            self.analysis_type.show_score_distribution_score_colums(score_df)
-            
+        else: # self.analysis_type.analysis == "Score Distributions"
             search_results_plots_container = st.container()
             search_results_plots_container.empty()
-            
-            search_results_tabs = st.tabs([entry for entry in score_df.keys()])
-            
-            counter =  0
-            for entry, df in score_df.items():
-                plotter = SearchResultAnalysisPlots()
-                pobj = plotter.plot_score_distributions(df, self.analysis_type.selected_score_col)
-                with search_results_plots_container:
-                    st.bokeh_chart(pobj, use_container_width=True)
-                with search_results_tabs[counter]:
-                    st.dataframe(df)
-                    counter += 1
 
+            config = SearchResultAnalysisPlotConfig()
+
+            plotter = SearchResultAnalysisPlotter()
+
+            plot = self.plot_score_distribution( plotter, resultsLoader) 
+
+            st.bokeh_chart(plot, use_container_width=True)
+           
