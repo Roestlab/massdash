@@ -11,6 +11,75 @@ from typing import List, Optional, Literal
 from ..structs.TransitionGroupFeature import TransitionGroupFeature
 from ..structs.TransitionGroup import TransitionGroup
 
+from ..util import check_streamlit
+
+import dataclasses
+
+@dataclasses.dataclass
+class SmoothingConfig1D:
+    type: Literal['none', 'sgolay', 'gauss'] = 'none'
+    sgolay_polynomial_order: int = 2
+    sgolay_frame_length: int = 11
+    gaussian_sigma: float = 2.0
+    gaussian_window: int = 11
+
+@dataclasses.dataclass
+class SmoothingConfig2D:
+    normalization_type: Literal['none', 'equalization'] = 'none'
+    normalization_bins: int = 2
+    type: Literal['none', 'gauss'] = 'none'
+    gaussian_sigma: float = 1.2
+
+@dataclasses.dataclass
+class PlotConfig:
+    title: str = None
+    subtitle: str = None
+    num_plot_columns: int = 2
+
+    @property
+    def plotContext(self):
+        if check_streamlit():
+            return 'streamlit'
+        else:
+            return 'jupyter'
+
+@dataclasses.dataclass
+class RawDataPlotConfig:
+    include_ms1: bool = True
+    include_ms2: bool = True
+
+    @property
+    def ms_level_str(self):
+        if self.include_ms1 and self.include_ms2:
+            return 'ms1ms2'
+        elif self.include_ms1 and not self.include_ms2:
+            return 'ms1'
+        elif not self.include_ms1 and self.include_ms2:
+            return 'ms2'
+    # TODO same smoothing dict for 1D and 2D 
+    # TODO all plots support aggregation
+
+@dataclasses.dataclass
+class InteractivePlotterConfig(RawDataPlotConfig):
+    smoothing_dict: SmoothingConfig1D = SmoothingConfig1D()
+    scale_intensity: bool = False
+    hide_legends: bool = False
+    x_axis_label: str = "Retention Time"
+    y_axis_label: str = "Intensity"
+
+@dataclasses.dataclass
+class InteractiveTwoDimensionalPlotterConfig(RawDataPlotConfig):
+    normalization_dict: SmoothingConfig2D = SmoothingConfig2D()
+    type_of_heatmap: Literal['m/z vs retention time', 'retention time vs ion mobility', 'm/z vs ion mobility']
+    aggregate_mslevels: bool = False # Aggregate the data into one heatmap
+
+@dataclasses.dataclass
+class InteractiveThreeDimensionalPlotterConfig(RawDataPlotConfig):
+    plot_type: Literal['3D Scatter Plot', '3D Surface Plot', '3D Contour Plot']
+    comparison: Literal['m/z vs retention time vs intensity', 'retention time vs ion mobility vs intensity', 'm/z vs ion mobility vs intensity']
+    aggregate_mslevels: bool = False # Aggregate data of the same MS level together
+
+
 class PlotConfig:
     """
     A class representing the configuration for a plot.
