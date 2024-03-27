@@ -2,7 +2,7 @@
 massdash/plotting/SearchResultAnalysisPlots
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
-from typing import Literal, Dict
+from typing import Optional, Dict
 from itertools import cycle
 
 # Analysis
@@ -12,8 +12,8 @@ from scipy.stats import gaussian_kde
 
 # Bokeh
 from bokeh.plotting import figure
-from bokeh.layouts import gridplot
-from bokeh.models import Legend, HoverTool, ColumnDataSource, FactorRange, Whisker
+from bokeh.layouts import gridplot, column
+from bokeh.models import Legend, HoverTool, ColumnDataSource, FactorRange, Whisker, Div
 from bokeh.palettes import Category10
 
 # Plotly
@@ -243,24 +243,26 @@ class SearchResultAnalysisPlotter:
         upset = upsetplot.UpSet(upsetplot.from_contents(identifications))
 
         fig = plt.figure(figsize=(7, 3))
-        return upset.plot(fig = fig)
+        upset.plot(fig = fig)
+        return fig
     
     def plotPeptideDistribution(self, resultsLoader):
         if not self.config.aggregate and self.config.statistic_context == 'global':
             raise Exception("Error: Global context only supports aggregated plots")
-        return self.plotScoreDistribution(resultsLoader, score_table='SCORE_PEPTIDE', score='SCORE')
+        return self.plotScoreDistribution(resultsLoader, score_table='SCORE_PEPTIDE', score='SCORE', title=f"Peptide Score Distribution ({self.config.statistic_context})")
     
     def plotProteinDistribution(self, resultsLoader):
         if not self.config.aggregate and self.config.statistic_context == 'global':
             raise Exception("Error: Global context only supports aggregated plots")
-        return self.plotScoreDistribution(resultsLoader, score_table='SCORE_PROTEIN', score='SCORE')
+        return self.plotScoreDistribution(resultsLoader, score_table='SCORE_PROTEIN', score='SCORE', title=f"Protein Score Distribution ({self.config.statistic_context})")
     
     def plotPrecursorDistribution(self, resultsLoader):
-        return self.plotScoreDistribution(resultsLoader, score_table='SCORE_MS2', score='SCORE')
+        return self.plotScoreDistribution(resultsLoader, score_table='SCORE_MS2', score='SCORE', title="Precursor Score Distribution")
 
-    @staticmethod
-    def _plotScoreDistributionHelper(df, score):
+    def _plotScoreDistributionHelper(self, df, score):
         # Create a Bokeh figure
+        subtitle = "Aggregated Across Runs" if self.config.aggregate else df['RUN_NAME'].values[0]
+
         p1 = figure(x_axis_label=score, y_axis_label="# of groups", width=600, height=450)
 
         # Plot histograms for targets
@@ -294,19 +296,40 @@ class SearchResultAnalysisPlotter:
         p2.legend.click_policy="mute"
         
         # Create a grid layout
-        grid = gridplot([p1, p2], ncols=2, sizing_mode="stretch_both")
+        subtitle_div = Div(text=f"<h2 style='font-style: italic; font-size:11pt; text-align: center;'>{subtitle}</h2>")
+        grid = gridplot([p1, p2], ncols=2, sizing_mode="stretch_width")
+
+        return column(subtitle_div, grid)
 
         # Show the plot
-        return grid
 
-    def plotScoreDistribution(self, resultsLoader, score_table, score):
+    def plotScoreDistribution(self, resultsLoader: ResultsLoader, score_table: str, score: str, title: Optional[str] =None) -> 'bokeh.layouts.column':
+        """
+        Plot the score distribution
 
+        Args:
+            resultsLoader (ResultsLoader)
+            score_table (str): Table to load the score distribution from, must be in validScores
+            score (str): Score to load, must be in valid scores
+            title (Optional[str], optional): Title of plot. Defaults to None where it will be autoset
+
+        Returns:
+            bokeh.layouts.column: Distribution and KDE plot
+        """
+        title = title if title else f"{score} Distribution"
         df = resultsLoader.loadScoreDistribution(score_table=score_table, score=score, context=self.config.statistic_context)
 
         if self.config.aggregate:
-            return SearchResultAnalysisPlotter._plotScoreDistributionHelper(df, score)
+            title_div = Div(text=f"<h1 style='font-size:13pt; text-align: center;'>{title}</h1>")
+            out = self._plotScoreDistributionHelper(df, score)
+
+            return column(title_div, out, sizing_mode="scale_both")
+
         else:
-            plot_dict = {}
+            plots = []
             for r in df['RUN_NAME'].drop_duplicates().values:
-                plot_dict[r] = SearchResultAnalysisPlotter._plotScoreDistributionHelper(df[df['RUN_NAME'] == r], score)
-            return plot_dict
+                plots.append(self._plotScoreDistributionHelper(df[df['RUN_NAME'] == r], score))
+
+            title_div = Div(text=f"<h1 style='font-size:13pt; text-align: center;'>{title}</h1>", width=800)
+            plots = [title_div] + plots
+            return column(plots, sizing_mode='scale_both')

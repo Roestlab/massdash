@@ -541,6 +541,18 @@ class ResultsLoader:
             return self._oswAccess.getScoreTable(**kwargs)
         else:
             LOGGER.exception("No OSW file found, OSW file required for loading scoring distributions")
+    
+    def loadValidScores(self):
+        """
+        Loads the valid score distributions for the given file
+
+        Returns:
+            Dict: Dictionary with keys as the score table and values as the valid scores
+        """
+        if self.getOSWAccessPtr() is not None:
+            return self._oswAccess.validScores
+        else:
+            return {}
   
     def __str__(self):
         return f"{__class__.__name__}: rsltsFile={self.rsltsFile}"

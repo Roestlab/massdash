@@ -7,6 +7,7 @@ import os
 import numpy as np
 import pandas as pd
 import streamlit as st
+from io import BytesIO # https://discuss.streamlit.io/t/cannot-change-matplotlib-figure-size/10295/6
 
 import timeit
 from datetime import timedelta
@@ -101,8 +102,9 @@ class SearchResultsAnalysisServer:
         """
         return _plotter.plotUpset(_resultsLoader)
     
-    @conditional_decorator(st.cache_resource, check_streamlit)
-    def plot_score_distribution(_self, _plotter, _resultsLoader: ResultsLoader) -> None:
+    #TODO caching this is not working
+    #@conditional_decorator(st.cache_resource, check_streamlit)
+    def plot_score_distribution(_self, _resultsLoader: ResultsLoader) -> None:
         """
         Plots the score distribution.
 
@@ -112,7 +114,20 @@ class SearchResultsAnalysisServer:
         resultsLoader : object
             An object representing the results loader.
         """
-        return _plotter.plotScoreDistribution(_resultsLoader, _self.analysis_settings.selected_score_table, _self.analysis_settings.selected_score_col, _self.analysis_settings.selected_score_table_context)
+        config = SearchResultAnalysisPlotConfig()
+        config.update(dict(aggregate=_self.analysis_type.aggregate_runs))
+        plotter = SearchResultAnalysisPlotter(config=config)
+        if _self.analysis_type.selected_analyte == "Protein":
+            return plotter.plotProteinDistribution(_resultsLoader)
+        elif _self.analysis_type.selected_analyte == "Peptide":
+            return plotter.plotPeptideDistribution(_resultsLoader)
+        else: # _self.analysis_type.selected_analyte == "Peptide Precursor"
+            if _self.analysis_type.show_more_scores:
+                return plotter.plotScoreDistribution(_resultsLoader, 
+                                                      _self.analysis_type.selected_score_table, 
+                                                      _self.analysis_type.selected_score)
+            else:
+                return plotter.plotPrecursorDistribution(_resultsLoader)
   
     def main(self) -> None:
         """
@@ -121,9 +136,12 @@ class SearchResultsAnalysisServer:
         # Create a UI for the analysis type
         self.analysis_type = SearchResultsAnalysisUI()
         self.analysis_type.analysis_type()
+        self.analysis_type.show_aggregation()
 
         # self.load_search_result_entries.clear()
-        resultsLoader = self.load_results(self.massdash_gui.file_input_settings.feature_file_entries)
+        # TODO clean up GUI less information needed then what is provided
+        files_to_load = pd.DataFrame(self.massdash_gui.file_input_settings.feature_file_entries).T['search_results_file_path'].values
+        resultsLoader = self.load_results(files_to_load)
 
         # Create a UI for the analysis
         if self.analysis_type.analysis == "Results":
@@ -146,7 +164,10 @@ class SearchResultsAnalysisServer:
                 plot_dict['coefficient_of_variation'] = self.plot_cv(plotter, resultsLoader)
             
             if "UpSet" in self.analysis_type.plot_types:
-                plot_dict['upset_diagram'] = self.plot_upset(plotter, resultsLoader) 
+                fig = self.plot_upset(plotter, resultsLoader) 
+                buf = BytesIO()
+                fig.savefig(buf, format="png")
+                plot_dict['upset_diagram'] = buf
             
             self.analysis_type.show_plots(plot_container, plot_dict, num_cols=self.analysis_type.num_cols)
             
@@ -154,11 +175,8 @@ class SearchResultsAnalysisServer:
             search_results_plots_container = st.container()
             search_results_plots_container.empty()
 
-            config = SearchResultAnalysisPlotConfig()
-
-            plotter = SearchResultAnalysisPlotter()
-
-            plot = self.plot_score_distribution( plotter, resultsLoader) 
+            self.analysis_type.show_score_tables(resultsLoader)
+            plot = self.plot_score_distribution(resultsLoader) 
 
             st.bokeh_chart(plot, use_container_width=True)
            

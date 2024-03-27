@@ -4,6 +4,7 @@ massdash/ui/SearchResultsAnalysisUI
 """
 
 import streamlit as st
+from massdash.loaders import ResultsLoader
 
 class SearchResultsAnalysisUI:
     """
@@ -49,16 +50,26 @@ class SearchResultsAnalysisUI:
         # Multiple select for the type of plots
         self.plot_types = st.sidebar.multiselect("Select plot types", ["Identification", "Quantification", "CV", "UpSet"], default=["Identification", "Quantification", "CV", "UpSet"], key=f'plot_types', help="Select the type of plots to display.")
         
-    def show_score_tables(self, data_access_dict):
+    def show_aggregation(self):
+        """
+        Displays the aggregation settings.
+        """
+        self.aggregate_runs = st.sidebar.checkbox("Aggregate Runs", value=True, key=f'aggregate_runs', help="Aggregate runs into single plot.")
+    def show_score_tables(self, resultsLoader: ResultsLoader):
         """
         Displays the score tables in the database
         """
-        score_tables = []
-        for entry, data_access in data_access_dict.items():
-            score_tables.extend(data_access.get_score_tables())
-        score_tables = list(set(score_tables))
-        score_tables.sort()
-        self.selected_score_table = st.sidebar.selectbox("Select score table", score_tables, index=score_tables.index("SCORE_MS2"))
+        analyte = ['Peptide Precursor', 'Peptide', 'Protein']
+        self.selected_analyte = st.sidebar.selectbox("Select Analyte", analyte, index=0)
+
+        if self.selected_analyte == 'Peptide Precursor':
+                self.show_more_scores = st.sidebar.checkbox("Show All Scores", value=False, key='show_more_scores', help="Show more scores for the peptide precursor.")
+                if self.show_more_scores:
+                    valid_scores = resultsLoader.loadValidScores()
+                    valid_scores = {k: v for k, v in valid_scores.items() if k in ['FEATURE_MS1', 'FEATURE_MS2', 'SCORE_MS2'] }
+                    self.selected_score_table = st.sidebar.selectbox("Select Score Table", valid_scores.keys())
+                    self.selected_score = st.sidebar.selectbox("Select Score", valid_scores[self.selected_score_table])
+                
         
     def show_score_table_contexts(self, data_access_dict):
         """
