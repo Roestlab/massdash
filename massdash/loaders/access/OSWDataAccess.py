@@ -43,6 +43,8 @@ import sqlite3
 import pandas as pd
 from typing import List, Literal, Optional, Dict, Union, Callable
 from pathlib import Path
+import duckdb
+duckdb.install_extension('sqlite3')
 
 # Loaders
 from .GenericResultsAccess import GenericResultsAccess
@@ -71,6 +73,7 @@ class OSWDataAccess(GenericResultsAccess):
         """
         super().__init__(*args, **kwargs)
         self.conn = sqlite3.connect(self.filename, check_same_thread=False)
+        self.conndb = duckdb.connect(self.filename, read_only=True)
         self.c = self.conn.cursor()
         
         # hashtable, each run is its own data 
@@ -94,7 +97,7 @@ class OSWDataAccess(GenericResultsAccess):
     ###### HASHTABLE INITIALIZERS ######
     def _initializeRunHashtable(self):
         stmt = "select * from run"
-        self.runHashTable = pd.read_sql(stmt, self.conn)
+        self.runHashTable = self.conndb.sql(stmt).df() 
         self.runHashTable['RUN_NAME'] = self.runHashTable['FILENAME'].apply(lambda x: Path(x).stem)
 
     def _initializePeptideHashtable(self):
@@ -103,8 +106,8 @@ class OSWDataAccess(GenericResultsAccess):
             FROM PRECURSOR
             INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
             INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID'''
-        tmp = pd.read_sql(stmt, self.conn)
-        self.peptideHash = tmp.set_index(['MODIFIED_SEQUENCE', 'CHARGE'])
+        self.peptideHash = self.conndb.sql(stmt).df()
+        self.peptideHash = self.peptideHash.set_index(['MODIFIED_SEQUENCE', 'CHARGE'])
     
     def _initializeFeatureScoreHashtable(self):
         if check_sqlite_table(self.conn, "SCORE_MS2"):
@@ -484,7 +487,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 INNER JOIN SCORE_PEPTIDE ON SCORE_PEPTIDE.PEPTIDE_ID = PEPTIDE.ID
                 INNER JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
                 WHERE SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_PEPTIDE.QVALUE <= {qvalue} AND SCORE_PROTEIN.QVALUE <= {qvalue} and SCORE_MS2.RANK == 1"""
-            df = pd.read_sql(stmt, self.conn)
+            df = self.conndb.sql(stmt).df() 
             df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
             return df[['RUN_NAME', 'Precursor']].groupby('RUN_NAME').apply(lambda x: set(x['Precursor'])).to_dict()
 
@@ -516,7 +519,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 LEFT JOIN SCORE_PEPTIDE ON SCORE_PEPTIDE.PEPTIDE_ID = PEPTIDE.ID
                 LEFT JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
                 WHERE FEATURE.RUN_ID = {run_id} AND SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_PEPTIDE.QVALUE <= {qvalue} AND SCORE_PROTEIN.QVALUE <= {qvalue} AND SCORE_MS2.RANK == 1"""
-            return pd.read_sql(stmt, self.conn)
+            return self.conndb.sql(stmt).df() 
         else: # get for all runs
             if precursorLevel:
                 stmt = f"""SELECT 
@@ -545,7 +548,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 LEFT JOIN SCORE_PEPTIDE ON SCORE_PEPTIDE.PEPTIDE_ID = PEPTIDE.ID
                 LEFT JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PEPTIDE_PROTEIN_MAPPING.PROTEIN_ID
                 WHERE SCORE_MS2.QVALUE <= {qvalue} AND PRECURSOR.DECOY = 0 AND SCORE_PEPTIDE.QVALUE <= {qvalue} AND SCORE_PROTEIN.QVALUE <= {qvalue} AND SCORE_MS2.RANK == 1"""
-            df = pd.read_sql(stmt, self.conn)
+            df = self.conndb.sql(stmt).df() 
             df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID').drop(columns=['RUN_ID', 'ID', 'FILENAME']).rename(columns={'RUN_NAME': 'runName'})
             return df
   
@@ -566,7 +569,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 FROM PEPTIDE
                 INNER JOIN SCORE_PEPTIDE ON SCORE_PEPTIDE.PEPTIDE_ID = PEPTIDE.ID
                 WHERE SCORE_PEPTIDE.QVALUE <= {qvalue} AND PEPTIDE.DECOY = 0 """
-            df = pd.read_sql(stmt, self.conn)
+            df = self.conndb.sql(stmt).df() 
             df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
             return df[['RUN_NAME', 'Peptide']].groupby('RUN_NAME').apply(lambda x: set(x['Peptide'])).to_dict()
  
@@ -587,7 +590,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 FROM PROTEIN
                 INNER JOIN SCORE_PROTEIN ON SCORE_PROTEIN.PROTEIN_ID = PROTEIN.ID
                 WHERE SCORE_PROTEIN.QVALUE <= {qvalue} AND PROTEIN.DECOY = 0 """
-            df = pd.read_sql(stmt, self.conn)
+            df = self.conndb.sql(stmt).df() 
             df = df.merge(self.runHashTable, left_on='RUN_ID', right_on='ID')
             return df[['RUN_NAME', 'Protein']].groupby('RUN_NAME').apply(lambda x: set(x['Protein'])).to_dict()
    
@@ -777,7 +780,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         else:
             raise ValueError(f"Score table {score_table} not recognized or not yet implemented")
         
-        df = pd.read_sql(stmt, self.conn)
+        df = self.conndb.sql(stmt).df() 
         if context == 'global' and score_table in ['SCORE_PEPTIDE', 'SCORE_PROTEIN']: # no run name for global context
             return df[['DECOY', 'SCORE']]
         else:
