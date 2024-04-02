@@ -596,7 +596,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
 
     def getPrecursorIDFromPeptideAndCharge(self, fullpeptidename: str, charge: int) -> int:
         try:
-            return self.peptideHash.loc[fullpeptidename, charge]['PRECURSOR_ID']
+            return self.peptideHash.loc[fullpeptidename, charge]['PRECURSOR_ID'].values[0]
         except KeyError:
             print(f"Peptide {fullpeptidename} with charge {charge} not found.")
             return None
