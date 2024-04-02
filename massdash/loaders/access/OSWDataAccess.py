@@ -677,17 +677,17 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         print("Initializing valid scores for selection")
         validScores = {}
         if check_sqlite_table(self.conn, "SCORE_MS2"):
-            validScores['SCORE_MS2'] = ["SCORE"]
+            validScores['SCORE_MS2'] = ["SCORE", "PVALUE", "PEP", "QVALUE"]
         if check_sqlite_table(self.conn, "SCORE_MS1"):
-            validScores['SCORE_MS1'] = ["SCORE"]
+            validScores['SCORE_MS1'] = ["SCORE", "PVALUE", "PEP", "QVALUE"]
         if check_sqlite_table(self.conn, "SCORE_TRANSITION"):
-            validScores['SCORE_TRANSITION'] = ["SCORE"]
+            validScores['SCORE_TRANSITION'] = ["SCORE", "PVALUE", "PEP", "QVALUE"]
         if check_sqlite_table(self.conn, "SCORE_PEPTIDE"):
-            validScores['SCORE_PEPTIDE'] = ["SCORE"]
+            validScores['SCORE_PEPTIDE'] = ["SCORE", "PVALUE", "PEP", "QVALUE"]
         if check_sqlite_table(self.conn, "SCORE_PROTEIN"):
-            validScores['SCORE_PROTEIN'] = ["SCORE"]
+            validScores['SCORE_PROTEIN'] = ["SCORE", "PVALUE", "PEP", "QVALUE"]
         if check_sqlite_table(self.conn, "SCORE_IPF"):
-            validScores['SCORE_IPF'] = ["SCORE"]
+            validScores['SCORE_IPF'] = ["SCORE", "PVALUE", "PEP", "QVALUE"]
         if check_sqlite_table(self.conn, "FEATURE_MS2"):
             validScores['FEATURE_MS2'] = []
             stmt = "select * from FEATURE_MS2"
