@@ -97,13 +97,19 @@ class MRMTransitionGroupPicker:
 
         valid_params = ['stop_after_feature', 'stop_after_intensity_ratio', 'min_peak_width', 'recalculate_peaks_max_z', 'resample_boundary', 'recalculate_peaks', 'background_subtraction', 'use_precursors']
         mrmParams = ['signal_to_noise']
-        valid_params = valid_params + mrmParams
+        bools_to_str = ['recalculate_peaks'] # these parameters require a "true" or "false" string
+        valid_params = valid_params + mrmParams + bools_to_str
         for k, val in kwargs.items():
             if k not in valid_params:
                 raise ValueError(f"Parameter {k} is not valid or is not currently supported")
             else:
                 if k in mrmParams:
                     self.params.setValue(bytes('PeakPickerMRM:'+k, encoding='utf-8'), val)
+                elif k in bools_to_str:
+                    if k:
+                        self.params.setValue(bytes(k, encoding='utf-8'), 'true')
+                    else:
+                        self.params.setValue(bytes(k, encoding='utf-8'), 'false')
                 else:
                     self.params.setValue(bytes(k, encoding='utf-8'), val)
                 self.picker.setParameters(self.params)
