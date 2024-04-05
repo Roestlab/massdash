@@ -8,7 +8,8 @@ import streamlit as st
 
 # Data modules
 import numpy as np
-from scipy.signal import savgol_filter, gaussian, convolve
+from scipy.signal import savgol_filter, convolve
+from scipy.signal.windows import gaussian
 
 # Plotting modules
 from bokeh.plotting import figure
