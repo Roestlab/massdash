@@ -93,9 +93,10 @@ class MRMTransitionGroupPicker:
             background_subtraction (str): Background subtraction
             use_precursors (bool): Use precursors
             signal_to_noise (float): Signal to noise
+            minimal_quality (float): Minimal quality (if set, automatically sets compute_peak_quality to true)
         '''
 
-        valid_params = ['stop_after_feature', 'stop_after_intensity_ratio', 'min_peak_width', 'recalculate_peaks_max_z', 'resample_boundary', 'recalculate_peaks', 'background_subtraction', 'use_precursors']
+        valid_params = ['stop_after_feature', 'stop_after_intensity_ratio', 'min_peak_width', 'recalculate_peaks_max_z', 'resample_boundary', 'recalculate_peaks', 'background_subtraction', 'use_precursors', 'minimal_quality']
         mrmParams = ['signal_to_noise']
         bools_to_str = ['recalculate_peaks'] # these parameters require a "true" or "false" string
         valid_params = valid_params + mrmParams + bools_to_str
@@ -110,9 +111,18 @@ class MRMTransitionGroupPicker:
                         self.params.setValue(bytes(k, encoding='utf-8'), 'true')
                     else:
                         self.params.setValue(bytes(k, encoding='utf-8'), 'false')
+                elif k == 'minimal_quality':
+                    self.params.setValue(bytes(k, encoding='utf-8'), val)
+                    self.params.setValue(bytes('compute_peak_quality', encoding='utf-8'), 'true')
                 else:
                     self.params.setValue(bytes(k, encoding='utf-8'), val)
                 self.picker.setParameters(self.params)
+
+    def printParameters(self):
+        ''' Print the current parameters including hidden parameters '''
+        lst = list(zip(self.params.keys(), self.params.values()))
+        for i in lst:
+            print(f'{i[0]}: {i[1]}')
 
     def pick(self, transitionGroup: TransitionGroup) -> List[TransitionGroupFeature]:
         ''' Performs Peak Picking, Should return a TransitionGroupFeatureList object '''
