@@ -4,7 +4,7 @@ massdash/peakPickers/MRMTransitionGroupPicker
 """
 
 import pyopenms as po
-from typing import List
+from typing import List, Tuple
 
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
@@ -118,11 +118,12 @@ class MRMTransitionGroupPicker:
                     self.params.setValue(bytes(k, encoding='utf-8'), val)
                 self.picker.setParameters(self.params)
 
-    def printParameters(self):
-        ''' Print the current parameters including hidden parameters '''
-        lst = list(zip(self.params.keys(), self.params.values()))
-        for i in lst:
-            print(f'{i[0]}: {i[1]}')
+    def getPrettyParameters(self) -> Tuple:
+        ''' 
+        Get a list of current parameters and their values in a python friendly format
+        Note: Changing the parameters will not update values
+        '''
+        return tuple(zip([ i.decode('utf-8') for i in self.params.keys()], self.params.values()))
 
     def pick(self, transitionGroup: TransitionGroup) -> List[TransitionGroupFeature]:
         ''' Performs Peak Picking, Should return a TransitionGroupFeatureList object '''
