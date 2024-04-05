@@ -391,14 +391,14 @@ class MzMLDataAccess():
             spec = msExperiment.getSpectrum(k)
             mz, intensity = spec.get_peaks()
             if (len(mz) == 0 and len(intensity) == 0):
-                LOGGER.warn(
+                LOGGER.warning(
                     f"MS{spec.getMSLevel()} spectrum native id {spec.getNativeID()} had no m/z or intensity array, skipping this spectrum")
                 continue
             rt = np.full([mz.shape[0]], spec.getRT(), float)
             
             if not self.has_im:
                 if config.im_window is not None:
-                    LOGGER.warn(
+                    LOGGER.warning(
                         f"MS{spec.getMSLevel()} spectrum native id {spec.getNativeID()} had no ion mobility array")
                 im = np.full([mz.shape[0]], np.nan, float)
             else:
@@ -420,7 +420,7 @@ class MzMLDataAccess():
             annotation_mz_mapping = pd.concat([annotation_mz_mapping, pd.DataFrame({'Annotation': ['prec'], 'product_mz': [feature.precursor_mz]})])
             results_df = results_df.merge(annotation_mz_mapping, on='Annotation', how='left')
         else:
-            LOGGER.warn(f"No spectra found for peptide: {feature.sequence}{feature.precursor_charge}. Try adjusting the extraction parameters")
+            LOGGER.warning(f"No spectra found for peptide: {feature.sequence}{feature.precursor_charge}. Try adjusting the extraction parameters")
             results_df = pd.DataFrame(columns=['rt', 'int', 'Annotation'])
 
         return FeatureMap(results_df, feature.sequence, feature.precursor_charge, config)
