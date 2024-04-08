@@ -148,7 +148,8 @@ class GenericLoader(ABC):
                         smooth: bool = True, 
                         sgolay_polynomial_order: int = 3, 
                         sgolay_frame_length: int = 11, 
-                        scale_intensity: bool = False) -> 'bokeh.plotting.figure.Figure':
+                        scale_intensity: bool = False,
+                        show_plot: bool = True) -> 'bokeh.plotting.figure.Figure':
         '''
         Plots a chromatogram for a transitionGroup and transitionGroupFeatures given peptide sequence and charge state for a given run
 
@@ -160,6 +161,7 @@ class GenericLoader(ABC):
             sgolay_polynomial_order (int, optional): Order of the polynomial to use for smoothing. Defaults to 3.
             sgolay_frame_length (int, optional): Frame length to use for smoothing. Defaults to 11.
             scale_intensity (bool, optional): Whether to scale the intensity of the chromatogram such that all chromatograms are individually normalized to 1. Defaults to False.
+            show_plot (bool, optional): Whether to show the plot. Defaults to True.
 
         Returns: 
             bokeh.plotting.figure.Figure: Bokeh figure object
@@ -185,7 +187,8 @@ class GenericLoader(ABC):
         # Plot the chromatogram data
         fig = plotter.plot(transitionGroup, transitionGroupFeatures)
 
-        show(fig)
+        if show_plot:
+            show(fig)
 
         return fig
 

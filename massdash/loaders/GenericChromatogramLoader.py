@@ -65,7 +65,8 @@ class GenericChromatogramLoader(GenericLoader):
                         smooth: bool = True, 
                         sgolay_polynomial_order: int = 3, 
                         sgolay_frame_length: int = 11, 
-                        scale_intensity: bool = False) -> 'bokeh.plotting.figure.Figure':
+                        scale_intensity: bool = False,
+                        show_plot: bool = True) -> 'bokeh.plotting.figure.Figure':
         '''
         Plots a chromatogram for a given peptide sequence and charge state for a given run
 
@@ -78,6 +79,7 @@ class GenericChromatogramLoader(GenericLoader):
             sgolay_polynomial_order (int, optional): Order of the polynomial to use for smoothing. Defaults to 3.
             sgolay_frame_length (int, optional): Frame length to use for smoothing. Defaults to 11.
             scale_intensity (bool, optional): Whether to scale the intensity of the chromatogram such that all chromatograms are individually normalized to 1. Defaults to False.
+            show_plot (bool, optional): Whether to show the plot. Defaults to True.
 
         Returns: 
             bokeh.plotting.figure.Figure: Bokeh figure object
@@ -85,14 +87,30 @@ class GenericChromatogramLoader(GenericLoader):
 
         ## TODO allow plotting of multiple chromatograms
         if len(self.dataFiles_str) > 1:
-            raise NotImplementedError("Only one transition file is supported")
- 
-        # load the transitionGroup for plotting
-        transitionGroup = list(self.loadTransitionGroups(seq, charge).values())[0]
-        print(transitionGroup)
-        if includeBoundaries:
-            transitionGroupFeatures = list(self.loadTransitionGroupFeatures(seq, charge).values())[0]
+            transitionGroup = list(self.loadTransitionGroups(seq, charge).values())
+            if includeBoundaries:
+                transitionGroupFeatures = list(self.loadTransitionGroupFeatures(seq, charge).values())
+            else:
+                transitionGroupFeatures = [None] * len(transitionGroup)
+            
+            # raise NotImplementedError("Only one transition file is supported")
+            
+            figures = []
+            for tg, tgf in zip(transitionGroup, transitionGroupFeatures):
+                figure = super().plotChromatogram(tg, tgf, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, scale_intensity=scale_intensity, show_plot=show_plot)
+                figures.append(figure)
+                
+            # Combine the figures into a single figure
+            from bokeh.layouts import gridplot
+            
+            return gridplot(figures, ncols=2, width=400, height=300)
         else:
-            transitionGroupFeatures = []
+            # load the transitionGroup for plotting
+            transitionGroup = list(self.loadTransitionGroups(seq, charge).values())[0]
+            
+            if includeBoundaries:
+                transitionGroupFeatures = list(self.loadTransitionGroupFeatures(seq, charge).values())[0]
+            else:
+                transitionGroupFeatures = []
 
-        return super().plotChromatogram(transitionGroup, transitionGroupFeatures, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, scale_intensity=scale_intensity)
+            return super().plotChromatogram(transitionGroup, transitionGroupFeatures, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, scale_intensity=scale_intensity, show_plot=show_plot)
