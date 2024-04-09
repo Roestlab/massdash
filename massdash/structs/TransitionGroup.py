@@ -248,7 +248,7 @@ class TransitionGroup:
             transitionGroupFeatures (Optional[List[TransitionGroupFeature]], optional): list of transition group features include in plot. Defaults to None.
             smoothing (Optional[Literal['none', 'sgolay', 'gauss']], optional): Smoothing to apply on the plot. Defaults to 'none'.
             gaussian_sigma (float, optional): sigma for gaussian plotting, ignored if smoothing is not 'gauss'. Defaults to 2.0.
-            gaussian_window (int, optional): window for guassian plotting, ignored if smoothing is not 'gauss'. Defaults to 11.
+            gaussian_window (int, optional): window for gaussian plotting, ignored if smoothing is not 'gauss'. Defaults to 11.
             sgolay_polynomial_order (int, optional): Polynomial order for sgolay, ignored if smoothing is not 'sgolay'. Defaults to 3.
             sgolay_frame_length (int, optional): Frame length for sgolay, ignored if smoothing is not 'sgolay'. Defaults to 11.
 
