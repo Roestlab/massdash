@@ -123,7 +123,8 @@ class ExtractedIonChromatogramAnalysisServer:
         with st.status("Performing targeted extraction...", expanded=True) as status:
             with time_block() as elapsed_time:
                 # Load transition group data
-                tr_group_data = self.xic_data.loadTransitionGroups(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+                # tr_group_data = self.xic_data.loadTransitionGroups(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
+                tr_group_data = [self.xic_data.loadTransitionGroups(peptide, transition_list_ui.transition_settings.selected_charge) for peptide in transition_list_ui.transition_settings.selected_peptide]
             st.write(f"Loading XIC data... Elapsed time: {elapsed_time()}") 
             
             # Perform peak picking based on user settings
@@ -173,9 +174,12 @@ class ExtractedIonChromatogramAnalysisServer:
                         tr_group_feature_data[file] = peak_features
                 st.write(f"Performing Conformer Peak Picking... Elapsed time: {elapsed_time()}")
             else:
-                tr_group_feature_data = {file: None for file in tr_group_data.keys()}
+                # tr_group_feature_data = {file: None for file in tr_group_data.keys()}
+                tr_group_feature_data = [{file: None for file in trgrp.keys()} for trgrp in tr_group_data]
 
             with time_block() as elapsed_time:
+                
+                st.write(tr_group_data)
                 
                 # Initialize axis limits for plotting
                 axis_limits_dict = {'x_range' : [], 'y_range' : []}
