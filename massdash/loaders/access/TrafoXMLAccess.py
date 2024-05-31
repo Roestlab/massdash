@@ -3,9 +3,10 @@ massdash/loaders/access/TrafoXMLAccess
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
+from typing import List, Dict, Tuple
 import xml.etree.ElementTree as ET
 import pandas as pd
-from typing import List, Tuple
+
 
 # Library Access
 from ..SpectralLibraryLoader import SpectralLibraryLoader
@@ -41,7 +42,7 @@ class TrafoXMLAccess:
             self.irt_library = SpectralLibraryLoader(self.irt_library_str)
             self.irt_library.load()
 
-    def load_transformation_params(self) -> dict:
+    def load_transformation_params(self) -> Dict:
         """
         Loads the transformation parameters from the TrafoXML file.
 
