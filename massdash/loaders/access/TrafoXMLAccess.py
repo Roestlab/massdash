@@ -33,15 +33,27 @@ class TrafoXMLAccess:
         load_pairs_df: Loads the transformation pairs as a pandas DataFrame.
     """
 
-    def __init__(self, input_file: str, irt_library: str = None) -> None:
+    def __init__(self, 
+                 input_file: str, 
+                 irt_library: str = None, 
+                 mzDebugFile: str = None, 
+                 imDebugFile: str = None) -> None:
         self.input_file_str = input_file
         self.tree = ET.parse(self.input_file_str)
         self.root = self.tree.getroot()
         self.irt_library_str = irt_library
+        self.mzDebugFile_str = mzDebugFile
+        self.imDebugFile_str = imDebugFile
         
         if self.irt_library_str is not None:
             self.irt_library = SpectralLibraryLoader(self.irt_library_str)
             self.irt_library.load()
+        
+        if self.mzDebugFile_str is not None:
+            self.mzDebugFile = pd.read_csv(self.mzDebugFile_str, sep='\t')
+            
+        if self.imDebugFile_str is not None:
+            self.imDebugFile = pd.read_csv(self.imDebugFile_str, sep='\t')
 
     def load_transformation_params(self) -> Dict:
         """
@@ -81,9 +93,20 @@ class TrafoXMLAccess:
         # Add irt precursor information to table if irt_library is available
         if self.irt_library_str is not None:
             irt_prec_meta = self.irt_library.data[['GeneName', 'ProteinId', 'ModifiedPeptideSequence',
-       'PrecursorMz', 'PrecursorCharge', 'NormalizedRetentionTime',
+       'PrecursorMz', 'PrecursorCharge', 'ProductMz', 'ProductCharge', 'Annotation', 'NormalizedRetentionTime',
        'PrecursorIonMobility']].drop_duplicates()
             df = pd.merge(df, irt_prec_meta, left_on='library_rt', right_on='NormalizedRetentionTime', how='inner')
+            
+        if self.mzDebugFile_str is not None:
+            df = pd.merge(df, self.mzDebugFile, left_on='experiment_rt', right_on='RT', how='inner')
+            # Drop RT column, since it's the same as experiment_rt
+            df = df.drop(columns=['RT'])
+            
+        if self.imDebugFile_str is not None:
+            df = pd.merge(df, self.imDebugFile[['RT', 'im', 'theo_im', 'intensity']], left_on='experiment_rt', right_on='RT', how='inner')
+            # Drop RT column, since it's the same as experiment_rt
+            df = df.drop(columns=['RT'])
+            
         df['filename'] = basename(self.input_file_str).split('.')[0]
 
         return df
