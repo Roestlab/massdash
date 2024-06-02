@@ -22,7 +22,12 @@ class DebugPlotter:
                 tools=['pan', 'wheel_zoom', 'box_zoom', 'reset', 'save'])
 
         unique_filenames = df['filename'].unique()
-        colors = Category20[len(unique_filenames)]
+        if len(unique_filenames) == 1:
+            colors = ['blue']
+        elif len(unique_filenames) <= 20:
+            colors = Category20[len(unique_filenames)]
+        else:
+            raise ValueError("Too many files to plot (>20), not enought colors available")
 
         legend_it = []
         file_number = 1
