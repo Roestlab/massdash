@@ -47,3 +47,28 @@ class TrafoXMLLoader:
         return f"TrafoXMLLoader(dataFiles={self.dataFiles_str}, libraryFile={self.libraryFile_str}"
     
     
+    def plot(self, debug_plot_type = "rt", split: bool = False):
+        import pandas as pd
+        from bokeh.plotting import show
+        
+        from massdash.plotting.DebugPlotter import DebugPlotter
+        
+        debug_plot_type_map = {
+            "rt": ['experiment_rt', 'library_rt', 'Retention Time Transformation', 'Original RT [s]', 'Delta RT [s]'],
+            "mz": ['mz', 'theo_mz', 'm/z calibration', 'Experiment m/z', 'Theoretical m/z'],
+            "im": ['im', 'theo_im', 'Ion mobility calibration', 'Experiment Ion Mobility', 'Theoretical Ion Mobility']
+        }
+        
+        if split:
+            for i in range(len(self.dataFiles)):
+                df = self.dataFiles[i].load_pairs_df()
+                plotter = DebugPlotter()
+                p = plotter.plot(df, *debug_plot_type_map[debug_plot_type])
+                show(p)
+        else:
+            df = [self.dataFiles[i].load_pairs_df() for i in range(len(self.dataFiles))]
+            df = pd.concat(df)
+
+            plotter = DebugPlotter()
+            p = plotter.plot(df, *debug_plot_type_map[debug_plot_type])
+            show(p)
