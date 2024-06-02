@@ -4,6 +4,7 @@ massdash/loaders/access/TrafoXMLAccess
 """
 
 from typing import List, Dict, Tuple
+from os.path import basename
 import xml.etree.ElementTree as ET
 import pandas as pd
 
@@ -83,5 +84,6 @@ class TrafoXMLAccess:
        'PrecursorMz', 'PrecursorCharge', 'NormalizedRetentionTime',
        'PrecursorIonMobility']].drop_duplicates()
             df = pd.merge(df, irt_prec_meta, left_on='library_rt', right_on='NormalizedRetentionTime', how='inner')
+        df['filename'] = basename(self.input_file_str).split('.')[0]
 
         return df
