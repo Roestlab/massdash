@@ -172,12 +172,21 @@
     ]),
     'SCORE_MS2': list([
       'SCORE',
+      'PVALUE',
+      'PEP',
+      'QVALUE',
     ]),
     'SCORE_PEPTIDE': list([
       'SCORE',
+      'PVALUE',
+      'PEP',
+      'QVALUE',
     ]),
     'SCORE_PROTEIN': list([
       'SCORE',
+      'PVALUE',
+      'PEP',
+      'QVALUE',
     ]),
   })
 # ---

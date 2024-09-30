@@ -754,9 +754,9 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 DECOY,
                 RUN_ID
             FROM {score_table}
-            INNER JOIN SCORE_MS2 ON {score_table}.FEATURE_ID = SCORE_MS2.FEATURE_ID 
             INNER JOIN FEATURE ON {score_table}.FEATURE_ID = FEATURE.ID
             INNER JOIN PRECURSOR ON FEATURE.PRECURSOR_ID = PRECURSOR.ID
+            INNER JOIN SCORE_MS2 ON {score_table}.FEATURE_ID = SCORE_MS2.FEATURE_ID 
             WHERE RANK == 1
             '''
         elif score_table in ['SCORE_MS2']:
@@ -786,7 +786,6 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 FROM {score_table}
                 INNER JOIN {analyte} ON {score_table}.{analyte}_ID = {analyte}.ID
                 WHERE CONTEXT == "{context}" '''
-                print(stmt)
         else:
             raise ValueError(f"Score table {score_table} not recognized or not yet implemented")
         
