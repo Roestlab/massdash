@@ -5,6 +5,7 @@ massdash/loaders/GenericRawDataLoader
 
 from abc import ABC, abstractmethod, ABCMeta
 from typing import Dict, List, Union, Literal, Optional
+from pathlib import Path
 
 # Loaders
 from .ResultsLoader import ResultsLoader
@@ -38,6 +39,9 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         else:
             self.libraryAccess = SpectralLibraryLoader(self.libraryAccess)
             self.libraryAccess.load()
+
+        ## overwrite run names since we are specifying data files
+        self.runNames = [Path(f).stem for f in self.dataFiles]
         
     @abstractmethod
     def loadTransitionGroups(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:

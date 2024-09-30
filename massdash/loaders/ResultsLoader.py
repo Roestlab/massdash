@@ -120,9 +120,7 @@ class ResultsLoader:
         '''
         out = {}
         for d in self.runNames:
-            for r in self.rsltsAccess:
-                features = r.getTransitionGroupFeaturesDf(d, pep_id, charge)
-                out[d] = features
+            out[d] = pd.concat([ r.getTransitionGroupFeaturesDf(d, pep_id, charge) for r in self.rsltsAccess ])
         
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname'))
 
@@ -159,9 +157,7 @@ class ResultsLoader:
         '''
         out = {}
         for d in self.runNames:
-            for r in self.rsltsAccess:
-                features = r.getTopTransitionGroupFeatureDf(d, pep_id, charge)
-                out[d] = features
+            out[d] = pd.concat([ r.getTopTransitionGroupFeatureDf(d, pep_id, charge) for r in self.rsltsAccess ])
         
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runName'))
 
