@@ -4,7 +4,7 @@ massdash/peakPickers/MRMTransitionGroupPicker
 """
 
 import pyopenms as po
-from typing import List
+from typing import List, Tuple
 
 # Structs
 from ..structs.TransitionGroup import TransitionGroup
@@ -93,20 +93,37 @@ class MRMTransitionGroupPicker:
             background_subtraction (str): Background subtraction
             use_precursors (bool): Use precursors
             signal_to_noise (float): Signal to noise
+            minimal_quality (float): Minimal quality (if set, automatically sets compute_peak_quality to true)
         '''
 
-        valid_params = ['stop_after_feature', 'stop_after_intensity_ratio', 'min_peak_width', 'recalculate_peaks_max_z', 'resample_boundary', 'recalculate_peaks', 'background_subtraction', 'use_precursors']
+        valid_params = ['stop_after_feature', 'stop_after_intensity_ratio', 'min_peak_width', 'recalculate_peaks_max_z', 'resample_boundary', 'recalculate_peaks', 'background_subtraction', 'use_precursors', 'minimal_quality']
         mrmParams = ['signal_to_noise']
-        valid_params = valid_params + mrmParams
+        bools_to_str = ['recalculate_peaks'] # these parameters require a "true" or "false" string
+        valid_params = valid_params + mrmParams + bools_to_str
         for k, val in kwargs.items():
             if k not in valid_params:
                 raise ValueError(f"Parameter {k} is not valid or is not currently supported")
             else:
                 if k in mrmParams:
                     self.params.setValue(bytes('PeakPickerMRM:'+k, encoding='utf-8'), val)
+                elif k in bools_to_str:
+                    if k:
+                        self.params.setValue(bytes(k, encoding='utf-8'), 'true')
+                    else:
+                        self.params.setValue(bytes(k, encoding='utf-8'), 'false')
+                elif k == 'minimal_quality':
+                    self.params.setValue(bytes(k, encoding='utf-8'), val)
+                    self.params.setValue(bytes('compute_peak_quality', encoding='utf-8'), 'true')
                 else:
                     self.params.setValue(bytes(k, encoding='utf-8'), val)
                 self.picker.setParameters(self.params)
+
+    def getPrettyParameters(self) -> Tuple:
+        ''' 
+        Get a list of current parameters and their values in a python friendly format
+        Note: Changing the parameters will not update values
+        '''
+        return tuple(zip([ i.decode('utf-8') for i in self.params.keys()], self.params.values()))
 
     def pick(self, transitionGroup: TransitionGroup) -> List[TransitionGroupFeature]:
         ''' Performs Peak Picking, Should return a TransitionGroupFeatureList object '''

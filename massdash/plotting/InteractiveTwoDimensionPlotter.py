@@ -8,7 +8,7 @@ from typing import List, Tuple
 # Data modules
 import numpy as np
 import pandas as pd
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 
 # Plotting modules
 from bokeh.models import HoverTool, CrosshairTool, Title
@@ -20,7 +20,7 @@ from ..util import rgb_to_hex
 from .GenericPlotter import PlotConfig
 # Structs
 from ..structs.FeatureMap import FeatureMap
-#Transofmrations
+#Transformations
 from ..dataProcessing.transformations import equalize2D
 
 class InteractiveTwoDimensionPlotter:
