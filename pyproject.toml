@@ -2,7 +2,7 @@
 requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
-[tool.flit.metadata]
+[project]
 module = "massdash"
 dist-name = "massdash"
 author = "Justin Sing"
@@ -42,7 +42,7 @@ gui = [ 'streamlit>=1.30.0', 'streamlit-javascript', 'tk', 'pyautogui' ]
 conformer= [ 'onnxxruntime' ]
 
 
-[tool.flit.scripts]
+[scripts]
 massdash = 'massdash.main:cli'
 
 [tool.flit.sdist]
