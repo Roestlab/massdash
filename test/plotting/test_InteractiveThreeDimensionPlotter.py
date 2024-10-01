@@ -84,7 +84,7 @@ def test_plot_individual_3d_mesh_cube(featureMap, include_ms1, include_ms2, snap
     assert snapshot_plotly == fig
 '''
 
-@pytest.skipif(sys.platform == 'Darwin', reason="Plots slightly different on mac")
+@pytest.mark.skipif(sys.platform == 'Darwin', reason="Plots slightly different on mac")
 @pytest.mark.parametrize('type_of_3d_plot,aggregate_mslevels,include_ms1,include_ms2,type_of_comparison', [
     # Scatter not aggregated
     ('3D Scatter Plot', False, True, True, ''), 
