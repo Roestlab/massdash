@@ -36,7 +36,7 @@ class PeakPickingServer:
 
     def perform_pypeakpicker_mrm_peak_picking(self, tr_group_data: TransitionGroupCollection) -> TransitionGroupFeatureCollection:
         """
-        Performs peak picking using pyPeakPickerMRM algorithm.
+        Performs peak picking using pyPeakPickerChromatogram algorithm.
 
         Args:
             tr_group_data (TransitionGroupCollection): The transition group data collection
@@ -51,7 +51,7 @@ class PeakPickingServer:
                 )
             else:
                 mslevel = self.peak_picking_settings.peak_picker_algo_settings.mslevels
-            peak_picker_param = self.peak_picking_settings.peak_picker_algo_settings.PeakPickerMRMParams
+            peak_picker_param = self.peak_picking_settings.peak_picker_algo_settings.PeakPickerChromatogramParams
 
             tr_group_feature_data = TransitionGroupFeatureCollection()
             for file, tr_group in tr_group_data.items():
@@ -59,7 +59,7 @@ class PeakPickingServer:
                 peak_features = peak_picker.pick(tr_group)
                 tr_group_feature_data[file] = peak_features
 
-        st.write(f"Performing pyPeakPickerMRM Peak Picking... Elapsed time: {elapsed_time()}")
+        st.write(f"Performing pyPeakPickerChromatogram Peak Picking... Elapsed time: {elapsed_time()}")
         return tr_group_feature_data
 
     def perform_mrmtransitiongrouppicker_peak_picking(self, tr_group_data: TransitionGroupFeatureCollection) -> TransitionGroupFeatureCollection:
@@ -131,7 +131,7 @@ class PeakPickingServer:
         tr_group_feature_data = {}
 
         # Perform peak picking based on the selected method
-        if self.peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
+        if self.peak_picking_settings.do_peak_picking == 'pyPeakPickerChromatogram':
             tr_group_feature_data = self.perform_pypeakpicker_mrm_peak_picking(tr_group_data)
         elif self.peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
             tr_group_feature_data = self.perform_mrmtransitiongrouppicker_peak_picking(tr_group_data)

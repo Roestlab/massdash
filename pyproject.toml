@@ -29,7 +29,7 @@ requires = [
     "pandas>=0.17",
     "plotly",
     "psutil",
-    "pyopenms",
+    "pyopenms>=3.2.0",
     "scipy>=1.12.0",
     "streamlit>=1.30.0",
     "streamlit-javascript",

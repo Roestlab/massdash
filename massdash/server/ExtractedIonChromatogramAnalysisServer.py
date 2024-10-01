@@ -131,21 +131,21 @@ class ExtractedIonChromatogramAnalysisServer:
                 with time_block() as elapsed_time:
                     tr_group_feature_data = self.xic_data.loadTransitionGroupFeatures(transition_list_ui.transition_settings.selected_peptide, transition_list_ui.transition_settings.selected_charge)
                 st.write(f"Loading Feature File Peak Boundaries... Elapsed time: {elapsed_time()}")
-            elif peak_picking_settings.do_peak_picking == 'pyPeakPickerMRM':
+            elif peak_picking_settings.do_peak_picking == 'pyPeakPickerChromatogram':
                 with time_block() as elapsed_time:
                     # Peak picking using pyMRMTransitionGroupPicker
                     if peak_picking_settings.peak_pick_on_displayed_chrom:
                         mslevel = get_string_mslevels_from_bool({'ms1':chrom_plot_settings.include_ms1, 'ms2':chrom_plot_settings.include_ms2})
                     else:
                         mslevel = peak_picking_settings.peak_picker_algo_settings.mslevels
-                    peak_picker_param = peak_picking_settings.peak_picker_algo_settings.PeakPickerMRMParams
+                    peak_picker_param = peak_picking_settings.peak_picker_algo_settings.PeakPickerChromatogramParams
 
                     tr_group_feature_data = {}
                     for file, tr_group in tr_group_data.items():
                         peak_picker = pyMRMTransitionGroupPicker(mslevel, peak_picker=peak_picker_param.peak_picker)
                         peak_features = peak_picker.pick(tr_group)
                         tr_group_feature_data[file] = peak_features
-                st.write(f"Performing pyPeakPickerMRM Peak Picking... Elapsed time: {elapsed_time()}")
+                st.write(f"Performing pyPeakPickerChromatogram Peak Picking... Elapsed time: {elapsed_time()}")
             elif peak_picking_settings.do_peak_picking == 'MRMTransitionGroupPicker':
                 with time_block() as elapsed_time:
                     # Peak picking using MRMTransitionGroupPicker
