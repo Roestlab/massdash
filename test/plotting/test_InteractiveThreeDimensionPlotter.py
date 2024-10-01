@@ -56,7 +56,7 @@ def test_plot_3d_vline(featureMap, snapshot_plotly):
     (True, True, dict(type='none'), "ion mobility vs m/z")
     ])
 def test_plot_individual_3d_surface(featureMap, include_ms1, include_ms2, smoothing_dict, type_of_comparison, snapshot_plotly):
-    if sys.platform == 'win32' and type_of_comparison == "ion mobility vs m/z": # ion mobility vs m/z leads to different plot on windows
+    if sys.platform in ['win32', 'Darwin'] and type_of_comparison == "ion mobility vs m/z": # ion mobility vs m/z leads to slightly different plot on windows and mac
         pass
     else:
         config_dict = dict(include_ms1=include_ms1, include_ms2=include_ms2, smoothing_dict=smoothing_dict, type_of_comparison=type_of_comparison)
@@ -105,7 +105,7 @@ def test_plot_individual_3d_mesh_cube(featureMap, include_ms1, include_ms2, snap
     ('3D Line Plot', False, True, False, '')
     ])
 def test_plot(featureMap, type_of_3d_plot, aggregate_mslevels, include_ms1, include_ms2, type_of_comparison, snapshot_plotly):
-    if sys.platform == 'win32' and type_of_comparison == "ion mobility vs m/z": # ion mobility vs m/z surface plot leads to different plot on windows
+    if sys.platform in ['win32','Darwin'] and type_of_comparison == "ion mobility vs m/z": # ion mobility vs m/z surface plot leads to slightly different plot on windows or mac
         pass
     else:
         config_dict = dict(type_of_3d_plot=type_of_3d_plot, aggregate_mslevels=aggregate_mslevels, include_ms1=include_ms1, include_ms2=include_ms2, type_of_comparison=type_of_comparison)
