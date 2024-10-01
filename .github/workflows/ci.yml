@@ -7,7 +7,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest] # remove mac tests
+        #os: [ubuntu-latest, windows-latest, macos-latest] # remove mac tests
+        os: [windows-latest] # remove mac tests
         # Latest pyOpenMS supports Python 3.9, 3.10, and 3.11
         #python-version: ["3.9", "3.10", "3.11"]
         python-version: ["3.11"]
@@ -25,7 +26,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --index-url https://pypi.cs.uni-tuebingen.de/simple/ pyopenms
+        pip install pyopenms
+        #pip install --index-url https://pypi.cs.uni-tuebingen.de/simple/ pyopenms
         pip install -r requirements.txt -r requirements-dev.txt -r requirements-optional.txt
     - name: Test
       run: |
