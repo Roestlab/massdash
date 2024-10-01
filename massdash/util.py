@@ -29,8 +29,13 @@ except Exception:
 import requests
 import socket
 import socketserver
-import streamlit as st
-from streamlit.components.v1 import html
+
+# Streamlit not avaliable if not installed with gui
+try:
+    import streamlit as st
+    from streamlit.components.v1 import html
+except ImportError:
+    st = None
 
 from .constants import USER_PLATFORM_SYSTEM
 
