@@ -43,7 +43,7 @@ def test_plot_3d_vline(featureMap, snapshot_plotly):
     fig = plotter.plot(featureMap)
     assert snapshot_plotly == fig
 
-@pytest.mark.skipif(sys.platform == 'Darwin', reason="Plots slightly different on mac")
+@pytest.mark.skipif(sys.platform == 'darwin', reason="Plots slightly different on mac")
 @pytest.mark.parametrize('include_ms1,include_ms2,smoothing_dict,type_of_comparison', [
     # no smoothing
     (True, True, dict(type='none'), 'retention time vs m/z'), 
@@ -84,7 +84,7 @@ def test_plot_individual_3d_mesh_cube(featureMap, include_ms1, include_ms2, snap
     assert snapshot_plotly == fig
 '''
 
-@pytest.mark.skipif(sys.platform == 'Darwin', reason="Plots slightly different on mac")
+@pytest.mark.skipif(sys.platform == 'darwin', reason="Plots slightly different on mac")
 @pytest.mark.parametrize('type_of_3d_plot,aggregate_mslevels,include_ms1,include_ms2,type_of_comparison', [
     # Scatter not aggregated
     ('3D Scatter Plot', False, True, True, ''), 
