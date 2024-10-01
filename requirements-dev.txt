@@ -1,6 +1,0 @@
-flake8
-flit
-pylint
-pytest
-syrupy
-tables
