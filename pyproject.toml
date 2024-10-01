@@ -4,11 +4,12 @@ build-backend = "flit_core.buildapi"
 
 [project]
 module = "massdash"
-dist-name = "massdash"
-author = "Justin Sing"
-author-email = "justincsing@gmail.com"
-home-page = "https://github.com/Roestlab/massdash"
-description-file = "README.md"
+name = "massdash"
+version = "0.0.9.1"
+authors = [{ name="Justin Sing", email="justincsing@gmai.com"} ]
+homepage = "https://github.com/Roestlab/massdash"
+description = "A visualization and data exploration platform for Data-Independent Acquisition mass spectrometry data"
+readme = "README.md"
 classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
@@ -39,7 +40,7 @@ requires = [
 testing = ["pytest", "syrupy" ]
 docs = [ 'nbsphinx', 'sphinx-copybutton', 'sphinx-rtd-theme', 'sphinx==5.3.0' ]
 gui = [ 'streamlit>=1.30.0', 'streamlit-javascript', 'tk', 'pyautogui' ] 
-conformer= [ 'onnxxruntime' ]
+conformer= [ 'onnxruntime' ]
 
 
 [scripts]
