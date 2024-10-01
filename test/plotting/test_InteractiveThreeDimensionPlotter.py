@@ -43,7 +43,7 @@ def test_plot_3d_vline(featureMap, snapshot_plotly):
     fig = plotter.plot(featureMap)
     assert snapshot_plotly == fig
 
-@pytest.skipif(sys.platform == 'Darwin', reason="Plots slightly different on mac")
+@pytest.mark.skipif(sys.platform == 'Darwin', reason="Plots slightly different on mac")
 @pytest.mark.parametrize('include_ms1,include_ms2,smoothing_dict,type_of_comparison', [
     # no smoothing
     (True, True, dict(type='none'), 'retention time vs m/z'), 
