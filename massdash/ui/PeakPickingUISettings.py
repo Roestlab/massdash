@@ -7,7 +7,7 @@ import streamlit as st
 
 # UI
 from .ChromatogramPlotUISettings import ChromatogramPlotUISettings
-from .pyPeakPickerMRMUISettings import pyPeakPickerMRMUISettings
+from .pyPeakPickerChromatogramUISettings import pyPeakPickerChromatogramUISettings
 from .ConformerPickerUISettings import ConformerPickerUISettings
 from .MRMTransitionGroupPickerUISettings import MRMTransitionGroupPickerUISettings
 
@@ -20,7 +20,7 @@ class PeakPickingUISettings:
         The type of peak picking to perform. Defaults to 'none'.
     peak_pick_on_displayed_chrom : bool
         Whether to perform peak picking on the displayed chromatogram. Defaults to True.
-    peak_picker_algo_settings : pyPeakPickerMRMUISettings/MRMTransitionGroupPickerUISettings
+    peak_picker_algo_settings : pyPeakPickerChromatogramUISettings/MRMTransitionGroupPickerUISettings
     isStreamlitCloud (bool): Set to True if running (or emulate running) on streamlit cloud, if False not on the cloud
     
     Methods:
@@ -47,14 +47,14 @@ class PeakPickingUISettings:
         st.sidebar.title("Peak Picking")
 
         ## Perform Peak Picking
-        self.do_peak_picking = st.sidebar.selectbox("Peak Picking", ['none', 'Feature File Boundaries', 'pyPeakPickerMRM', 'MRMTransitionGroupPicker', 'Conformer'], help="Peak picking method to use.")
+        self.do_peak_picking = st.sidebar.selectbox("Peak Picking", ['none', 'Feature File Boundaries', 'pyPeakPickerChromatogram', 'MRMTransitionGroupPicker', 'Conformer'], help="Peak picking method to use.")
 
         if self.do_peak_picking != 'none':
             ## Perform peak picking on displayed chromatogram, or adjust smoothing separately for peak picking?
             self.peak_pick_on_displayed_chrom = st.sidebar.checkbox("Peak Pick with Displayed Chromatogram", value=True, help="If checked, peak picking will be performed on the displayed chromatogram. If unchecked, peak picking will be performed on the raw chromatogram or you set different smoothing parameters for peak picking.") 
 
-        if self.do_peak_picking == "pyPeakPickerMRM":
-            self.peak_picker_algo_settings = pyPeakPickerMRMUISettings(self)
+        if self.do_peak_picking == "pyPeakPickerChromatogram":
+            self.peak_picker_algo_settings = pyPeakPickerChromatogramUISettings(self)
             self.peak_picker_algo_settings.create_ui(plot_settings)
         elif self.do_peak_picking == "Feature File Boundaries":
             pass

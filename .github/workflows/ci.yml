@@ -7,25 +7,30 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest] # remove mac tests
         # Latest pyOpenMS supports Python 3.9, 3.10, and 3.11
         python-version: ["3.9", "3.10", "3.11"]
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies for macOS
       if: runner.os == 'macOS'
       run: |
         brew install hdf5
         pip install -r requirements-dev.txt
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install --index-url https://pypi.cs.uni-tuebingen.de/simple/ pyopenms
-        pip install -r requirements.txt -r requirements-dev.txt -r requirements-optional.txt
+        pip install .[testing,conformer]
+        #pip install -r requirements.txt -r requirements-dev.txt -r requirements-optional.txt
+
     - name: Test
       run: |
         python -m pytest --snapshot-warn-unused test/ # do not fail if unused snapshot, just warn

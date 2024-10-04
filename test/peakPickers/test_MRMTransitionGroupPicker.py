@@ -73,7 +73,7 @@ class TestMRMTransitionGroupPicker(unittest.TestCase):
         picker.setGeneralParameters(stop_after_feature=5, signal_to_noise=1000.0, minimal_quality=0.0)
         val = picker.params.getValue(b'stop_after_feature')
         self.assertEqual(val, 5)
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:signal_to_noise'), 1000.0)
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:signal_to_noise'), 1000.0)
         self.assertEqual(picker.params.getValue(b'minimal_quality'), 0.0)
         self.assertEqual(picker.params.getValue(b'compute_peak_quality'), 'true')
 
@@ -100,17 +100,17 @@ class TestMRMTransitionGroupPicker(unittest.TestCase):
                     ('compute_peak_shape_metrics', 'false'),
                     ('compute_total_mi', 'false'),
                     ('boundary_selection_method', 'largest'),
-                    ('PeakPickerMRM:sgolay_frame_length', 11),
-                    ('PeakPickerMRM:sgolay_polynomial_order', 3),
-                    ('PeakPickerMRM:gauss_width', 50.0),
-                    ('PeakPickerMRM:use_gauss', 'false'),
-                    ('PeakPickerMRM:peak_width', -1.0),
-                    ('PeakPickerMRM:signal_to_noise', 0.001),
-                    ('PeakPickerMRM:sn_win_len', 1000.0),
-                    ('PeakPickerMRM:sn_bin_count', 30),
-                    ('PeakPickerMRM:write_sn_log_messages', 'false'),
-                    ('PeakPickerMRM:remove_overlapping_peaks', 'true'),
-                    ('PeakPickerMRM:method', 'legacy'),
+                    ('PeakPickerChromatogram:sgolay_frame_length', 11),
+                    ('PeakPickerChromatogram:sgolay_polynomial_order', 3),
+                    ('PeakPickerChromatogram:gauss_width', 50.0),
+                    ('PeakPickerChromatogram:use_gauss', 'false'),
+                    ('PeakPickerChromatogram:peak_width', -1.0),
+                    ('PeakPickerChromatogram:signal_to_noise', 0.001),
+                    ('PeakPickerChromatogram:sn_win_len', 1000.0),
+                    ('PeakPickerChromatogram:sn_bin_count', 30),
+                    ('PeakPickerChromatogram:write_sn_log_messages', 'false'),
+                    ('PeakPickerChromatogram:remove_overlapping_peaks', 'true'),
+                    ('PeakPickerChromatogram:method', 'legacy'),
                     ('PeakIntegrator:integration_type', 'intensity_sum'),
                     ('PeakIntegrator:baseline_type', 'base_to_base'),
                     ('PeakIntegrator:fit_EMG', 'false'))
@@ -124,18 +124,18 @@ class TestMRMTransitionGroupPicker(unittest.TestCase):
         
         # Test setting of original smoother
         picker.setSmoother("original")
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:method'),  'legacy')
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:method'),  'legacy')
 
         # Test setting of gaussian smoother
         picker.setSmoother("gauss", gauss_width=10.0)
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:method'),  'corrected')
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:use_gauss'),  'true')
-        self.assertEqual((picker.params.getValue(b'PeakPickerMRM:gauss_width')), 10.0)
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:method'),  'corrected')
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:use_gauss'),  'true')
+        self.assertEqual((picker.params.getValue(b'PeakPickerChromatogram:gauss_width')), 10.0)
 
         picker.setSmoother("sgolay")
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:method'), 'corrected')
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:use_gauss'), 'false')
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:sgolay_frame_length'), 11)
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:method'), 'corrected')
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:use_gauss'), 'false')
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:sgolay_frame_length'), 11)
 
         # Test setting of invalid smoother
         with self.assertRaises(ValueError):

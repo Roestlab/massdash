@@ -4,7 +4,11 @@ massdash/plotting/InteractivePlotter
 """
 
 from typing import List, Optional, Literal
-import streamlit as st
+
+try:
+    import streamlit as st
+except ImportError:
+    st = None
 
 # Data modules
 import numpy as np
