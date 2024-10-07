@@ -20,6 +20,7 @@ def snapshot_pandas(snapshot):
 
 #f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv",
     #[f"{TEST_PATH}/test_data/example_dia/diann/report/test_diann_report_combined.tsv", f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv"]
+    # NOTE: with this PR dreamDIA is not supported
 @pytest.fixture(params=['openswath', 'diann1', 'combined'])
 def resultsLoader(request):
     if request.param == 'openswath':

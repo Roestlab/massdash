@@ -31,6 +31,8 @@ class MzMLDataLoader(GenericSpectrumLoader):
         super().__init__(**kwargs) 
         self.dataAccess = [MzMLDataAccess(f, 'ondisk', verbose=self.verbose) for f in self.dataFiles]
         self.has_im = np.all([d.has_im for d in self.dataAccess])
+        if self.libraryAccess is None:
+            raise ValueError("If .osw file is not supplied, library file is required for MzMLDataLoader to perform targeted extraction")
                    
     def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, TransitionGroup]:
         '''

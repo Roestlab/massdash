@@ -10,6 +10,12 @@
     'test_raw_1',
   ])
 # ---
+# name: test_inferRunNames[dreamdia]
+  list([
+    'test_raw_1',
+    'test_raw_2',
+  ])
+# ---
 # name: test_inferRunNames[openswath]
   list([
     'test_raw_1',
@@ -52,6 +58,24 @@
   dict({
     'DIA-NN': dict({
       'test_raw_1': set({
+        'AGAANIVPNSTGAAK',
+        'DYASIDAAPEER',
+        'IEDQLGEVAQYK',
+        'KVVITAPGGNDVK',
+      }),
+    }),
+  })
+# ---
+# name: test_loadIdentifiedPeptides[dreamdia]
+  dict({
+    'DreamDIA': dict({
+      'test_raw_1.mzML': set({
+        'AGAANIVPNSTGAAK',
+        'DYASIDAAPEER',
+        'IEDQLGEVAQYK',
+        'KVVITAPGGNDVK',
+      }),
+      'test_raw_2.mzML': set({
         'AGAANIVPNSTGAAK',
         'DYASIDAAPEER',
         'IEDQLGEVAQYK',
@@ -207,6 +231,22 @@
     }),
   })
 # ---
+# name: test_loadIdentifiedProteins[dreamdia]
+  dict({
+    'DreamDIA': dict({
+      'test_raw_1.mzML': set({
+        'Spyo_Exp3652_DDB_SeqID_514830',
+        'Spyo_Exp3652_DDB_SeqID_514851',
+        'Spyo_Exp3652_DDB_SeqID_515131',
+      }),
+      'test_raw_2.mzML': set({
+        'Spyo_Exp3652_DDB_SeqID_514830',
+        'Spyo_Exp3652_DDB_SeqID_514851',
+        'Spyo_Exp3652_DDB_SeqID_515131',
+      }),
+    }),
+  })
+# ---
 # name: test_loadIdentifiedProteins[openswath]
   dict({
     'OpenSWATH': dict({
@@ -239,6 +279,14 @@
   dict({
     'DIA-NN': dict({
       'test_raw_1': 4,
+    }),
+  })
+# ---
+# name: test_loadNumIdentifiedPeptides[dreamdia]
+  dict({
+    'DreamDIA': dict({
+      'test_raw_1.mzML': 4,
+      'test_raw_2.mzML': 4,
     }),
   })
 # ---
@@ -296,6 +344,14 @@
     }),
   })
 # ---
+# name: test_loadNumIdentifiedProteins[dreamdia]
+  dict({
+    'DreamDIA': dict({
+      'test_raw_1.mzML': 3,
+      'test_raw_2.mzML': 3,
+    }),
+  })
+# ---
 # name: test_loadNumIdentifiedProteins[openswath]
   dict({
     'OpenSWATH': dict({
@@ -313,6 +369,11 @@
 # name: test_loadSoftware[diann1]
   list([
     'DIA-NN',
+  ])
+# ---
+# name: test_loadSoftware[dreamdia]
+  list([
+    'DreamDIA',
   ])
 # ---
 # name: test_loadSoftware[openswath]
