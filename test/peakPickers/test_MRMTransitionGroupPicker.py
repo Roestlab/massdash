@@ -70,14 +70,53 @@ class TestMRMTransitionGroupPicker(unittest.TestCase):
     def test_setGeneralParameters(self):
         # Test setting of parameters
         picker = MRMTransitionGroupPicker("original")
-        picker.setGeneralParameters(stop_after_feature=5, signal_to_noise=1000.0)
+        picker.setGeneralParameters(stop_after_feature=5, signal_to_noise=1000.0, minimal_quality=0.0)
         val = picker.params.getValue(b'stop_after_feature')
         self.assertEqual(val, 5)
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:signal_to_noise'), 1000.0)
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:signal_to_noise'), 1000.0)
+        self.assertEqual(picker.params.getValue(b'minimal_quality'), 0.0)
+        self.assertEqual(picker.params.getValue(b'compute_peak_quality'), 'true')
 
         # Test setting of invalid parameterata/xics/test_chrom_1.sqMass', '../test_data/xics/test_chrom_2.sqMass'], rsltsFile="../test_data/osw/test_data.osw")
         with self.assertRaises(ValueError):
             picker.setGeneralParameters(invalid_param=5)
+
+    def test_getPrettyParameters(self):
+        # Test printing of parameters
+        picker = MRMTransitionGroupPicker("original")
+
+        expected = (('stop_after_feature', -1),
+                    ('stop_after_intensity_ratio', 0.0001),
+                    ('min_peak_width', -1.0),
+                    ('peak_integration', 'original'),
+                    ('background_subtraction', 'none'),
+                    ('recalculate_peaks', 'true'),
+                    ('use_precursors', 'false'),
+                    ('use_consensus', 'true'),
+                    ('recalculate_peaks_max_z', 0.75),
+                    ('minimal_quality', -10000.0),
+                    ('resample_boundary', 15.0),
+                    ('compute_peak_quality', 'false'),
+                    ('compute_peak_shape_metrics', 'false'),
+                    ('compute_total_mi', 'false'),
+                    ('boundary_selection_method', 'largest'),
+                    ('PeakPickerChromatogram:sgolay_frame_length', 11),
+                    ('PeakPickerChromatogram:sgolay_polynomial_order', 3),
+                    ('PeakPickerChromatogram:gauss_width', 50.0),
+                    ('PeakPickerChromatogram:use_gauss', 'false'),
+                    ('PeakPickerChromatogram:peak_width', -1.0),
+                    ('PeakPickerChromatogram:signal_to_noise', 0.001),
+                    ('PeakPickerChromatogram:sn_win_len', 1000.0),
+                    ('PeakPickerChromatogram:sn_bin_count', 30),
+                    ('PeakPickerChromatogram:write_sn_log_messages', 'false'),
+                    ('PeakPickerChromatogram:remove_overlapping_peaks', 'true'),
+                    ('PeakPickerChromatogram:method', 'legacy'),
+                    ('PeakIntegrator:integration_type', 'intensity_sum'),
+                    ('PeakIntegrator:baseline_type', 'base_to_base'),
+                    ('PeakIntegrator:fit_EMG', 'false'))
+
+        # Now you can make assertions about the print output
+        self.assertEqual(expected, picker.getPrettyParameters())
 
     def test_setSmoother(self):
         # Test setting of smoother
@@ -85,18 +124,18 @@ class TestMRMTransitionGroupPicker(unittest.TestCase):
         
         # Test setting of original smoother
         picker.setSmoother("original")
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:method'),  'legacy')
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:method'),  'legacy')
 
         # Test setting of gaussian smoother
         picker.setSmoother("gauss", gauss_width=10.0)
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:method'),  'corrected')
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:use_gauss'),  'true')
-        self.assertEqual((picker.params.getValue(b'PeakPickerMRM:gauss_width')), 10.0)
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:method'),  'corrected')
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:use_gauss'),  'true')
+        self.assertEqual((picker.params.getValue(b'PeakPickerChromatogram:gauss_width')), 10.0)
 
         picker.setSmoother("sgolay")
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:method'), 'corrected')
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:use_gauss'), 'false')
-        self.assertEqual(picker.params.getValue(b'PeakPickerMRM:sgolay_frame_length'), 11)
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:method'), 'corrected')
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:use_gauss'), 'false')
+        self.assertEqual(picker.params.getValue(b'PeakPickerChromatogram:sgolay_frame_length'), 11)
 
         # Test setting of invalid smoother
         with self.assertRaises(ValueError):

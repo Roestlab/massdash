@@ -15,10 +15,23 @@ from .TransitionGroupFeature import TransitionGroupFeature
 
 class TransitionGroup:
     '''
-    Class for Storing a transition group
+    A Transition Group which contains a list of precursor and transition data. Precursor and Transition data must be a Chromatogram, Mobilogram or Spectrum object.
     '''
     def __init__(self, precursorData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]],
                  transitionData: Union[List[Chromatogram], List[Mobilogram], List[Spectrum]], sequence: str = None, precursor_charge: int = None):
+        """
+        Initialize a TransitionGroup object.
+
+        Args:
+            precursorData (Union[List[Chromatogram], List[Mobilogram], List[Spectrum]]): _description_
+            transitionData (Union[List[Chromatogram], List[Mobilogram], List[Spectrum]]): _description_
+            sequence (str, optional): Peptide Sequence. Defaults to None.
+            precursor_charge (int, optional): Peptide Charge. Defaults to None.
+
+        Raises:
+            ValueError: Precursor and transition data cannot both be empty
+        """
+
         self.precursorData = precursorData
         self.transitionData = transitionData
         if len(transitionData) > 0:
@@ -33,9 +46,11 @@ class TransitionGroup:
         self.precursor_charge = precursor_charge
   
     def toPandasDf(self) -> pd.DataFrame:
-        '''
-        Convert the TransitionGroup to a Pandas DataFrame
-        '''
+        """Convert the TransitionGroup to a Pandas DataFrame.
+
+        Returns:
+            pd.DataFrame: DataFrame representation of the TransitionGroup.
+        """
         if self.transitionData == [] and self.precursorData == []:
             return pd.DataFrame()
         elif self.transitionData == []:
@@ -47,10 +62,20 @@ class TransitionGroup:
             precursorDataDf = pd.concat([ i.toPandasDf() for i in self.precursorData])
             return pd.concat([precursorDataDf, transitionDataDf])
 
-    def to_pyopenms(self, includePrecursors=True):
-        '''
-        Converts the TransitionGroup to an OpenMS TransitionGroup
-        '''
+    def to_pyopenms(self, includePrecursors=True) -> po.MRMTransitionGroupCP:
+        """Convert the TransitionGroup to an OpenMS TransitionGroup.
+
+        Args:
+            includePrecursors (bool, optional): If True, include precursor in transition group. Note Precursor and transition chromatograms are not distinguished in this OpenMS representation. Defaults to True.
+
+        Returns:
+            po.MRMTransitionGroupCP: An OpenMS TransitionGroup object, can invoke pyopenms methods on this object.
+        
+        Raises:
+            ValueError: Cannot convert Spectrum to pyopenms TransitionGroup
+        """
+        if self.dataType == Spectrum:
+            raise ValueError("Cannot convert Spectrum to pyopenms TransitionGroup")
         transitionGroup = po.MRMTransitionGroupCP()
         for i in range(len(self.transitionData)):
             transition = po.ReactionMonitoringTransition()
@@ -99,15 +124,20 @@ class TransitionGroup:
         else:
             raise ValueError("Level must be one of ['ms1', 'ms2', 'ms1ms2']")
 
-    def sum(self, boundary: Tuple[float, float], level: str = 'ms2') -> float:
+    def sum(self, boundary: Tuple[float, float], level: Optional[Literal['ms1', 'ms2', 'ms1ms2']] = 'ms2') -> float:
         """
         Calculates the integrated intensity of a chromatogram within a given boundary.
 
         Args:
-            boundary (tuple): A tuple containing the left and right boundaries of the integration range.
+            boundary (Tuple[float, float]): _description_
+            level (Optional[Literal['ms1', 'ms2', 'ms1ms2' ]], optional):The MS level of the data to sum. Defaults to 'ms2'.
 
         Returns:
-            float: The integrated intensity of the chromatogram within the given boundary.
+            float: The integrated intensity of the chromatogram within the given boundary
+
+        Raises:
+            ValueError: Level must be one of ['ms1', 'ms2', 'ms1ms2']
+
         """
         chroms = self._resolveLevel(level)
         integrated_intensity = 0.0
@@ -116,10 +146,19 @@ class TransitionGroup:
 
         return integrated_intensity
     
-    def flatten(self, level: str = 'ms2'):
-        '''
-        Flatten the TransitionGroup into a single Data1D object
-        '''
+    def flatten(self, level: Optional[Literal['ms1', 'ms2', 'ms1ms2']] = 'ms2') -> Union[Chromatogram, Mobilogram, Spectrum]:
+        """
+        Flatten the TransitionGroup into a single Data1D object.
+
+        Args:
+            level (str): The level of the data to sum. Must be one of ['ms1', 'ms2', 'ms1ms2'].
+
+        Returns:
+            Union[Chromatogram, Mobilogram, Spectrum]: A single Data1D object containing the flattened data.
+        
+        Raises:
+            ValueError: Level must be one of ['ms1', 'ms2', 'ms1ms2']
+        """
         data1D = self._resolveLevel(level)
         data = []
         intensity = []
@@ -139,6 +178,9 @@ class TransitionGroup:
 
         Returns:
             float: The median intensity value of the data points within the given boundary.
+        
+        Raises:
+            ValueError: Level must be one of ['ms1', 'ms2', 'ms1ms2']
         """
 
         data_flattened = self.flatten(level)
@@ -200,9 +242,19 @@ class TransitionGroup:
              gaussian_window: int = 11,
              sgolay_polynomial_order: int = 3,
              sgolay_frame_length: int = 11) -> None:
-        '''
-        Plot the 1D data, meant for jupyter notebook context
-        '''
+        """Convenience function for plotting 1D data, meant for jupyter notebook context.
+
+        Args:
+            transitionGroupFeatures (Optional[List[TransitionGroupFeature]], optional): list of transition group features include in plot. Defaults to None.
+            smoothing (Optional[Literal['none', 'sgolay', 'gauss']], optional): Smoothing to apply on the plot. Defaults to 'none'.
+            gaussian_sigma (float, optional): sigma for gaussian plotting, ignored if smoothing is not 'gauss'. Defaults to 2.0.
+            gaussian_window (int, optional): window for gaussian plotting, ignored if smoothing is not 'gauss'. Defaults to 11.
+            sgolay_polynomial_order (int, optional): Polynomial order for sgolay, ignored if smoothing is not 'sgolay'. Defaults to 3.
+            sgolay_frame_length (int, optional): Frame length for sgolay, ignored if smoothing is not 'sgolay'. Defaults to 11.
+
+        Raises:
+            ValueError: Unknown type of 1D data
+        """
         from ..plotting import PlotConfig
         from ..plotting import InteractivePlotter
 

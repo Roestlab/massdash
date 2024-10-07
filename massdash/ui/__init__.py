@@ -16,7 +16,7 @@ from .FileInputXICDataUISettings import FileInputXICDataUISettings
 from .MassDashGUI import MassDashGUI
 from .MRMTransitionGroupPickerUISettings import MRMTransitionGroupPickerUISettings
 from .PeakPickingUISettings import PeakPickingUISettings
-from .pyPeakPickerMRMUISettings import pyPeakPickerMRMUISettings
+from .pyPeakPickerChromatogramUISettings import pyPeakPickerChromatogramUISettings
 from .RawTargetedExtractionAnalysisFormUI import RawTargetedExtractionAnalysisFormUI
 from .RawTargetedExtractionAnalysisUI import RawTargetedExtractionAnalysisUI
 from .TransitionListUISettings import TransitionListUISettings
@@ -33,7 +33,7 @@ __all__ = [ "BaseUISettings",
             "MassDashGUI",
             "MRMTransitionGroupPickerUISettings",
             "PeakPickingUISettings",
-            "pyPeakPickerMRMUISettings",
+            "pyPeakPickerChromatogramUISettings",
             "RawTargetedExtractionAnalysisFormUI",
             "RawTargetedExtractionAnalysisUI",
             "TransitionListUISettings" ]

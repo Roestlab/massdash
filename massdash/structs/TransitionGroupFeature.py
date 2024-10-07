@@ -12,7 +12,7 @@ from .GenericFeature import GenericFeature
 
 class TransitionGroupFeature(GenericFeature):
     '''
-    This is a Transition group level feature object PeakFeature Object. All Peak Picking algorithms should output an object of this class 
+    An object storing attributes on the detected feature in a TransitionGroup. All Peak Picking algorithms should output an object of this class
 
     Attributes:
         leftBoundary (float): The left boundary of the feature

@@ -13,16 +13,31 @@ from collections import Counter
 # Logging and performance modules
 from functools import wraps
 import contextlib
-from time import time
+from time import time, sleep
 from timeit import default_timer
 from datetime import timedelta
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import psutil
 
+try:
+    import pyautogui
+except Exception:
+    # For unittesting or when headless, pyautogui requires a display
+    pyautogui = None
+
 import requests
-import streamlit as st
-from streamlit.components.v1 import html
+import socket
+import socketserver
+
+# Streamlit not avaliable if not installed with gui
+try:
+    import streamlit as st
+    from streamlit.components.v1 import html
+except ImportError:
+    st = None
+
+from .constants import USER_PLATFORM_SYSTEM
 
 
 #######################################
@@ -399,6 +414,27 @@ def rgb_to_hex(rgb):
     """
     return "#{:02x}{:02x}{:02x}".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
 
+def check_free_port(free_port: int = 8501):
+    """
+    Check if the specified port is available. If not, find a free port.
+    
+    Args:
+        free_port (int): The port to check for availability.
+        
+    Returns:
+        tuple: A tuple containing the free port and a boolean indicating if the port is free.
+    """
+    port_is_free = True
+    # Creates a new socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Check if the port is available
+    if sock.connect_ex(('localhost', free_port)) == 0:
+        port_is_free = False
+        with socketserver.TCPServer(("localhost", 0), None) as s:
+            free_port = s.server_address[1]
+    # Close the socket
+    sock.close()
+    return free_port, port_is_free
 
 def open_page(url: str):
     """
@@ -425,6 +461,37 @@ def reset_app():
     # set everything to unclicked
     for k in st.session_state.clicked.keys():
         st.session_state.clicked[k] = False
+
+def close_app():
+    """
+    Closes the MassDash app by terminating the Streamlit process and closing the browser tab.
+    """
+    with st.spinner("Shutting down MassDash..."):
+        # Give a bit of delay for user experience
+        sleep(5)
+        
+        # Close streamlit browser tab
+        if pyautogui is not None:
+            msg = "Closing MassDash app browser tab..."
+            LOGGER.info(msg)
+            try:
+                if USER_PLATFORM_SYSTEM == "Darwin":
+                    pyautogui.hotkey('command', 'w')
+                else:
+                    pyautogui.hotkey('ctrl', 'w')
+            except Exception as error:
+                LOGGER.exception(error)
+                LOGGER.info("We tried closing MassDash's browser window, but failed. You will have to close it manually. If you are using MacOS, this is most likely due to a permissions error. You can fix this by doing: System Preferences -> Security & Privacy -> Accessibility -> Terminal 'check'")
+
+        # Terminate streamlit python process
+        pid = os.getpid()
+        msg =f"Terminating MassDash app process with PID: {pid}"
+        LOGGER.info(msg)
+        try:
+            p = psutil.Process(pid)
+            p.terminate()
+        except Exception as error:
+            LOGGER.exception(error)
 
 #######################################
 ## Decorators

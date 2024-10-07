@@ -135,6 +135,8 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 tmp_tbl_global = pd.read_sql("SELECT PEPTIDE_ID, QVALUE FROM SCORE_PEPTIDE WHERE CONTEXT == 'global'", self.conn)
                 # Rename columns to "SCORE_global", "PVALUE_global", "QVALUE_global", "PEP_global"
                 tmp_tbl_global.rename(columns={'QVALUE': 'PEPTIDE_QVALUE_global'}, inplace=True)
+            else:
+                tmp_tbl_global = pd.DataFrame(columns=['PEPTIDE_ID', 'PEPTIDE_QVALUE_global'])
 
             pivoted_tbl = tmp_tbl.pivot_table(
                                                 index=['RUN_ID', 'PEPTIDE_ID'],
@@ -159,6 +161,8 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
                 tmp_tbl_global = pd.read_sql("SELECT PROTEIN_ID, QVALUE FROM SCORE_PROTEIN WHERE CONTEXT == 'global'", self.conn)
                 # Rename columns to "SCORE_global", "PVALUE_global", "QVALUE_global", "PEP_global"
                 tmp_tbl_global.rename(columns={'SCORE': 'PROTEIN_SCORE_global', 'PVALUE': 'PROTEIN_PVALUE_global', 'QVALUE': 'PROTEIN_QVALUE_global', 'PEP': 'PROTEIN_PEP_global'}, inplace=True)
+            else:
+                tmp_tbl_global = pd.DataFrame(columns=['PROTEIN_ID', 'PROTEIN_QVALUE_global'])
 
             pivoted_tbl = tmp_tbl.pivot_table(
                                                 index=['RUN_ID', 'PROTEIN_ID'],
@@ -422,7 +426,16 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
     
     def getPrecursorIDFromPeptideAndCharge(self, fullpeptidename: str, charge: int) -> int:
         try:
-            return self.peptideHash.loc[fullpeptidename, charge]['PRECURSOR_ID']
+            ## depending on version of pandas this might return a series or number
+            # return self.peptideHash.loc[fullpeptidename, charge]['PRECURSOR_ID'].values[0]
+
+            out = self.peptideHash.loc[fullpeptidename, charge]['PRECURSOR_ID']
+
+            if isinstance(out, pd.Series):
+                return out.values[0]
+            else:
+                return out
+
         except KeyError:
             print(f"Peptide {fullpeptidename} with charge {charge} not found.")
             return None

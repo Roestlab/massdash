@@ -97,7 +97,7 @@ class FeatureMapPlotterServer:
                 tr_group_feature_data = self.chrom_loader.loadTransitionGroupFeatures(self.transition_list_ui.transition_settings.selected_peptide,
                     self.transition_list_ui.transition_settings.selected_charge)
 
-            elif self.peak_picking_settings.do_peak_picking in ['pyPeakPickerMRM', 'MRMTransitionGroupPicker', 'Conformer']:
+            elif self.peak_picking_settings.do_peak_picking in ['pyPeakPickerChromatogram', 'MRMTransitionGroupPicker', 'Conformer']:
                 # Perform peak picking if enabled
                 peak_picker = PeakPickingServer(self.peak_picking_settings, self.chrom_plot_settings)
                 tr_group_feature_data = peak_picker.perform_peak_picking(tr_group_data=chromatograms, 
@@ -106,7 +106,7 @@ class FeatureMapPlotterServer:
                 tr_group_feature_data = TransitionGroupFeatureCollection()
 
             else:
-                raise ValueError(f"Invalid peak picking algorithm: {self.peak_picking_settings.do_peak_picking}. Valid options are 'Feature File Boundaries', 'pyPeakPickerMRM', 'MRMTransitionGroupPicker', and 'Conformer'.")
+                raise ValueError(f"Invalid peak picking algorithm: {self.peak_picking_settings.do_peak_picking}. Valid options are 'Feature File Boundaries', 'pyPeakPickerChromatogram', 'MRMTransitionGroupPicker', and 'Conformer'.")
 
             plot_settings_dict = self._get_plot_settings('Retention Time (s)', 'Intensity', 'chromatogram')
             self._generate_plots_helper(chromatograms, plot_settings_dict, tr_group_feature_data)

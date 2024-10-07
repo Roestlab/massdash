@@ -21,7 +21,7 @@ from massdash.server.SearchResultsAnalysisServer import SearchResultsAnalysisSer
 # UI 
 from massdash.ui.MassDashGUI import MassDashGUI
 # Utils
-from massdash.util import LOGGER, get_download_folder, download_file, reset_app, open_page
+from massdash.util import LOGGER, get_download_folder, download_file, reset_app, open_page, close_app
 
 @click.command()
 # @click.argument('args', default='args', type=str)
@@ -48,7 +48,6 @@ def main(verbose, perf, perf_output, cloud):
 
     st.session_state.WELCOME_PAGE_STATE = True
 
-
     # determine if should run in a streamlit cloud context
     isStreamlitCloud = cloud or platform.processor() == "" # will be "" if running on streamlit cloud
 
@@ -68,7 +67,11 @@ def main(verbose, perf, perf_output, cloud):
     documentation_button = cols[1].button("📖 Doc", key="documentation_button", help="Open the MassDash documentation in a new tab.", use_container_width=True, on_click=open_page, args=(MASSDASH_DOC_URL,))
     MASSDASH_GITHUB_URL = "https://github.com/Roestlab/massdash"
     github_button = cols[2].button("🐙 GitHub", key="github_button", help="Open the MassDash GitHub repository in a new tab.", use_container_width=True, on_click=open_page, args=(MASSDASH_GITHUB_URL,))
-
+    try:
+        stop_button = st.sidebar.button("🛑 Exit", key="stop_button", help="Stop the MassDash app.", on_click=close_app, use_container_width=True)
+    except Exception:
+        pass
+        
     st.sidebar.divider()
 
     if st.session_state.workflow == "xic_data" and st.session_state.clicked['load_toy_dataset_xic_data']:
