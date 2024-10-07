@@ -18,15 +18,19 @@ TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test'
 def snapshot_pandas(snapshot):
     return snapshot.use_extension(PandasSnapshotExtension)
 
-@pytest.fixture(params=[
-    f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw",
-    f"{TEST_PATH}/test_data/example_dia/diann/report/test_1_diann_report.tsv",
-    [f"{TEST_PATH}/test_data/example_dia/diann/report/test_diann_report_combined.tsv", f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"],
-    #f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv",
+#f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv",
     #[f"{TEST_PATH}/test_data/example_dia/diann/report/test_diann_report_combined.tsv", f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv"]
-])
+@pytest.fixture(params=['openswath', 'diann1', 'combined'])
 def resultsLoader(request):
-    return ResultsLoader(rsltsFile=request.param, libraryFile=None, verbose=False, mode='module')
+    if request.param == 'openswath':
+        return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", libraryFile=None, verbose=False, mode='module')
+    elif request.param == 'diann1':
+        return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/diann/report/test_1_diann_report.tsv", libraryFile=None, verbose=False, mode='module')
+    elif request.param == 'combined':
+        return ResultsLoader(rsltsFile=[f"{TEST_PATH}/test_data/example_dia/diann/report/test_diann_report_combined.tsv", 
+                                        f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"], libraryFile=None, verbose=False, mode='module')
+    else:
+        raise ValueError(f"Invalid parameter: {request.param}")
 
 @pytest.fixture
 def oswResultsLoader():
