@@ -4,7 +4,11 @@ massdash/plotting/InteractiveThreeDimensionPlotter
 """
 
 from typing import List, Tuple
-import streamlit as st
+
+try:
+    import streamlit as st
+except ImportError:
+    st = None
 
 # Data modules
 import numpy as np

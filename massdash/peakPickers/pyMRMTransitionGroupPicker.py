@@ -18,11 +18,11 @@ class pyMRMTransitionGroupPicker:
     This is a python implementation based on OpenMS peak picker
     '''
 
-    def __init__(self, level: str='ms1ms2', sgolay_frame_length: Optional[int]=11, sgolay_polynomial_order: Optional[int]=3, peak_picker: Optional[po.PeakPickerMRM]=None):
+    def __init__(self, level: str='ms1ms2', sgolay_frame_length: Optional[int]=11, sgolay_polynomial_order: Optional[int]=3, peak_picker: Optional[po.PeakPickerChromatogram]=None):
         self.level = level
         self.top_n_features = 5
         if peak_picker is None:
-            self.peak_picker = po.PeakPickerMRM()
+            self.peak_picker = po.PeakPickerChromatogram()
             ##### Set the pyopenms peak picker parameters
             params = self.peak_picker.getDefaults()
             params.setValue(b'sgolay_frame_length', sgolay_frame_length)
@@ -48,7 +48,7 @@ class pyMRMTransitionGroupPicker:
 
     def find_peak_boundaries(self, chrom: Chromatogram) -> List[TransitionFeature]:
         """
-        Find peak boundaries using the PeakPickerMRM algorithm.
+        Find peak boundaries using the PeakPickerChromatogram algorithm.
 
         Args:
             rt_arr (np.array): Array of retention times.
