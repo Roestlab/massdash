@@ -23,7 +23,7 @@ classifiers = [
 requires-python = ">=3.9, <=3.12"
 dependencies = [
     "bokeh==2.4.3",
-    "Click",
+    "click>=8.1",
     "joblib",
     "matplotlib",
     "numpy>=1.9.0",
@@ -44,7 +44,7 @@ gui = [ 'streamlit>=1.30.0', 'streamlit-javascript', 'tk', 'pyautogui' ]
 conformer= [ 'onnxruntime' ]
 
 
-[scripts]
+[project.scripts]
 massdash = 'massdash.main:cli'
 
 [tool.flit.sdist]
