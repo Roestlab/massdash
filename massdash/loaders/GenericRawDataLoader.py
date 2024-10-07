@@ -98,9 +98,9 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         plotter = InteractivePlotter(pc)
 
         # Plot the chromatogram data
-        labelBySoftware = not all(f.software for f in transitionGroupFeatures)
         if len(transitionGroupFeatures) > 0:
             # if multiple software tools used, label by software
+            labelBySoftware = not all([f.software == transitionGroupFeatures[0].software for f in transitionGroupFeatures])
             if transitionGroupFeatures[0].software is not None and labelBySoftware:
                 feature_legend_labels = [ f.software for f in transitionGroupFeatures if f.software is not None]
             else:
