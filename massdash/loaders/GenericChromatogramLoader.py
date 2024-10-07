@@ -78,7 +78,7 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
         '''
 
         ## TODO allow plotting of multiple chromatograms
-        if len(self.dataFiles_str) > 1:
+        if len(self.dataFiles) > 1:
             raise NotImplementedError("Only one transition file is supported")
  
         # load the transitionGroup for plotting

@@ -36,9 +36,10 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
                 if isinstance(a, OSWDataAccess): 
                     self.libraryAccess = SpectralLibraryLoader(a.filename)
                     self.libraryAccess.load()
-        else:
-            self.libraryAccess = SpectralLibraryLoader(self.libraryAccess)
-            self.libraryAccess.load()
+        # I think the comment below was previously added, by mistake if not necessary then remove
+        #else:
+        #    self.libraryAccess = SpectralLibraryLoader(self.libraryAccess)
+        #    self.libraryAccess.load()
 
         ## overwrite run names since we are specifying data files
         self.runNames = [Path(f).stem for f in self.dataFiles]
@@ -97,7 +98,17 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         plotter = InteractivePlotter(pc)
 
         # Plot the chromatogram data
-        fig = plotter.plot(transitionGroup, transitionGroupFeatures)
+        labelBySoftware = not all(f.software for f in transitionGroupFeatures)
+        if len(transitionGroupFeatures) > 0:
+            # if multiple software tools used, label by software
+            if transitionGroupFeatures[0].software is not None and labelBySoftware:
+                feature_legend_labels = [ f.software for f in transitionGroupFeatures if f.software is not None]
+            else:
+                feature_legend_labels = [ f"Feature {i+1}" for i in  range(len(transitionGroupFeatures)) ]
+        else:
+            feature_legend_labels = []
+
+        fig = plotter.plot(transitionGroup, transitionGroupFeatures, feature_legend_labels=feature_legend_labels)
 
         show(fig)
 
