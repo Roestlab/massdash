@@ -52,12 +52,12 @@ class RawTargetedExtractionAnalysisServer:
         Loads the spectral library and sets the transition list attribute and append q-values to the transition list.
         """
 
-        _self.transition_list = _self.mzml_loader.libraryFile
-        _self.transition_list.has_im = _self.mzml_loader.libraryFile.has_im
-        _self.transition_list.data = _self.mzml_loader.libraryFile.data
+        _self.transition_list = _self.mzml_loader.libraryAccess
+        _self.transition_list.has_im = _self.mzml_loader.libraryAccess.has_im
+        _self.transition_list.data = _self.mzml_loader.libraryAccess.data
 
         # top_ranked_precursor_features = self.feature_data.get_top_rank_precursor_features_across_runs()
-        top_ranked_precursor_features = _self.mzml_loader.rsltsFile.df[['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence',  'PrecursorCharge', 'Qvalue']]
+        top_ranked_precursor_features = _self.mzml_loader.rsltsAccess[0].df[['ProteinId', 'PeptideSequence', 'ModifiedPeptideSequence',  'PrecursorCharge', 'Qvalue']]
         
         # If Decoy column not in transition list add it to top_ranked_precursor_features
         if 'Decoy' not in _self.transition_list.data.columns:
@@ -75,7 +75,7 @@ class RawTargetedExtractionAnalysisServer:
         return _self.transition_list
     
     @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading data...")(func), check_streamlit())
-    def initiate_mzML_interface(_self, mzml_files, resultsFile, dataFile, resultsFileType, verbose) -> MzMLDataLoader:
+    def initiate_mzML_interface(_self, mzml_files, resultsFile, dataFile, verbose) -> MzMLDataLoader:
         """
         Initiate an mzMLLoader Object.
 
@@ -83,11 +83,12 @@ class RawTargetedExtractionAnalysisServer:
             mzml_files (List[str]): List of paths to the mzML files.
             resultsFile (str): Path to the results file.
             dataFile (str): Path to the data file.
-            resultsFileType (str): The type of the results file.
             verbose (bool): Whether or not to print verbose output.
         
         """
-        _self.mzml_loader = MzMLDataLoader(resultsFile, mzml_files, dataFile, resultsFileType, verbose, 'gui')
+        st.write(mzml_files)
+        st.write(dataFile)
+        _self.mzml_loader = MzMLDataLoader(rsltsFile=resultsFile, dataFiles=mzml_files, libraryFile=dataFile, verbose=verbose, mode='gui')
         return _self.mzml_loader
 
     @conditional_decorator(lambda func: st.cache_resource(show_spinner="Loading into transition group...")(func), check_streamlit())
@@ -140,7 +141,6 @@ class RawTargetedExtractionAnalysisServer:
                 self.mzml_loader = self.initiate_mzML_interface(self.massdash_gui.file_input_settings.raw_file_path_list, 
                                             self.massdash_gui.file_input_settings.feature_file_path, 
                                             self.massdash_gui.file_input_settings.transition_list_file_path, 
-                                            self.massdash_gui.file_input_settings.feature_file_type,
                                             self.massdash_gui.verbose)
             st_log_writer.write(f"Initiating mzML files complete! Elapsed time: {timedelta(seconds=perf_metrics.execution_time)}")
                             
