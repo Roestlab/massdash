@@ -105,11 +105,7 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
             # if multiple software tools used, label by software
             labelBySoftware = transitionGroupFeatures['software'].nunique() > 1
             if transitionGroupFeatures.software is not None and labelBySoftware:
-                feature_legend_labels = transitionGroupFeatures['software']
-            else:
-                feature_legend_labels = [ f"Feature {i+1}" for i in  range(len(transitionGroupFeatures)) ]
-        else:
-            feature_legend_labels = None
+                transitionGroupFeatures.rename(columns={'software':'name'}, inplace=True)
 
         def apply_smoothing(group):
             if smooth:
@@ -123,5 +119,5 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
 
         to_plot = to_plot.groupby('annotation').apply(apply_smoothing).reset_index(drop=True)
 
-        fig = to_plot.plot(x='rt', y='intensity', kind='chromatogram', by='annotation', backend='ms_bokeh', annotation_data=transitionGroupFeatures, width=800, **kwargs) 
+        fig = to_plot.plot(x='rt', y='intensity', kind='chromatogram', by='annotation', backend='ms_bokeh', annotation_data=transitionGroupFeatures, width=width, **kwargs) 
         return fig
