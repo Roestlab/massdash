@@ -77,10 +77,10 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
                         smooth: bool = True, 
                         sgolay_polynomial_order: int = 3, 
                         sgolay_frame_length: int = 11, 
-                        scale_intensity: bool = False,
                         mz_tol: float = 20,
                         rt_window: float = 50,
-                        im_window: Optional[float] = None) -> 'bokeh.plotting.figure.Figure':
+                        im_window: Optional[float] = None,
+                        **kwargs) -> 'bokeh.plotting.figure.Figure':
         '''
         Plots a chromatogram for a given peptide sequence and charge state for a given run
 
@@ -92,7 +92,6 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
             smooth (bool, optional): Whether to smooth the chromatogram. Defaults to True.
             sgolay_polynomial_order (int, optional): Order of the polynomial to use for smoothing. Defaults to 3.
             sgolay_frame_length (int, optional): Frame length to use for smoothing. Defaults to 11.
-            scale_intensity (bool, optional): Whether to scale the intensity of the chromatogram such that all chromatograms are individually normalized to 1. Defaults to False.
             mz_tol (float, optional): m/z tolerance for extraction (in ppm). Defaults to 20.
             rt_tol (float, optional): RT tolerance for extraction (in seconds). Defaults to 50.
             im_tol (float, optional): IM tolerance for extraction (in 1/k0). Defaults to None.
@@ -114,8 +113,8 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
         # load the transitionGroup for plotting
         transitionGroup = list(self.loadTransitionGroups(seq, charge, extraction_parameters).values())[0]
         if includeBoundaries:
-            transitionGroupFeatures = list(self.loadTransitionGroupFeatures(seq, charge).values())[0]
+            transitionGroupFeatures = self.loadTransitionGroupFeaturesDf(seq, charge)
         else:
-            transitionGroupFeatures = []
+            transitionGroupFeatures = None
 
-        return super().plotChromatogram(transitionGroup, transitionGroupFeatures, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, scale_intensity=scale_intensity)
+        return super().plotChromatogram(transitionGroup, transitionGroupFeatures, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, **kwargs)

@@ -122,7 +122,7 @@ class ResultsLoader:
         for d in self.runNames:
             out[d] = pd.concat([ r.getTransitionGroupFeaturesDf(d, pep_id, charge) for r in self.rsltsAccess ])
         
-        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname'))
+        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname')).drop_duplicates()
 
     def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> TransitionGroupFeatureCollection:
         """

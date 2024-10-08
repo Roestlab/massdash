@@ -15,6 +15,10 @@ from .access.OSWDataAccess import OSWDataAccess
 from .SpectralLibraryLoader import SpectralLibraryLoader
 from ..util import LOGGER
 
+from scipy.signal import savgol_filter, convolve
+from scipy.signal.windows import gaussian
+import pandas as pd
+
 class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
     ''' 
     Abstract class for loading Chromatograms and peak features
@@ -63,7 +67,8 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
                         smooth: bool = True, 
                         sgolay_polynomial_order: int = 3, 
                         sgolay_frame_length: int = 11, 
-                        scale_intensity: bool = False) -> 'bokeh.plotting.figure.Figure':
+                        width=800,
+                        **kwargs) -> 'bokeh.plotting.figure.Figure':
         '''
         Plots a chromatogram for a transitionGroup and transitionGroupFeatures given peptide sequence and charge state for a given run
 
@@ -80,36 +85,43 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
             bokeh.plotting.figure.Figure: Bokeh figure object
         '''
 
-        from bokeh.plotting import output_notebook, show
-        from ..plotting import InteractivePlotter, PlotConfig
+        from bokeh.plotting import output_notebook
        
         # Initiate Plotting in Jupyter Notebook
         output_notebook()
 
-        # Create an instance of the InteractivePlotter class and set appropriate config
-        pc = PlotConfig()
-        pc.include_ms1 = include_ms1
-        if smooth:
-            pc.smoothing_dict = {'type': 'sgolay', 'sgolay_polynomial_order': sgolay_polynomial_order, 'sgolay_frame_length': sgolay_frame_length}
+        # Extract chromatogram data from the transitionGroup
+        precursorChroms, transitionChroms = transitionGroup.toPandasDf(separate=True)
+        if include_ms1:
+            to_plot = pd.concat([precursorChroms, transitionChroms])
         else:
-            pc.smoothing_dict = {'type': 'none'}
-        pc.scale_intensity = scale_intensity
+            to_plot = transitionChroms
 
-        plotter = InteractivePlotter(pc)
+        # format transitionGroupFeatures for plotting with pyopenms_viz
+        if transitionGroupFeatures is not None:
+            transitionGroupFeatures.rename(columns={'leftBoundary':'leftWidth', 'rightBoundary':'rightWidth', 'consensusApexIntensity':'apexIntensity'}, inplace=True)
 
-        # Plot the chromatogram data
-        if len(transitionGroupFeatures) > 0:
+            # Determine the labels for the legend, this is dependent on software tool
             # if multiple software tools used, label by software
-            labelBySoftware = not all([f.software == transitionGroupFeatures[0].software for f in transitionGroupFeatures])
-            if transitionGroupFeatures[0].software is not None and labelBySoftware:
-                feature_legend_labels = [ f.software for f in transitionGroupFeatures if f.software is not None]
+            labelBySoftware = transitionGroupFeatures['software'].nunique() > 1
+            if transitionGroupFeatures.software is not None and labelBySoftware:
+                feature_legend_labels = transitionGroupFeatures['software']
             else:
                 feature_legend_labels = [ f"Feature {i+1}" for i in  range(len(transitionGroupFeatures)) ]
         else:
-            feature_legend_labels = []
+            feature_legend_labels = None
 
-        fig = plotter.plot(transitionGroup, transitionGroupFeatures, feature_legend_labels=feature_legend_labels)
+        def apply_smoothing(group):
+            if smooth:
+                group['intensity'] = savgol_filter(group['intensity'], window_length=sgolay_frame_length, polyorder=sgolay_polynomial_order)
 
-        show(fig)
+            #elif pc.smoothing_dict['type'] == 'gauss':
+            #    window = gaussian(pc.smoothing_dict['gaussian_window'], std=pc.smoothing_dict['gaussian_sigma'])
+            #    intensity = convolve(intensity, window, mode='same') / window.sum()
+            return group
 
+
+        to_plot = to_plot.groupby('annotation').apply(apply_smoothing).reset_index(drop=True)
+
+        fig = to_plot.plot(x='rt', y='intensity', kind='chromatogram', by='annotation', backend='ms_bokeh', annotation_data=transitionGroupFeatures, width=800, **kwargs) 
         return fig
