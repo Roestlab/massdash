@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 import pandas as pd
 import pyopenms as po
-import sys
 
 from massdash.loaders import MzMLDataLoader
 from massdash.structs import TargetedDIAConfig
