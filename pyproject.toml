@@ -20,9 +20,9 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Scientific/Engineering :: Chemistry",
 ]
-requires-python = ">=3.9, <=3.12"
+requires-python = ">=3.10, <=3.12"
 dependencies = [
-    "bokeh==2.4.3",
+    "bokeh>3.0",
     "click>=8.1",
     "joblib",
     "matplotlib",
@@ -34,7 +34,8 @@ dependencies = [
     "scipy>=1.12.0",
     "tqdm",
     "upsetplot",
-    "requests"
+    "requests",
+    "pyopenms_viz"
 ]
 
 [project.optional-dependencies]
