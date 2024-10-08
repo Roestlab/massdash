@@ -110,4 +110,4 @@ This project is licensed under the BSD 3-Clause license.
 
 ## Citation
 
-Sing, J. C., Charkow, J., AlHigaylan, M., Horecka, I., Xu, L., & Roest, H. L. (2024). MassDash: A Web-based Dashboard for Targeted Mass Spectrometry Visualization (p. 2024.01.15.575772). bioRxiv. https://doi.org/10.1101/2024.01.15.575772
+Sing JC, Charkow J, AlHigaylan M, Horecka I, Xu L, Röst HL. MassDash: A Web-Based Dashboard for Data-Independent Acquisition Mass Spectrometry Visualization. J Proteome Res. 2024 Jun 7;23(6):2306-2314. doi: 10.1021/acs.jproteome.4c00026. Epub 2024 Apr 29.
