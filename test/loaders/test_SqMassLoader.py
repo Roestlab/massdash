@@ -29,6 +29,11 @@ def loader(request):
 def snapshot_pandas(snapshot):
     return snapshot.use_extension(PandasSnapshotExtension)
 
+def test_init_error():
+    # if no .osw file is provided then throw an error because .sqMass file cannot be indexed
+    with pytest.raises(ValueError):
+        SqMassLoader(rsltsFile=f"{TEST_PATH}/diann/report/test_diann_report_combined.tsv", dataFiles=f'{TEST_PATH}/openswath/xics/test_raw_1.mzML')
+
 @pytest.mark.parametrize('fullpeptidename,charge', [('AGAANIVPNSTGAAK', 3), ('INVALID', 0)])
 def test_loadTransitionGroupFeature(loader, fullpeptidename, charge, snapshot):
     # Test loading a peak feature for a valid peptide ID and charge
