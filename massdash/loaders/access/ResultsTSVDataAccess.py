@@ -38,13 +38,13 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         self.runs = self.df['runName'].drop_duplicates()  
         self.has_im = 'IM' in self.df.columns
     
-    def detectResultsType(self) -> Literal["OpenSWATH", "DIA-NN", "DreamDIA"]:
+    def detectResultsType(self, columns) -> Literal["OpenSWATH", "DIA-NN", "DreamDIA"]:
         '''
         Detects the type of results file by looking at the column names
         '''
         diann_dont_check = {'Precursor.Mz'} # Note: remove Precursor.Mz because not all DIA-NN files have this column
         for rsltType, colDict in ResultsTSVDataAccess.columnMapping.items():
-            if set(colDict.keys()).difference(diann_dont_check).issubset(set(self.df.columns)): 
+            if set(colDict.keys()).difference(diann_dont_check).issubset(set(columns)): 
                 return rsltType
 
         raise Exception(f"Error: Unsupported file type {self.filename}, could not detect results type")
@@ -53,17 +53,20 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         This method loads the data from self.filename into a pandas dataframe
         '''
-        self.df = pd.read_csv(self.filename, sep='\t')
+        #just read first row to detect the file type
+        columns = pd.read_csv(self.filename, sep='\t', nrows=1).columns
+        self.results_type = self.detectResultsType(columns)
+        print(columns)
 
-        self.results_type = self.detectResultsType()
-
-        # rename column according to column mapping 
+        # read all required columns and set new names
+        self.df = pd.read_csv(self.filename, sep='\t', usecols=ResultsTSVDataAccess.columnMapping[self.results_type].keys())
         self.df = self.df.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
         
         # TODO is this required?
         # Assign dummy Decoy column all 0
         self.df['Decoy'] = 0
         self.df['software'] = self.results_type
+        self.df['Precursor'] = self.df['ModifiedPeptideSequence'] + '_' + self.df['PrecursorCharge'].astype(str)
 
     def _initializePeptideHashTable(self) -> pd.DataFrame:   
         '''
@@ -216,22 +219,43 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         return [ Path(r).stem for r in self.runs]
     
     def getIdentifiedPrecursors(self, qvalue: float = 0.01, run:Optional[str] = None, precursorLevel = False) -> Union[set, Dict[str, set]]:
-        if precursorLevel:
-            if isinstance(run, str):
-                return set(self.df[(self.df['runName'] == run) & (self.df['Qvalue'] <= qvalue)]['Precursor'])
-            else:
-                return self.df[(self.df['Qvalue'] <= qvalue)].groupby('runName').apply(lambda x: set(x['Precursor']), include_groups=False).to_dict()
+        '''
+        Get identified precursors from the results file
+        Args:
+            qvalue (float): Qvalue threshold
+            run (str): Run name
+            precursorLevel (bool): If True, do not filter by protein Q.Value (only on precursor level) - "False" Only supported for DIA-NN results type will automatically be True otherwise
+        '''
+        ## If specified create boolean mask for only those precursors that pass the qvalue threshold on the protein level
+        if not precursorLevel and self.results_type == "DIA-NN":
+            protein_q_filter = self.df['PG.Q.Value'] <= qvalue
         else:
-            if isinstance(run, str):
-                return set(self.df[(self.df['runName'] == run) & (self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value'] <= qvalue )]['Precursor'])
-            else:
-                return self.df[(self.df['Qvalue'] <= qvalue) & (self.df['PG.Q.Value']<= qvalue )].groupby('runName').apply(lambda x: set(x['Precursor']), include_groups=False).to_dict()
-    
-    def getIdentifiedPrecursorIntensities(self, qvalue: float = 0.01, run: Optional[str] = None) -> pd.DataFrame:
+            protein_q_filter = True # no protein_q_filter
+        
         if isinstance(run, str):
-            return self.df[(self.df['runName'] == run) & (self.df['Qvalue'] <= qvalue)][['Precursor', 'Intensity']].copy()
+            return set(self.df[(self.df['runName'] == run) & (self.df['Qvalue'] <= qvalue) & protein_q_filter]['Precursor'])
         else:
-            return self.df[(self.df['Qvalue'] <= qvalue)][['runName', 'Precursor', 'Intensity']].copy()
+            return self.df[(self.df['Qvalue'] <= qvalue) & protein_q_filter ].groupby('runName').apply(lambda x: set(x['Precursor']), include_groups=False).to_dict()
+    
+    def getIdentifiedPrecursorIntensities(self, qvalue: float = 0.01, run: Optional[str] = None, precursorLevel = False) -> pd.DataFrame:
+        '''
+        Get a dataframe of identified precursors and their intensities from the results file
+        Args:
+            qvalue (float): Qvalue threshold
+            run (str): Run name
+            precursorLevel (bool): If True, do not filter by protein Q.Value (only on precursor level) - "False" Only supported for DIA-NN results type will automatically be True otherwise
+        '''
+
+        ## If specified create boolean mask for only those precursors that pass the qvalue threshold on the protein level
+        if not precursorLevel and self.results_type == "DIA-NN":
+            protein_q_filter = self.df['PG.Q.Value'] <= qvalue
+        else:
+            protein_q_filter = True # no protein_q_filter
+ 
+        if isinstance(run, str):
+            return self.df[(self.df['runName'] == run) & (self.df['Qvalue'] <= qvalue) & protein_q_filter][['Precursor', 'Intensity']].copy()
+        else:
+            return self.df[(self.df['Qvalue'] <= qvalue) & protein_q_filter][['runName', 'Precursor', 'Intensity']].copy()
 
     def getIdentifiedProteins(self, qvalue: float = 0.01, run:Optional[str] = None) -> Union[set, Dict[str, set]]:
         if isinstance(run, str):

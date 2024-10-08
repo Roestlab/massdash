@@ -26,6 +26,7 @@ import upsetplot
 # Internal
 from massdash.loaders import ResultsLoader
 from massdash.plotting import PlotConfig
+from massdash.util import LOGGER
 
 class SearchResultAnalysisPlotConfig(PlotConfig):
     def __init__(self) -> None:
@@ -263,36 +264,39 @@ class SearchResultAnalysisPlotter:
         # Create a Bokeh figure
         subtitle = "Aggregated Across Runs" if self.config.aggregate else df['RUN_NAME'].values[0]
 
-        p1 = figure(x_axis_label=score, y_axis_label="# of groups", width=600, height=450)
+        p1 = figure(x_axis_label=score, y_axis_label="# of groups", width=600, height=450) # for histogram
+        p2 = figure(x_axis_label=score, y_axis_label="Density", width=600, height=450) # for density plot
+
+        xs = np.linspace(min(df['SCORE']), max(df['SCORE']), 200)
 
         # Plot histograms for targets
-        hist_targets, edges_targets = np.histogram(df[df['DECOY'] == 0]['SCORE'], bins=20)
-        hist_targets_handle = p1.quad(top=hist_targets, bottom=0, left=edges_targets[:-1], right=edges_targets[1:], color="blue", alpha=0.7)
+        hist_renderers = []
+        dens_renderers = []
+        for i in [0, 1]: # 0 is Target, 1 is Decoy
+            if not df[df['DECOY'] == i].empty:
+                hist, edges = np.histogram(df[df['DECOY'] == i]['SCORE'], bins=20)
+                hist_renderers.append(p1.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], color="blue", alpha=0.7))
+                dens_renderers.append(p2.line(xs, gaussian_kde(df[df['DECOY'] == i]['SCORE'])(xs), line_color="blue", line_width=2))
+            else:
+                LOGGER.warning(f"No {['Target', 'Decoy'][i]} identifications found")
 
-        # Plot histograms for decoys
-        hist_decoys, edges_decoys = np.histogram(df[df['DECOY'] == 1]['SCORE'], bins=20)
-        hist_decoys_handle = p1.quad(top=hist_decoys, bottom=0, left=edges_decoys[:-1], right=edges_decoys[1:], color="red", alpha=0.6)
-        
-        hover1 = HoverTool(renderers=[hist_targets_handle, hist_decoys_handle],
+        # Histogram hover tool and legend
+        legend_items_hist = [ (i, [r]) for i, r in  list(zip(["Target", "Decoy"], hist_renderers)) ]
+
+        hover1 = HoverTool(renderers=hist_renderers,
                         tooltips=[(f"{score}", "@left"), ("Count", "@top")])
         p1.add_tools(hover1)
-        
-        p1.add_layout(Legend(items=[("Target", [hist_targets_handle]), ("Decoy", [hist_decoys_handle])]), 'right')
+        p1.add_layout(Legend(items=legend_items_hist), 'right')
         p1.legend.click_policy="mute"
 
-        # Create a Bokeh figure for density plot
-        p2 = figure(x_axis_label=score, y_axis_label="Density", width=600, height=450)
 
-        # Plot density curves
-        xs = np.linspace(min(df['SCORE']), max(df['SCORE']), 200)
-        dens_targets_handle = p2.line(xs, gaussian_kde(df[df['DECOY'] == 0]['SCORE'])(xs), line_color="blue", line_width=2)
-        dens_decoys_handle = p2.line(xs, gaussian_kde(df[df['DECOY'] == 1]['SCORE'])(xs), line_color="red", line_width=2)
-
-        hover2 = HoverTool(renderers=[dens_targets_handle, dens_decoys_handle],
+        # Density hover tool and legend
+        legend_items_dens = [ (i, [r]) for i, r in list(zip(["Target", "Decoy"], dens_renderers))]
+        hover2 = HoverTool(renderers=dens_renderers,
                         tooltips=[(f"{score}", "@x"), ("Density", "@y")])
         p2.add_tools(hover2)
 
-        p2.add_layout(Legend(items=[("Target", [dens_targets_handle]), ("Decoy", [dens_decoys_handle])]), 'right')
+        p2.add_layout(Legend(items=legend_items_dens), 'right')
         p2.legend.click_policy="mute"
         
         # Create a grid layout
