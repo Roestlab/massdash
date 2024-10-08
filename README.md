@@ -110,7 +110,4 @@ This project is licensed under the BSD 3-Clause license.
 
 ## Citation
 
-MassDash: A Web-Based Dashboard for Data-Independent Acquisition Mass Spectrometry Visualization
-Justin C. Sing, Joshua Charkow, Mohammed AlHigaylan, Ira Horecka, Leon Xu, and Hannes L. Röst
-Journal of Proteome Research 2024 23 (6), 2306-2314
-DOI: 10.1021/acs.jproteome.4c00026
+Sing JC, Charkow J, AlHigaylan M, Horecka I, Xu L, Röst HL. MassDash: A Web-Based Dashboard for Data-Independent Acquisition Mass Spectrometry Visualization. J Proteome Res. 2024 Jun 7;23(6):2306-2314. doi: 10.1021/acs.jproteome.4c00026. Epub 2024 Apr 29.
