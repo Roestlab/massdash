@@ -6,6 +6,8 @@ test/loaders/test_MzMLDataLoader
 from pathlib import Path
 import pytest
 import pandas as pd
+import pyopenms as po
+import sys
 
 from massdash.loaders import MzMLDataLoader
 from massdash.structs import TargetedDIAConfig
@@ -21,14 +23,26 @@ def snapshot_pandas(snapshot):
 @pytest.fixture
 def config():
     c = TargetedDIAConfig()
+    c.im_window = None
     c.rt_window = 5
     return c
 
+@pytest.fixture(scope='session')
+def mzml_files():
+    # resave the experiment using pyopenms so do not have indexing problems with the os.
+    files = [Path('test_raw_1.mzML'), Path('test_raw_2.mzML')]
+    filePaths = [ str(TEST_PATH / 'test_data' / 'example_dia' / 'raw' / f) for f in files ]
+    for f in filePaths:
+        exp = po.MSExperiment()
+        po.MzMLFile().load(f, exp) 
+        po.MzMLFile().store(f, exp)
+    return filePaths
+
+
 @pytest.fixture(params=['openswath', 'diann', 'combined'])
-def mzml_data_loader(request):
-    dataFilesPrefix = f'{TEST_PATH}/test_data/example_dia/raw/'
-    dataFiles = [f"{dataFilesPrefix}/test_raw_1.mzML", f"{dataFilesPrefix}/test_raw_2.mzML"]
+def mzml_data_loader(request, mzml_files):
     libFile = None
+    print(mzml_files)
 
     if request.param == 'openswath':
         rsltsFile = f'{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw'
@@ -41,7 +55,7 @@ def mzml_data_loader(request):
     else:
         raise ValueError(f"Invalid parameter: {request.param}")
 
-    return MzMLDataLoader(rsltsFile=rsltsFile, dataFiles=dataFiles, libraryFile=libFile, verbose=False, mode='module')
+    return MzMLDataLoader(rsltsFile=rsltsFile, dataFiles=mzml_files, libraryFile=libFile, verbose=False, mode='module')
 
 def test_init_error():
     # if library file is not provided, an error should be raised when only DIA-NN report files are supplied
