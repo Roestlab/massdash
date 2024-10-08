@@ -69,6 +69,12 @@ def get_file_handler():
     file_handler.setFormatter(FORMATTER)
     return file_handler
 
+class MassDashLogger(logging.Logger):
+    def warning(self, msg):
+        super().warning(msg)
+        if st is not None:
+            st.warning(msg)
+
 def get_logger(logger_name, log_level=logging.INFO):
     """
     Get a logger with the specified name.
@@ -80,6 +86,7 @@ def get_logger(logger_name, log_level=logging.INFO):
         logging.Logger: The logger object.
 
     """
+    logging.setLoggerClass(MassDashLogger)
     logger = logging.getLogger(logger_name)
     logger.setLevel(log_level) # better to have too much log than not enough
     logger.addHandler(get_console_handler())
