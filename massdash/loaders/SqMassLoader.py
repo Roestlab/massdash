@@ -33,7 +33,7 @@ class SqMassLoader(GenericChromatogramLoader):
         ## Currently only 
         self.oswAccess = self.getOSWAccessPtr()
         if self.oswAccess is None:
-            raise LOGGER.exception("No OSW file found in SqMassLoader, OSW file required for parsing sqMass files")
+            raise ValueError("No OSW file found in SqMassLoader, OSW file required for parsing sqMass files")
                 
     def loadTransitionGroupsDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         transitionMetaInfo = self.oswAccess.getTransitionIDAnnotationFromSequence(pep_id, charge)
