@@ -158,7 +158,7 @@ numexpr==2.10.1
     # via
     #   blosc2
     #   tables
-numpy==1.26.4
+numpy==2.1.2
     # via
     #   blosc2
     #   bokeh
