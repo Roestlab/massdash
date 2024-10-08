@@ -13,6 +13,7 @@ from .Mobilogram import Mobilogram
 from .Spectrum import Spectrum
 from .TransitionGroupFeature import TransitionGroupFeature
 
+
 class TransitionGroup:
     '''
     A Transition Group which contains a list of precursor and transition data. Precursor and Transition data must be a Chromatogram, Mobilogram or Spectrum object.
@@ -32,7 +33,7 @@ class TransitionGroup:
             ValueError: Precursor and transition data cannot both be empty
         """
 
-        self.precursorData = precursorData
+        self.precursorData = precursorData 
         self.transitionData = transitionData
         if len(transitionData) > 0:
             self.dataType = type(transitionData[0])
@@ -45,8 +46,11 @@ class TransitionGroup:
         self.sequence = sequence
         self.precursor_charge = precursor_charge
   
-    def toPandasDf(self) -> pd.DataFrame:
+    def toPandasDf(self, separate=False) -> pd.DataFrame:
         """Convert the TransitionGroup to a Pandas DataFrame.
+
+        Args: 
+            separate - Whether to return precursor and transition data in separate dataframes. Defaults to False.
 
         Returns:
             pd.DataFrame: DataFrame representation of the TransitionGroup.
@@ -60,7 +64,10 @@ class TransitionGroup:
         else:
             transitionDataDf = pd.concat([ i.toPandasDf() for i in self.transitionData])
             precursorDataDf = pd.concat([ i.toPandasDf() for i in self.precursorData])
-            return pd.concat([precursorDataDf, transitionDataDf])
+            if separate:
+                return precursorDataDf, transitionDataDf
+            else:
+                return pd.concat([precursorDataDf, transitionDataDf])
 
     def to_pyopenms(self, includePrecursors=True) -> po.MRMTransitionGroupCP:
         """Convert the TransitionGroup to an OpenMS TransitionGroup.

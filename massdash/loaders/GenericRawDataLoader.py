@@ -6,6 +6,7 @@ massdash/loaders/GenericRawDataLoader
 from abc import ABC, abstractmethod, ABCMeta
 from typing import Dict, List, Union, Literal, Optional
 from pathlib import Path
+import pandas as pd
 
 # Loaders
 from .ResultsLoader import ResultsLoader
@@ -58,14 +59,14 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
 
     def plotChromatogram(self,
                         transitionGroup: TransitionGroup,
-                        transitionGroupFeatures: Optional[List[TransitionGroupFeature]],
+                        transitionGroupFeatures: pd.DataFrame,
                         include_ms1: bool = False, 
                         smooth: bool = True, 
                         sgolay_polynomial_order: int = 3, 
-                        sgolay_frame_length: int = 11, 
-                        scale_intensity: bool = False) -> 'bokeh.plotting.figure.Figure':
+                        sgolay_frame_length: int = 11,
+                        **kwargs) -> 'bokeh.plotting.figure.Figure':
         '''
-        Plots a chromatogram for a transitionGroup and transitionGroupFeatures given peptide sequence and charge state for a given run
+        Plots a chromatogram for a transitionGroup and transitionGroupFeatures given peptide sequence and charge state for a given run, will plot with plotly backend
 
         Args:
             transitionGroup (TransitionGroup): TransitionGroup object
@@ -74,17 +75,13 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
             smooth (bool, optional): Whether to smooth the chromatogram. Defaults to True.
             sgolay_polynomial_order (int, optional): Order of the polynomial to use for smoothing. Defaults to 3.
             sgolay_frame_length (int, optional): Frame length to use for smoothing. Defaults to 11.
-            scale_intensity (bool, optional): Whether to scale the intensity of the chromatogram such that all chromatograms are individually normalized to 1. Defaults to False.
+            **kwargs - kwargs to pyopenms_viz plotting
 
         Returns: 
             bokeh.plotting.figure.Figure: Bokeh figure object
         '''
 
-        from bokeh.plotting import output_notebook, show
         from ..plotting import InteractivePlotter, PlotConfig
-       
-        # Initiate Plotting in Jupyter Notebook
-        output_notebook()
 
         # Create an instance of the InteractivePlotter class and set appropriate config
         pc = PlotConfig()
@@ -93,23 +90,23 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
             pc.smoothing_dict = {'type': 'sgolay', 'sgolay_polynomial_order': sgolay_polynomial_order, 'sgolay_frame_length': sgolay_frame_length}
         else:
             pc.smoothing_dict = {'type': 'none'}
-        pc.scale_intensity = scale_intensity
 
         plotter = InteractivePlotter(pc)
+
+        print(transitionGroupFeatures)
+        # make a pyopenms_viz transitionGroupFeature
+        transitionGroupFeatures.rename(columns={'leftBoundary':'leftWidth', 'rightBoundary':'rightWidth', 'consensusApexIntensity':'apexIntensity'}, inplace=True)
 
         # Plot the chromatogram data
         if len(transitionGroupFeatures) > 0:
             # if multiple software tools used, label by software
-            labelBySoftware = not all([f.software == transitionGroupFeatures[0].software for f in transitionGroupFeatures])
-            if transitionGroupFeatures[0].software is not None and labelBySoftware:
-                feature_legend_labels = [ f.software for f in transitionGroupFeatures if f.software is not None]
+            labelBySoftware = transitionGroupFeatures['software'].nunique() > 1
+            if transitionGroupFeatures.software is not None and labelBySoftware:
+                feature_legend_labels = transitionGroupFeatures['software']
             else:
                 feature_legend_labels = [ f"Feature {i+1}" for i in  range(len(transitionGroupFeatures)) ]
         else:
             feature_legend_labels = []
 
-        fig = plotter.plot(transitionGroup, transitionGroupFeatures, feature_legend_labels=feature_legend_labels)
-
-        show(fig)
-
+        fig = plotter.plot(transitionGroup, transitionGroupFeatures, feature_legend_labels=feature_legend_labels, **kwargs)
         return fig

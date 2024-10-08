@@ -6,6 +6,7 @@ massdash/loaders/GenericChromatogramLoader
 from abc import abstractmethod, ABCMeta
 import pandas as pd 
 from typing import Dict, List, Union, Literal
+import pandas as pd
 
 # Loader
 from .GenericRawDataLoader import GenericRawDataLoader
@@ -59,7 +60,7 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
                         smooth: bool = True, 
                         sgolay_polynomial_order: int = 3, 
                         sgolay_frame_length: int = 11, 
-                        scale_intensity: bool = False) -> 'bokeh.plotting.figure.Figure':
+                        **kwargs ) -> 'bokeh.plotting.figure.Figure':
         '''
         Plots a chromatogram for a given peptide sequence and charge state for a given run
 
@@ -84,8 +85,8 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
         # load the transitionGroup for plotting
         transitionGroup = list(self.loadTransitionGroups(seq, charge).values())[0]
         if includeBoundaries:
-            transitionGroupFeatures = list(self.loadTransitionGroupFeatures(seq, charge).values())[0]
+            transitionGroupFeatures = self.loadTransitionGroupFeaturesDf(seq, charge)
         else:
-            transitionGroupFeatures = []
+            transitionGroupFeatures = None
 
-        return super().plotChromatogram(transitionGroup, transitionGroupFeatures, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, scale_intensity=scale_intensity)
+        return super().plotChromatogram(transitionGroup, transitionGroupFeatures, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, **kwargs)

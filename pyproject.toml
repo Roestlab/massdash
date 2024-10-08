@@ -34,7 +34,8 @@ dependencies = [
     "scipy>=1.12.0",
     "tqdm",
     "upsetplot",
-    "requests"
+    "requests",
+    "pyopenms_viz"
 ]
 
 [project.optional-dependencies]

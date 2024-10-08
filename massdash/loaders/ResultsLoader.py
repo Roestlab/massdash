@@ -93,19 +93,6 @@ class ResultsLoader:
         '''
         return [i.getSoftware() for i in self.rsltsAccess]
 
-    @abstractmethod
-    def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
-        '''
-        Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
-
-        Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
-
-        Returns:
-            DataFrame: DataFrame containing TransitionGroupObject information across all runs 
-        '''
-        pass
 
     def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
@@ -122,7 +109,7 @@ class ResultsLoader:
         for d in self.runNames:
             out[d] = pd.concat([ r.getTransitionGroupFeaturesDf(d, pep_id, charge) for r in self.rsltsAccess ])
         
-        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname'))
+        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname')).drop_duplicates()
 
     def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> TransitionGroupFeatureCollection:
         """
