@@ -27,12 +27,13 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
         super().__init__(**kwargs)
     
     @abstractmethod
-    def loadTransitionGroups(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, runNames: None | str | List[str] ) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
         Args:
             pep_id (str): Peptide ID
             charge (int): Charge
+            runNames (None | str | List[str]): Name of the run to extract the transition group from. If None, all runs are extracted. If str, only the specified run is extracted. If List[str], only the specified runs are extracted.
         Returns:
             dict[str, TransitionGroup]: Dictionary of TransitionGroups, with keys as filenames
         '''
@@ -54,6 +55,7 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
     def plotChromatogram(self,
                         seq: str, 
                         charge: int, 
+                        runName: str | None = None,
                         includeBoundaries: bool = True, 
                         include_ms1: bool = False, 
                         smooth: bool = True, 
@@ -66,6 +68,7 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
         Args:
             seq (str): Peptide sequence
             charge (int): Charge state
+            runName (str): Name of the run to extract the chromatogram from
             includeBoundaries (bool, optional): Whether to include peak boundaries. Defaults to True.
             include_ms1 (bool, optional): Whether to include MS1 data. Defaults to False.
             smooth (bool, optional): Whether to smooth the chromatogram. Defaults to True.
@@ -77,12 +80,11 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
             bokeh.plotting.figure.Figure: Bokeh figure object
         '''
 
-        ## TODO allow plotting of multiple chromatograms
-        if len(self.dataFiles) > 1:
-            raise NotImplementedError("Only one transition file is supported")
+        if len(self.dataFiles) > 1 and runName is None:
+            raise NotImplementedError("If loader has multiple runs, runName must be specified")
  
         # load the transitionGroup for plotting
-        transitionGroup = list(self.loadTransitionGroups(seq, charge).values())[0]
+        transitionGroup = list(self.loadTransitionGroups(seq, charge, runNames=runName).values())[0]
         if includeBoundaries:
             transitionGroupFeatures = self.loadTransitionGroupFeaturesDf(seq, charge)
         else:

@@ -34,16 +34,16 @@ def test_init_error():
     with pytest.raises(ValueError):
         SqMassLoader(rsltsFile=f"{TEST_PATH}/diann/report/test_diann_report_combined.tsv", dataFiles=f'{TEST_PATH}/openswath/xics/test_raw_1.mzML')
 
-@pytest.mark.parametrize('fullpeptidename,charge', [('AGAANIVPNSTGAAK', 3), ('INVALID', 0)])
-def test_loadTransitionGroupFeature(loader, fullpeptidename, charge, snapshot):
+@pytest.mark.parametrize('fullpeptidename,charge,runNames', [('AGAANIVPNSTGAAK', 3, None), ('INVALID', 0, None), ('AGAANIVPNSTGAAK', 3, 'test_raw_1'), ('AGAANIVPNSTGAAK', 3, ['test_raw_1', 'test_raw_2'])])
+def test_loadTransitionGroupFeature(loader, fullpeptidename, charge, runNames, snapshot):
     # Test loading a peak feature for a valid peptide ID and charge
-    peak_feature = loader.loadTransitionGroupFeatures(fullpeptidename, charge)
+    peak_feature = loader.loadTransitionGroupFeatures(fullpeptidename, charge, runNames=runNames)
     assert snapshot == AmberDataSerializer.serialize(peak_feature)
 
-@pytest.mark.parametrize('fullpeptidename,charge', [('AGAANIVPNSTGAAK', 3), ('INVALID', 0)])
-def test_loadTransitionGroups(loader, fullpeptidename, charge, snapshot):
+@pytest.mark.parametrize('fullpeptidename,charge,runNames', [('AGAANIVPNSTGAAK', 3, None), ('INVALID', 0, None), ('AGAANIVPNSTGAAK', 3, 'test_raw_1'), ('AGAANIVPNSTGAAK', 3, ['test_raw_1', 'test_raw_2'])])
+def test_loadTransitionGroups(loader, fullpeptidename, charge, runNames, snapshot):
     # Test loading a chromatogram for a valid peptide ID and charge
-    transitionGroup = loader.loadTransitionGroups(fullpeptidename, charge) 
+    transitionGroup = loader.loadTransitionGroups(fullpeptidename, charge, runNames=runNames) 
     print(transitionGroup)
     assert snapshot == AmberDataSerializer.serialize(transitionGroup)
 

@@ -136,7 +136,7 @@ class RawTargetedExtractionAnalysisUI(TransitionListUISettings):
             self.use_search_results_in_extraction = st.sidebar.checkbox("Use search result coordinates for extraction", value=True, disabled=not enable_use_search_results_checkbox)
             # Create tabs to display search results per file in search_results
             search_results_tabs = st.sidebar.tabs([f"Run{i}" for i in range(1, search_results.shape[0] + 1)])
-            grouped_df = search_results.groupby('run')
+            grouped_df = search_results.groupby('runName')
             for search_results_tab, (file, search_result) in zip(search_results_tabs, grouped_df):
                 with search_results_tab:
                     with st.expander("Expand for search results", expanded=False):

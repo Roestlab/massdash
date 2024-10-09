@@ -124,24 +124,40 @@ class ResultsLoader:
         
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname')).drop_duplicates()
 
-    def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> TransitionGroupFeatureCollection:
+    def loadTransitionGroupFeatures(self, pep_id: str, charge: int, runNames: Union[str, List[str], None] = None) -> TransitionGroupFeatureCollection:
         """
         Load TransitionGroupFeature objects from the results file for the given peptide precursor
 
         Args:
             pep_id (str): Peptide Sequence
             charge (int): Charge of the peptide precursor to fetch
+            runNames (str | List[str] | None): Name of the run to extract the TransitionGroupFeature from. If None, all runs are extracted. If str, only the specified run is extracted. If List[str], only the specified runs are extracted.
 
         Returns:
             TransitionGroupFeatureCollection: TransitionGroupFeatureCollection object containing peak boundaries, intensity and confidence for the specified peptide precursor
         """
         out = TransitionGroupFeatureCollection()
-        for t in self.runNames:
-            runname = basename(t).split('.')[0]
+
+        def _loadTransitionGroupFeature(runName):
+            '''
+            Helper function which loads all transition group features in a single run
+            e.g. all transition group features in OpenSwath and DIA-NN across run#1
+            '''
             feats = []
-            for r in self.rsltsAccess:
-                feats += r.getTransitionGroupFeatures(runname, pep_id, charge)
-            out[t] = feats
+            for access in self.rsltsAccess:
+                feats += access.getTransitionGroupFeatures(runName, pep_id, charge)
+            return feats
+
+        if runNames is None:
+            for r in [ basename(i).split('.')[0] for i in self.runNames ]: # get filename without extension which is runname:
+                out[r] = _loadTransitionGroupFeature(r)
+        elif isinstance(runNames, str):
+            out[runNames] = _loadTransitionGroupFeature(runNames)
+        elif isinstance(runNames, list):
+            for r in runNames:
+                out[r] = _loadTransitionGroupFeature(r)
+        else:
+            raise ValueError("runName must be none, a string or list of strings")
         return out
     
     def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:

@@ -61,7 +61,7 @@ def test_initializePeptideHashTable(access, snapshot_pandas):
 
 @pytest.mark.parametrize("mock_access,expected", [('DIA-NN', 'DIA-NN'), ('DreamDIA', 'DreamDIA')], indirect=['mock_access'])
 def test_detectResultsType(mock_access, expected):
-    assert mock_access.detectResultsType() == expected
+    assert mock_access.detectResultsType(mock_access.df.columns) == expected
 
 @pytest.mark.parametrize("access,runname,peptide,charge", [('diann', 'test_raw_1', 'DYASIDAAPEER', 2),], indirect=['access'])
 def test_getTopTransitionGroupFeature(access, runname, peptide, charge, snapshot):

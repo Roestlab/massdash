@@ -31,8 +31,6 @@ class FileInputSearchResultsAnalysisUISettings:
             feature_file_path (str): Path to the feature file (*.osw / *.tsv)
             feature_file_type (str): File type of the feature file (OpenSwath / DIA-NN)
         """
-        st.sidebar.subheader("Input Search Results")
-
         file_list_container = st.sidebar.container()
         file_list_container.empty()
         self.feature_file_entries = feature_file_entries

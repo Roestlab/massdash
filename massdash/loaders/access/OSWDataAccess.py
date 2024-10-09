@@ -77,7 +77,7 @@ class OSWDataAccess(GenericResultsAccess):
         self._initializePeptideHashtable()
         self._initializeRunHashtable()
         self._initializeValidScores()
-        #self._initializeFeatureScoreHashtable()
+        self._initializeFeatureScoreHashtable()
         
         if mode == 'gui':
             self.df = self.load_data()

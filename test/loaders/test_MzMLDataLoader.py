@@ -66,14 +66,9 @@ def test_loadTopTransitionGroupFeatureDf(mzml_data_loader, pep, charge, snapshot
     df = mzml_data_loader.loadTopTransitionGroupFeatureDf(pep, charge)
     assert snapshot_pandas == df
 
-@pytest.mark.parametrize('pep,charge', [('DYASIDAAPEER', 2)])
-def test_loadTransitionGroupFeaturesDf(mzml_data_loader, pep, charge, snapshot_pandas):
-    df = mzml_data_loader.loadTransitionGroupFeaturesDf(pep, charge)
-    assert snapshot_pandas == df
-
-@pytest.mark.parametrize('pep,charge', [('DYASIDAAPEER', 2)])
-def test_loadTransitionGroups(mzml_data_loader, config, pep, charge, snapshot_pandas):
-    groups = mzml_data_loader.loadTransitionGroups(pep, charge, config)
+@pytest.mark.parametrize('pep,charge,runNames', [('DYASIDAAPEER', 2, None), ('DYASIDAAPEER', 2, 'test_raw_1'), ('DYASIDAAPEER', 2, ['test_raw_1', 'test_raw_2'])])
+def test_loadTransitionGroups(mzml_data_loader, config, pep, charge, runNames, snapshot_pandas):
+    groups = mzml_data_loader.loadTransitionGroups(pep, charge, config, runNames=runNames)
     assert snapshot_pandas == groups.toPandasDf()
 
 @pytest.mark.parametrize('pep,charge', [('DYASIDAAPEER', 2)])
@@ -81,9 +76,9 @@ def test_loadTransitionGroupsDf(mzml_data_loader, config, pep, charge, snapshot_
     df = mzml_data_loader.loadTransitionGroupsDf(pep, charge, config)
     assert snapshot_pandas == df
 
-@pytest.mark.parametrize('pep,charge', [('DYASIDAAPEER', 2)])
-def test_loadFeatureMaps(mzml_data_loader, config, pep, charge, snapshot_pandas):
-    feature_maps = mzml_data_loader.loadFeatureMaps(pep, charge, config)
+@pytest.mark.parametrize('pep,charge,runNames', [('DYASIDAAPEER', 2, None), ('DYASIDAAPEER', 2, 'test_raw_1'), ('DYASIDAAPEER', 2, ['test_raw_1', 'test_raw_2'])])
+def test_loadFeatureMaps(mzml_data_loader, config, pep, charge, runNames, snapshot_pandas):
+    feature_maps = mzml_data_loader.loadFeatureMaps(pep, charge, config, runNames=runNames)
     
     # note: only checking data not metadata like peptide sequence, charge and filename
     assert snapshot_pandas == pd.concat([ f.feature_df for f in feature_maps.values()])
