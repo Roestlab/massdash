@@ -56,10 +56,12 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         #just read first row to detect the file type
         columns = pd.read_csv(self.filename, sep='\t', nrows=1).columns
         self.results_type = self.detectResultsType(columns)
-        print(columns)
+        columns_to_load = list(ResultsTSVDataAccess.columnMapping[self.results_type].keys())
+        if self.results_type == 'DIA-NN' and 'Precursor.Mz' not in columns:
+            columns_to_load = columns_to_load.remove('Precursor.Mz')
 
         # read all required columns and set new names
-        self.df = pd.read_csv(self.filename, sep='\t', usecols=ResultsTSVDataAccess.columnMapping[self.results_type].keys())
+        self.df = pd.read_csv(self.filename, sep='\t', usecols=columns_to_load)
         self.df = self.df.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
         
         # TODO is this required?
