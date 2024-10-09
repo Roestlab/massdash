@@ -88,7 +88,7 @@ class SqMassLoader(GenericChromatogramLoader):
             transition_chroms = dataAccess.getDataForChromatogramsFromNativeIds(transitionMetaInfo['TRANSITION_ID'], transitionMetaInfo['ANNOTATION'])
             prec_chrom_ids = dataAccess.getPrecursorChromIDs(precursor_id)
             precursor_chroms = dataAccess.getDataForChromatograms(prec_chrom_ids['chrom_ids'], prec_chrom_ids['native_ids'])
-            out[t.runName] = TransitionGroup(precursor_chroms, transition_chroms, pep_id, charge)
+            return TransitionGroup(precursor_chroms, transition_chroms, pep_id, charge)
 
         if runNames is None:
             for t in self.dataAccess:
