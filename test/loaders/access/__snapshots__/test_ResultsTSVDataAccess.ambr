@@ -20,14 +20,14 @@
 # name: test_getIdentifiedPrecursors[diann]
   dict({
     'test_raw_1': set({
-      'AGAANIVPNSTGAAK2',
-      'AGAANIVPNSTGAAK3',
-      'DYASIDAAPEER2',
-      'DYASIDAAPEER3',
-      'IEDQLGEVAQYK2',
-      'IEDQLGEVAQYK3',
-      'KVVITAPGGNDVK2',
-      'KVVITAPGGNDVK3',
+      'AGAANIVPNSTGAAK_2',
+      'AGAANIVPNSTGAAK_3',
+      'DYASIDAAPEER_2',
+      'DYASIDAAPEER_3',
+      'IEDQLGEVAQYK_2',
+      'IEDQLGEVAQYK_3',
+      'KVVITAPGGNDVK_2',
+      'KVVITAPGGNDVK_3',
     }),
   })
 # ---
