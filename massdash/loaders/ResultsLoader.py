@@ -124,7 +124,7 @@ class ResultsLoader:
         
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname'))
 
-    def loadTransitionGroupFeatures(self, pep_id: str, charge: int, runNames: str | List[str] | None = None) -> TransitionGroupFeatureCollection:
+    def loadTransitionGroupFeatures(self, pep_id: str, charge: int, runNames: Union[str, List[str], None] = None) -> TransitionGroupFeatureCollection:
         """
         Load TransitionGroupFeature objects from the results file for the given peptide precursor
 

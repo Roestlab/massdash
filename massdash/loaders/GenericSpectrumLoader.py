@@ -7,7 +7,7 @@ This is an abstract class for loading spectra from a file.
 
 from abc import abstractmethod, ABCMeta
 import pandas as pd
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union
 
 # Loader
 from .GenericRawDataLoader import GenericRawDataLoader
@@ -28,7 +28,7 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
         super().__init__(**kwargs)
 
     @abstractmethod
-    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig, runNames: None | str | List[str] = None) -> Dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig, runNames: Union[None,str,List[str]] = None) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
 
@@ -58,7 +58,7 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
         pass 
 
     @abstractmethod
-    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig, runNames: None | str | List[str] = None) -> Dict[str, FeatureMap]:
+    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig, runNames: Union[None, str, List[str]] = None) -> Dict[str, FeatureMap]:
         '''
         Loads a dictionary of FeatureMaps (where the keys are the filenames) from the results file
 
@@ -74,7 +74,7 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
     def plotChromatogram(self,
                         seq: str, 
                         charge: int, 
-                        runName: str | None = None,
+                        runName: Union[str, None] = None,
                         includeBoundaries: bool = True, 
                         include_ms1: bool = False, 
                         smooth: bool = True, 
