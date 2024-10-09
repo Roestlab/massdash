@@ -99,8 +99,9 @@ class SqMassLoader(GenericChromatogramLoader):
         elif isinstance(runNames, list):
             out = TransitionGroupCollection()
             for r in runNames:
-                t = self.dataAccess[self.runNames.index(r)]
-                out[t.runName] = _loadTransitionGroup(t)
+                for t in self.dataAccess:
+                    if t.runName == r:
+                        out[t.runName] = _loadTransitionGroup(t)
         else:
             raise ValueError("runName must be none, a string or list of strings")
 

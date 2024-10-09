@@ -131,28 +131,31 @@ class ResultsLoader:
         Args:
             pep_id (str): Peptide Sequence
             charge (int): Charge of the peptide precursor to fetch
+            runNames (str | List[str] | None): Name of the run to extract the TransitionGroupFeature from. If None, all runs are extracted. If str, only the specified run is extracted. If List[str], only the specified runs are extracted.
 
         Returns:
             TransitionGroupFeatureCollection: TransitionGroupFeatureCollection object containing peak boundaries, intensity and confidence for the specified peptide precursor
         """
         out = TransitionGroupFeatureCollection()
+
+        def _loadTransitionGroupFeature(runName):
+            '''
+            Helper function which loads all transition group features in a single run
+            e.g. all transition group features in OpenSwath and DIA-NN across run#1
+            '''
+            feats = []
+            for access in self.rsltsAccess:
+                feats += access.getTransitionGroupFeatures(runName, pep_id, charge)
+            return feats
+
         if runNames is None:
-            for t in self.runNames:
-                runname = basename(t).split('.')[0]
-                feats = []
-                for r in self.rsltsAccess:
-                    feats += r.getTransitionGroupFeatures(runname, pep_id, charge)
-                out[t] = feats
+            for r in [ basename(i).split('.')[0] for i in self.runNames ]: # get filename without extension which is runname:
+                out[r] = _loadTransitionGroupFeature(r)
         elif isinstance(runNames, str):
-            runname = basename(runNames).split('.')[0]
-            out[runNames] = r.getTransitionGroupFeatures(runname, pep_id, charge) 
+            out[runNames] = _loadTransitionGroupFeature(runNames)
         elif isinstance(runNames, list):
-            for t in runNames:
-                runname = basename(t).split('.')[0]
-                feats = []
-                for r in self.rsltsAccess:
-                    feats += r.getTransitionGroupFeatures(runname, pep_id, charge)
-                out[t] = feats
+            for r in runNames:
+                out[r] = _loadTransitionGroupFeature(r)
         else:
             raise ValueError("runName must be none, a string or list of strings")
         return out

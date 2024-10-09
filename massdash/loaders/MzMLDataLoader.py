@@ -100,13 +100,14 @@ class MzMLDataLoader(GenericSpectrumLoader):
                 out[d.runName] = _loadFeatureMap(d, t)
             return out
         elif isinstance(runNames, str):
-            t = self.dataAccess[self.runNames.index(runNames)]
-            out[runNames] = _loadFeatureMap(t)
+            data_access = self.dataAccess[self.runNames.index(runNames)]
+            top_feature = top_features[self.runNames.index(runNames)]
+            out[runNames] = _loadFeatureMap(data_access, top_feature)
         elif isinstance(runNames, list):
             for r in runNames:
-                data_access = self.dataAccess[self.runNames.index(r)]
-                top_feature = top_features[self.runNames.index(r)]
-                out[runNames] = _loadFeatureMap(data_access, top_feature)
+                for data_access, top_feature in zip(self.dataAccess, top_features):
+                    if data_access.runName == r:
+                        out[r] = _loadFeatureMap(data_access, top_feature)
         else:
             raise ValueError("runName must be none, a string or list of strings")
 

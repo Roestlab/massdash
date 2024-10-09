@@ -55,7 +55,7 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
     def plotChromatogram(self,
                         seq: str, 
                         charge: int, 
-                        runName: str | None,
+                        runName: str | None = None,
                         includeBoundaries: bool = True, 
                         include_ms1: bool = False, 
                         smooth: bool = True, 
