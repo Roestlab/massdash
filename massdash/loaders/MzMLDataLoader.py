@@ -34,7 +34,7 @@ class MzMLDataLoader(GenericSpectrumLoader):
         if self.libraryAccess is None:
             raise ValueError("If .osw file is not supplied, library file is required for MzMLDataLoader to perform targeted extraction")
                    
-    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig, runNames: None | str |List[str]=None) -> Dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig, runNames: Union[None, str, List[str]]=None) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
 
@@ -73,7 +73,7 @@ class MzMLDataLoader(GenericSpectrumLoader):
         out_df = out_df.loc[:,~out_df.columns.duplicated()]
         return out_df
 
-    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig, runNames: None | str | List[str] = None) -> FeatureMapCollection:
+    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig, runNames: Union[None, str, List[str]] = None) -> FeatureMapCollection:
         '''
         Loads a dictionary of FeatureMaps (where the keys are the filenames) from the results file
 
