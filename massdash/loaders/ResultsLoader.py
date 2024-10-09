@@ -124,7 +124,7 @@ class ResultsLoader:
         
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname'))
 
-    def loadTransitionGroupFeatures(self, pep_id: str, charge: int) -> TransitionGroupFeatureCollection:
+    def loadTransitionGroupFeatures(self, pep_id: str, charge: int, runNames: str | List[str] | None = None) -> TransitionGroupFeatureCollection:
         """
         Load TransitionGroupFeature objects from the results file for the given peptide precursor
 
@@ -136,12 +136,25 @@ class ResultsLoader:
             TransitionGroupFeatureCollection: TransitionGroupFeatureCollection object containing peak boundaries, intensity and confidence for the specified peptide precursor
         """
         out = TransitionGroupFeatureCollection()
-        for t in self.runNames:
-            runname = basename(t).split('.')[0]
-            feats = []
-            for r in self.rsltsAccess:
-                feats += r.getTransitionGroupFeatures(runname, pep_id, charge)
-            out[t] = feats
+        if runNames is None:
+            for t in self.runNames:
+                runname = basename(t).split('.')[0]
+                feats = []
+                for r in self.rsltsAccess:
+                    feats += r.getTransitionGroupFeatures(runname, pep_id, charge)
+                out[t] = feats
+        elif isinstance(runNames, str):
+            runname = basename(runNames).split('.')[0]
+            out[runNames] = r.getTransitionGroupFeatures(runname, pep_id, charge) 
+        elif isinstance(runNames, list):
+            for t in runNames:
+                runname = basename(t).split('.')[0]
+                feats = []
+                for r in self.rsltsAccess:
+                    feats += r.getTransitionGroupFeatures(runname, pep_id, charge)
+                out[t] = feats
+        else:
+            raise ValueError("runName must be none, a string or list of strings")
         return out
     
     def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
