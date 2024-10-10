@@ -24,6 +24,18 @@ class GenericResultsAccess(ABC):
             LOGGER.setLevel("INFO")
 
     @abstractmethod
+    @property
+    def has_im(self) -> bool:
+        pass
+
+    @property
+    def columns(self) -> List[str]:
+        if self.has_im:
+            return self.COLUMNS.insert(7, 'consensusApexIM')
+        else:
+            return self.COLUMNS
+
+    @abstractmethod
     def getTransitionGroupFeatures(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:
         pass
 
