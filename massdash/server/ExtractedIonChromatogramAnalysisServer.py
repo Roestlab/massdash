@@ -177,72 +177,36 @@ class ExtractedIonChromatogramAnalysisServer:
 
             with time_block() as elapsed_time:
                 
-                # Initialize axis limits for plotting
-                axis_limits_dict = {'x_range' : [], 'y_range' : []}
-                master_rt_arr = np.concatenate([tg.flatten().data for tg in tr_group_data.values()])
-                master_int_arr = np.concatenate([tg.flatten().intensity for tg in tr_group_data.values()])
-
-                # Set axis limits based on user settings
-                if chrom_plot_settings.set_x_range:
-                    axis_limits_dict['x_range'] = [master_rt_arr.min(), master_rt_arr.max()]
-                if chrom_plot_settings.set_y_range:
-                    axis_limits_dict['y_range'] = [0, master_int_arr.max()]
-
                 # Initialize plot object dictionary
                 plot_obj_dict = {}
-
-                filename_mapping = infer_unique_filenames([file for file in tr_group_data.keys()])
 
                 # Iterate through each file and generate chromatogram plots
 
                 noFeaturesWarning = [] # list to store files with no features found so can output warning
-                for file, tr_group in tr_group_data.items():
-                    tr_group.targeted_transition_list = transition_list_ui.target_transition_list
+                for file in tr_group_data.keys():
+                    tr_group_data[file].targeted_transition_list = transition_list_ui.target_transition_list
 
-                    # Configure plot settings
-                    plot_settings_dict = chrom_plot_settings.get_settings()
-                    plot_settings_dict['x_axis_label'] = 'Retention Time (s)'
-                    plot_settings_dict['y_axis_label'] = 'Intensity'
-                    plot_settings_dict['title'] = filename_mapping[file]
-                    plot_settings_dict['subtitle'] = f"{transition_list_ui.transition_settings.selected_protein} | {transition_list_ui.transition_settings.selected_peptide}_{transition_list_ui.transition_settings.selected_charge}"
-                    
-                    if chrom_plot_settings.set_x_range:
-                        plot_settings_dict['x_range'] = axis_limits_dict['x_range']
-                        
-                    if chrom_plot_settings.set_y_range:
-                        plot_settings_dict['y_range'] = axis_limits_dict['y_range']
+                    # Extract chromatogram data from the transitionGroup
+                    precursorChroms, transitionChroms = tr_group_data[file].toPandasDf(separate=True)
+                    if chrom_plot_settings.include_ms1 and chrom_plot_settings.include_ms2:
+                        to_plot = pd.concat([precursorChroms, transitionChroms])
+                    elif chrom_plot_settings.include_ms1:
+                        to_plot = precursorChroms
+                    elif chrom_plot_settings.include_ms2:
+                        to_plot = transitionChroms
+                    else:
+                        to_plot = pd.DataFrame()
 
-                    # Update plot configuration
-                    plot_config = PlotConfig()
-                    plot_config.update(plot_settings_dict)
+                    # Load transition group features for this file
+                    if file in tr_group_feature_data.keys():
+                        transitionGroupFeatures = tr_group_feature_data[file]
+                        transitionGroupFeatures.rename(columns={'leftBoundary':'leftWidth', 'rightBoundary':'rightWidth', 'consensusApexIntensity':'apexIntensity'}, inplace=True)
+                    else:
+                        transitionGroupFeatures = None
+                        noFeaturesWarning.append(file)
 
-                    # chromatogram plot generation
-                    if not tr_group.empty():
-                        plotter = InteractivePlotter(plot_config)
-                        # Check if there is available feature data
-                        if file in tr_group_feature_data.keys():
-                            performPlotFeatures = True # bool flag to check if features are available for the current file
-                            feature_data =  tr_group_feature_data[file] # get the feature data
-
-                            # check different conditions to determine if features should be plotted and how features should be plotted
-                            if peak_picking_settings.do_peak_picking == 'none':
-                                performPlotFeatures = False
-                            else:
-                                if len(feature_data) == 0: # no features found even though peak picking was performed
-                                    noFeaturesWarning.append(file)
-                                    performPlotFeatures = False
-                                # display features differently dependening on the peak picking method
-                                elif peak_picking_settings.do_peak_picking == 'Feature File Boundaries': # also display q values
-                                    feature_legend_labels = [ f"Feature {i+1}: q={feature.qvalue:.2e}" for i, feature in enumerate(feature_data)]
-                                else:
-                                    feature_legend_labels = [ f"Feature {i+1}" for i in range(len(feature_data))]
-                        
-                        # plot the chromatograms (do not display yet)
-                        if performPlotFeatures:
-                            plot_obj = plotter.plot(tr_group, features=feature_data, feature_legend_labels=feature_legend_labels)
-                        else:
-                            plot_obj = plotter.plot(tr_group)
-                        plot_obj_dict[file] = plot_obj
+                    if not to_plot.empty:
+                        plot_obj_dict[file] = to_plot.plot(x='rt', y='intensity', kind='chromatogram', by='annotation', backend='ms_plotly', annotation_data=transitionGroupFeatures, width=2000, scale_intensity=chrom_plot_settings.scale_intensity, show_plot=False) 
 
             st.write(f"Generating chromatogram plots... Elapsed time: {elapsed_time()}")
 

@@ -10,6 +10,21 @@ from ..loaders.SpectralLibraryLoader import SpectralLibraryLoader
 # UI
 from .TransitionListUISettings import TransitionListUISettings
 
+from bokeh.io import output_file
+from bokeh.plotting import figure, save
+import streamlit.components.v1 as components
+# Current streamlit version only supports bokeh 2.4.3
+# See work around: https://github.com/streamlit/streamlit/issues/5858#issuecomment-1482042533
+def use_file_for_bokeh(chart: figure, chart_height=500):
+    output_file('bokeh_graph.html')
+    save(chart)
+    with open("bokeh_graph.html", 'r', encoding='utf-8') as f:
+        html = f.read()
+    components.html(html, height=chart_height)
+# Update the bokeh_chart method to use the file workaround
+st.bokeh_chart = use_file_for_bokeh
+
+
 class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
     """
     A class representing the user interface for extracted ion chromatogram analysis.
@@ -107,7 +122,7 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
                     pass
                 else:
                     with plot_cols[col_counter]:
-                        st.bokeh_chart(plot_obj)
+                        st.plotly_chart(plot_obj)
                         col_counter+=1
                         if col_counter >= len(plot_cols):
                             col_counter = 0
