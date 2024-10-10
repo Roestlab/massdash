@@ -14,6 +14,7 @@ from ...util import LOGGER
 
 class GenericResultsAccess(ABC):
     COLUMNS = ['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence', 'software']
+    IM_COLUMNS = ['consensusApexIM']
     def __init__(self, filename: str, verbose: bool = False) -> None:
 
         self.filename = filename
@@ -22,6 +23,18 @@ class GenericResultsAccess(ABC):
             LOGGER.setLevel("DEBUG")
         else:
             LOGGER.setLevel("INFO")
+
+    @property
+    @abstractmethod
+    def has_im(self) -> bool:
+        pass
+
+    @property
+    def columns(self) -> List[str]:
+        if self.has_im:
+            return self.COLUMNS[:6] + self.IM_COLUMNS + self.COLUMNS[6:]
+        else:
+            return self.COLUMNS
 
     @abstractmethod
     def getTransitionGroupFeatures(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:

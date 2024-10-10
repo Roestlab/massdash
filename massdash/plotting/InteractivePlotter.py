@@ -187,33 +187,37 @@ class InteractivePlotter(GenericPlotter):
         i = 0
         legend_items = []
         for idx, feature in enumerate(features):
-            if self.scale_intensity:
-                source = ColumnDataSource(data = {
-                    'Intensity' : [1],
-                    'leftWidth'   : [feature.leftBoundary],
-                    'rightWidth'   : [feature.rightBoundary],
-                    'ms2_mscore' : [feature.qvalue],
-                    'bottom_int'    : [0]})
+            # skip features if outside of plot range
+            if feature.leftBoundary > transitionGroup.transitionData[0].data.max() or feature.rightBoundary < transitionGroup.transitionData[0].data.min():
+                continue
             else:
-                source = ColumnDataSource(data = {
-                    'Intensity' : [transitionGroup.max((feature.leftBoundary, feature.rightBoundary), level=self.ms_level_str)],
-                    'leftWidth'   : [feature.leftBoundary],
-                    'rightWidth'   : [feature.rightBoundary],
-                    'ms2_mscore' : [feature.qvalue],
-                    'bottom_int'    : [0]})
-            
-            # Left border
-            leftWidth_line = p.vbar(x='leftWidth', bottom='bottom_int', top='Intensity', width=boundary_width, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
-            if createBoundaryLegend:
-                legend_items.append((legend_labels[idx], [leftWidth_line]))
+                if self.scale_intensity:
+                    source = ColumnDataSource(data = {
+                        'Intensity' : [1],
+                        'leftWidth'   : [feature.leftBoundary],
+                        'rightWidth'   : [feature.rightBoundary],
+                        'ms2_mscore' : [feature.qvalue],
+                        'bottom_int'    : [0]})
+                else:
+                    source = ColumnDataSource(data = {
+                        'Intensity' : [transitionGroup.max((feature.leftBoundary, feature.rightBoundary), level=self.ms_level_str)],
+                        'leftWidth'   : [feature.leftBoundary],
+                        'rightWidth'   : [feature.rightBoundary],
+                        'ms2_mscore' : [feature.qvalue],
+                        'bottom_int'    : [0]})
+                
+                # Left border
+                leftWidth_line = p.vbar(x='leftWidth', bottom='bottom_int', top='Intensity', width=boundary_width, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+                if createBoundaryLegend:
+                    legend_items.append((legend_labels[idx], [leftWidth_line]))
 
-            # Right border
-            p.vbar(x='rightWidth', bottom='bottom_int', top='Intensity', width=boundary_width, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
+                # Right border
+                p.vbar(x='rightWidth', bottom='bottom_int', top='Intensity', width=boundary_width, color=dark2_palette[i], line_color=dark2_palette[i], source=source)
 
-            # Add a point to the left border to attached the hover tool to
-            leftWidth_apex_point = p.circle(source=source, x='leftWidth', y='Intensity', name='leftWidth_apex_point', alpha=0) 
+                # Add a point to the left border to attached the hover tool to
+                leftWidth_apex_point = p.circle(source=source, x='leftWidth', y='Intensity', name='leftWidth_apex_point', alpha=0) 
 
-            i += 1
+                i += 1
 
         # Create a HoverTool
         hover = HoverTool(names=['leftWidth_apex_point'],

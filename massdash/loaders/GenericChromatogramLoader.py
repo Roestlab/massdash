@@ -27,7 +27,7 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
         super().__init__(**kwargs)
     
     @abstractmethod
-    def loadTransitionGroups(self, pep_id: str, charge: int, runNames: None | str | List[str] ) -> Dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, runNames: Union[None, str, List[str]] ) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
         Args:
@@ -55,7 +55,7 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
     def plotChromatogram(self,
                         seq: str, 
                         charge: int, 
-                        runName: str | None = None,
+                        runName: Union[str, None] = None,
                         includeBoundaries: bool = True, 
                         include_ms1: bool = False, 
                         smooth: bool = True, 

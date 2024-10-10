@@ -77,7 +77,6 @@ Abstract Classes
    :toctree: generated/
    :template: class.rst
 
-   GenericLoader
    GenericChromatogramLoader
    GenericSpectrumLoader
 
@@ -89,6 +88,7 @@ Classes
    :toctree: generated/
    :template: class.rst
    
+   ResultsLoader
    MzMLDataLoader
    SqMassLoader
    SpectralLibraryLoader

@@ -21,8 +21,8 @@ class ResultsTSVDataAccess(GenericResultsAccess):
 
     # static variable
     columnMapping = {
-        'OpenSwath':{'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge', 'leftWidth': 'RT.Start', 'rightWidth': 'RT.Stop'},
-        'DIA-NN':{'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'runName', 'Precursor.Id':'Precursor'},
+        'OpenSwath':{'ProteinName': 'ProteinId', 'Sequence': 'PeptideSequence', 'FullPeptideName': 'ModifiedPeptideSequence', 'm_score': 'Qvalue', 'mz': 'PrecursorMz', 'Charge': 'PrecursorCharge', 'leftWidth': 'leftBoundary', 'rightWidth': 'rightBoundary', 'RT':'consensusApex'},
+        'DIA-NN':{'Protein.Ids': 'ProteinId', 'Stripped.Sequence': 'PeptideSequence', 'Modified.Sequence': 'ModifiedPeptideSequence', 'Q.Value': 'Qvalue', 'Precursor.Mz': 'PrecursorMz', 'Precursor.Charge': 'PrecursorCharge', 'Precursor.Quantity': 'Intensity', 'Run':'runName', 'RT.Start':'leftBoundary', 'RT.Stop':'rightBoundary', 'IM':'consensusApexIM', 'RT':'consensusApex' },
         'DreamDIA':{'protein_name': 'ProteinId', 'sequence': 'PeptideSequence', 'full_sequence': 'ModifiedPeptideSequence', 'qvalue': 'Qvalue', 'SCORE_MZ': 'PrecursorMz', 'SCORE_CHARGE': 'PrecursorCharge', 'filename': 'runName', 'quantification': 'Intensity'}
 
     }
@@ -36,8 +36,11 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         self.loadData()   # set self.df and self.results_type
         self.peptideHash = self._initializePeptideHashTable()
         self.runs = self.df['runName'].drop_duplicates()  
-        self.has_im = 'IM' in self.df.columns
     
+    @property
+    def has_im(self) -> bool:
+        return 'consensusApexIM' in self.df.columns
+
     def detectResultsType(self, columns) -> Literal["OpenSWATH", "DIA-NN", "DreamDIA"]:
         '''
         Detects the type of results file by looking at the column names
@@ -139,16 +142,15 @@ class ResultsTSVDataAccess(GenericResultsAccess):
                 feature_data = feature_data.rename(columns=ResultsTSVDataAccess.columnMapping[self.results_type])
                 LOGGER.debug(f"Found {feature_data.shape[0]} rows from {self.filename} for feature data")
 
-                # Save the chromatogram peak feature from the report using cols 'RT', 'RT.Start', 'RT.Stop', 'Precursor.Quantity', 'Q.Value'
                 # Multiply RT by 60 to convert from minutes to seconds
                 out = []
                 for _, row in feature_data.iterrows():
-                    out.append(TransitionGroupFeature(consensusApex=row['RT'] * 60,
-                                                      leftBoundary=row['RT.Start'] * self.rt_multiplier,
-                                                      rightBoundary=row['RT.Stop'] * self.rt_multiplier,
+                    out.append(TransitionGroupFeature(consensusApex=row['consensusApex'] * self.rt_multiplier,
+                                                      leftBoundary=row['leftBoundary'] * self.rt_multiplier,
+                                                      rightBoundary=row['rightBoundary'] * self.rt_multiplier,
                                                       areaIntensity=row['Intensity'],
                                                       qvalue=row['Qvalue'],
-                                                      consensusApexIM=row['IM'] if self.has_im else None,
+                                                      consensusApexIM=row['consensusApexIM'] if self.has_im else None,
                                                       sequence=row['ModifiedPeptideSequence'],
                                                       precursor_charge=row['PrecursorCharge'],
                                                       software=self.results_type))
@@ -176,7 +178,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         '''
         runname_exact = self.getExactRunName(runname)
         if runname_exact is None:
-            return pd.DataFrame(columns=self.COLUMNS)
+            return pd.DataFrame(columns=self.columns)
         else:
             df = self.df[(self.df['runName'] == runname_exact) & (self.df['ModifiedPeptideSequence'] == pep_id) & (self.df['PrecursorCharge'] == charge)]
 
@@ -195,7 +197,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
             df['leftBoundary'] = df['leftBoundary'] * self.rt_multiplier
             df['rightBoundary'] = df['rightBoundary'] * self.rt_multiplier
             df['consensusApexIntensity'] = np.nan
-            return df[self.COLUMNS]
+            return df[self.columns]
 
     def getExactRunName(self, run_basename_wo_ext: str) -> str:
         '''

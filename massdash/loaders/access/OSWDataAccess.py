@@ -43,6 +43,7 @@ import sqlite3
 import pandas as pd
 from typing import List, Literal, Optional, Dict, Union, Callable
 from pathlib import Path
+from functools import lru_cache
 
 # Loaders
 from .GenericResultsAccess import GenericResultsAccess
@@ -81,7 +82,13 @@ class OSWDataAccess(GenericResultsAccess):
         
         if mode == 'gui':
             self.df = self.load_data()
-        
+    
+    @property
+    @lru_cache(maxsize=None) # cache so only computed once
+    def has_im(self) -> bool:
+        # Check if EXP_IM in FEATURE table
+        return check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM")
+
 
     ###### INDICES CREATOR ######
     def _initialize_indices(self):
@@ -209,7 +216,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
             join_score_ipf = ""
             select_score_ipf = ""
         
-        if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
+        if self.has_im: 
             select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
         else:
             select_feature_exp_im = "-1 AS IM,"
@@ -381,7 +388,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
             pandas.DataFrame: The top ranking features per assay.
         """
         # Check if EXP_IM in FEATURE table
-        if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
+        if self.has_im: 
             select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
         else:
             select_feature_exp_im = "-1 AS IM,"
@@ -619,13 +626,13 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
         
         if run_id is None or precursor_id is None:
-            features =  pd.DataFrame(columns=self.COLUMNS)
+            features =  pd.DataFrame(columns=self.columns)
         else:
             features =  self._getFeaturesFromPrecursorIdAndRunDf(run_id, precursor_id)
 
         features['sequence'] = fullpeptidename
         features['precursor_charge'] = charge
-        return features[self.COLUMNS]
+        return features[self.columns]
 
     def getTopTransitionGroupFeatureDf(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> pd.DataFrame:
         columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'sequence', 'precursor_charge', 'software']
@@ -1196,8 +1203,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         if fullpeptidename[0] == "(":
             # If there is a (UniMod:#) at the beginning of the sequence, add a period (.) at the front 
             fullpeptidename = "." + fullpeptidename
-        # Check if EXP_IM in FEATURE table
-        if check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM"):
+        if self.has_im: 
             select_feature_exp_im = "FEATURE.EXP_IM AS IM,"
         else:
             select_feature_exp_im = "-1 AS IM,"
