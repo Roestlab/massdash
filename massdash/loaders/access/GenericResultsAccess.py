@@ -23,8 +23,8 @@ class GenericResultsAccess(ABC):
         else:
             LOGGER.setLevel("INFO")
 
-    @abstractmethod
     @property
+    @abstractmethod
     def has_im(self) -> bool:
         pass
 
