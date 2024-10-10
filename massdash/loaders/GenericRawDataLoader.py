@@ -64,9 +64,11 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
                         transitionGroup: TransitionGroup,
                         transitionGroupFeatures: Optional[List[TransitionGroupFeature]],
                         include_ms1: bool = False, 
-                        smooth: bool = True, 
+                        smooth: Literal[str] = True, # can be 'savgol' 'gauss' or 'none'
                         sgolay_polynomial_order: int = 3, 
                         sgolay_frame_length: int = 11, 
+                        gaussian_window: int = 11,
+                        gaussian_sigma: float = 2,
                         width=800,
                         **kwargs) -> 'bokeh.plotting.figure.Figure':
         '''
@@ -84,11 +86,6 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         Returns: 
             bokeh.plotting.figure.Figure: Bokeh figure object
         '''
-
-        from bokeh.plotting import output_notebook
-       
-        # Initiate Plotting in Jupyter Notebook
-        output_notebook()
 
         # Extract chromatogram data from the transitionGroup
         precursorChroms, transitionChroms = transitionGroup.toPandasDf(separate=True)
@@ -108,16 +105,17 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
                 transitionGroupFeatures.rename(columns={'software':'name'}, inplace=True)
 
         def apply_smoothing(group):
-            if smooth:
+            if smooth == 'savgol':
                 group['intensity'] = savgol_filter(group['intensity'], window_length=sgolay_frame_length, polyorder=sgolay_polynomial_order)
+            elif smooth == 'gauss':
+                window = gaussian(gaussian_window, std=gaussian_sigma)
+                group['intensity'] = convolve(group['intensity'], window, mode='same') / window.sum()
+            else:
+                pass
 
-            #elif pc.smoothing_dict['type'] == 'gauss':
-            #    window = gaussian(pc.smoothing_dict['gaussian_window'], std=pc.smoothing_dict['gaussian_sigma'])
-            #    intensity = convolve(intensity, window, mode='same') / window.sum()
             return group
 
 
         to_plot = to_plot.groupby('annotation').apply(apply_smoothing).reset_index(drop=True)
 
-        fig = to_plot.plot(x='rt', y='intensity', kind='chromatogram', by='annotation', backend='ms_bokeh', annotation_data=transitionGroupFeatures, width=width, **kwargs) 
-        return fig
+        to_plot.plot(x='rt', y='intensity', kind='chromatogram', by='annotation', backend='ms_bokeh', annotation_data=transitionGroupFeatures, width=width, **kwargs) 
