@@ -87,7 +87,7 @@ class OSWDataAccess(GenericResultsAccess):
     @lru_cache(maxsize=None) # cache so only computed once
     def has_im(self) -> bool:
         # Check if EXP_IM in FEATURE table
-        check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM")
+        return check_sqlite_column_in_table(self.conn, "FEATURE", "EXP_IM")
 
 
     ###### INDICES CREATOR ######

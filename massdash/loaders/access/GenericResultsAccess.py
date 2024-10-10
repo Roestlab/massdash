@@ -14,6 +14,7 @@ from ...util import LOGGER
 
 class GenericResultsAccess(ABC):
     COLUMNS = ['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence', 'software']
+    IM_COLUMNS = ['consensusApexIM']
     def __init__(self, filename: str, verbose: bool = False) -> None:
 
         self.filename = filename
@@ -31,7 +32,7 @@ class GenericResultsAccess(ABC):
     @property
     def columns(self) -> List[str]:
         if self.has_im:
-            return self.COLUMNS.insert(7, 'consensusApexIM')
+            return self.COLUMNS[:6] + self.IM_COLUMNS + self.COLUMNS[6:]
         else:
             return self.COLUMNS
 
