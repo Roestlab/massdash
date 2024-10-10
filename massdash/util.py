@@ -72,7 +72,7 @@ def get_file_handler():
 class MassDashLogger(logging.Logger):
     def warning(self, msg):
         super().warning(msg)
-        if st is not None:
+        if st is not None and check_streamlit():
             st.warning(msg)
 
 def get_logger(logger_name, log_level=logging.INFO):
@@ -213,15 +213,11 @@ def check_streamlit():
     use_streamlit : boolean
         True if code is run within streamlit, else False
     """
-    try:
-        from streamlit.runtime.scriptrunner import get_script_run_ctx
-        if not get_script_run_ctx():
-            use_streamlit = False
-        else:
-            use_streamlit = True
-    except ModuleNotFoundError:
-        use_streamlit = False
-    return use_streamlit
+    # st will be None 
+    if st is not None and st.runtime.exists():
+        return True
+    else:
+        return False
 
 def check_sqlite_table(con, table):
     """
