@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Tuple
 import numpy as np
 import pandas as pd
+from massdash.util import LOGGER
 
 class Data1D(ABC):
     ''' 
@@ -46,6 +47,9 @@ class Data1D(ABC):
         if boundary is not None:
             return self.filter(boundary).max()
         else:
+            if self.intensity.size == 0:
+                LOGGER.warning(f"{self.label} is empty, Returning 0.")
+                return (0, 0)
             idx_max = np.argmax(self.intensity)
             return (self.data[idx_max], self.intensity[idx_max])
         

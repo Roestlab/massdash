@@ -85,29 +85,27 @@ class MzMLDataLoader(GenericSpectrumLoader):
             FeatureMapCollection: FeatureMapCollection containing FeatureMap objects for each file
         '''
         out = FeatureMapCollection()
-        # use the first results file to get the feature location
-        top_features = [ self.rsltsAccess[0].getTopTransitionGroupFeature(basename(splitext(d.filename)[0]), pep_id, charge) for d in self.dataAccess]
-        self.libraryAccess.populateTransitionGroupFeatures(top_features)
         
-        def _loadFeatureMap(dataAccess, top_feature):
+        def _loadFeatureMap(dataAccess):
+            top_feature = self.rsltsAccess[0].getTopTransitionGroupFeature(dataAccess.runName, pep_id, charge)
+            self.libraryAccess.populateTransitionGroupFeature(top_feature)
             if top_feature is None:
                 LOGGER.debug(f"No feature found for {pep_id} {charge} in {dataAccess.runName}")
                 return FeatureMap()
             return dataAccess.reduce_spectra(top_feature, config)
 
         if runNames is None:
-            for d, t in zip(self.dataAccess, top_features):
-                out[d.runName] = _loadFeatureMap(d, t)
+            for d in self.dataAccess:
+                out[d.runName] = _loadFeatureMap(d)
             return out
         elif isinstance(runNames, str):
             data_access = self.dataAccess[self.runNames.index(runNames)]
-            top_feature = top_features[self.runNames.index(runNames)]
-            out[runNames] = _loadFeatureMap(data_access, top_feature)
+            out[runNames] = _loadFeatureMap(data_access)
         elif isinstance(runNames, list):
             for r in runNames:
-                for data_access, top_feature in zip(self.dataAccess, top_features):
-                    if data_access.runName == r:
-                        out[r] = _loadFeatureMap(data_access, top_feature)
+                for d in self.dataAccess:
+                    if d.runName == r:
+                        out[r] = _loadFeatureMap(d)
         else:
             raise ValueError("runName must be none, a string or list of strings")
 
