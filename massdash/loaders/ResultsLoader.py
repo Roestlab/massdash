@@ -570,4 +570,4 @@ class ResultsLoader:
         return f"{__class__.__name__}: rsltsFile={self.rsltsFile}"
 
     def __repr__(self):
-        return f"{__class__.__name__}: rsltsFile={self.rsltsFile}"
+        return f"{__class__.__name__}: rsltsFile={self.rsltsFile}, runNames={self.runNames}"

@@ -113,3 +113,7 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         show(fig)
 
         return fig
+    
+    def __repr__(self):
+        tmp =  super().__repr__()
+        return tmp + f" dataFiles={self.dataFiles}"
