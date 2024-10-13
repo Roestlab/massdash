@@ -13,7 +13,7 @@ from .ResultsLoader import ResultsLoader
 from ..structs import TransitionGroup, TransitionGroupFeature
 from .access.OSWDataAccess import OSWDataAccess
 from .SpectralLibraryLoader import SpectralLibraryLoader
-from ..util import LOGGER
+from ..util import LOGGER, in_notebook
 
 class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
     ''' 
@@ -79,8 +79,9 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         from bokeh.plotting import output_notebook, show
         from ..plotting import InteractivePlotter, PlotConfig
        
-        # Initiate Plotting in Jupyter Notebook
-        output_notebook()
+        # Initiate Plotting in Jupyter Notebook (if in notebook)
+        if in_notebook():
+            output_notebook()
 
         # Create an instance of the InteractivePlotter class and set appropriate config
         pc = PlotConfig()
