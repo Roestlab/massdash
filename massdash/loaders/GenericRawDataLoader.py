@@ -36,10 +36,6 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
                 if isinstance(a, OSWDataAccess): 
                     self.libraryAccess = SpectralLibraryLoader(a.filename)
                     self.libraryAccess.load()
-        # I think the comment below was previously added, by mistake if not necessary then remove
-        #else:
-        #    self.libraryAccess = SpectralLibraryLoader(self.libraryAccess)
-        #    self.libraryAccess.load()
 
         ## overwrite run names since we are specifying data files
         self.runNames = [Path(f).stem for f in self.dataFiles]
