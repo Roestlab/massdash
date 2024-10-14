@@ -41,12 +41,13 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         self.runNames = [Path(f).stem for f in self.dataFiles]
         
     @abstractmethod
-    def loadTransitionGroups(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, runNames: Union[None, str, List[str]]= None) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
         Args:
             pep_id (str): Peptide ID
             charge (int): Charge
+            runNames (None | str | List[str]): Name of the run to extract the transition group from. If None, all runs are extracted. If str, only the specified run is extracted. If List[str], only the specified runs are extracted.
         Returns:
             dict[str, TransitionGroup]: Dictionary of TransitionGroups, with keys as filenames
         '''

@@ -10,14 +10,6 @@ import pandas as pd
 from pathlib import Path 
 import numpy as np
 
-# Loaders
-from .SpectralLibraryLoader import SpectralLibraryLoader
-from .access.OSWDataAccess import OSWDataAccess
-from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
-# Structs
-from ..structs import TransitionGroup, TransitionGroupFeatureCollection, TopTransitionGroupFeatureCollection
-# Utils
-from ..util import LOGGER
 # Plotting
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, FactorRange, Whisker, Legend, HoverTool
@@ -26,10 +18,27 @@ from bokeh.layouts import gridplot
 from itertools import cycle
 import plotly.express as px
 
+# Loaders
+from .SpectralLibraryLoader import SpectralLibraryLoader
+from .access.OSWDataAccess import OSWDataAccess
+from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
+# Structs
+from ..structs import TransitionGroup, TransitionGroupFeatureCollection, TopTransitionGroupFeatureCollection
+# Utils
+from ..util import LOGGER
+
 class ResultsLoader:
     ''' 
-    Class for loading Results files. Base class for GenericLoader
+    Class for loading Results files. Base class for GenericRawDataLoader
+    Abstract class for loading raw chromatogram data
+    
+    Attributes:
+        rsltsFile: (str) The path to the report file (DIANN-TSV or OSW)
+        dataFiles: (str/List[str]) The path to the mzML file(s)
+        verbose: (bool) Whether to print debug messages
+        mode: (str) Whether to run in module or GUI mode
     '''
+
     def __init__(self, 
                  rsltsFile: Union[str, List[str]], 
                  libraryFile: str = None,
@@ -304,7 +313,7 @@ class ResultsLoader:
         elif level == 'peptide':
             counts = self.loadNumIdentifiedPeptides(**kwargs)
         elif level == 'protein':
-            counts = self.loadNumIdentifiedPrecursors(**kwargs)
+            counts = self.loadNumIdentifiedProteins(**kwargs)
         else:
             raise Exception(f"Error: Unsupported level {level}, supported levels are 'precursor', 'peptide' or 'protein'")
 
