@@ -22,7 +22,7 @@ class SqMassLoader(GenericChromatogramLoader):
 
     ''' 
     Class for loading Chromatograms and peak features from SqMass files and OSW files
-    Inherits from GenericLoader
+    Inherits from GenericChromatogramLoader
     '''
 
     def __init__(self, **kwargs):
