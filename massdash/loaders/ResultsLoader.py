@@ -212,7 +212,7 @@ class ResultsLoader:
         '''
         Load the precursor identifications
 
-        **kwargs: Additional arguments to be passed to the getIdentifiedPrecursors function
+        **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPrecursors` getIdentifiedPrecursors function
         '''
         return {i.getSoftware():i.getIdentifiedPrecursors(**kwargs) for i in self.rsltsAccess}
     
@@ -300,12 +300,15 @@ class ResultsLoader:
                 .rename(columns={'level_0':'Software'})
                 .pivot(index='Precursor', columns=['Software'], values='CV'))
 
-    def plotIdentifications(self, aggregate, level: Literal['precursor', 'peptide', 'protein'], **kwargs) -> None:
+    def plotIdentifications(self, aggregate, level: Literal['precursor', 'peptide', 'protein'], height=450, width=600, **kwargs) -> None:
         '''
         Plot the identifications
 
         Args:
             aggregate: (str) The level of aggregation for the plot, can be 'precursor', 'peptide' or 'protein'
+            level: (str) The level of identifications to plot, can be 'precursor', 'peptide' or 'protein'
+            height: (int) The height of the plot
+            width: (int) The width of the plot
             **kwargs: Additional arguments to be passed to the getPrecursorIdentifications function
         '''
         if level == 'precursor':
@@ -325,7 +328,7 @@ class ResultsLoader:
             std = { s:np.std(list(r.values())) for s, r in counts.items() }
 
             # Create the figure
-            p = figure(x_range=FactorRange(*self.software),plot_height=450, plot_width=600)
+            p = figure(x_range=FactorRange(*self.software),plot_height=height, plot_width=width)
 
             # Axis titles
             p.xaxis.axis_label = "Software"
@@ -336,11 +339,10 @@ class ResultsLoader:
 
             legend_items = []
             for software in self.software:
-                std_upper = median[software] + std[software]  # TODO should this /2 
-                std_lower = median[software] - std[software] # TODO should this /2 
+                std_upper = median[software] + std[software] / 2 
+                std_lower = median[software] - std[software]  / 2
 
                 # Create a ColumnDataSource from the data
-                print(median[software])
                 source = ColumnDataSource(data=dict(x=[software], y=[median[software]], upper=[std_upper], lower=[std_lower]))
 
                 # Get the next color from the cycle
@@ -470,19 +472,7 @@ class ResultsLoader:
         
         p.update_xaxes(type='category')
         return p
-    
-    @staticmethod
-    def _flattenDict(d: Dict[str, Dict[str, set]]) -> Dict[str,set]:
-        '''
-        Flatten a dictionary of dictionaries
-        Helper for plotUpset
-        '''
-        out = {}
-        for k1,v1 in d.items():
-            for k2,v2 in v1.items():
-                out[f'{k2} ({k1})'] = v2
-        return out
-
+   
     def plotUpset(self, level= Literal['precursor', 'peptide', 'protein'], **kwargs):
         """
         Create an UpSet plot showing the intersection of ModifiedPeptideSequence's between entries
@@ -538,7 +528,7 @@ class ResultsLoader:
 
         return self._oswAccess
 
-    def loadPrecursorScoreDistribution(self):
+    def loadPeakGroupScoreDistribution(self):
         return self.loadScoreDistribution(score_table='SCORE_MS2', score='Score')
     
     def loadPeptideScoreDistribution(self, context: Literal['run-specific', 'experiment-wide', 'global'] = None):
@@ -575,6 +565,18 @@ class ResultsLoader:
         else:
             return {}
   
+    @staticmethod
+    def _flattenDict(d: Dict[str, Dict[str, set]]) -> Dict[str,set]:
+        '''
+        Flatten a dictionary of dictionaries
+        Helper for plotUpset
+        '''
+        out = {}
+        for k1,v1 in d.items():
+            for k2,v2 in v1.items():
+                out[f'{k2} ({k1})'] = v2
+        return out
+
     def __str__(self):
         return f"{__class__.__name__}: rsltsFile={self.rsltsFile}"
 
