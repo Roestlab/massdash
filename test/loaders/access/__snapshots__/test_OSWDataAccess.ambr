@@ -1,34 +1,192 @@
 # serializer version: 1
-# name: test_getPrecursorIDFromPeptideAndCharge[ANS(UniMod:21)SPTTNIDHLK(UniMod:259)-2]
-  29
+# name: test_getIdentifiedPeptides[None]
+  dict({
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_25.d_mergeFiles': set({
+      'AFVDFLSDEIK',
+    }),
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_27.d_mergeFiles': set({
+      'AFVDFLSDEIK',
+    }),
+    'ionMobilityTest2': set({
+      'AFVDFLSDEIK',
+    }),
+  })
+# ---
+# name: test_getIdentifiedPeptides[ionMobilityTest2]
+  set({
+    'AFVDFLSDEIK',
+  })
+# ---
+# name: test_getIdentifiedPrecursors
+  dict({
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_25.d_mergeFiles': set({
+      'AFVDFLSDEIK2',
+    }),
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_27.d_mergeFiles': set({
+      'AFVDFLSDEIK2',
+    }),
+    'ionMobilityTest2': set({
+      'AFVDFLSDEIK2',
+    }),
+  })
+# ---
+# name: test_getIdentifiedProteins[None]
+  dict({
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_25.d_mergeFiles': set({
+      'sp|Q07021|C1QBP_HUMAN',
+    }),
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_27.d_mergeFiles': set({
+      'sp|Q07021|C1QBP_HUMAN',
+    }),
+    'ionMobilityTest2': set({
+      'sp|Q07021|C1QBP_HUMAN',
+    }),
+  })
+# ---
+# name: test_getIdentifiedProteins[ionMobilityTest2]
+  set({
+    'sp|Q07021|C1QBP_HUMAN',
+  })
+# ---
+# name: test_getNumIdentifiedPeptides[None]
+  dict({
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_25.d_mergeFiles': 1,
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_27.d_mergeFiles': 1,
+    'ionMobilityTest2': 1,
+  })
+# ---
+# name: test_getNumIdentifiedPeptides[ionMobilityTest2]
+  1
+# ---
+# name: test_getNumIdentifiedPrecursors[None]
+  dict({
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_25.d_mergeFiles': 1,
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_27.d_mergeFiles': 1,
+    'ionMobilityTest2': 1,
+  })
+# ---
+# name: test_getNumIdentifiedPrecursors[ionMobilityTest2]
+  1
+# ---
+# name: test_getNumIdentifiedProteins[None]
+  dict({
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_25.d_mergeFiles': 1,
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_27.d_mergeFiles': 1,
+    'ionMobilityTest2': 1,
+  })
+# ---
+# name: test_getNumIdentifiedProteins[ionMobilityTest2]
+  1
+# ---
+# name: test_getPrecursorIDFromPeptideAndCharge[AFVDFLSDEIK-2]
+  33018
 # ---
 # name: test_getPrecursorIDFromPeptideAndCharge[INVALID-0]
   None
 # ---
-# name: test_getTransitionGroupFeaturesDf[ANS(UniMod:21)SPTTNIDHLK(UniMod:259)-2-INVALID]
-  Empty DataFrame
-  Columns: [filename, leftBoundary, rightBoundary, areaIntensity, qvalue, consensusApex, consensusApexIntensity]
-  Index: []
+# name: test_getRunNames
+  list([
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_25.d_mergeFiles',
+    'ionMobilityTest2',
+    '20190816_TIMS05_MA_FlMe_diaPASEF_25pc_50ng_A2_1_27.d_mergeFiles',
+  ])
 # ---
-# name: test_getTransitionGroupFeaturesDf[ANS(UniMod:21)SPTTNIDHLK(UniMod:259)-2-test_chrom_1]
-  Empty DataFrame
-  Columns: [filename, leftBoundary, rightBoundary, areaIntensity, qvalue, consensusApex, consensusApexIntensity]
-  Index: []
-# ---
-# name: test_getTransitionGroupFeaturesDf[INVALID-0-test_chrom_1]
-  Empty DataFrame
-  Columns: [filename, leftBoundary, rightBoundary, areaIntensity, qvalue, consensusApex, consensusApexIntensity]
-  Index: []
-# ---
-# name: test_getTransitionGroupFeatures[ANS(UniMod:21)SPTTNIDHLK(UniMod:259)-2-INVALID]
+# name: test_getTransitionGroupFeatures[AFVDFLSDEIK-2-INVALID]
   list([
   ])
 # ---
-# name: test_getTransitionGroupFeatures[ANS(UniMod:21)SPTTNIDHLK(UniMod:259)-2-test_chrom_1]
+# name: test_getTransitionGroupFeatures[AFVDFLSDEIK-2-ionMobilityTest2]
+  list([
+    -------- TransitionGroupFeature --------
+  leftBoundary: 6235.8486328125
+  rightBoundary: 6248.42822265625
+  areaIntensity: 2848190.0
+  consensusApex: 6242.15
+  consensusApexIntensity: 352642.16135025
+  qvalue: 3.5084067486223456e-05
+  consensusApexIM: 0.978579389257473
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AFVDFLSDEIK
+  software: OpenSWATH,
+    -------- TransitionGroupFeature --------
+  leftBoundary: 6255.64599609375
+  rightBoundary: 6266.51513671875
+  areaIntensity: 35433.9
+  consensusApex: 6256.67
+  consensusApexIntensity: 2888.98703575134
+  qvalue: 0.0001776217262565
+  consensusApexIM: 0.981810896830182
+  precursor_mz: None
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: AFVDFLSDEIK
+  software: OpenSWATH,
+  ])
+# ---
+# name: test_getTransitionGroupFeatures[INVALID-0-ionMobilityTest2]
   list([
   ])
 # ---
-# name: test_getTransitionGroupFeatures[INVALID-0-test_chrom_1]
-  list([
-  ])
+# name: test_initializeValidScores
+  dict({
+    'FEATURE_MS1': list([
+      'VAR_MASSDEV_SCORE',
+      'VAR_MI_CONTRAST_SCORE',
+      'VAR_MI_COMBINED_SCORE',
+      'VAR_ISOTOPE_CORRELATION_SCORE',
+      'VAR_ISOTOPE_OVERLAP_SCORE',
+      'VAR_XCORR_COELUTION_CONTRAST',
+      'VAR_XCORR_COELUTION_COMBINED',
+      'VAR_XCORR_SHAPE_CONTRAST',
+      'VAR_XCORR_SHAPE_COMBINED',
+    ]),
+    'FEATURE_MS2': list([
+      'VAR_BSERIES_SCORE',
+      'VAR_DOTPROD_SCORE',
+      'VAR_INTENSITY_SCORE',
+      'VAR_ISOTOPE_CORRELATION_SCORE',
+      'VAR_ISOTOPE_OVERLAP_SCORE',
+      'VAR_LIBRARY_CORR',
+      'VAR_LIBRARY_DOTPROD',
+      'VAR_LIBRARY_MANHATTAN',
+      'VAR_LIBRARY_RMSD',
+      'VAR_LIBRARY_ROOTMEANSQUARE',
+      'VAR_LIBRARY_SANGLE',
+      'VAR_LOG_SN_SCORE',
+      'VAR_MANHATTAN_SCORE',
+      'VAR_MASSDEV_SCORE',
+      'VAR_MASSDEV_SCORE_WEIGHTED',
+      'VAR_MI_SCORE',
+      'VAR_MI_WEIGHTED_SCORE',
+      'VAR_MI_RATIO_SCORE',
+      'VAR_NORM_RT_SCORE',
+      'VAR_XCORR_COELUTION',
+      'VAR_XCORR_COELUTION_WEIGHTED',
+      'VAR_XCORR_SHAPE',
+      'VAR_XCORR_SHAPE_WEIGHTED',
+      'VAR_YSERIES_SCORE',
+    ]),
+    'SCORE_MS2': list([
+      'SCORE',
+      'PVALUE',
+      'PEP',
+      'QVALUE',
+    ]),
+    'SCORE_PEPTIDE': list([
+      'SCORE',
+      'PVALUE',
+      'PEP',
+      'QVALUE',
+    ]),
+    'SCORE_PROTEIN': list([
+      'SCORE',
+      'PVALUE',
+      'PEP',
+      'QVALUE',
+    ]),
+  })
 # ---

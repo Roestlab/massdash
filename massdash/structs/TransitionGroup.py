@@ -45,8 +45,11 @@ class TransitionGroup:
         self.sequence = sequence
         self.precursor_charge = precursor_charge
   
-    def toPandasDf(self) -> pd.DataFrame:
+    def toPandasDf(self, separate=False) -> pd.DataFrame:
         """Convert the TransitionGroup to a Pandas DataFrame.
+
+        Args:
+            separate (bool, optional): If True, return separate DataFrames for precursor and transition data. Defaults to False.
 
         Returns:
             pd.DataFrame: DataFrame representation of the TransitionGroup.
@@ -60,6 +63,10 @@ class TransitionGroup:
         else:
             transitionDataDf = pd.concat([ i.toPandasDf() for i in self.transitionData])
             precursorDataDf = pd.concat([ i.toPandasDf() for i in self.precursorData])
+        
+        if separate:
+            return precursorDataDf, transitionDataDf
+        else:
             return pd.concat([precursorDataDf, transitionDataDf])
 
     def to_pyopenms(self, includePrecursors=True) -> po.MRMTransitionGroupCP:

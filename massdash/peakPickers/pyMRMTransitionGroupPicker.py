@@ -134,6 +134,6 @@ class pyMRMTransitionGroupPicker:
         # Calculate the consensus boundaries and integrated intensity
         transitionGroupFeatures = []
         for idx, row in newPeaks.iterrows():
-            transitionGroupFeatures.append(TransitionGroupFeature(row['leftBoundary'], row['rightBoundary'], areaIntensity=row['areaIntensity'], consensusApexIntensity=row['apexIntensity']))
+            transitionGroupFeatures.append(TransitionGroupFeature(row['leftBoundary'], row['rightBoundary'], areaIntensity=row['areaIntensity'], consensusApexIntensity=row['apexIntensity'], consensusApex=row['peakApex']))
         
         return transitionGroupFeatures

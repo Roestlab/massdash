@@ -3,7 +3,7 @@ massdash/structs/TransitionGroupFeature
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Literal
 import pandas as pd
 import numpy as np
 
@@ -42,6 +42,7 @@ class TransitionGroupFeature(GenericFeature):
                  product_annotations: Optional[List[str]]=None,
                  product_mz: Optional[List[float]]=None,
                  sequence: Optional[str]=None,
+                 software: Optional[Literal['DIA-NN', 'OpenSWATH', 'DreamDIA']]=None,
                  ):
         super().__init__(leftBoundary, rightBoundary, areaIntensity=areaIntensity)
         self.consensusApex = consensusApex
@@ -53,6 +54,7 @@ class TransitionGroupFeature(GenericFeature):
         self.product_annotations = product_annotations
         self.product_mz = product_mz
         self.sequence = sequence
+        self.software = software
 
     def __str__(self):
         attribute_strings = [f"{key}: {getattr(self, key)}" for key in vars(self)]
@@ -76,6 +78,13 @@ class TransitionGroupFeature(GenericFeature):
         qvalues = [i.qvalue for i in transitionGroupFeatureLst ]
         consensusApexes = [i.consensusApex for i in transitionGroupFeatureLst ]
         consensusApexIntensities = [i.consensusApexIntensity for i in transitionGroupFeatureLst ]
+        consensusApexIMs = [i.consensusApexIM for i in transitionGroupFeatureLst ]
+        precursor_mzs = [i.precursor_mz for i in transitionGroupFeatureLst ]
+        precursor_charges = [i.precursor_charge for i in transitionGroupFeatureLst ]
+        sequences = [i.sequence for i in transitionGroupFeatureLst ]
+        softwares = [i.software for i in transitionGroupFeatureLst ]
 
-        return pd.DataFrame(np.column_stack([leftBoundaries, rightBoundaries, areaIntensities, qvalues, consensusApexes, consensusApexIntensities]),
-                            columns=['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity'])
+        df = pd.DataFrame(np.column_stack([leftBoundaries, rightBoundaries, areaIntensities, qvalues, consensusApexes, consensusApexIntensities, consensusApexIMs, precursor_mzs, precursor_charges, sequences, softwares]),
+                            columns=['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'consensusApexIM', 'precursor_mz', 'precursor_charge', 'sequence', 'software'])
+        
+        return df.dropna(axis=1)

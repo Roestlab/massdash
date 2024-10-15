@@ -52,11 +52,6 @@ class FileInputRawDataUISettings(BaseUISettings):
         st.sidebar.subheader("Input Raw file")
         self.raw_file_path_input = st.sidebar.text_input("Enter file path", raw_file_path, key='raw_data_file_path', help="Path to the raw file (*.mzML)")
 
-        # Tabs for different data workflows
-        st.sidebar.subheader("Input Search Results")
-        self.feature_file_path = st.sidebar.text_input("Enter file path", feature_file_path, key='feature_file_path', help="Path to the search results output file. Can be an Pyprophet scored OpenSwath file or a DIA-NN report file (*.osw / *.tsv)")
-        self.feature_file_type = st.sidebar.selectbox("File type", ["OpenSWATH", "DIA-NN"], index=["OpenSWATH", "DIA-NN"].index(feature_file_type), key='feature_file_type', help="File type of the search results output file")
-
     def get_mzml_files(self, threads: int=1):
         """
         Given a path to a directory or a file, returns a list of full file paths to *.mzML files in the directory or the file itself.

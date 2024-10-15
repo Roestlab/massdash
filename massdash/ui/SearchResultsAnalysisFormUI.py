@@ -37,13 +37,6 @@ class SearchResultsAnalysisFormUI:
         
         search_results_exp_name = cols[2].text_input("Experiment name", value=search_results_exp_name, placeholder="Experiment name", key=f"search_results_exp_name_{entry_number}", help="Name of the experiment.")
         
-        if search_results_file_type is None:
-            search_results_file_type = cols[3].selectbox("File type", options=["OpenSWATH", "DIA-NN", "DreamDIA"], key=f"search_results_file_type_{entry_number}", help="Select the file type of the search results file.")
-        elif search_results_file_type not in ["OpenSWATH", "DIA-NN", "DreamDIA"] and search_results_file_type is not None:
-            raise ValueError(f"search_results_file_type must be either 'OpenSWATH', 'DIA-NN' or 'DreamDIA' not {search_results_file_type}")
-        else:
-            search_results_file_type = cols[3].selectbox("File type", options=["OpenSWATH", "DIA-NN", "DreamDIA"], index=["OpenSWATH", "DIA-NN", "DreamDIA"].index(search_results_file_type), key=f"search_results_file_type_{entry_number}", help="Select the file type of the search results file.")
-        
         return search_results_file_path, search_results_exp_name, search_results_file_type
 
     def create_forum(self, st_container: Literal["st", "st.sidebar"]=st, st_type: Literal["main", "sidebar"]="main", feature_file_entries_dict=None):
