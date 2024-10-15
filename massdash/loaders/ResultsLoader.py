@@ -20,8 +20,7 @@ import plotly.express as px
 
 # Loaders
 from .SpectralLibraryLoader import SpectralLibraryLoader
-from .access.OSWDataAccess import OSWDataAccess
-from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
+from .access import OSWDataAccess, ResultsTSVDataAccess
 # Structs
 from ..structs import TransitionGroup, TransitionGroupFeatureCollection, TopTransitionGroupFeatureCollection
 # Utils

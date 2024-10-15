@@ -11,7 +11,7 @@ from pathlib import Path
 from .ResultsLoader import ResultsLoader
 # Structs
 from ..structs import TransitionGroup, TransitionGroupFeature
-from .access.OSWDataAccess import OSWDataAccess
+from .access import OSWDataAccess
 from .SpectralLibraryLoader import SpectralLibraryLoader
 from ..util import LOGGER, in_notebook
 

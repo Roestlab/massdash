@@ -11,8 +11,7 @@ import pandas as pd
 
 # Loaders
 from .GenericChromatogramLoader import GenericChromatogramLoader
-from .access.SqMassDataAccess import SqMassDataAccess
-from .access.OSWDataAccess import OSWDataAccess
+from .access import SqMassDataAccess
 # Structs
 from ..structs import TransitionGroup, TransitionGroupCollection
 # Utils

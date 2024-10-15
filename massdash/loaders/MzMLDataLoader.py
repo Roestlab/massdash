@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 # Loaders
-from .access.MzMLDataAccess import MzMLDataAccess
+from .access import MzMLDataAccess
 from .GenericSpectrumLoader import GenericSpectrumLoader
 # Structs
 from ..structs import TransitionGroup, FeatureMap, TargetedDIAConfig, FeatureMapCollection, TopTransitionGroupFeatureCollection, TransitionGroupCollection
