@@ -211,15 +211,17 @@ class ResultsLoader:
         '''
         Load the precursor identifications
 
-        **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPrecursors` getIdentifiedPrecursors function
+        Args:
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPrecursors` function
         '''
         return {i.getSoftware():i.getIdentifiedPrecursors(**kwargs) for i in self.rsltsAccess}
     
     def loadNumIdentifiedPrecursors(self, **kwargs):
         '''
-        Load the number of precursor identifications
+        Load the precursor identifications
 
-        **kwargs: Additional arguments to be passed to the getIdentifiedPrecursors function
+        Args:
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getNumIdentifiedPrecursors` function
         '''
         return {i.getSoftware():i.getNumIdentifiedPrecursors(**kwargs) for i in self.rsltsAccess}
 
@@ -227,7 +229,8 @@ class ResultsLoader:
         '''
         Load the protein identifications
 
-        **kwargs: Additional arguments to be passed to the getIdentifiedProteins function
+        Args:
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedProteins` function
         '''
         return {i.getSoftware():i.getIdentifiedProteins(**kwargs) for i in self.rsltsAccess}
     
@@ -236,7 +239,7 @@ class ResultsLoader:
         Load the number of protein identifications
 
         Args:
-            **kwargs: Additional arguments to be passed to the getIdentifiedProteins function
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedProteins` function
         '''
         return {i.getSoftware():i.getNumIdentifiedProteins(**kwargs) for i in self.rsltsAccess}
 
@@ -244,7 +247,8 @@ class ResultsLoader:
         '''
         Load the peptide identifications
 
-        **kwargs: Additional arguments to be passed to the getIdentifiedPeptides function
+        Args:
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPeptides` function
         '''
         return {i.getSoftware():i.getIdentifiedPeptides(**kwargs) for i in self.rsltsAccess}
     
@@ -253,7 +257,7 @@ class ResultsLoader:
         Load the number of peptide identifications
 
         Args:
-            **kwargs: Additional arguments to be passed to the getIdentifiedPeptides function
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPeptides` function
         '''
         return {i.getSoftware():i.getNumIdentifiedPeptides(**kwargs) for i in self.rsltsAccess}
     
@@ -269,13 +273,12 @@ class ResultsLoader:
         load a quantification matrix
 
         Args:
-            **kwargs: Additional arguments to be passed to the getPrecursorIdentifications function
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPrecursorIntensities` function
         
         Returns:
             DataFrame: DataFrame containing the quantification matrix, columns are the software tool, index are the precursor and the values are the intensities
         '''
         tmp =  pd.concat({ i.getSoftware():i.getIdentifiedPrecursorIntensities(**kwargs) for i in self.rsltsAccess }).drop_duplicates()
-        print(tmp)
         return (tmp
                 .drop_duplicates()
                 .reset_index()
@@ -287,7 +290,7 @@ class ResultsLoader:
         Compute the CV (coefficient of variation) of the identified precursors
 
         Args:
-            **kwargs: Additional arguments to be passed to the getPrecursorIdentifications function
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getPrecursorCVs` function
         
         Returns:
             DataFrame: DataFrame containing the CV of the identified precursors, columns are the software tool, index are the precursor and the values are the CV
@@ -308,7 +311,7 @@ class ResultsLoader:
             level: (str) The level of identifications to plot, can be 'precursor', 'peptide' or 'protein'
             height: (int) The height of the plot
             width: (int) The width of the plot
-            **kwargs: Additional arguments to be passed to the getPrecursorIdentifications function
+            **kwargs: Additional arguments to be passed to the getIdentification function for this level (e.g. :func:`~massdash.loaders.access.GenericResultsAccess.getNumIdentifiedPrecursors`) 
         '''
         if level == 'precursor':
             counts = self.loadNumIdentifiedPrecursors(**kwargs)
@@ -422,9 +425,11 @@ class ResultsLoader:
     def plotQuantifications(self, **kwargs) -> None:
         '''
         Plot the quantifications
+
+        Args:
+            **kwargs: Additional arguments to be passed to :func:`~massdash.loaders.ResultsLoader.loadQuantificationMatrix` function 
         '''
         quantMatrix = self.loadQuantificationMatrix(**kwargs).melt(value_name='Intensity')
-        print(quantMatrix['Software'])
 
         # Take the log2 of the Intensity column
         quantMatrix['log2_intensity'] = np.log2(quantMatrix['Intensity'])
@@ -449,7 +454,7 @@ class ResultsLoader:
         Plot the CV
 
         Args:
-            **kwargs: Additional arguments to be passed to the getPrecursorIdentifications function
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getPrecursorCVs` function
         '''
         # Compute coefficient of variation
         df = self.computeCV(**kwargs).melt(value_name='CV')
@@ -476,10 +481,13 @@ class ResultsLoader:
         """
         Create an UpSet plot showing the intersection of ModifiedPeptideSequence's between entries
         (with unique ModifiedPeptideSequence across runNames)
+
+        Args:
+            level: (str) The level of identifications to plot, can be 'precursor', 'peptide' or 'protein'
+            **kwargs: Additional arguments to be passed to the underlying getIdentified function (e.g. :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPrecursors` for precursor level)
         """
         import upsetplot
         import matplotlib.pyplot as plt
-        from io import BytesIO
 
         if level == 'precursor':
             identifications = self.loadIdentifiedPrecursors(**kwargs)
@@ -541,7 +549,7 @@ class ResultsLoader:
         Loads score distribution for a given file
 
         Args:
-            **kwargs: kwargs to pass to the getScoreDistribution function, score_table and score must be specified
+            **kwargs: kwargs to pass to the :func:`~massdash.loaders.access.GenericResultsAccess.getScoreDistribution function`, score_table and score must be specified
 
         Returns:
             pd.DataFrame: DataFrame with columns: Decoy, Score, Run

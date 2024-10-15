@@ -1,8 +1,8 @@
 """
-massdash/loaders
-~~~~~~~~~~~~~~~~
+massdash/loaders/access
+~~~~~~~~~~~~~~~~~~~~~~~
 
-The :mod:`massdash.loaders` subpackage contains the structures for loading data into MassDash
+The :mod:`massdash.loaders.access` subpackage contains the low level access to DIA data files. 
 """
 
 from .GenericResultsAccess import GenericResultsAccess
