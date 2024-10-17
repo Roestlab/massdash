@@ -413,3 +413,5 @@ zipp==3.20.2
     # via
     #   importlib-metadata
     #   importlib-resources
+
+massdash @ git+https://github.com/Roestlab/massdash.git@dist/streamlit_deployment
