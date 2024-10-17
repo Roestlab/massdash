@@ -5,16 +5,16 @@ massdash/loaders/GenericSpectrumLoader
 This is an abstract class for loading spectra from a file.
 '''
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod, ABCMeta
 import pandas as pd
-from typing import Dict, List, Union, Literal, Optional
+from typing import Dict, Optional, List, Union
 
 # Loader
-from .GenericLoader import GenericLoader
+from .GenericRawDataLoader import GenericRawDataLoader
 # Structs
 from ..structs import TransitionGroup, TargetedDIAConfig, FeatureMap
 
-class GenericSpectrumLoader(GenericLoader):
+class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
     '''
     Abstract class for loading raw spectrum data
 
@@ -24,11 +24,11 @@ class GenericSpectrumLoader(GenericLoader):
         libraryFile: (str) The path to the library file (.tsv or .pqp)
     '''
     
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'DIA-NN', verbose: bool=False, mode: Literal['module', 'gui'] = 'module'):
-        super().__init__(rsltsFile=rsltsFile, dataFiles=dataFiles, libraryFile=libraryFile, rsltsFileType=rsltsFileType, verbose=verbose, mode=mode)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @abstractmethod
-    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig, runNames: Union[None,str,List[str]] = None) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
 
@@ -36,6 +36,7 @@ class GenericSpectrumLoader(GenericLoader):
             pep_id (str): Peptide ID
             charge (int): Charge
             config (TargetedDIAConfig): Configuration object containing the extraction parameters
+            runNames (None | str | List[str]): Name of the run to extract the transition group from. If None, all runs are extracted. If str, only the specified run is extracted. If List[str], only the specified runs are extracted.
         Return:
             dict[str, TransitionGroup]: Dictionary of TransitionGroups, with keys as filenames
         '''
@@ -57,13 +58,14 @@ class GenericSpectrumLoader(GenericLoader):
         pass 
 
     @abstractmethod
-    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> Dict[str, FeatureMap]:
+    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig, runNames: Union[None, str, List[str]] = None) -> Dict[str, FeatureMap]:
         '''
         Loads a dictionary of FeatureMaps (where the keys are the filenames) from the results file
 
         Args:
             pep_id (str): Peptide ID
             charge (int): Charge
+            runNames (None | str | List[str]): Name of the run to extract the feature map from. If None, all runs are extracted. If str, only the specified run is extracted. If List[str], only the specified runs are extracted.
         Returns:
             FeatureMap: FeatureMap object containing peak boundaries, intensity and confidence
         '''
@@ -72,6 +74,7 @@ class GenericSpectrumLoader(GenericLoader):
     def plotChromatogram(self,
                         seq: str, 
                         charge: int, 
+                        runName: Union[str, None] = None,
                         includeBoundaries: bool = True, 
                         include_ms1: bool = False, 
                         smooth: bool = True, 
@@ -87,6 +90,7 @@ class GenericSpectrumLoader(GenericLoader):
         Args:
             seq (str): Peptide sequence
             charge (int): Charge state
+            runName (str): Name of the run to extract the chromatogram from
             includeBoundaries (bool, optional): Whether to include peak boundaries. Defaults to True.
             include_ms1 (bool, optional): Whether to include MS1 data. Defaults to False.
             smooth (bool, optional): Whether to smooth the chromatogram. Defaults to True.
@@ -101,9 +105,9 @@ class GenericSpectrumLoader(GenericLoader):
             bokeh.plotting.figure.Figure: Bokeh figure object
         '''
 
-        ## TODO allow plotting of multiple chromatograms
-        if len(self.dataFiles_str) > 1:
-            raise NotImplementedError("Only one transition file is supported")
+
+        if len(self.dataFiles) > 1 and runName is None:
+            raise NotImplementedError("If loader has multiple runs, runName must be specified")
  
         # specify extraction paramaters
         extraction_parameters = TargetedDIAConfig()
@@ -112,9 +116,9 @@ class GenericSpectrumLoader(GenericLoader):
         extraction_parameters.im_window = im_window
 
         # load the transitionGroup for plotting
-        transitionGroup = list(self.loadTransitionGroups(seq, charge, extraction_parameters).values())[0]
+        transitionGroup = list(self.loadTransitionGroups(seq, charge, extraction_parameters, runNames=runName).values())[0]
         if includeBoundaries:
-            transitionGroupFeatures = list(self.loadTransitionGroupFeatures(seq, charge).values())[0]
+            transitionGroupFeatures = list(self.loadTransitionGroupFeatures(seq, charge, runNames=runName).values())[0]
         else:
             transitionGroupFeatures = []
 

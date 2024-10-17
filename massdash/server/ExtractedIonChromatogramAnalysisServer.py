@@ -110,7 +110,7 @@ class ExtractedIonChromatogramAnalysisServer:
         # concensus_chromatogram_settings.create_ui()
 
         # Load XIC data from SQMass file
-        self.xic_data = SqMassLoader(self.massdash_gui.file_input_settings.sqmass_file_path_list, self.massdash_gui.file_input_settings.osw_file_path)
+        self.xic_data = SqMassLoader(dataFiles=self.massdash_gui.file_input_settings.sqmass_file_path_list, rsltsFile=self.massdash_gui.file_input_settings.osw_file_path)
 
         # Print selected peptide and charge information
         LOGGER.info(f"Selected peptide: {transition_list_ui.transition_settings.selected_peptide} Selected charge: {transition_list_ui.transition_settings.selected_charge}")

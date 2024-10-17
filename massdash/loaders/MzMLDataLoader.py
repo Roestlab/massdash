@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 # Loaders
-from .access.MzMLDataAccess import MzMLDataAccess
+from .access import MzMLDataAccess
 from .GenericSpectrumLoader import GenericSpectrumLoader
 # Structs
 from ..structs import TransitionGroup, FeatureMap, TargetedDIAConfig, FeatureMapCollection, TopTransitionGroupFeatureCollection, TransitionGroupCollection
@@ -27,51 +27,14 @@ class MzMLDataLoader(GenericSpectrumLoader):
         libraryFile: (str) The path to the library file (.tsv or .pqp)
         
     '''
-    def __init__(self, rsltsFile: str, dataFiles: Union[str, List[str]], libraryFile: str = None, rsltsFileType: Literal['OpenSWATH', 'DIA-NN'] = 'OpenSWATH', verbose: bool=False, mode: Literal['module', 'gui'] = 'module') -> None:
-        super().__init__(rsltsFile, dataFiles, libraryFile, rsltsFileType, verbose, mode)
-        self.dataFiles = [MzMLDataAccess(f, 'ondisk', verbose=verbose) for f in self.dataFiles_str]
-        self.has_im = np.all([d.has_im for d in self.dataFiles])
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs) 
+        self.dataAccess = [MzMLDataAccess(f, 'ondisk', verbose=self.verbose) for f in self.dataFiles]
+        self.has_im = np.all([d.has_im for d in self.dataAccess])
+        if self.libraryAccess is None:
+            raise ValueError("If .osw file is not supplied, library file is required for MzMLDataLoader to perform targeted extraction")
                    
-    def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
-        '''
-        Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
-
-        Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
-        Returns:
-            DataFrame: DataFrame containing TransitionGroupObject information across all runs 
-        '''
-        out = {}
-        for t in self.dataFiles:
-            runname = basename(t.filename).split('.')[0]
-            out[t.runName] = self.rsltsFile.getTopTransitionGroupFeatureDf(runname, pep_id, charge)
-        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='run'))
-        # Drop duplicate columns
-        out_df = out_df.loc[:,~out_df.columns.duplicated()]
-        return out_df
-        
-    def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
-        '''
-        Loads a pandas dataframe of TransitionGroupFeatures across all runsPeakFeature object from the results file
-
-        Args:
-            pep_id (str): Peptide ID
-            charge (int): Charge
-
-        Returns:
-            DataFrame: DataFrame containing TransitionGroupObject information across all runs 
-        '''
-        out = {}
-        for t in self.dataFiles:
-            runname = basename(t.filename).split('.')[0]
-            out[t.runName] = self.rsltsFile.getTransitionGroupFeaturesDf(runname, pep_id, charge)
-        out_df = pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='run'))
-        # Drop duplicate columns
-        out_df = out_df.loc[:,~out_df.columns.duplicated()]
-        return out_df
-        
-    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig) -> Dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig, runNames: Union[None, str, List[str]]=None) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
 
@@ -79,10 +42,11 @@ class MzMLDataLoader(GenericSpectrumLoader):
             pep_id (str): Peptide ID
             charge (int): Charge
             config (TargetedDIAConfig): Configuration object containing the extraction parameters
+            runNames (None | str | List[str]): Name of the run to extract the transition group from. If None, all runs are extracted. If str, only the specified run is extracted. If List[str], only the specified runs are extracted.
         Return:
             dict[str, TransitionGroup]: Dictionary of TransitionGroups, with keys as filenames
         '''
-        out_feature_map = self.loadFeatureMaps(pep_id, charge, config)
+        out_feature_map = self.loadFeatureMaps(pep_id, charge, config, runNames=runNames)
 
         return TransitionGroupCollection({ run: data.to_chromatograms() for run, data in out_feature_map.items() })
     
@@ -109,23 +73,40 @@ class MzMLDataLoader(GenericSpectrumLoader):
         out_df = out_df.loc[:,~out_df.columns.duplicated()]
         return out_df
 
-    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig) -> FeatureMapCollection:
+    def loadFeatureMaps(self, pep_id: str, charge: int, config=TargetedDIAConfig, runNames: Union[None, str, List[str]] = None) -> FeatureMapCollection:
         '''
         Loads a dictionary of FeatureMaps (where the keys are the filenames) from the results file
 
         Args:
             pep_id (str): Peptide ID
             charge (int): Charge
+            runNames (None | str | List[str]): Name of the run to extract the feature map from. If None, all runs are extracted. If str, only the specified run is extracted. If List[str], only the specified runs are extracted.
         Returns:
             FeatureMapCollection: FeatureMapCollection containing FeatureMap objects for each file
         '''
         out = FeatureMapCollection()
-        top_features = [ self.rsltsFile.getTopTransitionGroupFeature(d.runName, pep_id, charge) for d in self.dataFiles]
-        self.libraryFile.populateTransitionGroupFeatures(top_features)
-        for d, t in zip(self.dataFiles, top_features):
-            if t is None:
-                LOGGER.debug(f"No feature found for {pep_id} {charge} in {d.runName}")
-                out[d.runName] =  FeatureMap()
-            else:
-                out[d.runName] = d.reduce_spectra(t, config)
+        
+        def _loadFeatureMap(dataAccess):
+            top_feature = self.rsltsAccess[0].getTopTransitionGroupFeature(dataAccess.runName, pep_id, charge)
+            self.libraryAccess.populateTransitionGroupFeature(top_feature)
+            if top_feature is None:
+                LOGGER.debug(f"No feature found for {pep_id} {charge} in {dataAccess.runName}")
+                return FeatureMap()
+            return dataAccess.reduce_spectra(top_feature, config)
+
+        if runNames is None:
+            for d in self.dataAccess:
+                out[d.runName] = _loadFeatureMap(d)
+            return out
+        elif isinstance(runNames, str):
+            data_access = self.dataAccess[self.runNames.index(runNames)]
+            out[runNames] = _loadFeatureMap(data_access)
+        elif isinstance(runNames, list):
+            for r in runNames:
+                for d in self.dataAccess:
+                    if d.runName == r:
+                        out[r] = _loadFeatureMap(d)
+        else:
+            raise ValueError("runName must be none, a string or list of strings")
+
         return out

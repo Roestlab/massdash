@@ -1,4 +1,76 @@
 # serializer version: 1
+# name: test_getIdentifiedPeptides[diann-None]
+  dict({
+    'test_raw_1': set({
+      'AGAANIVPNSTGAAK',
+      'DYASIDAAPEER',
+      'IEDQLGEVAQYK',
+      'KVVITAPGGNDVK',
+    }),
+  })
+# ---
+# name: test_getIdentifiedPeptides[diann-test_raw_1]
+  set({
+    'AGAANIVPNSTGAAK',
+    'DYASIDAAPEER',
+    'IEDQLGEVAQYK',
+    'KVVITAPGGNDVK',
+  })
+# ---
+# name: test_getIdentifiedPrecursors[diann]
+  dict({
+    'test_raw_1': set({
+      'AGAANIVPNSTGAAK_2',
+      'AGAANIVPNSTGAAK_3',
+      'DYASIDAAPEER_2',
+      'DYASIDAAPEER_3',
+      'IEDQLGEVAQYK_2',
+      'IEDQLGEVAQYK_3',
+      'KVVITAPGGNDVK_2',
+      'KVVITAPGGNDVK_3',
+    }),
+  })
+# ---
+# name: test_getIdentifiedProteins[diann-None]
+  dict({
+    'test_raw_1': set({
+      'P0C0G6;P0C0G7;P0DB18;Q5XDW3;P0DB19;P68777',
+      'Q5XD01;P69949;A2RFE3;B5XKM7;P0DA94;P0DA95;P69951;Q1J7I5;Q1JCN8;Q1JHQ6;Q1JML5;Q48UF7',
+      'Q5XD49;A2RFQ4;B5XKI1;P0DA82;P0DA83;P69952;Q1J7N4;Q1JCT6;Q1JHV6;Q1JMR3;Q48UK5;Q8P1W4',
+    }),
+  })
+# ---
+# name: test_getIdentifiedProteins[diann-test_raw_1]
+  set({
+    'P0C0G6;P0C0G7;P0DB18;Q5XDW3;P0DB19;P68777',
+    'Q5XD01;P69949;A2RFE3;B5XKM7;P0DA94;P0DA95;P69951;Q1J7I5;Q1JCN8;Q1JHQ6;Q1JML5;Q48UF7',
+    'Q5XD49;A2RFQ4;B5XKI1;P0DA82;P0DA83;P69952;Q1J7N4;Q1JCT6;Q1JHV6;Q1JMR3;Q48UK5;Q8P1W4',
+  })
+# ---
+# name: test_getNumIdentifiedPeptides[diann-None]
+  dict({
+    'test_raw_1': 4,
+  })
+# ---
+# name: test_getNumIdentifiedPeptides[diann-test_raw_1]
+  4
+# ---
+# name: test_getNumIdentifiedPrecursors[diann-None]
+  dict({
+    'test_raw_1': 8,
+  })
+# ---
+# name: test_getNumIdentifiedPrecursors[diann-test_raw_1]
+  8
+# ---
+# name: test_getNumIdentifiedProteins[diann-None]
+  dict({
+    'test_raw_1': 3,
+  })
+# ---
+# name: test_getNumIdentifiedProteins[diann-test_raw_1]
+  3
+# ---
 # name: test_getTopTransitionGroupFeature[diann-test_raw_1-DYASIDAAPEER-2]
   TransitionGroupFeature(
     areaIntensity=21663.5,
@@ -17,7 +89,8 @@
   precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: DYASIDAAPEER>,
+  sequence: DYASIDAAPEER
+  software: DIA-NN>,
     leftBoundary=2421.63,
     precursor_charge=2,
     precursor_mz=None,
@@ -26,6 +99,7 @@
     qvalue=3.28317e-05,
     rightBoundary=2455.77,
     sequence='DYASIDAAPEER',
+    software='DIA-NN',
     toPandasDf="TransitionGroupFeature.toPandasDf(transitionGroupFeatureLst: List[ForwardRef('TransitionGroupFeature')]) -> pandas.core.frame.DataFrame",
   )
 # ---
@@ -48,7 +122,8 @@
   precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: DYASIDAAPEER>,
+  sequence: DYASIDAAPEER
+  software: DIA-NN>,
       leftBoundary=2421.63,
       precursor_charge=2,
       precursor_mz=None,
@@ -57,6 +132,7 @@
       qvalue=3.28317e-05,
       rightBoundary=2455.77,
       sequence='DYASIDAAPEER',
+      software='DIA-NN',
       toPandasDf="TransitionGroupFeature.toPandasDf(transitionGroupFeatureLst: List[ForwardRef('TransitionGroupFeature')]) -> pandas.core.frame.DataFrame",
     ),
   ])

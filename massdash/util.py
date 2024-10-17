@@ -69,6 +69,12 @@ def get_file_handler():
     file_handler.setFormatter(FORMATTER)
     return file_handler
 
+class MassDashLogger(logging.Logger):
+    def warning(self, msg):
+        super().warning(msg)
+        if st is not None and check_streamlit():
+            st.warning(msg)
+
 def get_logger(logger_name, log_level=logging.INFO):
     """
     Get a logger with the specified name.
@@ -80,6 +86,7 @@ def get_logger(logger_name, log_level=logging.INFO):
         logging.Logger: The logger object.
 
     """
+    logging.setLoggerClass(MassDashLogger)
     logger = logging.getLogger(logger_name)
     logger.setLevel(log_level) # better to have too much log than not enough
     logger.addHandler(get_console_handler())
@@ -206,15 +213,11 @@ def check_streamlit():
     use_streamlit : boolean
         True if code is run within streamlit, else False
     """
-    try:
-        from streamlit.runtime.scriptrunner import get_script_run_ctx
-        if not get_script_run_ctx():
-            use_streamlit = False
-        else:
-            use_streamlit = True
-    except ModuleNotFoundError:
-        use_streamlit = False
-    return use_streamlit
+    # st will be None 
+    if st is not None and st.runtime.exists():
+        return True
+    else:
+        return False
 
 def check_sqlite_table(con, table):
     """
@@ -561,3 +564,15 @@ def find_git_directory(start_path=None):
 
     # If .git is not found in any parent directory, return None
     return None
+
+# check if running in notebook see https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
+def in_notebook() -> bool:
+    try:
+        from IPython import get_ipython
+        if 'IPKernelApp' not in get_ipython().config:  # pragma: no cover
+            return False
+    except ImportError:
+        return False
+    except AttributeError:
+        return False
+    return True
