@@ -670,7 +670,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         return features[self.columns]
 
     def getTopTransitionGroupFeatureDf(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> pd.DataFrame:
-        columns = ['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'sequence', 'precursor_charge', 'software']
+        columns = self.columns #['filename', 'leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'sequence', 'precursor_charge', 'software']
         run_id = self._runIDFromRunName(run_basename_wo_ext)
         precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
         
@@ -681,7 +681,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
 
         features['sequence'] = fullpeptidename
         features['precursor_charge'] = charge
-        return features[['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'sequence', 'precursor_charge', 'software']]
+        return features[self.columns]
 
     def getTransitionGroupFeatures(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> List[TransitionGroupFeature]:
         run_id = self._runIDFromRunName(run_basename_wo_ext)
