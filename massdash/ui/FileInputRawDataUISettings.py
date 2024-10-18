@@ -52,6 +52,9 @@ class FileInputRawDataUISettings(BaseUISettings):
         st.sidebar.subheader("Input Raw file")
         self.raw_file_path_input = st.sidebar.text_input("Enter file path", raw_file_path, key='raw_data_file_path', help="Path to the raw file (*.mzML)")
 
+        st.sidebar.subheader("Input Feature file")
+        self.feature_file_path = st.sidebar.text_input("Enter file path", feature_file_path, key='raw_data_feature_file_path', help="Path to the feature file (*.osw / *.tsv)")
+
     def get_mzml_files(self, threads: int=1):
         """
         Given a path to a directory or a file, returns a list of full file paths to *.mzML files in the directory or the file itself.
