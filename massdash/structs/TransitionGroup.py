@@ -48,6 +48,9 @@ class TransitionGroup:
     def toPandasDf(self, separate=False) -> pd.DataFrame:
         """Convert the TransitionGroup to a Pandas DataFrame.
 
+        Args:
+            separate (bool, optional): If True, return separate DataFrames for precursor and transition data. Defaults to False.
+
         Returns:
             pd.DataFrame: DataFrame representation of the TransitionGroup.
         """

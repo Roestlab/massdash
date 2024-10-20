@@ -11,9 +11,9 @@ from pathlib import Path
 from .ResultsLoader import ResultsLoader
 # Structs
 from ..structs import TransitionGroup, TransitionGroupFeature
-from .access.OSWDataAccess import OSWDataAccess
+from .access import OSWDataAccess
 from .SpectralLibraryLoader import SpectralLibraryLoader
-from ..util import LOGGER
+from ..util import LOGGER, in_notebook
 
 from scipy.signal import savgol_filter, convolve
 from scipy.signal.windows import gaussian
@@ -40,21 +40,18 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
                 if isinstance(a, OSWDataAccess): 
                     self.libraryAccess = SpectralLibraryLoader(a.filename)
                     self.libraryAccess.load()
-        # I think the comment below was previously added, by mistake if not necessary then remove
-        #else:
-        #    self.libraryAccess = SpectralLibraryLoader(self.libraryAccess)
-        #    self.libraryAccess.load()
 
         ## overwrite run names since we are specifying data files
         self.runNames = [Path(f).stem for f in self.dataFiles]
         
     @abstractmethod
-    def loadTransitionGroups(self, pep_id: str, charge: int) -> Dict[str, TransitionGroup]:
+    def loadTransitionGroups(self, pep_id: str, charge: int, runNames: Union[None, str, List[str]]= None) -> Dict[str, TransitionGroup]:
         '''
         Loads the transition group for a given peptide ID and charge across all files
         Args:
             pep_id (str): Peptide ID
             charge (int): Charge
+            runNames (None | str | List[str]): Name of the run to extract the transition group from. If None, all runs are extracted. If str, only the specified run is extracted. If List[str], only the specified runs are extracted.
         Returns:
             dict[str, TransitionGroup]: Dictionary of TransitionGroups, with keys as filenames
         '''
@@ -87,8 +84,13 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
             bokeh.plotting.figure.Figure: Bokeh figure object
         '''
 
-        # Extract chromatogram data from the transitionGroup
+        # Initiate Plotting in Jupyter Notebook
+        if in_notebook():
+            from bokeh.plotting import output_notebook
+            output_notebook()
+
         precursorChroms, transitionChroms = transitionGroup.toPandasDf(separate=True)
+
         if include_ms1:
             to_plot = pd.concat([precursorChroms, transitionChroms])
         else:
@@ -119,3 +121,7 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         to_plot = to_plot.groupby('annotation').apply(apply_smoothing).reset_index(drop=True)
 
         to_plot.plot(x='rt', y='intensity', kind='chromatogram', by='annotation', backend='ms_bokeh', annotation_data=transitionGroupFeatures, width=width, **kwargs) 
+    
+    def __repr__(self):
+        tmp =  super().__repr__()
+        return tmp + f" dataFiles={self.dataFiles}"

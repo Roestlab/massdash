@@ -109,8 +109,8 @@ def test_getOSWAccessPtr(rsltsFiles, expected):
     else: # expected is OSWDataAccess
         assert isinstance(resultsLoader.getOSWAccessPtr(), expected)
 
-def test_loadPrecursorScoreDistribution(oswResultsLoader, snapshot_pandas):
-    assert snapshot_pandas == oswResultsLoader.loadPrecursorScoreDistribution()
+def test_loadPeakGroupScoreDistribution(oswResultsLoader, snapshot_pandas):
+    assert snapshot_pandas == oswResultsLoader.loadPeakGroupScoreDistribution()
 
 @pytest.mark.parametrize('context', ('global', 'run-specific', 'experiment-wide'))
 def test_loadPeptideScoreDistribution(oswResultsLoader, context, snapshot_pandas):

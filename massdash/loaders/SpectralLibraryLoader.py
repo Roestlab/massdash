@@ -8,8 +8,7 @@ from typing import List
 import pandas as pd
 
 # Loaders
-from .access.TransitionTSVDataAccess import TransitionTSVDataAccess
-from .access.TransitionPQPDataAccess import TransitionPQPDataAccess
+from .access import TransitionTSVDataAccess, TransitionPQPDataAccess
 # Structs
 from ..structs import TransitionGroupFeature
 # Utils

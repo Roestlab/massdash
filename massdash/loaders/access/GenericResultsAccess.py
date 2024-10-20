@@ -13,6 +13,9 @@ from ...structs.TransitionGroupFeature import TransitionGroupFeature
 from ...util import LOGGER
 
 class GenericResultsAccess(ABC):
+    """
+    Abstract class for accessing results from a generic results file.
+    """
     COLUMNS = ['leftBoundary', 'rightBoundary', 'areaIntensity', 'qvalue', 'consensusApex', 'consensusApexIntensity', 'precursor_charge', 'sequence', 'software']
     IM_COLUMNS = ['consensusApexIM']
     def __init__(self, filename: str, verbose: bool = False) -> None:

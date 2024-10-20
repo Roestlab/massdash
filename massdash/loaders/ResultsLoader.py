@@ -10,14 +10,6 @@ import pandas as pd
 from pathlib import Path 
 import numpy as np
 
-# Loaders
-from .SpectralLibraryLoader import SpectralLibraryLoader
-from .access.OSWDataAccess import OSWDataAccess
-from .access.ResultsTSVDataAccess import ResultsTSVDataAccess
-# Structs
-from ..structs import TransitionGroup, TransitionGroupFeatureCollection, TopTransitionGroupFeatureCollection
-# Utils
-from ..util import LOGGER
 # Plotting
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, FactorRange, Whisker, Legend, HoverTool
@@ -26,10 +18,26 @@ from bokeh.layouts import gridplot
 from itertools import cycle
 import plotly.express as px
 
+# Loaders
+from .SpectralLibraryLoader import SpectralLibraryLoader
+from .access import OSWDataAccess, ResultsTSVDataAccess
+# Structs
+from ..structs import TransitionGroup, TransitionGroupFeatureCollection, TopTransitionGroupFeatureCollection
+# Utils
+from ..util import LOGGER
+
 class ResultsLoader:
     ''' 
-    Class for loading Results files. Base class for GenericLoader
+    Class for loading Results files. Base class for GenericRawDataLoader
+    Abstract class for loading raw chromatogram data
+    
+    Attributes:
+        rsltsFile: (str) The path to the report file (DIANN-TSV or OSW)
+        dataFiles: (str/List[str]) The path to the mzML file(s)
+        verbose: (bool) Whether to print debug messages
+        mode: (str) Whether to run in module or GUI mode
     '''
+
     def __init__(self, 
                  rsltsFile: Union[str, List[str]], 
                  libraryFile: str = None,
@@ -203,15 +211,17 @@ class ResultsLoader:
         '''
         Load the precursor identifications
 
-        **kwargs: Additional arguments to be passed to the getIdentifiedPrecursors function
+        Args:
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPrecursors` function
         '''
         return {i.getSoftware():i.getIdentifiedPrecursors(**kwargs) for i in self.rsltsAccess}
     
     def loadNumIdentifiedPrecursors(self, **kwargs):
         '''
-        Load the number of precursor identifications
+        Load the precursor identifications
 
-        **kwargs: Additional arguments to be passed to the getIdentifiedPrecursors function
+        Args:
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getNumIdentifiedPrecursors` function
         '''
         return {i.getSoftware():i.getNumIdentifiedPrecursors(**kwargs) for i in self.rsltsAccess}
 
@@ -219,7 +229,8 @@ class ResultsLoader:
         '''
         Load the protein identifications
 
-        **kwargs: Additional arguments to be passed to the getIdentifiedProteins function
+        Args:
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedProteins` function
         '''
         return {i.getSoftware():i.getIdentifiedProteins(**kwargs) for i in self.rsltsAccess}
     
@@ -228,7 +239,7 @@ class ResultsLoader:
         Load the number of protein identifications
 
         Args:
-            **kwargs: Additional arguments to be passed to the getIdentifiedProteins function
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedProteins` function
         '''
         return {i.getSoftware():i.getNumIdentifiedProteins(**kwargs) for i in self.rsltsAccess}
 
@@ -236,7 +247,8 @@ class ResultsLoader:
         '''
         Load the peptide identifications
 
-        **kwargs: Additional arguments to be passed to the getIdentifiedPeptides function
+        Args:
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPeptides` function
         '''
         return {i.getSoftware():i.getIdentifiedPeptides(**kwargs) for i in self.rsltsAccess}
     
@@ -245,7 +257,7 @@ class ResultsLoader:
         Load the number of peptide identifications
 
         Args:
-            **kwargs: Additional arguments to be passed to the getIdentifiedPeptides function
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPeptides` function
         '''
         return {i.getSoftware():i.getNumIdentifiedPeptides(**kwargs) for i in self.rsltsAccess}
     
@@ -261,13 +273,12 @@ class ResultsLoader:
         load a quantification matrix
 
         Args:
-            **kwargs: Additional arguments to be passed to the getPrecursorIdentifications function
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPrecursorIntensities` function
         
         Returns:
             DataFrame: DataFrame containing the quantification matrix, columns are the software tool, index are the precursor and the values are the intensities
         '''
         tmp =  pd.concat({ i.getSoftware():i.getIdentifiedPrecursorIntensities(**kwargs) for i in self.rsltsAccess }).drop_duplicates()
-        print(tmp)
         return (tmp
                 .drop_duplicates()
                 .reset_index()
@@ -279,7 +290,7 @@ class ResultsLoader:
         Compute the CV (coefficient of variation) of the identified precursors
 
         Args:
-            **kwargs: Additional arguments to be passed to the getPrecursorIdentifications function
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getPrecursorCVs` function
         
         Returns:
             DataFrame: DataFrame containing the CV of the identified precursors, columns are the software tool, index are the precursor and the values are the CV
@@ -291,20 +302,23 @@ class ResultsLoader:
                 .rename(columns={'level_0':'Software'})
                 .pivot(index='Precursor', columns=['Software'], values='CV'))
 
-    def plotIdentifications(self, aggregate, level: Literal['precursor', 'peptide', 'protein'], **kwargs) -> None:
+    def plotIdentifications(self, aggregate, level: Literal['precursor', 'peptide', 'protein'], height=450, width=600, **kwargs) -> None:
         '''
         Plot the identifications
 
         Args:
             aggregate: (str) The level of aggregation for the plot, can be 'precursor', 'peptide' or 'protein'
-            **kwargs: Additional arguments to be passed to the getPrecursorIdentifications function
+            level: (str) The level of identifications to plot, can be 'precursor', 'peptide' or 'protein'
+            height: (int) The height of the plot
+            width: (int) The width of the plot
+            **kwargs: Additional arguments to be passed to the getIdentification function for this level (e.g. :func:`~massdash.loaders.access.GenericResultsAccess.getNumIdentifiedPrecursors`) 
         '''
         if level == 'precursor':
             counts = self.loadNumIdentifiedPrecursors(**kwargs)
         elif level == 'peptide':
             counts = self.loadNumIdentifiedPeptides(**kwargs)
         elif level == 'protein':
-            counts = self.loadNumIdentifiedPrecursors(**kwargs)
+            counts = self.loadNumIdentifiedProteins(**kwargs)
         else:
             raise Exception(f"Error: Unsupported level {level}, supported levels are 'precursor', 'peptide' or 'protein'")
 
@@ -316,7 +330,7 @@ class ResultsLoader:
             std = { s:np.std(list(r.values())) for s, r in counts.items() }
 
             # Create the figure
-            p = figure(x_range=FactorRange(*self.software),plot_height=450, plot_width=600)
+            p = figure(x_range=FactorRange(*self.software),plot_height=height, plot_width=width)
 
             # Axis titles
             p.xaxis.axis_label = "Software"
@@ -327,11 +341,10 @@ class ResultsLoader:
 
             legend_items = []
             for software in self.software:
-                std_upper = median[software] + std[software]  # TODO should this /2 
-                std_lower = median[software] - std[software] # TODO should this /2 
+                std_upper = median[software] + std[software] / 2 
+                std_lower = median[software] - std[software]  / 2
 
                 # Create a ColumnDataSource from the data
-                print(median[software])
                 source = ColumnDataSource(data=dict(x=[software], y=[median[software]], upper=[std_upper], lower=[std_lower]))
 
                 # Get the next color from the cycle
@@ -412,9 +425,11 @@ class ResultsLoader:
     def plotQuantifications(self, **kwargs) -> None:
         '''
         Plot the quantifications
+
+        Args:
+            **kwargs: Additional arguments to be passed to :func:`~massdash.loaders.ResultsLoader.loadQuantificationMatrix` function 
         '''
         quantMatrix = self.loadQuantificationMatrix(**kwargs).melt(value_name='Intensity')
-        print(quantMatrix['Software'])
 
         # Take the log2 of the Intensity column
         quantMatrix['log2_intensity'] = np.log2(quantMatrix['Intensity'])
@@ -439,7 +454,7 @@ class ResultsLoader:
         Plot the CV
 
         Args:
-            **kwargs: Additional arguments to be passed to the getPrecursorIdentifications function
+            **kwargs: Additional arguments to be passed to the :func:`~massdash.loaders.access.GenericResultsAccess.getPrecursorCVs` function
         '''
         # Compute coefficient of variation
         df = self.computeCV(**kwargs).melt(value_name='CV')
@@ -461,27 +476,18 @@ class ResultsLoader:
         
         p.update_xaxes(type='category')
         return p
-    
-    @staticmethod
-    def _flattenDict(d: Dict[str, Dict[str, set]]) -> Dict[str,set]:
-        '''
-        Flatten a dictionary of dictionaries
-        Helper for plotUpset
-        '''
-        out = {}
-        for k1,v1 in d.items():
-            for k2,v2 in v1.items():
-                out[f'{k2} ({k1})'] = v2
-        return out
-
+   
     def plotUpset(self, level= Literal['precursor', 'peptide', 'protein'], **kwargs):
         """
         Create an UpSet plot showing the intersection of ModifiedPeptideSequence's between entries
         (with unique ModifiedPeptideSequence across runNames)
+
+        Args:
+            level: (str) The level of identifications to plot, can be 'precursor', 'peptide' or 'protein'
+            **kwargs: Additional arguments to be passed to the underlying getIdentified function (e.g. :func:`~massdash.loaders.access.GenericResultsAccess.getIdentifiedPrecursors` for precursor level)
         """
         import upsetplot
         import matplotlib.pyplot as plt
-        from io import BytesIO
 
         if level == 'precursor':
             identifications = self.loadIdentifiedPrecursors(**kwargs)
@@ -529,7 +535,7 @@ class ResultsLoader:
 
         return self._oswAccess
 
-    def loadPrecursorScoreDistribution(self):
+    def loadPeakGroupScoreDistribution(self):
         return self.loadScoreDistribution(score_table='SCORE_MS2', score='Score')
     
     def loadPeptideScoreDistribution(self, context: Literal['run-specific', 'experiment-wide', 'global'] = None):
@@ -543,7 +549,7 @@ class ResultsLoader:
         Loads score distribution for a given file
 
         Args:
-            **kwargs: kwargs to pass to the getScoreDistribution function, score_table and score must be specified
+            **kwargs: kwargs to pass to the :func:`~massdash.loaders.access.GenericResultsAccess.getScoreDistribution function`, score_table and score must be specified
 
         Returns:
             pd.DataFrame: DataFrame with columns: Decoy, Score, Run
@@ -566,8 +572,20 @@ class ResultsLoader:
         else:
             return {}
   
+    @staticmethod
+    def _flattenDict(d: Dict[str, Dict[str, set]]) -> Dict[str,set]:
+        '''
+        Flatten a dictionary of dictionaries
+        Helper for plotUpset
+        '''
+        out = {}
+        for k1,v1 in d.items():
+            for k2,v2 in v1.items():
+                out[f'{k2} ({k1})'] = v2
+        return out
+
     def __str__(self):
         return f"{__class__.__name__}: rsltsFile={self.rsltsFile}"
 
     def __repr__(self):
-        return f"{__class__.__name__}: rsltsFile={self.rsltsFile}"
+        return f"{__class__.__name__}: rsltsFile={self.rsltsFile}, runNames={self.runNames}"

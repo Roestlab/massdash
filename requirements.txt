@@ -209,7 +209,7 @@ pillow==10.4.0
     #   streamlit
 platformdirs==4.3.6
     # via jupyter-core
-plotly==5.18.0
+plotly==5.24.1
     # via massdash (pyproject.toml)
 pluggy==1.5.0
     # via pytest
