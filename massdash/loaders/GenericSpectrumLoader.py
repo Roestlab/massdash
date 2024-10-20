@@ -117,8 +117,8 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
         # load the transitionGroup for plotting
         transitionGroup = list(self.loadTransitionGroups(seq, charge, extraction_parameters, runNames=runName).values())[0]
         if includeBoundaries:
-            transitionGroupFeatures = self.loadTransitionGroupFeaturesDf(seq, charge)
+            transitionGroupFeatures = self.loadTransitionGroupFeaturesDf(seq, charge, runNames=runName)
         else:
             transitionGroupFeatures = None
-
+        
         return super().plotChromatogram(transitionGroup, transitionGroupFeatures, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, **kwargs)
