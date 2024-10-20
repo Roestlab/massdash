@@ -63,6 +63,13 @@ def test_loadTransitionGroupFeaturesDf(resultsLoader, precursor, charge, snapsho
     feature = feature.sort_values(by=['consensusApex'], ascending=True).reset_index(drop=True)
     assert snapshot_pandas == feature
 
+@pytest.mark.parametrize('run', ['test_raw_1', ['test_raw_1', 'test_raw_2'], 'test_raw_3']) #note that 'test_raw_3' is not in the data
+def test_loadTransitionGroupFeaturesDf_runSpecific(resultsLoader, precursor, charge, run, snapshot_pandas):
+    feature = resultsLoader.loadTransitionGroupFeaturesDf(precursor, charge, runNames=run)
+    print(feature)
+    feature = feature.sort_values(by=['consensusApex'], ascending=True).reset_index(drop=True)
+    assert snapshot_pandas == feature
+
 def test_loadSoftware(resultsLoader, snapshot):
     assert snapshot == resultsLoader._loadSoftware()
 
