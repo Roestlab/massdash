@@ -13,14 +13,33 @@ jobs:
         run: |
              pwd 
              $PWD/.github/workflows/scripts/update_init_version.py --file-path $PWD/massdash/__init__.py
+             $PWD/.github/workflows/scripts/update_pyproject.py --file-path pyproject.toml --init_file_path massdash/__init__.py
              $PWD/.github/workflows/scripts/version_update_script.py --file-path $PWD/README.md --init_file_path $PWD/massdash/__init__.py
              $PWD/.github/workflows/scripts/version_update_script.py --file-path $PWD/docs/Installation.rst --init_file_path $PWD/massdash/__init__.py
-      - name: Commit version update
+      - name: Commit __init__ version update
         uses: test-room-7/action-update-file@v1
         with:
               file-path: massdash/__init__.py
-              commit-msg: Bump patch version 
+              commit-msg: Bump patch version in __init__.py
               github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit version update for pyproject.toml
+        uses: test-room-7/action-update-file@v1
+        with:
+          file-path: pyproject.toml
+          commit-msg: Bump patch version in pyproject.toml
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit version update for README.md
+        uses: test-room-7/action-update-file@v1
+        with:
+          file-path: README.md
+          commit-msg: Bump patch version in README.md
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit version update for Installation.rst
+        uses: test-room-7/action-update-file@v1
+        with:
+          file-path: docs/Installation.rst
+          commit-msg: Bump patch version in Installation.rst
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v3
       - name: Create new patch release
         run: $PWD/.github/workflows/scripts/release.py
