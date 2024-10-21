@@ -249,7 +249,7 @@ pymsgbox==1.0.9
     # via pyautogui
 pyopenms==3.2.0
     # via massdash (pyproject.toml)
-pyparsing==3.1.4
+pyparsing==3.2.0
     # via matplotlib
 pyperclip==1.9.0
     # via mouseinfo
