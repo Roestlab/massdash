@@ -84,10 +84,8 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
             bokeh.plotting.figure.Figure: Bokeh figure object
         '''
 
-        # Initiate Plotting in Jupyter Notebook
-        if in_notebook():
-            from bokeh.plotting import output_notebook
-            output_notebook()
+        from bokeh.plotting import output_notebook, show
+        output_notebook()
 
         precursorChroms, transitionChroms = transitionGroup.toPandasDf(separate=True)
 
@@ -120,7 +118,8 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
 
         to_plot = to_plot.groupby('annotation').apply(apply_smoothing).reset_index(drop=True)
 
-        to_plot.plot(x='rt', y='intensity', kind='chromatogram', by='annotation', backend='ms_bokeh', annotation_data=transitionGroupFeatures, width=width, **kwargs) 
+        fig = to_plot.plot(x='rt', y='intensity', kind='chromatogram', by='annotation', backend='ms_bokeh', annotation_data=transitionGroupFeatures, width=width, show_plot=False, **kwargs) 
+        show(fig) # for the documentation figures to render correctly need to call show() here 
     
     def __repr__(self):
         tmp =  super().__repr__()
