@@ -186,6 +186,7 @@ class InteractivePlotter(GenericPlotter):
         # Add peak boundaries
         i = 0
         legend_items = []
+        hover_renderers = []
         for idx, feature in enumerate(features):
             # skip features if outside of plot range
             if feature.leftBoundary > transitionGroup.transitionData[0].data.max() or feature.rightBoundary < transitionGroup.transitionData[0].data.min():
@@ -216,11 +217,13 @@ class InteractivePlotter(GenericPlotter):
 
                 # Add a point to the left border to attached the hover tool to
                 leftWidth_apex_point = p.circle(source=source, x='leftWidth', y='Intensity', name='leftWidth_apex_point', alpha=0) 
+                hover_renderers.append(leftWidth_apex_point)
+
 
                 i += 1
 
         # Create a HoverTool
-        hover = HoverTool(names=['leftWidth_apex_point'],
+        hover = HoverTool(renderers=hover_renderers,
             tooltips=[
                 ("Intensity", "@Intensity"),
                 ("Left Width", "@leftWidth{0.00}"),
