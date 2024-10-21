@@ -115,22 +115,37 @@ class ResultsLoader:
         '''
         pass
 
-    def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
+    def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int, runNames: Union[str, None, List[str]] = None) -> pd.DataFrame:
         '''
         Loads a TransitionGroupFeature object from the results file to a pandas dataframe
 
         Args:
             pep_id (str): Peptide ID
             charge (int): Charge
+            runNames (None | str | List[str]): Name of the run to extract the transition group from. If None, all runs are extracted. If str, only the specified run is extracted. If List[str], only the specified runs are extracted.
         
         Returns:
             DataFrame: DataFrame containing TransitionGroupObject information across all runs
         '''
-        out = {}
-        for d in self.runNames:
-            out[d] = pd.concat([ r.getTransitionGroupFeaturesDf(d, pep_id, charge) for r in self.rsltsAccess ])
-        
-        return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname'))
+        if runNames is None:
+            out = {}
+            for d in self.runNames:
+                out[d] = pd.concat([ r.getTransitionGroupFeaturesDf(d, pep_id, charge) for r in self.rsltsAccess ])
+            return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname')).drop_duplicates()
+        elif isinstance(runNames, str): # get features across all software for single run
+            out = [ r.getTransitionGroupFeaturesDf(runNames, pep_id, charge) for r in self.rsltsAccess ]
+            out = pd.concat(out).reset_index(drop=True).drop_duplicates()
+            out['runname'] = runNames
+            return out
+        elif isinstance(runNames, list): # get features across all software for multiple specified runs
+            out = []
+            for d in runNames: # NOTE: iterate through user specified runs not all run names
+                print(d)
+                tmp = {}
+                tmp[d] = pd.concat([ r.getTransitionGroupFeaturesDf(d, pep_id, charge) for r in self.rsltsAccess ])
+                out.append(pd.concat(tmp).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runname')).drop_duplicates())
+            
+            return pd.concat(out).reset_index(drop=True).drop_duplicates()
 
     def loadTransitionGroupFeatures(self, pep_id: str, charge: int, runNames: Union[str, List[str], None] = None) -> TransitionGroupFeatureCollection:
         """

@@ -23,6 +23,23 @@ from massdash.ui.MassDashGUI import MassDashGUI
 # Utils
 from massdash.util import LOGGER, get_download_folder, download_file, reset_app, open_page, close_app
 
+
+# Current streamlit version only supports bokeh 2.4.3
+# See work around: https://github.com/streamlit/streamlit/issues/5858#issuecomment-1482042533
+# Support for Bokeh is currently on Streamlit's roadmap: https://roadmap.streamlit.app/
+def use_file_for_bokeh(chart, chart_height=1200):
+    import streamlit.components.v1 as components
+
+    from bokeh.plotting import save
+    from bokeh.io import output_file
+    output_file('bokeh_graph.html')
+    save(chart)
+    with open("bokeh_graph.html", 'r', encoding='utf-8') as f:
+        html = f.read()
+    components.html(html, height=chart_height, scrolling=True)
+# Update the bokeh_chart method to use the file workaround
+st.bokeh_chart = use_file_for_bokeh
+
 @click.command()
 # @click.argument('args', default='args', type=str)
 @click.option('--verbose', '-v', is_flag=True, help="Enables verbose mode.")
