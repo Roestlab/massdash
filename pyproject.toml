@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 module = "massdash"
 name = "massdash"
-version = "0.0.9.1"
+version = "0.1.0"
 authors = [{ name="Justin Sing", email="justincsing@gmai.com"} ]
 homepage = "https://github.com/Roestlab/massdash"
 description = "A visualization and data exploration platform for Data-Independent Acquisition mass spectrometry data"
