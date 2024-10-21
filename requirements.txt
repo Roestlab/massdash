@@ -30,7 +30,7 @@ cachetools==5.5.0
     # via streamlit
 certifi==2024.8.30
     # via requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 click==8.1.7
     # via
