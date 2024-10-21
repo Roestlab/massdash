@@ -48,12 +48,12 @@ One Click Installation
 
 For those unfamilliar with commandline and only plan on using the GUI, a one click installation is also avaliable. Please see below for current releases.
 
-.. |installwindows| image:: https://img.shields.io/badge/install-windows-blue?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_windows.exe
-   :target: https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_windows.exe
-.. |installmacos| image::  https://img.shields.io/badge/install-macos-white?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_macos.pkg
-   :target: https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_macos.pkg
-.. |installubuntu| image:: https://img.shields.io/badge/install-ubuntu-purple?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_linux.deb 
-   :target: https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_linux.deb
+.. |installwindows| image:: https://img.shields.io/badge/install-windows-blue?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.10%2Fmassdash_windows.exe
+   :target: https://github.com/Roestlab/massdash/releases/download/v0.0.10/massdash_windows.exe
+.. |installmacos| image::  https://img.shields.io/badge/install-macos-white?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.10%2Fmassdash_macos.pkg
+   :target: https://github.com/Roestlab/massdash/releases/download/v0.0.10/massdash_macos.pkg
+.. |installubuntu| image:: https://img.shields.io/badge/install-ubuntu-purple?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.10%2Fmassdash_linux.deb 
+   :target: https://github.com/Roestlab/massdash/releases/download/v0.0.10/massdash_linux.deb
 .. |demoapp| image:: https://img.shields.io/badge/demo-massdash.streamlit.app-brightgreen?link=https%3A%2F%2Fmassdash-test.streamlit.app%2F
    :target: https://massdash.streamlit.app/
 
