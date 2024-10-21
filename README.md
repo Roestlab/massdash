@@ -32,9 +32,9 @@ Key Features Include:
 
 ## One Click Installation
 
-[![installwindows](https://img.shields.io/badge/install-windows-blue?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_windows.exe)](https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_windows.exe)
-[![installmacos](https://img.shields.io/badge/install-macos-white?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_macos.pkg)](https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_macos.pkg)
-[![installubuntu](https://img.shields.io/badge/install-ubuntu-purple?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.8%2Fmassdash_linux.deb)](https://github.com/Roestlab/massdash/releases/download/v0.0.8/massdash_linux.deb)
+[![installwindows](https://img.shields.io/badge/install-windows-blue?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.10%2Fmassdash_windows.exe)](https://github.com/Roestlab/massdash/releases/download/v0.0.10/massdash_windows.exe)
+[![installmacos](https://img.shields.io/badge/install-macos-white?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.10%2Fmassdash_macos.pkg)](https://github.com/Roestlab/massdash/releases/download/v0.0.10/massdash_macos.pkg)
+[![installubuntu](https://img.shields.io/badge/install-ubuntu-purple?link=https%3A%2F%2Fgithub.com%2FRoestlab%2Fmassdash%2Freleases%2Fdownload%2Fv0.0.10%2Fmassdash_linux.deb)](https://github.com/Roestlab/massdash/releases/download/v0.0.10/massdash_linux.deb)
 [![demoapp](https://img.shields.io/badge/demo-massdash.streamlit.app-brightgreen?link=https%3A%2F%2Fmassdash.streamlit.app%2F)](https://massdash.streamlit.app/)
 
 For a one-click installation, click on the corresponding badge corresponding to your operating system, or visit the [latest release page](https://github.com/Roestlab/massdash/releases/latest) and download the installer for your operating system.
