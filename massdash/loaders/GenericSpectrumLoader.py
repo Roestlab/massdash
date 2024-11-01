@@ -139,4 +139,8 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
         else:
             transitionGroupFeatures = None
         
+        # set title automatically (as peptide and charge state) if not set by user
+        if not 'title' in kwargs.keys():
+            kwargs['title'] = f"{seq}_{charge}"
+
         return super().plotChromatogram(transitionGroup, transitionGroupFeatures, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, **kwargs)

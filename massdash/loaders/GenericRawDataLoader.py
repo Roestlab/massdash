@@ -115,7 +115,6 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
 
             return group
 
-
         to_plot = to_plot.groupby('annotation').apply(apply_smoothing).reset_index(drop=True)
 
         fig = to_plot.plot(x='rt', y='intensity', kind='chromatogram', by='annotation', backend='ms_bokeh', annotation_data=transitionGroupFeatures, width=width, show_plot=False, **kwargs) 
