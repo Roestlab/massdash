@@ -95,6 +95,10 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
             labelBySoftware = transitionGroupFeatures['software'].nunique() > 1
             if transitionGroupFeatures.software is not None and labelBySoftware:
                 transitionGroupFeatures.rename(columns={'software':'name'}, inplace=True)
+            else: # if only one software tool used, label by q value
+                transitionGroupFeatures = transitionGroupFeatures.sort_values(by='qvalue')
+                transitionGroupFeatures['name'] = 'qValue: ' + transitionGroupFeatures['qvalue'].map(lambda x: f'{x:.2e}')
+                transitionGroupFeatures.rename(columns={'annotation':'name'}, inplace=True)
 
         def apply_smoothing(group):
             if smooth == 'savgol':
