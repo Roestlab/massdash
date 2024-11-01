@@ -89,15 +89,19 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         # format transitionGroupFeatures for plotting with pyopenms_viz
         if transitionGroupFeatures is not None:
             transitionGroupFeatures.rename(columns={'leftBoundary':'leftWidth', 'rightBoundary':'rightWidth', 'consensusApexIntensity':'apexIntensity'}, inplace=True)
+            
+            # sort by qvalue
+            transitionGroupFeatures = transitionGroupFeatures.sort_values(by='qvalue')
 
             # Determine the labels for the legend, this is dependent on software tool
             # if multiple software tools used, label by software
+
             labelBySoftware = transitionGroupFeatures['software'].nunique() > 1
             if transitionGroupFeatures.software is not None and labelBySoftware:
                 transitionGroupFeatures.rename(columns={'software':'name'}, inplace=True)
+                transitionGroupFeatures['name'] = transitionGroupFeatures['name'] + transitionGroupFeatures['qvalue'].map(lambda x: f' (qvalue={x:.2e})')
             else: # if only one software tool used, label by q value
-                transitionGroupFeatures = transitionGroupFeatures.sort_values(by='qvalue')
-                transitionGroupFeatures['name'] = 'qValue: ' + transitionGroupFeatures['qvalue'].map(lambda x: f'{x:.2e}')
+                transitionGroupFeatures['name'] = transitionGroupFeatures['sequence'] + transitionGroupFeatures['qvalue'].map(lambda x: f' (qvalue={x:.2e})')
                 transitionGroupFeatures.rename(columns={'annotation':'name'}, inplace=True)
 
         def apply_smoothing(group):
