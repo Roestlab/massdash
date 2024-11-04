@@ -86,7 +86,7 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
         # load the transitionGroup for plotting
         transitionGroup = list(self.loadTransitionGroups(seq, charge, runNames=runName).values())[0]
         if includeBoundaries:
-            transitionGroupFeatures = self.loadTransitionGroupFeaturesDf(seq, charge)
+            transitionGroupFeatures = self.loadTransitionGroupFeaturesDf(seq, charge, runNames=runName)
         else:
             transitionGroupFeatures = None
 
