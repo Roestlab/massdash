@@ -369,7 +369,7 @@ tornado==6.4.1
     #   ipykernel
     #   jupyter-client
     #   streamlit
-tqdm==4.67.0
+tqdm==4.67.1
     # via massdash (pyproject.toml)
 traitlets==5.14.3
     # via
