@@ -89,6 +89,7 @@ class ExtractedIonChromatogramAnalysisServer:
         """
         # Load data from the OSW file
         self.osw_data = OSWDataAccess(self.massdash_gui.file_input_settings.osw_file_path)
+        self.osw_data._initializeFeatureScoreHashtable()
 
         # Get and append q-values to the transition list
         self.get_transition_list()
