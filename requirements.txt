@@ -81,7 +81,7 @@ iniconfig==2.0.0
     # via pytest
 ipykernel==6.29.5
     # via massdash (pyproject.toml)
-ipython==8.29.0
+ipython==8.32.0
     # via ipykernel
 jedi==0.19.2
     # via ipython
