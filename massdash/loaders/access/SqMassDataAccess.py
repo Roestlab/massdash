@@ -62,12 +62,20 @@ class SqMassDataAccess:
         self.c = self.conn.cursor()
         self.filename = filename
         self.runName = str(Path(filename).stem)
+        self.createIndices()
+
+    def createIndices(self):
+        """
+        Create indices for the SQMass file
+        """
+        self.c.execute("CREATE INDEX IF NOT EXISTS idx_chrom_id ON CHROMATOGRAM(ID)")
+        self.c.execute("CREATE INDEX IF NOT EXISTS idx_data_native_id ON CHROMATOGRAM(NATIVE_ID)")
 
     def getPrecursorChromIDs(self, precursor_id):
         """
         Get the chromatogram IDs for a given precursor ID
         """
-        data = [row for row in self.c.execute(f"""SELECT ID, NATIVE_ID FROM CHROMATOGRAM WHERE NATIVE_ID LIKE '{precursor_id}_Precursor%'""")]
+        data = [row for row in self.c.execute(f"""SELECT ID, NATIVE_ID FROM CHROMATOGRAM WHERE NATIVE_ID GLOB '{precursor_id}_Precursor*'""")]
         return {"chrom_ids":[d[0] for d in data], "native_ids":[d[1] for d in data]}
 
 

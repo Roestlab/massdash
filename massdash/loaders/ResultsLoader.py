@@ -20,7 +20,7 @@ import plotly.express as px
 
 # Loaders
 from .SpectralLibraryLoader import SpectralLibraryLoader
-from .access import OSWDataAccess, ResultsTSVDataAccess
+from .access import OSWDataAccess, ResultsTSVDataAccess, ResultsParquetDataAccess
 # Structs
 from ..structs import TransitionGroup, TransitionGroupFeatureCollection, TopTransitionGroupFeatureCollection
 # Utils
@@ -72,6 +72,8 @@ class ResultsLoader:
                 self.rsltsAccess.append(OSWDataAccess(f, verbose=verbose, mode=mode))
             elif f.endswith('.tsv'):
                 self.rsltsAccess.append(ResultsTSVDataAccess(f, verbose=verbose))
+            elif f.endswith('.parquet'):
+                self.rsltsAccess.append(ResultsParquetDataAccess(f, verbose=verbose))
             else:
                 raise Exception(f"Error: Unsupported file type {f} or unsupported rsltsFileType {f}")
               
@@ -536,11 +538,11 @@ class ResultsLoader:
             self._oswAccessChecked = True
             oswAccessFound = False
             for i in self.rsltsAccess:
-                if not oswAccessFound and isinstance(i, OSWDataAccess):
+                if not oswAccessFound and ( isinstance(i, OSWDataAccess) or isinstance(i, ResultsParquetDataAccess) ):
                     oswAccessFound = True
                     self._oswAccess = i
                 elif oswAccessFound and isinstance(i, OSWDataAccess):
-                    LOGGER.exception("Multiple OSW files found, only one OSW file is currently supported")
+                    LOGGER.exception("Multiple OSW/parquet files found, only one OSW/parquet file is currently supported")
                     self._oswAccess = None
                     return None
                 else:
@@ -570,7 +572,7 @@ class ResultsLoader:
             pd.DataFrame: DataFrame with columns: Decoy, Score, Run
         """
 
-        if self.getOSWAccessPtr() is not None:
+        if self.getOSWAccessPtr() is not None and isinstance(self.getOSWAccessPtr(), OSWDataAccess):
             return self._oswAccess.getScoreTable(**kwargs)
         else:
             LOGGER.exception("No OSW file found, OSW file required for loading scoring distributions")
