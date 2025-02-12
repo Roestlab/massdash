@@ -58,18 +58,26 @@ from ...util import check_sqlite_column_in_table, check_sqlite_table
 class SqMassDataAccess:
 
     def __init__(self, filename):
+        self.checkValidSQL(filename)
         self.conn = sqlite3.connect(filename, check_same_thread=False)
         self.c = self.conn.cursor()
         self.filename = filename
         self.runName = str(Path(filename).stem)
         self.createIndices()
 
+    def checkValidSQL(self, filename):
+        if not filename.endswith("sqMass"):
+            raise ValueError("SqMassDataAccess expects a .sqMass file")
+
     def createIndices(self):
         """
         Create indices for the SQMass file
         """
-        self.c.execute("CREATE INDEX IF NOT EXISTS idx_chrom_id ON CHROMATOGRAM(ID)")
-        self.c.execute("CREATE INDEX IF NOT EXISTS idx_data_native_id ON CHROMATOGRAM(NATIVE_ID)")
+        idx_query = '''
+        CREATE INDEX IF NOT EXISTS idx_chrom_id ON CHROMATOGRAM(ID);
+        CREATE INDEX IF NOT EXISTS idx_data_native_id ON CHROMATOGRAM(NATIVE_ID);
+        '''
+        self.conn.executescript(idx_query)
 
     def getPrecursorChromIDs(self, precursor_id):
         """

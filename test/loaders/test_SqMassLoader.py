@@ -32,7 +32,7 @@ def snapshot_pandas(snapshot):
 def test_init_error():
     # if no .osw file is provided then throw an error because .sqMass file cannot be indexed
     with pytest.raises(ValueError):
-        SqMassLoader(rsltsFile=f"{TEST_PATH}/diann/report/test_diann_report_combined.tsv", dataFiles=f'{TEST_PATH}/openswath/xics/test_raw_1.mzML')
+        SqMassLoader(rsltsFile=f"{TEST_PATH}/diann/report/test_diann_report_combined.tsv", dataFiles=f'{TEST_PATH}/openswath/xics/test_raw_1.sqMass')
 
 @pytest.mark.parametrize('fullpeptidename,charge,runNames', [('AGAANIVPNSTGAAK', 3, None), ('INVALID', 0, None), ('AGAANIVPNSTGAAK', 3, 'test_raw_1'), ('AGAANIVPNSTGAAK', 3, ['test_raw_1', 'test_raw_2'])])
 def test_loadTransitionGroupFeature(loader, fullpeptidename, charge, runNames, snapshot):
