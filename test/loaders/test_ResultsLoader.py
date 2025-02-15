@@ -21,10 +21,12 @@ def snapshot_pandas(snapshot):
 #f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv",
     #[f"{TEST_PATH}/test_data/example_dia/diann/report/test_diann_report_combined.tsv", f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv"]
     # NOTE: with this PR dreamDIA is not supported
-@pytest.fixture(params=['openswath', 'diann1', 'combined'])
+@pytest.fixture(params=['openswath', 'diann1', 'openswath-parquet', 'combined'])
 def resultsLoader(request):
     if request.param == 'openswath':
         return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", libraryFile=None, verbose=False, mode='module')
+    elif request.param == 'openswath-parquet':
+        return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/parquet/test.parquet", libraryFile=None, verbose=False, mode='module')
     elif request.param == 'diann1':
         return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/diann/report/test_1_diann_report.tsv", libraryFile=None, verbose=False, mode='module')
     elif request.param == 'combined':
@@ -36,6 +38,10 @@ def resultsLoader(request):
 @pytest.fixture
 def oswResultsLoader():
     return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", libraryFile=None, verbose=False, mode='module')
+
+@pytest.fixture
+def oswResultsLoaderParquet():
+    return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/parquet/test.parquet", libraryFile=None, verbose=False, mode='module')
 
 @pytest.fixture(params=['AGAANIVPNSTGAAK', 'INVALID'])
 def precursor(request):
