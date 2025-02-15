@@ -72,6 +72,7 @@ class OSWDataAccess(GenericResultsAccess):
         """
         super().__init__(*args, **kwargs)
         self.conn = sqlite3.connect(self.filename, check_same_thread=False)
+        self.validateSQL()
         self.c = self.conn.cursor()
         
         # hashtable, each run is its own data 
@@ -83,6 +84,17 @@ class OSWDataAccess(GenericResultsAccess):
         if mode == 'gui':
             self.df = self.load_data()
     
+    def validateSQL(self):
+        """
+        Validate that connection is a true SQLite connection.
+
+        Returns:
+            None - throws an error if connection is not valid.
+        """
+        num_tables = len(self.conn.execute("SELECT * from sqlite_master where type='table'").fetchall())
+        if num_tables == 0:
+            raise ValueError(f"Connection {self.filename} is not a valid OSW SQLite connection, no tables found")
+
     @property
     @lru_cache(maxsize=None) # cache so only computed once
     def has_im(self) -> bool:
