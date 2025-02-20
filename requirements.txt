@@ -405,4 +405,3 @@ webencodings==0.5.1
     # via
     #   bleach
     #   tinycss2
-pyarrow==19.0.1
