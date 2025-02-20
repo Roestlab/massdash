@@ -91,6 +91,7 @@ Classes
    ResultsLoader
    MzMLDataLoader
    SqMassLoader
+   XICParquetDataLoader
    SpectralLibraryLoader
 
 :mod:`massdash.loaders.access`: Classes For Low Level Data Access 
@@ -132,7 +133,7 @@ Classes
 Abstract Classes
 ----------------
 
-.. automsummary::
+.. autosummary::
    :nosignatures:
    :toctree: generated/
    :template: class.rst
