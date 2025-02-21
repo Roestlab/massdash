@@ -128,6 +128,7 @@ Classes
    ResultsTSVDataAccess
    TransitionPQPDataAccess
    TransitionTSVDataAccess
+   XICParquetDataAccess
       
 
 Abstract Classes
