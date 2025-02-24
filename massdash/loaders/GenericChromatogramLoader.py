@@ -86,8 +86,12 @@ class GenericChromatogramLoader(GenericRawDataLoader, metaclass=ABCMeta):
         # load the transitionGroup for plotting
         transitionGroup = list(self.loadTransitionGroups(seq, charge, runNames=runName).values())[0]
         if includeBoundaries:
-            transitionGroupFeatures = self.loadTransitionGroupFeaturesDf(seq, charge)
+            transitionGroupFeatures = self.loadTransitionGroupFeaturesDf(seq, charge, runNames=runName)
         else:
             transitionGroupFeatures = None
+
+        # set title automatically (as peptide and charge state) if not set by user
+        if not 'title' in kwargs.keys():
+            kwargs['title'] = f"{seq}_{charge}"
 
         return super().plotChromatogram(transitionGroup, transitionGroupFeatures, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, **kwargs)
