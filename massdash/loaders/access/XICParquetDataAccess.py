@@ -11,6 +11,7 @@ from typing import Union
 
 # Structs
 from ...structs import TransitionGroup
+from ...util import get_base_stem
 
 class XICParquetDataAccess:
     '''
@@ -18,7 +19,7 @@ class XICParquetDataAccess:
     '''
     def __init__(self, filename):
         self.filename = filename
-        self.runName = str(Path(filename).stem)
+        self.runName = get_base_stem(filename) 
         self.parquet = pq.ParquetFile(filename)
         
         ## Read the index

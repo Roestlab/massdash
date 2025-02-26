@@ -11,7 +11,7 @@ from pathlib import Path
 from .ResultsLoader import ResultsLoader
 # Structs
 from ..structs import TransitionGroup, TransitionGroupFeature
-from ..util import LOGGER, in_notebook
+from ..util import LOGGER, in_notebook, get_base_stem
 
 from scipy.signal import savgol_filter, convolve
 from scipy.signal.windows import gaussian
@@ -34,7 +34,7 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
             self.dataFiles = dataFiles
 
         ## overwrite run names since we are specifying data files
-        self.runNames = [Path(f).stem for f in self.dataFiles]
+        self.runNames = [get_base_stem(f) for f in self.dataFiles]
 
     @abstractmethod
     def loadTransitionGroups(self, pep_id: str, charge: int, runNames: Union[None, str, List[str]]= None) -> Dict[str, TransitionGroup]:
