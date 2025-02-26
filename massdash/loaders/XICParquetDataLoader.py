@@ -20,7 +20,7 @@ from massdash.util import LOGGER
 class XICParquetDataLoader(GenericChromatogramLoader):
 
     ''' 
-    Class for loading Chromatograms and peak features from SqMass files and OSW files
+    Class for loading Chromatograms and peak features from DIA-NNs results and XIC parquet files
     Inherits from GenericChromatogramLoader
     '''
 
