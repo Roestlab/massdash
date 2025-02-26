@@ -26,7 +26,7 @@ def resultsLoader(request):
     if request.param == 'openswath':
         return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", verbose=False, mode='module')
     elif request.param == 'openswath-parquet':
-        return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/parquet/test.parquet", libraryFile=None, verbose=False, mode='module')
+        return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/parquet/test.parquet", verbose=False, mode='module')
     elif request.param == 'diann1':
         return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/diann/report/test_1_diann_report.tsv", verbose=False, mode='module')
     elif request.param == 'combined':
@@ -37,11 +37,11 @@ def resultsLoader(request):
 
 @pytest.fixture
 def oswResultsLoader():
-    return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", verbose=False, libraryFile=None, mode='module')
+    return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", verbose=False, mode='module')
 
 @pytest.fixture
 def oswResultsLoaderParquet():
-    return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/parquet/test.parquet", libraryFile=None, verbose=False, mode='module')
+    return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/parquet/test.parquet", verbose=False, mode='module')
 
 @pytest.fixture
 def oswResultsLoaderParquet():
