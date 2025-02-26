@@ -90,7 +90,7 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
 
         # format transitionGroupFeatures for plotting with pyopenms_viz
         if transitionGroupFeatures is not None:
-            transitionGroupFeatures.rename(columns={'leftBoundary':'leftWidth', 'rightBoundary':'rightWidth', 'consensusApexIntensity':'apexIntensity'}, inplace=True)
+            transitionGroupFeatures.rename(columns={'leftBoundary':'leftWidth', 'rightBoundary':'rightWidth', 'consensusApexIntensity':'apexIntensity', 'ModifiedPeptideSequence':'sequence', 'Qvalue':'qvalue'}, inplace=True)
             
             # sort by qvalue
             transitionGroupFeatures = transitionGroupFeatures.sort_values(by='qvalue')

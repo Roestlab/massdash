@@ -103,7 +103,7 @@ class ResultsParquetDataAccess(GenericResultsAccess):
         def decorator(func):
             @wraps(func)
             def wrapper(self, *args, **kwargs):
-                missing_columns = [col for col in optional_columns if col not in self.df.columns and col in self.reverseColumnMapping[col] in self.schema]
+                missing_columns = [col for col in optional_columns if col not in self.df.columns and self.reverseColumnMapping[col] in self.schema]
                 if len(missing_columns) > 0:
                     self.appendColumns(missing_columns)
                 return func(self, *args, **kwargs)
@@ -199,7 +199,7 @@ class ResultsParquetDataAccess(GenericResultsAccess):
         Loads a TransitionGroupFeature object from the results file to a pandas dataframe. Since there is only one feature this is the same as getTopTransitionGroupFeatureDf()
         '''
 
-        columns = self.FEATURE_REQUIRED_COLUMNS if not self.has_im else self.FEATURE_REQUIRED_COLUMNS + self.FEATURE_OPTIONAL_COLUMNS
+        columns = self.FEATURE_REQUIRED_COLUMNS if not self.has_im else self.FEATURE_REQUIRED_COLUMNS + self.FEATURE_OPTIONAL_COLUMNS + ['software']
         runname_exact = self.getExactRunName(runname)
         if runname_exact is None:
             return pd.DataFrame(columns=columns)
