@@ -10,12 +10,13 @@ import pyarrow.compute as pc
 from typing import Union
 
 # Structs
-from ...structs import TransitionGroup
+from ...structs import TransitionGroup, Chromatogram
 
 class XICParquetDataAccess:
     '''
     Class for accessing XIC Parquet files (DIA-NN output)
     '''
+    RT_MULTIPLIER = 60
     def __init__(self, filename):
         self.filename = filename
         self.runName = str(Path(filename).stem)
@@ -40,6 +41,8 @@ class XICParquetDataAccess:
         
         # fix annotation name for MS1
         out.loc[out['annotation'] == 'ms1', 'annotation'] = 'prec'
+
+        out['rt'] = out['rt'] * XICParquetDataAccess.RT_MULTIPLIER
 
         return out
     
@@ -66,9 +69,9 @@ class XICParquetDataAccess:
         precs = []
         for name, grp in grps:
             if name == 'ms1':
-                precs.append(TransitionGroup(grp['rt'].values, grp['value'].values, 'prec'))
+                precs.append(Chromatogram(grp['rt'].values * XICParquetDataAccess.RT_MULTIPLIER, grp['value'].values, 'prec'))
             else:
-                transitions.append(TransitionGroup(grp['rt'].values, grp['value'].values, name))
+                transitions.append(Chromatogram(grp['rt'].values * XICParquetDataAccess.RT_MULTIPLIER, grp['value'].values, name))
         
         return TransitionGroup(precs, transitions, pep_id, charge)
     
