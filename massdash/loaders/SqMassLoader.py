@@ -11,6 +11,7 @@ import pandas as pd
 
 # Loaders
 from .GenericChromatogramLoader import GenericChromatogramLoader
+from .ResultsLoader import ResultsLoader
 from .access import SqMassDataAccess
 # Structs
 from ..structs import TransitionGroup, TransitionGroupCollection
@@ -33,7 +34,7 @@ class SqMassLoader(GenericChromatogramLoader):
         self.oswAccess = self.getOSWAccessPtr()
         if self.oswAccess is None:
             raise ValueError("No OSW file found in SqMassLoader, OSW file required for parsing sqMass files")
-                
+    @ResultsLoader.cache_results
     def loadTransitionGroupsDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         transitionMetaInfo = self.oswAccess.getTransitionIDAnnotationFromSequence(pep_id, charge)
         precursor_id = self.oswAccess.getPrecursorIDFromPeptideAndCharge(pep_id, charge)
@@ -62,6 +63,7 @@ class SqMassLoader(GenericChromatogramLoader):
 
         return pd.concat(out).reset_index().drop('level_1', axis=1).rename(columns=dict(level_0='run'))
 
+    @ResultsLoader.cache_results
     def loadTransitionGroups(self, pep_id: str, charge: int, runNames: Union[None, str, List[str]] =None) -> Dict[str, TransitionGroupCollection]:
         '''
         Loads the transition group for a given peptide ID and charge across all files

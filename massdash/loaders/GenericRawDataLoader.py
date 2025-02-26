@@ -11,8 +11,6 @@ from pathlib import Path
 from .ResultsLoader import ResultsLoader
 # Structs
 from ..structs import TransitionGroup, TransitionGroupFeature
-from .access import OSWDataAccess
-from .SpectralLibraryLoader import SpectralLibraryLoader
 from ..util import LOGGER, in_notebook
 
 from scipy.signal import savgol_filter, convolve
@@ -35,15 +33,9 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         else:
             self.dataFiles = dataFiles
 
-        if self.libraryFile is None:
-            for a in self.rsltsAccess:
-                if isinstance(a, OSWDataAccess): 
-                    self.libraryAccess = SpectralLibraryLoader(a.filename)
-                    self.libraryAccess.load()
-
         ## overwrite run names since we are specifying data files
         self.runNames = [Path(f).stem for f in self.dataFiles]
-        
+
     @abstractmethod
     def loadTransitionGroups(self, pep_id: str, charge: int, runNames: Union[None, str, List[str]]= None) -> Dict[str, TransitionGroup]:
         '''
@@ -67,6 +59,7 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
                         gaussian_window: int = 11,
                         gaussian_sigma: float = 2,
                         width=800,
+                        allFeatures=True,
                         **kwargs) -> 'bokeh.plotting.figure.Figure':
         '''
         Plots a chromatogram for a transitionGroup and transitionGroupFeatures given peptide sequence and charge state for a given run
@@ -79,6 +72,7 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
             sgolay_polynomial_order (int, optional): Order of the polynomial to use for smoothing. Defaults to 3.
             sgolay_frame_length (int, optional): Frame length to use for smoothing. Defaults to 11.
             scale_intensity (bool, optional): Whether to scale the intensity of the chromatogram such that all chromatograms are individually normalized to 1. Defaults to False.
+            allFeatures (bool, optional): Whether to plot all features or just the top ranked feature. Defaults to True.
 
         Returns: 
             bokeh.plotting.figure.Figure: Bokeh figure object
@@ -97,12 +91,23 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
         # format transitionGroupFeatures for plotting with pyopenms_viz
         if transitionGroupFeatures is not None:
             transitionGroupFeatures.rename(columns={'leftBoundary':'leftWidth', 'rightBoundary':'rightWidth', 'consensusApexIntensity':'apexIntensity'}, inplace=True)
+            
+            # sort by qvalue
+            transitionGroupFeatures = transitionGroupFeatures.sort_values(by='qvalue')
 
             # Determine the labels for the legend, this is dependent on software tool
             # if multiple software tools used, label by software
+
             labelBySoftware = transitionGroupFeatures['software'].nunique() > 1
             if transitionGroupFeatures.software is not None and labelBySoftware:
                 transitionGroupFeatures.rename(columns={'software':'name'}, inplace=True)
+                transitionGroupFeatures['name'] = transitionGroupFeatures['name'] + transitionGroupFeatures['qvalue'].map(lambda x: f' (qvalue={x:.2e})')
+            else: # if only one software tool used, label by q value
+                transitionGroupFeatures['name'] = transitionGroupFeatures['sequence'] + transitionGroupFeatures['qvalue'].map(lambda x: f' (qvalue={x:.2e})')
+                transitionGroupFeatures.rename(columns={'annotation':'name'}, inplace=True)
+            
+            if not allFeatures:
+                transitionGroupFeatures = transitionGroupFeatures.head(1)
 
         def apply_smoothing(group):
             if smooth == 'savgol':
@@ -114,7 +119,6 @@ class GenericRawDataLoader(ResultsLoader, metaclass=ABCMeta):
                 pass
 
             return group
-
 
         to_plot = to_plot.groupby('annotation').apply(apply_smoothing).reset_index(drop=True)
 

@@ -9,20 +9,19 @@ from typing import Dict, List, Union, Literal, Optional
 import pandas as pd
 from pathlib import Path 
 import numpy as np
+from functools import wraps
 
 # Plotting
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, FactorRange, Whisker, Legend, HoverTool
 from bokeh.palettes import Category10
-from bokeh.layouts import gridplot
 from itertools import cycle
 import plotly.express as px
 
 # Loaders
-from .SpectralLibraryLoader import SpectralLibraryLoader
 from .access import OSWDataAccess, ResultsTSVDataAccess, ResultsParquetDataAccess
 # Structs
-from ..structs import TransitionGroup, TransitionGroupFeatureCollection, TopTransitionGroupFeatureCollection
+from ..structs import TransitionGroupFeatureCollection 
 # Utils
 from ..util import LOGGER
 
@@ -40,19 +39,18 @@ class ResultsLoader:
 
     def __init__(self, 
                  rsltsFile: Union[str, List[str]], 
-                 libraryFile: str = None,
                  verbose: bool=False, 
                  mode: Literal['module', 'gui'] = 'module'):
 
+        print("in results loader")
         # Attributes (set further down)
         self.rsltsAccess = []
-        self.libraryAccess = None
         self.runNames = None
         self.verbose = verbose
-        self.libraryFile = libraryFile
         self.software = None
         self._oswAccess = None
         self._oswAccessChecked = False
+        self.cache = {} # holds the cache of previously loaded peptides so do not have to load again
 
         if isinstance(rsltsFile, str):
             self.rsltsFile = [rsltsFile]
@@ -81,11 +79,6 @@ class ResultsLoader:
         self.runNames = self._inferRunNames()
         self.software = self._loadSoftware()
 
-        if self.libraryFile is not None:
-            self.libraryAccess = SpectralLibraryLoader(self.libraryFile)
-            self.libraryAccess.load()
-
-
     def _inferRunNames(self):
         '''
         Infer the run names from the results file
@@ -103,6 +96,21 @@ class ResultsLoader:
         '''
         return [i.getSoftware() for i in self.rsltsAccess]
 
+    def cache_results(func):
+        @wraps(func)
+        def wrapper(self, pep_id, charge, *args, **kwargs):
+            cache_key = (pep_id, charge)
+            result_type = func.__name__
+            if cache_key not in self.cache.keys():
+                self.cache[cache_key] = {}
+                self.cache[cache_key][result_type] = func(self, pep_id, charge, *args, **kwargs)
+            elif result_type not in self.cache[cache_key].keys():
+                self.cache[cache_key][result_type] = func(self, pep_id, charge, *args, **kwargs)
+            else:
+                pass
+            return self.cache[cache_key][result_type]
+        return wrapper 
+
     @abstractmethod
     def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
@@ -117,6 +125,7 @@ class ResultsLoader:
         '''
         pass
 
+    @cache_results
     def loadTransitionGroupFeaturesDf(self, pep_id: str, charge: int, runNames: Union[str, None, List[str]] = None) -> pd.DataFrame:
         '''
         Loads a TransitionGroupFeature object from the results file to a pandas dataframe
@@ -149,6 +158,7 @@ class ResultsLoader:
             
             return pd.concat(out).reset_index(drop=True).drop_duplicates()
 
+    @cache_results
     def loadTransitionGroupFeatures(self, pep_id: str, charge: int, runNames: Union[str, List[str], None] = None) -> TransitionGroupFeatureCollection:
         """
         Load TransitionGroupFeature objects from the results file for the given peptide precursor
@@ -185,6 +195,7 @@ class ResultsLoader:
             raise ValueError("runName must be none, a string or list of strings")
         return out
     
+    @cache_results
     def loadTopTransitionGroupFeatureDf(self, pep_id: str, charge: int) -> pd.DataFrame:
         '''
         Loads a pandas dataframe of TransitionGroupFeatures across all runs 
@@ -202,6 +213,7 @@ class ResultsLoader:
         
         return pd.concat(out).reset_index().drop(columns='level_1').rename(columns=dict(level_0='runName'))
 
+    @cache_results
     def loadTopTransitionGroupFeature(self, pep_id: str, charge: int) -> TransitionGroupFeatureCollection:
         '''
         Loads a PeakFeature object from the results file

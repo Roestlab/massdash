@@ -11,6 +11,7 @@ from .MzMLDataLoader import MzMLDataLoader
 from .ResultsLoader import ResultsLoader
 from .SpectralLibraryLoader import SpectralLibraryLoader
 from .SqMassLoader import SqMassLoader
+from .XICParquetDataLoader import XICParquetDataLoader
 
 __all__ = [ 
             "GenericChromatogramLoader",
@@ -18,4 +19,5 @@ __all__ = [
             "MzMLDataLoader", 
             "ResultsLoader",
             "SpectralLibraryLoader",
-            "SqMassLoader"]
+            "SqMassLoader",
+            "XICParquetDataLoader"]

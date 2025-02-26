@@ -235,7 +235,10 @@ def check_sqlite_table(con, table):
     result = con.execute('SELECT count(name) FROM sqlite_master WHERE type="table" AND name=?', (table,))
 
     if result.fetchone()[0] == 1:
-        table_present = True
+        # ensure the table is not empty
+        result = con.execute(f"SELECT COUNT(*) FROM {table}")
+        if result.fetchone()[0] > 0:
+            table_present = True
 
     return table_present
 

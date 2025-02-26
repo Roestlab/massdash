@@ -11,6 +11,8 @@ from typing import Dict, Optional, List, Union
 
 # Loader
 from .GenericRawDataLoader import GenericRawDataLoader
+from .SpectralLibraryLoader import SpectralLibraryLoader
+from .access import OSWDataAccess
 # Structs
 from ..structs import TransitionGroup, TargetedDIAConfig, FeatureMap
 
@@ -24,8 +26,24 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
         libraryFile: (str) The path to the library file (.tsv or .pqp)
     '''
     
-    def __init__(self, **kwargs):
+    def __init__(self, libraryFile=None, **kwargs):
         super().__init__(**kwargs)
+
+        self.libraryFile = libraryFile
+        self.libraryAccess = None
+
+        # If the library is not explicitly set, 
+        if self.libraryFile is not None:
+            self.libraryAccess = SpectralLibraryLoader(self.libraryFile)
+        else: # self.libraryFile is None:
+            for a in self.rsltsAccess:
+                if isinstance(a, OSWDataAccess): 
+                   self.libraryAccess = SpectralLibraryLoader(a.filename)
+        
+        # If library access is not set, then throw an error
+        if self.libraryAccess is None:
+            raise ValueError("If .osw file is not supplied, library file is required for MzMLDataLoader to perform targeted extraction")
+                   
 
     @abstractmethod
     def loadTransitionGroups(self, pep_id: str, charge: int, config: TargetedDIAConfig, runNames: Union[None,str,List[str]] = None) -> Dict[str, TransitionGroup]:
@@ -121,4 +139,8 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
         else:
             transitionGroupFeatures = None
         
+        # set title automatically (as peptide and charge state) if not set by user
+        if not 'title' in kwargs.keys():
+            kwargs['title'] = f"{seq}_{charge}"
+
         return super().plotChromatogram(transitionGroup, transitionGroupFeatures, include_ms1=include_ms1, smooth=smooth, sgolay_polynomial_order=sgolay_polynomial_order, sgolay_frame_length=sgolay_frame_length, **kwargs)

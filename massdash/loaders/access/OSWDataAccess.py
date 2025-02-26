@@ -72,17 +72,29 @@ class OSWDataAccess(GenericResultsAccess):
         """
         super().__init__(*args, **kwargs)
         self.conn = sqlite3.connect(self.filename, check_same_thread=False)
+        self.validateSQL()
         self.c = self.conn.cursor()
         
         # hashtable, each run is its own data 
-        self._initializePeptideHashtable()
         self._initializeRunHashtable()
         self._initializeValidScores()
-        self._initializeFeatureScoreHashtable()
         
+        self.featureScoreHash = None # only initialize if needed
+
         if mode == 'gui':
             self.df = self.load_data()
     
+    def validateSQL(self):
+        """
+        Validate that connection is a true SQLite connection.
+
+        Returns:
+            None - throws an error if connection is not valid.
+        """
+        num_tables = len(self.conn.execute("SELECT * from sqlite_master where type='table'").fetchall())
+        if num_tables == 0:
+            raise ValueError(f"Connection {self.filename} is not a valid OSW SQLite connection, no tables found")
+
     @property
     @lru_cache(maxsize=None) # cache so only computed once
     def has_im(self) -> bool:
@@ -118,15 +130,6 @@ class OSWDataAccess(GenericResultsAccess):
         self.runHashTable = pd.read_sql(stmt, self.conn)
         self.runHashTable['RUN_NAME'] = self.runHashTable['FILENAME'].apply(lambda x: Path(x).stem)
 
-    def _initializePeptideHashtable(self):
-        stmt = '''
-            SELECT MODIFIED_SEQUENCE, CHARGE, PRECURSOR_ID 
-            FROM PRECURSOR
-            INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
-            INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID'''
-        tmp = pd.read_sql(stmt, self.conn)
-        self.peptideHash = tmp.set_index(['MODIFIED_SEQUENCE', 'CHARGE'])
-    
     def _initializeFeatureScoreHashtable(self):
         if self.has_SCORE_MS2: 
             join_score_ms2 = "INNER JOIN SCORE_MS2 ON SCORE_MS2.FEATURE_ID = FEATURE.ID"
@@ -641,21 +644,20 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         return "OpenSWATH"
 
     def getPrecursorIDFromPeptideAndCharge(self, fullpeptidename: str, charge: int) -> int:
-        try:
-            ## depending on version of pandas this might return a series or number
-            # return self.peptideHash.loc[fullpeptidename, charge]['PRECURSOR_ID'].values[0]
+        stmt = f'''
+            SELECT PRECURSOR_ID 
+            FROM PRECURSOR
+            INNER JOIN PRECURSOR_PEPTIDE_MAPPING ON PRECURSOR_PEPTIDE_MAPPING.PRECURSOR_ID = PRECURSOR.ID
+            INNER JOIN PEPTIDE ON PEPTIDE.ID = PRECURSOR_PEPTIDE_MAPPING.PEPTIDE_ID WHERE MODIFIED_SEQUENCE = '{fullpeptidename}' AND CHARGE = {charge}
+        '''
+        result = self.conn.execute(stmt).fetchone()
 
-            out = self.peptideHash.loc[fullpeptidename, charge]['PRECURSOR_ID']
-
-            if isinstance(out, pd.Series):
-                return out.values[0]
-            else:
-                return out
-
-        except KeyError:
+        if result is not None:
+            return result[0]
+        else:
             print(f"Peptide {fullpeptidename} with charge {charge} not found.")
             return None
-
+ 
     def getTransitionGroupFeaturesDf(self, run_basename_wo_ext: str, fullpeptidename: str, charge: int) -> pd.DataFrame:
         run_id = self._runIDFromRunName(run_basename_wo_ext)
         precursor_id = self.getPrecursorIDFromPeptideAndCharge(fullpeptidename, charge)
@@ -1234,6 +1236,9 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
         Returns:
             pandas.DataFrame: The top ranking precursor feature.
         """
+        if self.featureScoreHash is None:
+            self._initializeFeatureScoreHashtable()
+
         # Check if fullpeptidename contains a unimod modification at the beginning of the sequence
         if fullpeptidename[0] == "(":
             # If there is a (UniMod:#) at the beginning of the sequence, add a period (.) at the front 

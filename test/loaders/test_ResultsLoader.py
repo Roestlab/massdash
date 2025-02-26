@@ -24,20 +24,24 @@ def snapshot_pandas(snapshot):
 @pytest.fixture(params=['openswath', 'diann1', 'openswath-parquet', 'combined'])
 def resultsLoader(request):
     if request.param == 'openswath':
-        return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", libraryFile=None, verbose=False, mode='module')
+        return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", verbose=False, mode='module')
     elif request.param == 'openswath-parquet':
         return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/parquet/test.parquet", libraryFile=None, verbose=False, mode='module')
     elif request.param == 'diann1':
-        return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/diann/report/test_1_diann_report.tsv", libraryFile=None, verbose=False, mode='module')
+        return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/diann/report/test_1_diann_report.tsv", verbose=False, mode='module')
     elif request.param == 'combined':
         return ResultsLoader(rsltsFile=[f"{TEST_PATH}/test_data/example_dia/diann/report/test_diann_report_combined.tsv", 
-                                        f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"], libraryFile=None, verbose=False, mode='module')
+                                        f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"], verbose=False, mode='module')
     else:
         raise ValueError(f"Invalid parameter: {request.param}")
 
 @pytest.fixture
 def oswResultsLoader():
-    return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", libraryFile=None, verbose=False, mode='module')
+    return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", verbose=False, libraryFile=None, mode='module')
+
+@pytest.fixture
+def oswResultsLoaderParquet():
+    return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/parquet/test.parquet", libraryFile=None, verbose=False, mode='module')
 
 @pytest.fixture
 def oswResultsLoaderParquet():
@@ -116,7 +120,7 @@ def test_computeCV(resultsLoader, snapshot_pandas):
         [[f"{TEST_PATH}/test_data/osw/ionMobilityTest.osw", f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"], None] # multiple osw files
 )  )
 def test_getOSWAccessPtr(rsltsFiles, expected):
-    resultsLoader = ResultsLoader(rsltsFile=rsltsFiles, libraryFile=None, verbose=False, mode='module')
+    resultsLoader = ResultsLoader(rsltsFile=rsltsFiles, verbose=False, mode='module')
     if expected is None:
         assert expected is resultsLoader.getOSWAccessPtr()
     else: # expected is OSWDataAccess

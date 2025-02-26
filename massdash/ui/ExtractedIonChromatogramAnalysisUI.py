@@ -52,8 +52,18 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
         if not self.transition_settings.include_decoys:
             self.transition_list.data = self.transition_list.data[self.transition_list.data["Decoy"] == 0]
         # Slider to filter transition list by q-value
-        self.transition_settings.q_value_threshold = st.sidebar.number_input(
-            "Q-value threshold",
+        cols = st.sidebar.columns(2)
+        self.transition_settings.q_value_threshold_min = cols[0].number_input(
+            "Min Q-value threshold",
+            min_value=0.0000,
+            max_value=1.0000,
+            value=0.0000,
+            step=0.0100,
+            format="%0.5f",  # Fix the format string here
+            help="Filter the transition list by q-value"
+        )
+        self.transition_settings.q_value_threshold_max = cols[1].number_input(
+            "Max Q-value threshold",
             min_value=0.0000,
             max_value=1.0000,
             value=0.0100,
@@ -61,7 +71,7 @@ class ExtractedIonChromatogramAnalysisUI(TransitionListUISettings):
             format="%0.5f",  # Fix the format string here
             help="Filter the transition list by q-value"
         )
-        self.transition_list.data = self.transition_list.data[self.transition_list.data["Qvalue"] <= self.transition_settings.q_value_threshold]
+        self.transition_list.data = self.transition_list.data[(self.transition_list.data["Qvalue"] <= self.transition_settings.q_value_threshold_max) & (self.transition_list.data["Qvalue"] >= self.transition_settings.q_value_threshold_min)]
         if self.transition_list.data.empty:
             st.error("Error: No transitions passed the q-value threshold! Increase the threshold.")
             st.stop()
