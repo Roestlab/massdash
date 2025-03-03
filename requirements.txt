@@ -20,7 +20,7 @@ beautifulsoup4==4.12.3
     # via nbconvert
 bleach==6.2.0
     # via nbconvert
-blinker==1.8.2
+blinker==1.9.0
     # via streamlit
 blosc2==2.7.1
     # via tables
