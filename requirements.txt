@@ -114,7 +114,7 @@ jupyter-core==5.7.2
     #   nbformat
 jupyterlab-pygments==0.3.0
     # via nbconvert
-kiwisolver==1.4.7
+kiwisolver==1.4.8
     # via matplotlib
 markdown-it-py==3.0.0
     # via rich
