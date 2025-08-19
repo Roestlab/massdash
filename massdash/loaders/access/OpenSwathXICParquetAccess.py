@@ -14,7 +14,6 @@ import base64
 import struct
 import zlib
 from pathlib import Path
-import pyarrow.compute as pc
 import pyarrow.dataset as ds
 
 # Structs
