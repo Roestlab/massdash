@@ -61,19 +61,33 @@ class OpenSwathXICParquetLoader(GenericChromatogramLoader):
 
         out = TransitionGroupCollection()
         
+        def _assembleTransitionGroup(t):
+            chroms = t.getChromatogramsFromSequenceAndCharge(pep_id, charge)
+            precursorChroms = [i for i in chroms if 'precursor' in  i.label.lower()]
+            transitionChroms = [i for i in chroms if 'precursor' not in  i.label.lower()]
+            if len(precursorChroms) == 0 and len(transitionChroms) == 0: # do not create a transition group if there are no chromatograms
+                return None
+            else:
+                return TransitionGroup(precursorChroms, transitionChroms, pep_id, charge)
+
         if runNames is None:
             for t in self.dataAccess:
-                out[t.runName] = t.getChromatogramsFromSequenceAndCharge(pep_id, charge)
+                out[t.runName] = _assembleTransitionGroup(t) 
         elif isinstance(runNames, str):
             t = self.dataAccess[self.runNames.index(runNames)]
-            out[runNames] = t.getChromatogramsFromSequenceAndCharge(pep_id, charge) 
+            out[runNames] = _assembleTransitionGroup(t)
         elif isinstance(runNames, list):
             out = TransitionGroupCollection()
             for r in runNames:
                 for t in self.dataAccess:
                     if t.runName == r:
-                        out[t.runName] = t.getChromatogramsFromSequenceAndCharge(pep_id, charge)
+                        out[t.runName] = _assembleTransitionGroup(t) 
         else:
             raise ValueError("runName must be none, a string or list of strings")
 
-        return out
+        # if there are no chromatograms, return none
+        if all([i is None for i in out.values()]):
+            LOGGER.warning(f"No chromatograms found for peptide {pep_id} with charge {charge} in any of the runs")
+            return None
+        else:
+            return out
