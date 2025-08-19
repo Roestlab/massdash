@@ -32,23 +32,32 @@ class OpenSwathXICParquetAccess:
         """
         Get chromatograms for a given peptide sequence and charge
         """
-        
-        df = self.parquet.filter(
-            pc.and_(
-                pc.equal(pc.field("SEQUENCE"), sequence),
-                pc.equal(pc.field("CHARGE"), charge)
+        df = self.parquet.scanner(
+            columns=['RT_DATA', 'INTENSITY_DATA', 'RT_COMPRESSION', 'INTENSITY_COMPRESSION', 'TRANSITION_ORDINAL', 'TRANSITION_TYPE', 'PRODUCT_CHARGE', 'NATIVE_ID'],
+            filter=( 
+                (ds.field("MODIFIED_SEQUENCE") == sequence) &
+                (ds.field("PRECURSOR_CHARGE") == charge)
             )
-        ).select(['RT_DATA', 'INTENSITY_DATA', 'RT_COMPRESSION', 'INTENSITY_COMPRESSION']).to_table().to_pandas()
+        ).to_table().to_pandas()
+
+        # Create an ANNOTATION column, is the annotation for transitions and the native ID for precursors
+        mask = ~df['PRODUCT_CHARGE'].isnull()
+        df.loc[mask, 'ANNOTATION'] = (df.loc[mask, 'TRANSITION_TYPE'] +
+                                       df.loc[mask, 'TRANSITION_ORDINAL'].astype(int).astype(str) + 
+                                       '^' + 
+                                       df.loc[mask, 'PRODUCT_CHARGE'].astype(int).astype(str))
+        df.loc[~mask, 'ANNOTATION'] = df.loc[~mask, 'NATIVE_ID']
 
         chroms = []
-        for row in df.iterrows():
-            rt_data = self._decodeArray(row['RT_DATA'], row['RT_COMPRESSION'])
-            intensity_data = self._decodeArray(row['INTENSITY_DATA'], row['INTENSITY_COMPRESSION'])
-            chroms.append(Chromatogram(rt_data, intensity_data, sequence))
+        for _, row in df.iterrows():
+            rt_data = OpenSwathXICParquetAccess._decodeArray(row['RT_DATA'], row['RT_COMPRESSION'])
+            intensity_data = OpenSwathXICParquetAccess._decodeArray(row['INTENSITY_DATA'], row['INTENSITY_COMPRESSION'])
+            chroms.append(Chromatogram(rt_data, intensity_data, row['ANNOTATION']))
 
         return chroms
-    
-    def _decodeArray(self, data, compr):
+
+    @staticmethod
+    def _decodeArray(data, compr):
         numpress_config = po.NumpressConfig()
         result = []
         if compr == 0:
@@ -57,7 +66,7 @@ class OpenSwathXICParquetAccess:
             tmp = zlib.decompress(data)
             return struct.unpack("<%sd" % (len(tmp) // 8), tmp)
         elif compr == 5:
-            tmp = bytearray( zlib.decompress(data) )
+            tmp = bytearray(zlib.decompress(data))
             if len(tmp) > 0:
                 numpress_config.setCompression('linear')
                 po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
@@ -75,7 +84,7 @@ class OpenSwathXICParquetAccess:
         else:
             raise Exception(f"Compression type {compr} not supported")
 
-    def getDataForChromatogramsDf(self, sequence: str, charge: int) -> pd.DataFrame:
+    def getChromatogramDfFromSequenceAndCharge(self, sequence: str, charge: int) -> pd.DataFrame:
         '''
         Get chromatogram data as a dataframe
         '''
@@ -84,120 +93,13 @@ class OpenSwathXICParquetAccess:
         for c in chroms:
             chroms_df.append(c.toPandasDf())
 
-        if len(c) == 0:
+        if len(chroms_df) == 0:
             return pd.DataFrame(columns=['rt', 'intensity', 'annotation'])
         else:
-            return pd.concat(c)
+            return pd.concat(chroms_df)
 
-    def getDataForChromatograms(self, ids: List[str], labels: List[str]) -> List[Chromatogram]:
-        """
-        Get 
-        Get data from multiple chromatograms chromatogram
-
-        - compression is one of 0 = no, 1 = zlib, 2 = np-linear, 3 = np-slof, 4 = np-pic, 5 = np-linear + zlib, 6 = np-slof + zlib, 7 = np-pic + zlib
-        - data_type is one of 0 = mz, 1 = int, 2 = rt
-        - data contains the raw (blob) data for a single data array
-        """
-
-        if len(ids) == 0:
-            return [ [ [0], [0] ] ]
-
-        res = self._getChromatogramsHelper(ids, labels)
-
-        ### Convert to chromatograms
-        ### match ids with labels
-        c = []
-        for l, val in zip(labels, res.values()):
-            c.append(Chromatogram(val[0], val[1], l))
-
-        return c
-
-    def getDataForChromatogramsFromNativeIdsDf(self, native_ids: List[str], labels: List[str]) -> pd.DataFrame:
-        '''
-        Get chromatogram data as a dataframe
-        '''
-        if len(native_ids) == 0:
-            return pd.DataFrame(columns=['rt', 'intensity', 'annotation'])
-
-        res = self._getChromatogramsHelperFromNativeIds(native_ids)
-
-        c = []
-        for l, val in zip(labels, res.values()):
-            c.append(Chromatogram(val[0], val[1], l).toPandasDf())
-
-        if len(c) == 0:
-            return pd.DataFrame(columns=['rt', 'intensity', 'annotation'])
-        else:
-            return pd.concat(c)
-
-    def getDataForChromatogramsFromNativeIds(self, native_ids: List, labels: List[str]) -> List[Chromatogram]:
-        """
-        Get data from multiple chromatograms chromatogram
-
-        - compression is one of 0 = no, 1 = zlib, 2 = np-linear, 3 = np-slof, 4 = np-pic, 5 = np-linear + zlib, 6 = np-slof + zlib, 7 = np-pic + zlib
-        - data_type is one of 0 = mz, 1 = int, 2 = rt
-        - data contains the raw (blob) data for a single data array
-        """
-
-        if len(native_ids) == 0:
-            return [ [ [0], [0] ] ]
-        
-        res = self._getChromatogramsHelperFromNativeIds(native_ids)
-
-        ### Convert to chromatograms
-        ### match ids with labels
-        c = []
-        for l, val in zip(labels, res.values()):
-            c.append(Chromatogram(val[0], val[1], l))
-
-        return c
-
-    def _returnDataForChromatogram(self, data):
-        # prepare result
-        chr_ids = [chr_id for chr_id, compr, data_type, d in data]
-        res = OrderedDict()
-        numpress_config = po.NumpressConfig()
-        for i in chr_ids:
-            res[i] = [None, None]
-
-
-        for chr_id, compr, data_type, d in data:
-            result = []
-
-            if compr == 1:
-                tmp = zlib.decompress(d)
-                result = struct.unpack("<%sd" % (len(tmp) // 8), tmp)
-
-            if compr == 5:
-                # tmp = [ord(q) for q in zlib.decompress(d)]
-                tmp = bytearray( zlib.decompress(d) )
-                if len(tmp) > 0:
-                    numpress_config.setCompression('linear')
-                    po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
-                else:
-                    result = [0]
-            if compr == 6:
-                # tmp = [ord(q) for q in zlib.decompress(d)]
-                tmp = bytearray( zlib.decompress(d) )
-                if len(tmp) > 0:
-                    numpress_config.setCompression('slof')
-                    po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
-                else:
-                    result = [0]
-
-            if len(result) == 0:
-                result = [ 0 ]
-            if data_type == 1:
-                res[chr_id][1] = result
-            elif data_type == 2:
-                res[chr_id][0] = result
-            else:
-                raise Exception("Only expected RT or Intensity data for chromatogram")
-
-        return res
-    
     def __str__(self):
-        return f"SqMassDataAccess(filename={self.filename})"
- 
+        return f"<OpenSwathXICParquetAccess(filename={self.filename})>"
+
     def __repr__(self):
-        return f"SqMassDataAccess(filename={self.filename})"
+        return f"OpenSwathXICParquetAccess(filename={self.filename})"
