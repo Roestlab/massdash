@@ -61,18 +61,25 @@ class OpenSwathXICParquetLoader(GenericChromatogramLoader):
 
         out = TransitionGroupCollection()
         
+        def _assembleTransitionGroup(t):
+            chroms = t.getChromatogramsFromSequenceAndCharge(pep_id, charge)
+            precursorChroms = [i for i in chroms if 'precursor' in  i.label.lower()]
+            transitionChroms = [i for i in chroms if 'precursor' not in  i.label.lower()]
+            t.getTransitionGroupFeaturesFromSequenceAndCharge(pep_id, charge)
+            return TransitionGroup(precursorChroms, transitionChroms, pep_id, charge)
+
         if runNames is None:
             for t in self.dataAccess:
-                out[t.runName] = t.getChromatogramsFromSequenceAndCharge(pep_id, charge)
+                out[t.runName] = _assembleTransitionGroup(t) 
         elif isinstance(runNames, str):
             t = self.dataAccess[self.runNames.index(runNames)]
-            out[runNames] = t.getChromatogramsFromSequenceAndCharge(pep_id, charge) 
+            out[runNames] = _assembleTransitionGroup(t)
         elif isinstance(runNames, list):
             out = TransitionGroupCollection()
             for r in runNames:
                 for t in self.dataAccess:
                     if t.runName == r:
-                        out[t.runName] = t.getChromatogramsFromSequenceAndCharge(pep_id, charge)
+                        out[t.runName] = _assembleTransitionGroup(t) 
         else:
             raise ValueError("runName must be none, a string or list of strings")
 
