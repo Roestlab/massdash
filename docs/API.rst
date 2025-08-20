@@ -125,6 +125,7 @@ Classes
    SqMassDataAccess
    MzMLDataAccess
    OSWDataAccess
+   OSWPQResultsAccess
    ResultsTSVDataAccess
    TransitionPQPDataAccess
    TransitionTSVDataAccess

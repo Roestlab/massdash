@@ -28,6 +28,42 @@ except ImportError:
 class OSWPQResultsAccess(GenericResultsAccess):
     """
     Class for accessing .oswpq directory containing precursors_features.parquet and transition_features.parquet files.
+    
+    The OSWPQResultsAccess class provides memory-efficient parsing of OpenSWATH results stored in Parquet format.
+    It uses PyArrow datasets for lazy evaluation, avoiding loading entire files into memory and enabling efficient
+    filtering and column projection at the parquet level.
+    
+    Parameters
+    ----------
+    filename : str
+        Path to the .oswpq directory containing the required parquet files
+    verbose : bool, optional
+        Enable verbose logging (default: False)
+        
+    Raises
+    ------
+    ValueError
+        If filename is not a directory
+    FileNotFoundError
+        If required parquet files are missing
+    RuntimeError
+        If parquet files cannot be loaded
+        
+    Notes
+    -----
+    The .oswpq directory must contain exactly these two files:
+    - precursors_features.parquet: Precursor-level features and scoring
+    - transition_features.parquet: Transition-level features and intensities
+    
+    This class implements lazy evaluation using PyArrow datasets when available,
+    with graceful fallback to pandas for environments without PyArrow.
+    
+    Examples
+    --------
+    >>> access = OSWPQResultsAccess('/path/to/results.oswpq')
+    >>> runs = access.getRunNames()
+    >>> precursors = access.getIdentifiedPrecursors(qvalue=0.01)
+    >>> has_im = access.has_im
     """
 
     def __init__(self, filename: str, verbose: bool = False) -> None:

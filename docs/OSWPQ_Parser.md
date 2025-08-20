@@ -33,7 +33,7 @@ from massdash.loaders.access.OSWPQResultsAccess import OSWPQResultsAccess
 # Direct access to OSWPQ data
 access = OSWPQResultsAccess('/path/to/results.oswpq')
 
-# Get identified precursors
+# Get identified precursors with efficient filtering
 precursors = access.getIdentifiedPrecursors(qvalue=0.01)
 
 # Get run names
@@ -41,6 +41,25 @@ runs = access.getRunNames()
 
 # Check if data contains ion mobility
 has_im = access.has_im
+```
+
+### Lazy Evaluation API
+
+The parser provides memory-efficient operations through lazy evaluation:
+
+```python
+# Efficient filtering applied at parquet level
+precursors = access.getIdentifiedPrecursors(
+    qvalue=0.01,           # Q-value threshold
+    run='specific_run',    # Optional run filter
+    precursorLevel=True    # Use precursor-level scoring
+)
+
+# Memory-efficient intensity retrieval
+intensities = access.getIdentifiedPrecursorIntensities(qvalue=0.01)
+
+# Lazy loading of transition group features
+features = access.getTransitionGroupFeatures('run1', 'PEPTIDE', 2)
 ```
 
 ## File Structure Requirements
@@ -133,16 +152,41 @@ except ValueError as e:
 
 ## Performance Considerations
 
-- Parquet files are loaded once during initialization
-- Large datasets are handled efficiently through pandas/PyArrow
-- Memory usage scales with the size of the feature tables
-- Filtering operations are performed in-memory for fast access
+### Memory-Efficient Lazy Evaluation
+
+The parser uses PyArrow datasets for memory-efficient lazy evaluation:
+
+- **Lazy Loading**: Parquet files are not loaded entirely into memory
+- **Efficient Filtering**: Filters applied at the parquet level using PyArrow compute
+- **Column Projection**: Only necessary columns are loaded for each operation
+- **Scalability**: Handles large-scale OpenSWATH results efficiently
+
+### Performance Benefits
+
+```python
+# Old approach - loads entire file
+self.precursors_df = pd.read_parquet(precursors_file)
+
+# New approach - lazy dataset with efficient querying
+self.precursors_dataset = pq.ParquetDataset(precursors_file)
+filtered_data = self._execute_precursor_query(
+    filters=[('SCORE_MS2_Q_VALUE', '<=', 0.01)],
+    columns=['MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE']
+)
+```
+
+- **Memory Usage**: No longer loads entire parquet files into memory
+- **Query Performance**: Filtering applied at parquet level using PyArrow compute
+- **Column Efficiency**: Only loads necessary columns for each operation
+- **Graceful Fallback**: Falls back to pandas if PyArrow is unavailable
 
 ## Dependencies
 
 - pandas >= 2.0
-- pyarrow >= 19.0
+- pyarrow >= 19.0 (optional, but recommended for optimal performance)
 - Python >= 3.10
+
+**Note**: PyArrow is optional but highly recommended. If PyArrow is not available, the parser will gracefully fall back to pandas-based loading with reduced performance for large files.
 
 ## Software Identification
 
