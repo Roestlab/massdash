@@ -4,6 +4,7 @@ massdash/loaders/ResultsLoader
 """
 
 from abc import ABC, abstractmethod
+import os
 from os.path import basename
 from typing import Dict, List, Union, Literal, Optional
 import pandas as pd
@@ -19,7 +20,7 @@ from itertools import cycle
 import plotly.express as px
 
 # Loaders
-from .access import OSWDataAccess, ResultsTSVDataAccess
+from .access import OSWDataAccess, ResultsTSVDataAccess, OSWPQResultsAccess
 # Structs
 from ..structs import TransitionGroupFeatureCollection 
 # Utils
@@ -70,6 +71,8 @@ class ResultsLoader:
                 self.rsltsAccess.append(OSWDataAccess(f, verbose=verbose, mode=mode))
             elif f.endswith('.tsv'):
                 self.rsltsAccess.append(ResultsTSVDataAccess(f, verbose=verbose))
+            elif f.endswith('.oswpq') or (os.path.isdir(f) and 'precursors_features.parquet' in os.listdir(f)):
+                self.rsltsAccess.append(OSWPQResultsAccess(f, verbose=verbose))
             else:
                 raise Exception(f"Error: Unsupported file type {f} or unsupported rsltsFileType {f}")
               
