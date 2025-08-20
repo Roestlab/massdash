@@ -16,14 +16,10 @@ from ...structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
 from ...util import LOGGER
 
-# Conditional import for pyarrow - fallback to pandas if not available
-try:
-    import pyarrow as pa
-    import pyarrow.parquet as pq
-    import pyarrow.compute as pc
-    PYARROW_AVAILABLE = True
-except ImportError:
-    PYARROW_AVAILABLE = False
+# Required imports for PyArrow
+import pyarrow as pa
+import pyarrow.parquet as pq
+import pyarrow.compute as pc
 
 class OSWPQResultsAccess(GenericResultsAccess):
     """
@@ -47,7 +43,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
     FileNotFoundError
         If required parquet files are missing
     RuntimeError
-        If parquet files cannot be loaded
+        If parquet files cannot be loaded or PyArrow is not available
         
     Notes
     -----
@@ -55,8 +51,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
     - precursors_features.parquet: Precursor-level features and scoring
     - transition_features.parquet: Transition-level features and intensities
     
-    This class implements lazy evaluation using PyArrow datasets when available,
-    with graceful fallback to pandas for environments without PyArrow.
+    This class requires PyArrow for lazy evaluation using PyArrow datasets.
     
     Examples
     --------
@@ -91,100 +86,44 @@ class OSWPQResultsAccess(GenericResultsAccess):
         
     def _initialize_datasets(self):
         """Initialize pyarrow datasets for lazy evaluation"""
-        if PYARROW_AVAILABLE:
-            try:
-                # Use pyarrow datasets for lazy loading
-                self.precursors_dataset = pq.ParquetDataset(self.precursors_file)
-                self.transitions_dataset = pq.ParquetDataset(self.transitions_file)
-                
-                # Cache schemas for metadata access
-                self._precursors_schema = self.precursors_dataset.schema
-                self._transitions_schema = self.transitions_dataset.schema
-                
-                LOGGER.info(f"Initialized lazy datasets for OSWPQ data: {self.filename}")
-                
-            except Exception as e:
-                LOGGER.warning(f"Failed to initialize pyarrow datasets, falling back to pandas: {e}")
-                self._fallback_to_pandas()
-        else:
-            LOGGER.warning("PyArrow not available, falling back to pandas for parquet reading")
-            self._fallback_to_pandas()
-    
-    def _fallback_to_pandas(self):
-        """Fallback to loading data with pandas (original implementation)"""
         try:
-            # Load full datasets (non-lazy fallback)
-            self.precursors_df = pd.read_parquet(self.precursors_file)
-            self.transitions_df = pd.read_parquet(self.transitions_file)
+            # Use pyarrow datasets for lazy loading
+            self.precursors_dataset = pq.ParquetDataset(self.precursors_file)
+            self.transitions_dataset = pq.ParquetDataset(self.transitions_file)
             
-            # Create helper columns for easier access
-            self.precursors_df['Precursor'] = (
-                self.precursors_df['MODIFIED_SEQUENCE'].astype(str) + 
-                self.precursors_df['PRECURSOR_CHARGE'].astype(str)
-            )
+            # Cache schemas for metadata access
+            self._precursors_schema = self.precursors_dataset.schema
+            self._transitions_schema = self.transitions_dataset.schema
             
-            LOGGER.info(f"Loaded {len(self.precursors_df)} precursor features and {len(self.transitions_df)} transition features")
+            LOGGER.info(f"Initialized lazy datasets for OSWPQ data: {self.filename}")
             
         except Exception as e:
-            raise RuntimeError(f"Failed to load parquet files: {e}")
-    
+            raise RuntimeError(f"Failed to initialize pyarrow datasets: {e}")
+
     def _execute_precursor_query(self, filters=None, columns=None):
         """Execute a query on the precursors dataset with optional filters and column selection"""
-        if PYARROW_AVAILABLE and self.precursors_dataset is not None:
-            try:
-                # Use pyarrow for efficient filtering and column selection
-                table = self.precursors_dataset.read(columns=columns, filters=filters)
-                df = table.to_pandas()
-                
-                # Add helper column if not already present
-                if 'Precursor' not in df.columns and 'MODIFIED_SEQUENCE' in df.columns and 'PRECURSOR_CHARGE' in df.columns:
-                    df['Precursor'] = (
-                        df['MODIFIED_SEQUENCE'].astype(str) + 
-                        df['PRECURSOR_CHARGE'].astype(str)
-                    )
-                
-                return df
-            except Exception as e:
-                LOGGER.warning(f"PyArrow query failed, falling back to pandas: {e}")
-                # Fall back to pandas filtering
-                return self._pandas_precursor_query(filters, columns)
-        else:
-            # Use pandas fallback
-            return self._pandas_precursor_query(filters, columns)
-    
-    def _pandas_precursor_query(self, filters=None, columns=None):
-        """Pandas-based filtering fallback"""
-        if not hasattr(self, 'precursors_df'):
-            self._fallback_to_pandas()
-        
-        df = self.precursors_df
-        
-        # Apply filters if provided (simplified pandas filtering)
-        if filters:
-            for filter_expr in filters:
-                if len(filter_expr) == 3:
-                    col, op, value = filter_expr
-                    if col in df.columns:
-                        if op == '<=':
-                            df = df[df[col] <= value]
-                        elif op == '==':
-                            df = df[df[col] == value]
-                        elif op == '!=':
-                            df = df[df[col] != value]
-        
-        # Select columns if specified
-        if columns:
-            available_columns = [col for col in columns if col in df.columns]
-            if available_columns:
-                df = df[available_columns]
-        
-        return df
+        try:
+            # Use pyarrow for efficient filtering and column selection
+            table = self.precursors_dataset.read(columns=columns, filters=filters)
+            df = table.to_pandas()
+            
+            # Add helper column if not already present
+            if 'Precursor' not in df.columns and 'MODIFIED_SEQUENCE' in df.columns and 'PRECURSOR_CHARGE' in df.columns:
+                df['Precursor'] = (
+                    df['MODIFIED_SEQUENCE'].astype(str) + 
+                    df['PRECURSOR_CHARGE'].astype(str)
+                )
+            
+            return df
+        except Exception as e:
+            raise RuntimeError(f"PyArrow query failed: {e}")
+
 
     @property
     def has_im(self) -> bool:
         """Check if the data contains ion mobility information"""
         # Check schema first if available
-        if PYARROW_AVAILABLE and self._precursors_schema is not None:
+        if self._precursors_schema is not None:
             im_columns = ['EXP_IM', 'FEATURE_MS1_EXP_IM', 'FEATURE_MS2_EXP_IM']
             schema_columns = [field.name for field in self._precursors_schema]
             return any(col in schema_columns for col in im_columns)
