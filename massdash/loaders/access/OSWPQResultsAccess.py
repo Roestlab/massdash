@@ -16,6 +16,15 @@ from ...structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
 from ...util import LOGGER
 
+# Conditional import for pyarrow - fallback to pandas if not available
+try:
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    import pyarrow.compute as pc
+    PYARROW_AVAILABLE = True
+except ImportError:
+    PYARROW_AVAILABLE = False
+
 class OSWPQResultsAccess(GenericResultsAccess):
     """
     Class for accessing .oswpq directory containing precursors_features.parquet and transition_features.parquet files.
@@ -24,29 +33,53 @@ class OSWPQResultsAccess(GenericResultsAccess):
     def __init__(self, filename: str, verbose: bool = False) -> None:
         super().__init__(filename, verbose)
         self.filename = filename
-        self.precursors_df = None
-        self.transitions_df = None
+        self.precursors_dataset = None
+        self.transitions_dataset = None
+        self._precursors_schema = None
+        self._transitions_schema = None
         
         # Validate that filename is a directory containing required files
         if not os.path.isdir(filename):
             raise ValueError(f"OSWPQResultsAccess requires a directory, got: {filename}")
         
-        precursors_file = os.path.join(filename, 'precursors_features.parquet')
-        transitions_file = os.path.join(filename, 'transition_features.parquet')
+        self.precursors_file = os.path.join(filename, 'precursors_features.parquet')
+        self.transitions_file = os.path.join(filename, 'transition_features.parquet')
         
-        if not os.path.exists(precursors_file):
-            raise FileNotFoundError(f"Required file not found: {precursors_file}")
-        if not os.path.exists(transitions_file):
-            raise FileNotFoundError(f"Required file not found: {transitions_file}")
+        if not os.path.exists(self.precursors_file):
+            raise FileNotFoundError(f"Required file not found: {self.precursors_file}")
+        if not os.path.exists(self.transitions_file):
+            raise FileNotFoundError(f"Required file not found: {self.transitions_file}")
         
-        # Load the parquet files
-        self._load_data(precursors_file, transitions_file)
+        # Initialize lazy datasets
+        self._initialize_datasets()
         
-    def _load_data(self, precursors_file: str, transitions_file: str):
-        """Load the parquet files into dataframes"""
+    def _initialize_datasets(self):
+        """Initialize pyarrow datasets for lazy evaluation"""
+        if PYARROW_AVAILABLE:
+            try:
+                # Use pyarrow datasets for lazy loading
+                self.precursors_dataset = pq.ParquetDataset(self.precursors_file)
+                self.transitions_dataset = pq.ParquetDataset(self.transitions_file)
+                
+                # Cache schemas for metadata access
+                self._precursors_schema = self.precursors_dataset.schema
+                self._transitions_schema = self.transitions_dataset.schema
+                
+                LOGGER.info(f"Initialized lazy datasets for OSWPQ data: {self.filename}")
+                
+            except Exception as e:
+                LOGGER.warning(f"Failed to initialize pyarrow datasets, falling back to pandas: {e}")
+                self._fallback_to_pandas()
+        else:
+            LOGGER.warning("PyArrow not available, falling back to pandas for parquet reading")
+            self._fallback_to_pandas()
+    
+    def _fallback_to_pandas(self):
+        """Fallback to loading data with pandas (original implementation)"""
         try:
-            self.precursors_df = pd.read_parquet(precursors_file)
-            self.transitions_df = pd.read_parquet(transitions_file)
+            # Load full datasets (non-lazy fallback)
+            self.precursors_df = pd.read_parquet(self.precursors_file)
+            self.transitions_df = pd.read_parquet(self.transitions_file)
             
             # Create helper columns for easier access
             self.precursors_df['Precursor'] = (
@@ -58,26 +91,91 @@ class OSWPQResultsAccess(GenericResultsAccess):
             
         except Exception as e:
             raise RuntimeError(f"Failed to load parquet files: {e}")
+    
+    def _execute_precursor_query(self, filters=None, columns=None):
+        """Execute a query on the precursors dataset with optional filters and column selection"""
+        if PYARROW_AVAILABLE and self.precursors_dataset is not None:
+            try:
+                # Use pyarrow for efficient filtering and column selection
+                table = self.precursors_dataset.read(columns=columns, filters=filters)
+                df = table.to_pandas()
+                
+                # Add helper column if not already present
+                if 'Precursor' not in df.columns and 'MODIFIED_SEQUENCE' in df.columns and 'PRECURSOR_CHARGE' in df.columns:
+                    df['Precursor'] = (
+                        df['MODIFIED_SEQUENCE'].astype(str) + 
+                        df['PRECURSOR_CHARGE'].astype(str)
+                    )
+                
+                return df
+            except Exception as e:
+                LOGGER.warning(f"PyArrow query failed, falling back to pandas: {e}")
+                # Fall back to pandas filtering
+                return self._pandas_precursor_query(filters, columns)
+        else:
+            # Use pandas fallback
+            return self._pandas_precursor_query(filters, columns)
+    
+    def _pandas_precursor_query(self, filters=None, columns=None):
+        """Pandas-based filtering fallback"""
+        if not hasattr(self, 'precursors_df'):
+            self._fallback_to_pandas()
+        
+        df = self.precursors_df
+        
+        # Apply filters if provided (simplified pandas filtering)
+        if filters:
+            for filter_expr in filters:
+                if len(filter_expr) == 3:
+                    col, op, value = filter_expr
+                    if col in df.columns:
+                        if op == '<=':
+                            df = df[df[col] <= value]
+                        elif op == '==':
+                            df = df[df[col] == value]
+                        elif op == '!=':
+                            df = df[df[col] != value]
+        
+        # Select columns if specified
+        if columns:
+            available_columns = [col for col in columns if col in df.columns]
+            if available_columns:
+                df = df[available_columns]
+        
+        return df
 
     @property
     def has_im(self) -> bool:
         """Check if the data contains ion mobility information"""
-        # Check if any IM-related columns have non-null values
-        im_columns = ['EXP_IM', 'FEATURE_MS1_EXP_IM', 'FEATURE_MS2_EXP_IM']
-        for col in im_columns:
-            if col in self.precursors_df.columns:
-                if not self.precursors_df[col].isna().all():
-                    return True
+        # Check schema first if available
+        if PYARROW_AVAILABLE and self._precursors_schema is not None:
+            im_columns = ['EXP_IM', 'FEATURE_MS1_EXP_IM', 'FEATURE_MS2_EXP_IM']
+            schema_columns = [field.name for field in self._precursors_schema]
+            return any(col in schema_columns for col in im_columns)
+        
+        # Fallback to checking a small sample
+        sample_df = self._execute_precursor_query(
+            columns=['EXP_IM', 'FEATURE_MS1_EXP_IM', 'FEATURE_MS2_EXP_IM']
+        )
+        if sample_df.empty:
+            return False
+            
+        for col in ['EXP_IM', 'FEATURE_MS1_EXP_IM', 'FEATURE_MS2_EXP_IM']:
+            if col in sample_df.columns and not sample_df[col].isna().all():
+                return True
         return False
 
     def getRunNames(self) -> List[str]:
         """Get list of run names from the data"""
-        if 'FILENAME' in self.precursors_df.columns:
+        # Query only the columns we need
+        df = self._execute_precursor_query(columns=['FILENAME', 'RUN_ID'])
+        
+        if 'FILENAME' in df.columns:
             # Extract basename without extension
-            return [Path(f).stem for f in self.precursors_df['FILENAME'].unique()]
+            return [Path(f).stem for f in df['FILENAME'].unique()]
         else:
             # Fallback to RUN_ID if FILENAME is not available
-            return [f"run_{rid}" for rid in self.precursors_df['RUN_ID'].unique()]
+            return [f"run_{rid}" for rid in df['RUN_ID'].unique()]
 
     def getIdentifiedPrecursors(self, qvalue: float = 0.01, run: Optional[str] = None, precursorLevel: bool = False) -> Union[set, Dict[str, set]]:
         """Get identified precursors at specified q-value threshold"""
@@ -86,16 +184,32 @@ class OSWPQResultsAccess(GenericResultsAccess):
             qvalue_col = 'SCORE_MS2_Q_VALUE'
         else:
             # Use protein-level q-value if available, fallback to peptide-level
-            if 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE' in self.precursors_df.columns:
-                qvalue_col = 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE'
+            qvalue_col = 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE'  # Will check if exists in query
+        
+        # Build filters for efficient querying
+        filters = [
+            ('PRECURSOR_DECOY', '==', 0)
+        ]
+        
+        # Add q-value filter
+        filters.append((qvalue_col, '<=', qvalue))
+        
+        # Select only necessary columns
+        columns = ['Precursor', 'MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE', 'FILENAME', 'RUN_ID', qvalue_col, 'PRECURSOR_DECOY']
+        
+        # Add fallback column if primary doesn't exist
+        if not precursorLevel:
+            columns.append('SCORE_MS2_Q_VALUE')
+        
+        filtered_df = self._execute_precursor_query(filters=filters, columns=columns)
+        
+        # Handle fallback q-value column if the preferred one doesn't exist
+        if qvalue_col not in filtered_df.columns:
+            if precursorLevel:
+                return set() if isinstance(run, str) else {}
             else:
                 qvalue_col = 'SCORE_MS2_Q_VALUE'
-        
-        # Filter by q-value and non-decoy
-        filtered_df = self.precursors_df[
-            (self.precursors_df[qvalue_col] <= qvalue) & 
-            (self.precursors_df['PRECURSOR_DECOY'] == 0)
-        ]
+                filtered_df = filtered_df[filtered_df[qvalue_col] <= qvalue]
         
         if isinstance(run, str):
             # Filter by specific run
@@ -109,7 +223,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
                 except:
                     run_filtered = pd.DataFrame()
             
-            return set(run_filtered['Precursor'])
+            return set(run_filtered['Precursor']) if 'Precursor' in run_filtered.columns else set()
         else:
             # Group by run and return dict
             if 'FILENAME' in filtered_df.columns:
@@ -123,16 +237,32 @@ class OSWPQResultsAccess(GenericResultsAccess):
         if precursorLevel:
             qvalue_col = 'SCORE_MS2_Q_VALUE'
         else:
-            if 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE' in self.precursors_df.columns:
-                qvalue_col = 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE'
-            else:
-                qvalue_col = 'SCORE_MS2_Q_VALUE'
+            qvalue_col = 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE'
         
-        # Filter by q-value and non-decoy
-        filtered_df = self.precursors_df[
-            (self.precursors_df[qvalue_col] <= qvalue) & 
-            (self.precursors_df['PRECURSOR_DECOY'] == 0)
+        # Build filters for efficient querying
+        filters = [
+            ('PRECURSOR_DECOY', '==', 0),
+            (qvalue_col, '<=', qvalue)
         ]
+        
+        # Select necessary columns
+        columns = [
+            'Precursor', 'MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE',
+            'FILENAME', 'RUN_ID', qvalue_col, 'PRECURSOR_DECOY',
+            'FEATURE_MS2_AREA_INTENSITY', 'FEATURE_MS1_AREA_INTENSITY'
+        ]
+        
+        filtered_df = self._execute_precursor_query(filters=filters, columns=columns)
+        
+        # Handle fallback q-value column
+        if qvalue_col not in filtered_df.columns:
+            if not precursorLevel:
+                qvalue_col = 'SCORE_MS2_Q_VALUE'
+                columns.append(qvalue_col)
+                filtered_df = self._execute_precursor_query(filters=[
+                    ('PRECURSOR_DECOY', '==', 0),
+                    (qvalue_col, '<=', qvalue)
+                ], columns=columns)
         
         # Use MS2 area intensity as the main intensity measure
         intensity_col = 'FEATURE_MS2_AREA_INTENSITY'
@@ -150,7 +280,8 @@ class OSWPQResultsAccess(GenericResultsAccess):
                 except:
                     run_filtered = pd.DataFrame()
             
-            return run_filtered[['Precursor', intensity_col]].rename(columns={intensity_col: 'Intensity'}).copy()
+            result = run_filtered[['Precursor', intensity_col]].rename(columns={intensity_col: 'Intensity'}).copy()
+            return result
         else:
             # Include run information
             result_df = filtered_df[['Precursor', intensity_col]].copy()
@@ -166,15 +297,25 @@ class OSWPQResultsAccess(GenericResultsAccess):
     def getIdentifiedProteins(self, qvalue: float = 0.01, run: Optional[str] = None) -> Union[set, Dict[str, set]]:
         """Get identified proteins"""
         # Use peptide-level q-value for protein identification
-        if 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE' in self.precursors_df.columns:
-            qvalue_col = 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE'
-        else:
-            qvalue_col = 'SCORE_MS2_Q_VALUE'
+        qvalue_col = 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE'
         
-        filtered_df = self.precursors_df[
-            (self.precursors_df[qvalue_col] <= qvalue) & 
-            (self.precursors_df['PROTEIN_DECOY'] == 0)
+        filters = [
+            ('PROTEIN_DECOY', '==', 0),
+            (qvalue_col, '<=', qvalue)
         ]
+        
+        columns = ['PROTEIN_ACCESSION', 'FILENAME', 'RUN_ID', qvalue_col, 'PROTEIN_DECOY']
+        
+        filtered_df = self._execute_precursor_query(filters=filters, columns=columns)
+        
+        # Handle fallback q-value column
+        if qvalue_col not in filtered_df.columns:
+            qvalue_col = 'SCORE_MS2_Q_VALUE'
+            columns.append(qvalue_col)
+            filtered_df = self._execute_precursor_query(filters=[
+                ('PROTEIN_DECOY', '==', 0),
+                (qvalue_col, '<=', qvalue)
+            ], columns=columns)
         
         if isinstance(run, str):
             if 'FILENAME' in filtered_df.columns:
@@ -186,7 +327,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
                 except:
                     run_filtered = pd.DataFrame()
             
-            return set(run_filtered['PROTEIN_ACCESSION'])
+            return set(run_filtered['PROTEIN_ACCESSION']) if 'PROTEIN_ACCESSION' in run_filtered.columns else set()
         else:
             if 'FILENAME' in filtered_df.columns:
                 return filtered_df.groupby('FILENAME')['PROTEIN_ACCESSION'].apply(set).to_dict()
@@ -195,15 +336,25 @@ class OSWPQResultsAccess(GenericResultsAccess):
 
     def getIdentifiedPeptides(self, qvalue: float = 0.01, run: Optional[str] = None) -> Union[set, Dict[str, set]]:
         """Get identified peptides"""
-        if 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE' in self.precursors_df.columns:
-            qvalue_col = 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE'
-        else:
-            qvalue_col = 'SCORE_MS2_Q_VALUE'
+        qvalue_col = 'SCORE_PEPTIDE_RUN_SPECIFIC_Q_VALUE'
         
-        filtered_df = self.precursors_df[
-            (self.precursors_df[qvalue_col] <= qvalue) & 
-            (self.precursors_df['PEPTIDE_DECOY'] == 0)
+        filters = [
+            ('PEPTIDE_DECOY', '==', 0),
+            (qvalue_col, '<=', qvalue)
         ]
+        
+        columns = ['MODIFIED_SEQUENCE', 'FILENAME', 'RUN_ID', qvalue_col, 'PEPTIDE_DECOY']
+        
+        filtered_df = self._execute_precursor_query(filters=filters, columns=columns)
+        
+        # Handle fallback q-value column
+        if qvalue_col not in filtered_df.columns:
+            qvalue_col = 'SCORE_MS2_Q_VALUE'
+            columns.append(qvalue_col)
+            filtered_df = self._execute_precursor_query(filters=[
+                ('PEPTIDE_DECOY', '==', 0),
+                (qvalue_col, '<=', qvalue)
+            ], columns=columns)
         
         if isinstance(run, str):
             if 'FILENAME' in filtered_df.columns:
@@ -215,7 +366,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
                 except:
                     run_filtered = pd.DataFrame()
             
-            return set(run_filtered['MODIFIED_SEQUENCE'])
+            return set(run_filtered['MODIFIED_SEQUENCE']) if 'MODIFIED_SEQUENCE' in run_filtered.columns else set()
         else:
             if 'FILENAME' in filtered_df.columns:
                 return filtered_df.groupby('FILENAME')['MODIFIED_SEQUENCE'].apply(set).to_dict()
@@ -228,11 +379,21 @@ class OSWPQResultsAccess(GenericResultsAccess):
 
     def getTransitionGroupFeatures(self, runname: str, pep: str, charge: int) -> List[TransitionGroupFeature]:
         """Get transition group features for a specific peptide and charge"""
-        # Find matching features
-        filtered_df = self.precursors_df[
-            (self.precursors_df['MODIFIED_SEQUENCE'] == pep) & 
-            (self.precursors_df['PRECURSOR_CHARGE'] == charge)
+        # Build filters for efficient querying
+        filters = [
+            ('MODIFIED_SEQUENCE', '==', pep),
+            ('PRECURSOR_CHARGE', '==', charge)
         ]
+        
+        # Select necessary columns
+        columns = [
+            'MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE', 'FILENAME', 'RUN_ID',
+            'LEFT_WIDTH', 'RIGHT_WIDTH', 'FEATURE_MS2_AREA_INTENSITY',
+            'SCORE_MS2_Q_VALUE', 'EXP_RT', 'FEATURE_MS2_APEX_INTENSITY',
+            'EXP_IM', 'PRECURSOR_MZ'
+        ]
+        
+        filtered_df = self._execute_precursor_query(filters=filters, columns=columns)
         
         # Filter by run
         if 'FILENAME' in filtered_df.columns:
@@ -265,11 +426,21 @@ class OSWPQResultsAccess(GenericResultsAccess):
 
     def getTransitionGroupFeaturesDf(self, runname: str, pep: str, charge: int) -> pd.DataFrame:
         """Get transition group features as DataFrame"""
-        # Find matching features
-        filtered_df = self.precursors_df[
-            (self.precursors_df['MODIFIED_SEQUENCE'] == pep) & 
-            (self.precursors_df['PRECURSOR_CHARGE'] == charge)
+        # Build filters for efficient querying
+        filters = [
+            ('MODIFIED_SEQUENCE', '==', pep),
+            ('PRECURSOR_CHARGE', '==', charge)
         ]
+        
+        # Select necessary columns
+        columns = [
+            'MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE', 'FILENAME', 'RUN_ID',
+            'LEFT_WIDTH', 'RIGHT_WIDTH', 'FEATURE_MS2_AREA_INTENSITY',
+            'SCORE_MS2_Q_VALUE', 'EXP_RT', 'FEATURE_MS2_APEX_INTENSITY',
+            'EXP_IM'
+        ]
+        
+        filtered_df = self._execute_precursor_query(filters=filters, columns=columns)
         
         # Filter by run
         if 'FILENAME' in filtered_df.columns:
