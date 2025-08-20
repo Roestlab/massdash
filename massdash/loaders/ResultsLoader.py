@@ -71,7 +71,9 @@ class ResultsLoader:
                 self.rsltsAccess.append(OSWDataAccess(f, verbose=verbose, mode=mode))
             elif f.endswith('.tsv'):
                 self.rsltsAccess.append(ResultsTSVDataAccess(f, verbose=verbose))
-            elif f.endswith('.oswpq') or (os.path.isdir(f) and 'precursors_features.parquet' in os.listdir(f)):
+            elif f.endswith('.oswpq') or (os.path.isdir(f) and 
+                                         'precursors_features.parquet' in os.listdir(f) and 
+                                         'transition_features.parquet' in os.listdir(f)):
                 self.rsltsAccess.append(OSWPQResultsAccess(f, verbose=verbose))
             else:
                 raise Exception(f"Error: Unsupported file type {f} or unsupported rsltsFileType {f}")
