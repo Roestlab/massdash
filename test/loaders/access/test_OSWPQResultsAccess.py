@@ -19,16 +19,8 @@ def snapshot_pandas(snapshot):
 
 @pytest.fixture
 def oswpq_data_access():
-    """Fixture for OSWPQ data access - will be updated when test data is available"""
-    # TODO: Update this path when .oswpq test data is available
-    # For now, use a placeholder that will be replaced with actual test data
-    oswpq_path = f"{str(TEST_PATH)}/test_data/oswpq/test.oswpq"
-    
-    # Skip test if path doesn't exist yet
-    if not Path(oswpq_path).exists():
-        pytest.skip(f"OSWPQ test data not yet available at {oswpq_path}")
-    
-    oswpq_data_access = OSWPQResultsAccess(oswpq_path)
+    """Fixture for OSWPQ data access""" 
+    oswpq_data_access = OSWPQResultsAccess(f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.oswpq")
     yield oswpq_data_access
 
 @pytest.fixture(params=['run1', None])
@@ -76,7 +68,7 @@ def test_getTransitionGroupFeaturesDf(oswpq_data_access, snapshot_pandas, run, f
     assert snapshot_pandas == transition_group_feature
 
 def test_getSoftware(oswpq_data_access):
-    assert oswpq_data_access.getSoftware() == "OpenSWATH-OSWPQ"
+    assert oswpq_data_access.getSoftware() == "OpenSWATH"
 
 def test_has_im_property(oswpq_data_access, snapshot):
     has_im = oswpq_data_access.has_im

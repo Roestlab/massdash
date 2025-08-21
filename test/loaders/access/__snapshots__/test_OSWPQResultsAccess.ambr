@@ -1,0 +1,88 @@
+# serializer version: 1
+# name: test_getIdentifiedPeptides[None]
+  dict({
+    'test_raw_1': set({
+      'AGAANIVPNSTGAAK',
+      'DYASIDAAPEER',
+      'IEDQLGEVAQYK',
+      'KVVITAPGGNDVK',
+    }),
+    'test_raw_2': set({
+      'AGAANIVPNSTGAAK',
+      'DYASIDAAPEER',
+      'IEDQLGEVAQYK',
+      'KVVITAPGGNDVK',
+    }),
+  })
+# ---
+# name: test_getIdentifiedPeptides[run1]
+  set({
+  })
+# ---
+# name: test_getIdentifiedPrecursors
+  dict({
+    'test_raw_1': set({
+      'AGAANIVPNSTGAAK2',
+      'AGAANIVPNSTGAAK3',
+      'DYASIDAAPEER2',
+      'DYASIDAAPEER3',
+      'IEDQLGEVAQYK2',
+      'IEDQLGEVAQYK3',
+      'KVVITAPGGNDVK2',
+      'KVVITAPGGNDVK3',
+    }),
+    'test_raw_2': set({
+      'AGAANIVPNSTGAAK2',
+      'AGAANIVPNSTGAAK3',
+      'DYASIDAAPEER2',
+      'DYASIDAAPEER3',
+      'IEDQLGEVAQYK2',
+      'IEDQLGEVAQYK3',
+      'KVVITAPGGNDVK2',
+      'KVVITAPGGNDVK3',
+    }),
+  })
+# ---
+# name: test_getIdentifiedProteins[None]
+  dict({
+    'test_raw_1': set({
+      'Spyo_Exp3652_DDB_SeqID_514830',
+      'Spyo_Exp3652_DDB_SeqID_514851',
+      'Spyo_Exp3652_DDB_SeqID_515131',
+    }),
+    'test_raw_2': set({
+      'Spyo_Exp3652_DDB_SeqID_514830',
+      'Spyo_Exp3652_DDB_SeqID_514851',
+      'Spyo_Exp3652_DDB_SeqID_515131',
+    }),
+  })
+# ---
+# name: test_getIdentifiedProteins[run1]
+  set({
+  })
+# ---
+# name: test_getRunNames
+  list([
+    'test_raw_2',
+    'test_raw_1',
+  ])
+# ---
+# name: test_getTransitionGroupFeatures[None-INVALID-0]
+  list([
+  ])
+# ---
+# name: test_getTransitionGroupFeatures[None-PEPTIDE-2]
+  list([
+  ])
+# ---
+# name: test_getTransitionGroupFeatures[run1-INVALID-0]
+  list([
+  ])
+# ---
+# name: test_getTransitionGroupFeatures[run1-PEPTIDE-2]
+  list([
+  ])
+# ---
+# name: test_has_im_property
+  True
+# ---
