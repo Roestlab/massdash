@@ -18,7 +18,6 @@ from ...util import LOGGER
 
 # Required imports for PyArrow
 import pyarrow.dataset as ds
-import pyarrow.compute as pc
 from functools import reduce, lru_cache
 import operator
 
@@ -378,6 +377,9 @@ class OSWPQResultsAccess(GenericResultsAccess):
             'PRECURSOR_CHARGE': 'precursor_charge',
             'MODIFIED_SEQUENCE': 'sequence'
         }, inplace=True)
+        filtered_df['software'] = self.getSoftware()
+        filtered_df['sequence'] = pep
+        filtered_df['precursor_charge'] = charge
 
         return filtered_df
        
