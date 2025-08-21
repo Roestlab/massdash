@@ -9,6 +9,7 @@ from .GenericResultsAccess import GenericResultsAccess
 from .MzMLDataAccess import MzMLDataAccess
 from .OSWDataAccess import OSWDataAccess
 from .OSWPQResultsAccess import OSWPQResultsAccess
+from .OpenSwathXICParquetAccess import OpenSwathXICParquetAccess
 from .ResultsTSVDataAccess import ResultsTSVDataAccess
 from .SqMassDataAccess import SqMassDataAccess
 from .TransitionPQPDataAccess import TransitionPQPDataAccess
@@ -19,6 +20,7 @@ __all__ = [ "GenericResultsAccess",
             "MzMLDataAccess",
             "OSWDataAccess",
             "OSWPQResultsAccess",
+            "OpenSwathXICParquetAccess",
             "ResultsTSVDataAccess",
             "SqMassDataAccess",
             "TransitionPQPDataAccess",
