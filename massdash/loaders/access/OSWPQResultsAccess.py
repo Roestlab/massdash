@@ -119,10 +119,11 @@ class OSWPQResultsAccess(GenericResultsAccess):
         columns: Optional list of additional columns to select
         """
 
-        if append_precursor_col:
-            assert 'MODIFIED_SEQUENCE' not in self.columns, "MODIFIED_SEQUENCE cannot be in columns, it is added automatically"
-            assert 'PRECURSOR_CHARGE' not in self.columns, "PRECURSOR_CHARGE cannot be in columns, it is added automatically"
-            assert 'Precursor' not in self.columns, "Precursor cannot be in columns, it is added automatically"
+        # Validate requested columns only when we plan to append Precursor components
+        if append_precursor_col and columns is not None:
+            assert 'MODIFIED_SEQUENCE' not in columns, "MODIFIED_SEQUENCE cannot be in columns, it is added automatically"
+            assert 'PRECURSOR_CHARGE' not in columns, "PRECURSOR_CHARGE cannot be in columns, it is added automatically"
+            assert 'Precursor' not in columns, "Precursor cannot be in columns, it is added automatically"
         try:
             # Convert filters to pyarrow expressions if present
             filter_expr = None
@@ -143,15 +144,16 @@ class OSWPQResultsAccess(GenericResultsAccess):
                         exprs.append(ds.field(col) != val)
                 if exprs:
                     filter_expr = reduce(operator.and_, exprs)
-            table = self.precursors_dataset.to_table(columns=columns + ['MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE'] if append_precursor_col else [] , filter=filter_expr)
+            table = self.precursors_dataset.to_table(columns=columns + ['MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE'] if append_precursor_col else columns, filter=filter_expr)
             df = table.to_pandas()
         except Exception as e:
             raise RuntimeError(f"PyArrow query failed: {e}")
+
         if append_precursor_col:
             df['Precursor'] = (
-                    df['MODIFIED_SEQUENCE'].astype(str) + 
-                    df['PRECURSOR_CHARGE'].astype(str)
-                )
+                df['MODIFIED_SEQUENCE'].astype(str) +
+                df['PRECURSOR_CHARGE'].astype(str)
+            )
             df = df.drop(columns=['MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE'])
         return df
 
@@ -161,7 +163,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
     def _runIDFromRunName(self, run_name):
         df =  self._runHash[self._runHash['FILENAME'].str.contains(run_name, regex=False)]['RUN_ID']
         if df.empty:
-            print(f"Run name {run_name} not found.")
+            LOGGER.warning(f"Run name {run_name} not found.")
             return None
         else:
             return df.values[0]
@@ -267,7 +269,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
         else:
             columns.append('RUN_ID')
 
-        filtered_df = self._execute_precursor_query(filters=filters, columns=columns)
+        filtered_df = self._execute_precursor_query(filters=filters, columns=columns, append_precursor_col=False)
         
         if isinstance(run, str):
             return set(filtered_df['PROTEIN_ACCESSION']) 
@@ -299,8 +301,8 @@ class OSWPQResultsAccess(GenericResultsAccess):
         else:
             columns.append('RUN_ID')
 
-        filtered_df = self._execute_precursor_query(filters=filters, columns=columns)
-        
+        filtered_df = self._execute_precursor_query(filters=filters, columns=columns, append_precursor_col=False)
+
         if isinstance(run, str):
             return set(filtered_df['MODIFIED_SEQUENCE']) 
         else:
@@ -321,7 +323,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
         
         # Select necessary columns
         columns = [
-            'MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE', 'RUN_ID',
+            'RUN_ID',
             'LEFT_WIDTH', 'RIGHT_WIDTH', 'FEATURE_MS2_AREA_INTENSITY',
             'SCORE_MS2_Q_VALUE', 'EXP_RT', 'FEATURE_MS2_APEX_INTENSITY',
             'PRECURSOR_MZ'
@@ -334,7 +336,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
             run_id = self._runIDFromRunName(runname)
             filters.append(('RUN_ID', '==', run_id))
         
-        return self._execute_precursor_query(filters=filters, columns=columns)
+        return self._execute_precursor_query(filters=filters, columns=columns, append_precursor_col=True)
     
     def getTransitionGroupFeatures(self, runname: str, pep: str, charge: int) -> List[TransitionGroupFeature]:
         """Get transition group features for a specific peptide and charge"""
@@ -394,8 +396,9 @@ class OSWPQResultsAccess(GenericResultsAccess):
         
     def getTopTransitionGroupFeatureDf(self, runname: str, pep: str, charge: int) -> pd.DataFrame:
         """Get the top (best q-value) transition group feature as DataFrame"""
-        features = self.getTransitionGroupFeatures(runname, pep, charge)
+        features = self.getTransitionGroupFeaturesDf(runname, pep, charge)
         try:
             return features[features.qvalue == min(features.qvalue)]
         except ValueError:
-            raise RuntimeError("results must be scored to select the top feature")
+            LOGGER.warning("No features found for the specified peptide and charge.")
+            return pd.DataFrame(columns=self.columns)
