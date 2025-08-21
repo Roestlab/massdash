@@ -579,3 +579,17 @@ def in_notebook() -> bool:
     except AttributeError:
         return False
     return True
+
+
+def get_base_stem(file_path: str) -> str:
+    """
+    Get the base name of a file without the extension.
+
+    Args:
+        file_path (str): The path to the file.
+
+    Returns:
+        str: The base name of the file without the extension.
+    """
+    stripped_extensions = file_path.rstrip(''.join(Path(file_path).suffixes))
+    return Path(stripped_extensions).stem
