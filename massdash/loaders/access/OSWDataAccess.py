@@ -1428,9 +1428,7 @@ SCORE_MS2.QVALUE AS ms2_mscore,"""
             select_feature_exp_im = "-1 AS IM,"
 
         if self.has_im_boundaries:
-            select_feature_im_boundaries = (
-                "FEATURE.IM_LEFT AS IM_leftWidth, FEATURE.IM_RIGHT AS IM_rightWidth,"
-            )
+            select_feature_im_boundaries = "FEATURE.EXP_IM_LEFTWIDTH AS IM_leftWidth, FEATURE.EXP_IM_RIGHTWIDTH AS IM_rightWidth,"
         else:
             select_feature_im_boundaries = "-1 AS IM_leftWidth, -1 AS IM_rightWidth,"
 
