@@ -125,24 +125,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
             assert 'Precursor' not in columns, "Precursor cannot be in columns, it is added automatically"
         try:
             # Convert filters to pyarrow expressions if present
-            filter_expr = None
-            if filters:
-                exprs = []
-                for col, op, val in filters:
-                    if op == '==':
-                        exprs.append(ds.field(col) == val)
-                    elif op == '<=':
-                        exprs.append(ds.field(col) <= val)
-                    elif op == '>=':
-                        exprs.append(ds.field(col) >= val)
-                    elif op == '<':
-                        exprs.append(ds.field(col) < val)
-                    elif op == '>':
-                        exprs.append(ds.field(col) > val)
-                    elif op == '!=':
-                        exprs.append(ds.field(col) != val)
-                if exprs:
-                    filter_expr = reduce(operator.and_, exprs)
+            filter_expr = OSWPQResultsAccess._execute_query_helper(filters)
             table = self.precursors_dataset.to_table(columns=columns + ['MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE'] if append_precursor_col else columns, filter=filter_expr)
             df = table.to_pandas()
         except Exception as e:
@@ -155,6 +138,48 @@ class OSWPQResultsAccess(GenericResultsAccess):
             )
             df = df.drop(columns=['MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE'])
         return df
+    def _execute_transition_query(self, filters=None, columns=None):
+        """
+        Execute a query on the transition dataset with optional filters and column selection
+
+        args
+        filters: Optional list of filter tuples (column, operator, value)
+        columns: Optional list of additional columns to select
+        """
+    
+        try:
+            # Convert filters to pyarrow expressions if present
+            filter_expr = OSWPQResultsAccess._execute_query_helper(filters)
+            table = self.transitions_dataset.to_table(columns=columns, filter=filter_expr)
+            df = table.to_pandas()
+        except Exception as e:
+            raise RuntimeError(f"PyArrow query failed: {e}")
+
+        return df
+    
+    @staticmethod
+    def _execute_query_helper(filters):
+        filter_expr = None
+        if filters:
+            exprs = []
+            for col, op, val in filters:
+                if op == '==':
+                    exprs.append(ds.field(col) == val)
+                elif op == '<=':
+                    exprs.append(ds.field(col) <= val)
+                elif op == '>=':
+                    exprs.append(ds.field(col) >= val)
+                elif op == '<':
+                    exprs.append(ds.field(col) < val)
+                elif op == '>':
+                    exprs.append(ds.field(col) > val)
+                elif op == '!=':
+                    exprs.append(ds.field(col) != val)
+            if exprs:
+                filter_expr = reduce(operator.and_, exprs)
+
+        return filter_expr
+
 
     def getRunNames(self):
         return self._runHash['runName'].tolist()
@@ -353,8 +378,8 @@ class OSWPQResultsAccess(GenericResultsAccess):
                 consensusApexIntensity=row.get('FEATURE_MS2_APEX_INTENSITY', 0),
                 consensusApexIM=row.get('EXP_IM') if self.has_im else None,
                 precursor_mz=row.get('PRECURSOR_MZ'),
-                precursor_charge=row.get('PRECURSOR_CHARGE'),
-                sequence=row.get('MODIFIED_SEQUENCE'),
+                sequence=pep,
+                precursor_charge = charge,
                 software=self.getSoftware()
             )
             features.append(feature)
@@ -404,3 +429,48 @@ class OSWPQResultsAccess(GenericResultsAccess):
         except ValueError:
             LOGGER.warning("No features found for the specified peptide and charge.")
             return pd.DataFrame(columns=self.columns)
+        
+    
+
+    def getPrecursorID(self, pep: str, charge: int) -> Optional[int]:
+        """Get precursor ID for a given peptide and charge"""
+        filters = [
+            ('MODIFIED_SEQUENCE', '==', pep),
+            ('PRECURSOR_CHARGE', '==', charge)
+        ]
+        df = self._execute_precursor_query(filters=filters, columns=['PRECURSOR_ID'], append_precursor_col=False)
+        if not df.empty:
+            return df['PRECURSOR_ID'].iloc[0]
+        else:
+            LOGGER.warning(f"No precursor ID found for {pep} {charge}.")
+            return None
+
+    def populateTransitionGroupFeature(self, transition_group_feature: TransitionGroupFeature) -> TransitionGroupFeature:
+        """
+        Appends library information to a TransitionGroupFeature object
+
+        Args:
+            transition_group_feature (TransitionGroupFeature): The TransitionGroupFeature object to append library information to.
+
+        Returns:
+            TransitionGroupFeature: The TransitionGroupFeature object with appended library information.
+        """
+
+        # determine the precursor_id from sequence and charge
+        precursor_id = self.getPrecursorID(transition_group_feature.sequence, transition_group_feature.precursor_charge)
+
+
+        # from the precursor id get the library data found in transition_features.parquet
+        filters = [
+            ('PRECURSOR_ID', '==', precursor_id)
+        ]
+        df_transitionLvl = self._execute_transition_query(filters=filters, columns=['ANNOTATION', 'PRODUCT_MZ'])
+        df_precursorLvl = self._execute_precursor_query(filters=filters, columns=['PRECURSOR_MZ'], append_precursor_col=False)
+
+        if df_transitionLvl.empty:
+            LOGGER.warning(f"No library data found for {transition_group_feature.sequence} {transition_group_feature.precursor_charge}")
+            return transition_group_feature
+        transition_group_feature.product_annotations = df_transitionLvl['ANNOTATION'].tolist()
+        transition_group_feature.product_mz = df_transitionLvl['PRODUCT_MZ'].tolist()
+        transition_group_feature.precursor_mz = df_precursorLvl['PRECURSOR_MZ'].iloc[0]
+        return transition_group_feature
