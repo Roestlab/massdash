@@ -582,10 +582,10 @@
   qvalue: 6.993573006436113e-06
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
     ]),
     'test_raw_2': list([
@@ -598,10 +598,10 @@
   qvalue: 6.993573006436113e-06
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
     ]),
   })
@@ -980,10 +980,10 @@
   qvalue: 0.27997408312165795
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
       -------- TransitionGroupFeature --------
   leftBoundary: 2001.72900390625
@@ -994,10 +994,10 @@
   qvalue: 1.822896508451022e-05
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
       -------- TransitionGroupFeature --------
   leftBoundary: 2158.76611328125
@@ -1008,10 +1008,10 @@
   qvalue: 0.16741273086102035
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
       -------- TransitionGroupFeature --------
   leftBoundary: 2117.801025390625
@@ -1022,10 +1022,10 @@
   qvalue: 0.0009590506619916316
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
       -------- TransitionGroupFeature --------
   leftBoundary: 1923.2130126953125
@@ -1036,10 +1036,10 @@
   qvalue: 6.993573006436113e-06
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
     ]),
     'test_raw_2': list([
@@ -1052,10 +1052,10 @@
   qvalue: 0.0004287466278223515
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
       -------- TransitionGroupFeature --------
   leftBoundary: 1971.010986328125
@@ -1066,10 +1066,10 @@
   qvalue: 3.35632586944344e-05
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
       -------- TransitionGroupFeature --------
   leftBoundary: 1895.906005859375
@@ -1080,10 +1080,10 @@
   qvalue: 6.993573006436113e-06
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
       -------- TransitionGroupFeature --------
   leftBoundary: 2145.115966796875
@@ -1094,10 +1094,10 @@
   qvalue: 0.38296484850166657
   consensusApexIM: nan
   precursor_mz: 671.36
-  precursor_charge: None
+  precursor_charge: 2
   product_annotations: None
   product_mz: None
-  sequence: None
+  sequence: AGAANIVPNSTGAAK
   software: OpenSWATH,
     ]),
   })
