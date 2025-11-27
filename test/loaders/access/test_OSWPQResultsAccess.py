@@ -23,7 +23,7 @@ def oswpq_data_access():
     oswpq_data_access = OSWPQResultsAccess(f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.oswpq")
     yield oswpq_data_access
 
-@pytest.fixture(params=['run1', None])
+@pytest.fixture(params=['test_raw_2.mzML', None])
 def run(request):
     return request.param
 
@@ -47,23 +47,32 @@ def test_getIdentifiedPeptides(oswpq_data_access, run, snapshot):
     peptides = oswpq_data_access.getIdentifiedPeptides(run=run)
     assert peptides == snapshot
 
-@pytest.mark.parametrize("fullpeptidename,charge", [("PEPTIDE", 2), ("INVALID", 0)])
+@pytest.mark.parametrize("fullpeptidename,charge,run", [("IEDQLGEVAQYK", 2, 'test_raw_2.mzML'),
+                                                        ("INVALID", 0, 'test_raw_2.mzML'),
+                                                        ("IEDQLGEVAQYK", 2, 'non_existent_run.mzML')])
 def test_getTransitionGroupFeatures(oswpq_data_access, snapshot, fullpeptidename, charge, run):
-    # Use first available run if run is None
-    if run is None:
-        run_names = oswpq_data_access.getRunNames()
-        run = run_names[0] if run_names else "run1"
-    
     transition_group_feature = oswpq_data_access.getTransitionGroupFeatures(run, fullpeptidename, charge)
     assert snapshot == transition_group_feature
 
-@pytest.mark.parametrize("fullpeptidename,charge", [("PEPTIDE", 2), ("INVALID", 0)])
+@pytest.mark.parametrize("fullpeptidename,charge,run", [("IEDQLGEVAQYK", 2, 'test_raw_2.mzML'),
+                                                        ("INVALID", 0, 'test_raw_2.mzML'),
+                                                        ("IEDQLGEVAQYK", 2, 'non_existent_run.mzML')])
 def test_getTransitionGroupFeaturesDf(oswpq_data_access, snapshot_pandas, run, fullpeptidename, charge):
-    # Use first available run if run is None
-    if run is None:
-        run_names = oswpq_data_access.getRunNames()
-        run = run_names[0] if run_names else "run1"
-    
+    transition_group_feature = oswpq_data_access.getTransitionGroupFeaturesDf(run, fullpeptidename, charge)
+    assert snapshot_pandas == transition_group_feature
+
+
+@pytest.mark.parametrize("fullpeptidename,charge,run", [("IEDQLGEVAQYK", 2, 'test_raw_2.mzML'),
+                                                        ("INVALID", 0, 'test_raw_2.mzML'),
+                                                        ("IEDQLGEVAQYK", 2, 'non_existent_run.mzML')])
+def test_getTopTransitionGroupFeature(oswpq_data_access, snapshot, fullpeptidename, charge, run):
+    transition_group_feature = oswpq_data_access.getTransitionGroupFeatures(run, fullpeptidename, charge)
+    assert snapshot == transition_group_feature
+
+@pytest.mark.parametrize("fullpeptidename,charge,run", [("IEDQLGEVAQYK", 2, 'test_raw_2.mzML'),
+                                                        ("INVALID", 0, 'test_raw_2.mzML'),
+                                                        ("IEDQLGEVAQYK", 2, 'non_existent_run.mzML')])
+def test_getTopTransitionGroupFeatureDf(oswpq_data_access, snapshot_pandas, run, fullpeptidename, charge):
     transition_group_feature = oswpq_data_access.getTransitionGroupFeaturesDf(run, fullpeptidename, charge)
     assert snapshot_pandas == transition_group_feature
 
