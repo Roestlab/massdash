@@ -1,6 +1,6 @@
 """
-test/loaders/access/test_SqMassDataAccess
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/loaders/access/test_OpenSwathXICParquetAccess.py
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 import pytest

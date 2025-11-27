@@ -1,6 +1,6 @@
 """
-test/loaders/test_SqMassLoader
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test/loaders/test_OpenSwathXICParquetLoader.py
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 import pytest
@@ -39,14 +39,12 @@ def test_loadTransitionGroupFeature(loader, fullpeptidename, charge, runNames, s
 def test_loadTransitionGroups(loader, fullpeptidename, charge, runNames, snapshot):
     # Test loading a chromatogram for a valid peptide ID and charge
     transitionGroup = loader.loadTransitionGroups(fullpeptidename, charge, runNames=runNames) 
-    print(transitionGroup)
     assert snapshot == AmberDataSerializer.serialize(transitionGroup)
 
 @pytest.mark.parametrize('fullpeptidename,charge', [('AGAANIVPNSTGAAK', 3), ('INVALID', 0)])
 def test_loadTransitionGroupsDf(loader, fullpeptidename, charge, snapshot_pandas):
     # Test loading a chromatogram for a valid peptide ID and charge
     transitionGroup = loader.loadTransitionGroupsDf(fullpeptidename, charge) 
-    print(transitionGroup)
     assert snapshot_pandas == transitionGroup 
 
 @pytest.mark.parametrize('fullpeptidename,charge', [('AGAANIVPNSTGAAK', 3), ('INVALID', 0)])

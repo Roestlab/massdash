@@ -40,7 +40,7 @@ class OpenSwathXICParquetLoader(GenericChromatogramLoader):
             if not df.empty:
                 out[t.runName] = df
             else:
-                print(f"Warning: no data found for peptide in transition file {t.filename}")
+                LOGGER.warning(f"Warning: no data found for peptide in transition file {t.filename}")
 
         if out == {}:
             return pd.DataFrame(columns=columns)
