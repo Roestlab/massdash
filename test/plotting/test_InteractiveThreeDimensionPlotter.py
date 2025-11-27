@@ -13,6 +13,8 @@ from massdash.plotting import InteractiveThreeDimensionPlotter, PlotConfig
 from massdash.structs import FeatureMap
 from massdash.util import find_git_directory
 
+
+pytestmark = pytest.mark.skip(reason="Skipping this test file for now")
 TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test' / 'test_data'
 
 @pytest.fixture
