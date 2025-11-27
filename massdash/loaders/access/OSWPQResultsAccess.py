@@ -300,6 +300,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
         else:
             filtered_df = filtered_df.merge(self._runHash[['RUN_ID', 'runName']], on='RUN_ID').drop(columns=['RUN_ID'])
             return filtered_df.groupby('runName')['PROTEIN_ACCESSION'].apply(set).to_dict()
+
     def getIdentifiedPeptides(self, qvalue: float = 0.01, run: Optional[str] = None, context: Literal['global', 'run_specific', 'experiment_wide'] = 'run_specific') -> Union[set, Dict[str, set]]:
         """Get identified peptides"""
         # Use peptide-level q-value for peptide identification
@@ -408,7 +409,6 @@ class OSWPQResultsAccess(GenericResultsAccess):
 
         return filtered_df
        
-
     def getTopTransitionGroupFeature(self, runname: str, pep: str, charge: int) -> TransitionGroupFeature:
         """Get the top (best q-value) transition group feature"""
         features = self.getTransitionGroupFeatures(runname, pep, charge)
@@ -430,8 +430,6 @@ class OSWPQResultsAccess(GenericResultsAccess):
             LOGGER.warning("No features found for the specified peptide and charge.")
             return pd.DataFrame(columns=self.columns)
         
-    
-
     def getPrecursorID(self, pep: str, charge: int) -> Optional[int]:
         """Get precursor ID for a given peptide and charge"""
         filters = [

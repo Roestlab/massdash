@@ -1,6 +1,6 @@
 """
 test/loaders/access/test_OSWPQResultsAccess
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 import pytest
