@@ -190,7 +190,7 @@ packaging==24.1
     #   sphinx
     #   streamlit
     #   tables
-pandas==2.2.3
+pandas==2.3.3
     # via
     #   bokeh
     #   massdash (pyproject.toml)
