@@ -10,15 +10,13 @@ from collections import OrderedDict
 import pyopenms as po
 import sqlite3
 import pandas as pd
-import base64
-import struct
-import zlib
 from pathlib import Path
 import pyarrow.dataset as ds
 
 # Structs
 from ...structs.Chromatogram import Chromatogram
 # Utils
+from ...util import decodeCompressedArray
 
 class OpenSwathXICParquetAccess:
 
@@ -49,39 +47,11 @@ class OpenSwathXICParquetAccess:
 
         chroms = []
         for _, row in df.iterrows():
-            rt_data = OpenSwathXICParquetAccess._decodeArray(row['RT_DATA'], row['RT_COMPRESSION'])
-            intensity_data = OpenSwathXICParquetAccess._decodeArray(row['INTENSITY_DATA'], row['INTENSITY_COMPRESSION'])
+            rt_data = decodeCompressedArray(row['RT_DATA'], row['RT_COMPRESSION'])
+            intensity_data = decodeCompressedArray(row['INTENSITY_DATA'], row['INTENSITY_COMPRESSION'])
             chroms.append(Chromatogram(rt_data, intensity_data, row['ANNOTATION']))
 
         return chroms
-
-    @staticmethod
-    def _decodeArray(data, compr):
-        numpress_config = po.NumpressConfig()
-        result = []
-        if compr == 0:
-            return data
-        if compr == 1:
-            tmp = zlib.decompress(data)
-            return struct.unpack("<%sd" % (len(tmp) // 8), tmp)
-        elif compr == 5:
-            tmp = bytearray(zlib.decompress(data))
-            if len(tmp) > 0:
-                numpress_config.setCompression('linear')
-                po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
-                return result
-            else:
-                return [0]
-        elif compr == 6:
-            tmp = bytearray( zlib.decompress(data) )
-            if len(tmp) > 0:
-                numpress_config.setCompression('slof')
-                po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
-                return result
-            else:
-                return [0]
-        else:
-            raise Exception(f"Compression type {compr} not supported")
 
     def getChromatogramDfFromSequenceAndCharge(self, sequence: str, charge: int) -> pd.DataFrame:
         '''
