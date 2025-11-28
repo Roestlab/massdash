@@ -138,6 +138,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
             )
             df = df.drop(columns=['MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE'])
         return df
+    
     def _execute_transition_query(self, filters=None, columns=None):
         """
         Execute a query on the transition dataset with optional filters and column selection
