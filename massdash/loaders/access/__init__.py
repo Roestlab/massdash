@@ -8,6 +8,7 @@ The :mod:`massdash.loaders.access` subpackage contains the low level access to D
 from .GenericResultsAccess import GenericResultsAccess
 from .MzMLDataAccess import MzMLDataAccess
 from .OSWDataAccess import OSWDataAccess
+from .OpenSwathXICParquetAccess import OpenSwathXICParquetAccess
 from .OSWPQResultsAccess import OSWPQResultsAccess
 from .ResultsTSVDataAccess import ResultsTSVDataAccess
 from .SqMassDataAccess import SqMassDataAccess
@@ -18,6 +19,7 @@ from .XICParquetDataAccess import XICParquetDataAccess
 __all__ = [ "GenericResultsAccess",
             "MzMLDataAccess",
             "OSWDataAccess",
+            "OpenSwathXICParquetAccess",
             "OSWPQResultsAccess",
             "ResultsTSVDataAccess",
             "SqMassDataAccess",

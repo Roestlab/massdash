@@ -190,7 +190,7 @@ packaging==24.1
     #   sphinx
     #   streamlit
     #   tables
-pandas==2.2.3
+pandas==2.3.3
     # via
     #   bokeh
     #   massdash (pyproject.toml)
@@ -291,7 +291,7 @@ referencing==0.35.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.3
+requests==2.32.5
     # via
     #   massdash (pyproject.toml)
     #   sphinx

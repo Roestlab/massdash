@@ -90,6 +90,7 @@ Classes
    
    ResultsLoader
    MzMLDataLoader
+   OpenSwathXICParquetLoader
    SqMassLoader
    XICParquetDataLoader
    SpectralLibraryLoader
@@ -126,10 +127,12 @@ Classes
    MzMLDataAccess
    OSWDataAccess
    OSWPQResultsAccess
+   OpenSwathXICParquetAccess
    ResultsTSVDataAccess
    TransitionPQPDataAccess
    TransitionTSVDataAccess
    XICParquetDataAccess
+
       
 
 Abstract Classes
