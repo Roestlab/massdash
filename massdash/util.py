@@ -579,3 +579,50 @@ def in_notebook() -> bool:
     except AttributeError:
         return False
     return True
+
+
+def decodeCompressedArray(data, compr):
+    '''
+    Decodes a compressed array using the specified compression method.
+
+    compression methods:
+    - 0 = no compression
+    - 1 = zlib
+    - 5 = numpress linear + zlib
+    - 6 = numpress slof + zlib
+
+    Docstring for decodeArray
+    
+    :param data: Description
+    :param compr: Description
+    '''
+
+    import pyopenms as po
+    import zlib
+    import struct
+    import base64
+    numpress_config = po.NumpressConfig()
+    result = []
+    if compr == 0:
+        return data
+    if compr == 1:
+        tmp = zlib.decompress(data)
+        return struct.unpack("<%sd" % (len(tmp) // 8), tmp)
+    elif compr == 5:
+        tmp = bytearray(zlib.decompress(data))
+        if len(tmp) > 0:
+            numpress_config.setCompression('linear')
+            po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
+            return result
+        else:
+            return [0]
+    elif compr == 6:
+        tmp = bytearray( zlib.decompress(data) )
+        if len(tmp) > 0:
+            numpress_config.setCompression('slof')
+            po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
+            return result
+        else:
+            return [0]
+    else:
+        raise Exception(f"Compression type {compr} not supported")
