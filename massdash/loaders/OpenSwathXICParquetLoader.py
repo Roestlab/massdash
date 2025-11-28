@@ -16,12 +16,12 @@ from .access import OpenSwathXICParquetAccess
 # Structs
 from ..structs import TransitionGroup, TransitionGroupCollection
 # Utils
-from massdash.util import LOGGER
+from ..util import LOGGER
 
 class OpenSwathXICParquetLoader(GenericChromatogramLoader):
 
     ''' 
-    Class for loading Chromatograms and peak features from SqMass files and OSW files
+    Class for loading Chromatograms and peak features from XIC (PyProphet) parquet files and a results files.
     Inherits from GenericChromatogramLoader
     '''
 
