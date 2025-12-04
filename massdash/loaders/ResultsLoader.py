@@ -71,16 +71,98 @@ class ResultsLoader:
                 self.rsltsAccess.append(OSWDataAccess(f, verbose=verbose, mode=mode))
             elif f.endswith('.tsv'):
                 self.rsltsAccess.append(ResultsTSVDataAccess(f, verbose=verbose))
-            elif f.endswith('.oswpq') or (os.path.isdir(f) and 
-                                         'precursors_features.parquet' in os.listdir(f) and 
-                                         'transition_features.parquet' in os.listdir(f)):
-                self.rsltsAccess.append(OSWPQResultsAccess(f, verbose=verbose))
+            elif self._is_oswpq_file(f):
+                # Handle single .oswpq or nested .oswpqd structure
+                oswpq_dirs = self._get_oswpq_directories(f)
+                for oswpq_dir in oswpq_dirs:
+                    self.rsltsAccess.append(OSWPQResultsAccess(oswpq_dir, verbose=verbose))
             else:
                 raise Exception(f"Error: Unsupported file type {f} or unsupported rsltsFileType {f}")
               
         # If called as a Results loader, infer the run names since no raw data will be used.
         self.runNames = self._inferRunNames()
         self.software = self._loadSoftware()
+
+    def _is_oswpq_file(self, path: str) -> bool:
+        """
+        Check if a path is an OSWPQ file (single .oswpq, nested .oswpqd, or directory with parquet files).
+        
+        Parameters
+        ----------
+        path : str
+            Path to check
+            
+        Returns
+        -------
+        bool
+            True if path is an OSWPQ-related file/directory
+        """
+        if not os.path.isdir(path):
+            return False
+            
+        # Check for .oswpq or .oswpqd extension
+        if path.endswith('.oswpq') or path.endswith('.oswpqd'):
+            return True
+            
+        # Check if directory contains parquet files directly
+        try:
+            contents = os.listdir(path)
+            if 'precursors_features.parquet' in contents and 'transition_features.parquet' in contents:
+                return True
+        except (OSError, PermissionError):
+            return False
+            
+        return False
+    
+    def _get_oswpq_directories(self, path: str) -> List[str]:
+        """
+        Get list of OSWPQ directories to load.
+        
+        For single .oswpq or directory with parquet files, returns [path].
+        For nested .oswpqd structure, returns list of all .oswpq subdirectories.
+        
+        Parameters
+        ----------
+        path : str
+            Path to OSWPQ file/directory
+            
+        Returns
+        -------
+        List[str]
+            List of OSWPQ directories to load
+        """
+        if not os.path.isdir(path):
+            return []
+        
+        # Check if this is a nested .oswpqd structure
+        if path.endswith('.oswpqd'):
+            oswpq_dirs = []
+            try:
+                for subdir_name in os.listdir(path):
+                    subdir_path = os.path.join(path, subdir_name)
+                    if os.path.isdir(subdir_path) and subdir_name.endswith('.oswpq'):
+                        # Verify it has the required parquet files
+                        try:
+                            contents = os.listdir(subdir_path)
+                            if 'precursors_features.parquet' in contents and 'transition_features.parquet' in contents:
+                                oswpq_dirs.append(subdir_path)
+                        except (OSError, PermissionError):
+                            continue
+            except (OSError, PermissionError):
+                pass
+            
+            # For .oswpqd, only return the subdirectories (don't check parent for parquet files)
+            return oswpq_dirs
+        
+        # Single .oswpq or directory with parquet files (not .oswpqd)
+        try:
+            contents = os.listdir(path)
+            if 'precursors_features.parquet' in contents and 'transition_features.parquet' in contents:
+                return [path]
+        except (OSError, PermissionError):
+            pass
+        
+        return []
 
     def _inferRunNames(self):
         '''
