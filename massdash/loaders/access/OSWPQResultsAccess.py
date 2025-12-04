@@ -232,7 +232,7 @@ class OSWPQResultsAccess(GenericResultsAccess):
         --------
         >>> filters = [('SCORE_MS2_Q_VALUE', '<=', 0.01), ('PRECURSOR_DECOY', '==', 0)]
         >>> expr = OSWPQResultsAccess._execute_query_helper(filters)
-        >>> # Returns: (field('SCORE_MS2_Q_VALUE') <= 0.01) & (field('PRECURSOR_DECOY') == 0)
+        >>> # expr is a PyArrow Expression that filters rows matching both conditions
         """
         filter_expr = None
         if filters:
