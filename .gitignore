@@ -8,3 +8,6 @@ tmp
 _build
 generated
 .ipynb_checkpoints
+streamlit-*.whl
+streamlit/
+streamlit-*.dist-info/

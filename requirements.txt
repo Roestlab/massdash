@@ -341,7 +341,7 @@ sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
 stack-data==0.6.3
     # via ipython
-streamlit==1.40.0
+streamlit==1.52.0
     # via
     #   massdash (pyproject.toml)
     #   streamlit-javascript
