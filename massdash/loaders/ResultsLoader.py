@@ -151,10 +151,10 @@ class ResultsLoader:
             except (OSError, PermissionError):
                 pass
             
-            if oswpq_dirs:
-                return oswpq_dirs
+            # For .oswpqd, only return the subdirectories (don't check parent for parquet files)
+            return oswpq_dirs
         
-        # Single .oswpq or directory with parquet files
+        # Single .oswpq or directory with parquet files (not .oswpqd)
         try:
             contents = os.listdir(path)
             if 'precursors_features.parquet' in contents and 'transition_features.parquet' in contents:
