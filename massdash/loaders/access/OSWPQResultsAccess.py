@@ -3,23 +3,19 @@ massdash/loaders/access/OSWPQResultsAccess
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-import os
-import pandas as pd
-import numpy as np
-from typing import List, Optional, Dict, Union, Literal
-from pathlib import Path
-
-# Loaders
-from .GenericResultsAccess import GenericResultsAccess
-# Structs
-from ...structs.TransitionGroupFeature import TransitionGroupFeature
-# Utils
-from ...util import LOGGER
-
-# Required imports for PyArrow
-import pyarrow.dataset as ds
-from functools import reduce, lru_cache
 import operator
+import os
+from functools import lru_cache, reduce
+from pathlib import Path
+from typing import Dict, List, Literal, Optional, Union
+
+import numpy as np
+import pandas as pd
+import pyarrow.dataset as ds
+
+from .GenericResultsAccess import GenericResultsAccess
+from ...structs.TransitionGroupFeature import TransitionGroupFeature
+from ...util import LOGGER
 
 class OSWPQResultsAccess(GenericResultsAccess):
     """
@@ -111,13 +107,39 @@ class OSWPQResultsAccess(GenericResultsAccess):
 
     def _execute_precursor_query(self, filters=None, columns=None, append_precursor_col=True):
         """
-        Execute a query on the precursors dataset with optional filters and column selection
+        Execute a query on the precursors dataset with optional filters and column selection.
+        
+        This method performs efficient lazy evaluation using PyArrow datasets, applying filters
+        and column projections at the parquet level to minimize memory usage.
 
-        args
-        filters: Optional list of filter tuples (column, operator, value)
-        columns: Optional list of additional columns to select
+        Parameters
+        ----------
+        filters : list of tuple, optional
+            List of filter tuples in the format (column, operator, value) where:
+            - column: str, name of the column to filter on
+            - operator: str, one of '==', '<=', '>=', '<', '>', '!='
+            - value: any, the value to compare against
+            Example: [('SCORE_MS2_Q_VALUE', '<=', 0.01), ('PRECURSOR_DECOY', '==', 0)]
+        columns : list of str, optional
+            List of column names to select from the parquet file. Only these columns will be
+            loaded into memory, improving performance for large datasets.
+        append_precursor_col : bool, default=True
+            If True, automatically adds 'MODIFIED_SEQUENCE' and 'PRECURSOR_CHARGE' to the
+            selected columns, then creates a combined 'Precursor' column (concatenation of
+            sequence and charge) and removes the individual columns. This is useful for
+            creating a unique precursor identifier. When False, returns columns as-is.
+
+        Returns
+        -------
+        pd.DataFrame
+            Filtered and projected dataframe with the requested columns. If append_precursor_col
+            is True, includes a 'Precursor' column instead of separate sequence and charge columns.
+
+        Raises
+        ------
+        RuntimeError
+            If the PyArrow query execution fails
         """
-
         # Validate requested columns only when we plan to append Precursor components
         if append_precursor_col and columns is not None:
             assert 'MODIFIED_SEQUENCE' not in columns, "MODIFIED_SEQUENCE cannot be in columns, it is added automatically"
@@ -138,16 +160,37 @@ class OSWPQResultsAccess(GenericResultsAccess):
             )
             df = df.drop(columns=['MODIFIED_SEQUENCE', 'PRECURSOR_CHARGE'])
         return df
-    
+
     def _execute_transition_query(self, filters=None, columns=None):
         """
-        Execute a query on the transition dataset with optional filters and column selection
+        Execute a query on the transition dataset with optional filters and column selection.
+        
+        This method performs efficient lazy evaluation using PyArrow datasets, applying filters
+        and column projections at the parquet level to minimize memory usage.
 
-        args
-        filters: Optional list of filter tuples (column, operator, value)
-        columns: Optional list of additional columns to select
+        Parameters
+        ----------
+        filters : list of tuple, optional
+            List of filter tuples in the format (column, operator, value) where:
+            - column: str, name of the column to filter on
+            - operator: str, one of '==', '<=', '>=', '<', '>', '!='
+            - value: any, the value to compare against
+            Example: [('PRECURSOR_ID', '==', 12345)]
+        columns : list of str, optional
+            List of column names to select from the parquet file. Only these columns will be
+            loaded into memory, improving performance for large datasets.
+
+        Returns
+        -------
+        pd.DataFrame
+            Filtered and projected dataframe with the requested columns from the transition
+            features parquet file.
+
+        Raises
+        ------
+        RuntimeError
+            If the PyArrow query execution fails
         """
-    
         try:
             # Convert filters to pyarrow expressions if present
             filter_expr = OSWPQResultsAccess._execute_query_helper(filters)
@@ -160,6 +203,37 @@ class OSWPQResultsAccess(GenericResultsAccess):
     
     @staticmethod
     def _execute_query_helper(filters):
+        """
+        Helper method to convert filter tuples to PyArrow filter expressions.
+        
+        This method takes a list of filter tuples and converts them into PyArrow dataset
+        filter expressions that can be efficiently applied at the parquet level during
+        data loading.
+
+        Parameters
+        ----------
+        filters : list of tuple or None
+            List of filter tuples in the format (column, operator, value) where:
+            - column: str, name of the column to filter on
+            - operator: str, one of '==', '<=', '>=', '<', '>', '!='
+            - value: any, the value to compare against
+            Multiple filters are combined with logical AND.
+            Example: [('SCORE_MS2_Q_VALUE', '<=', 0.01), ('PRECURSOR_DECOY', '==', 0)]
+            If None or empty list, no filtering is applied.
+
+        Returns
+        -------
+        pyarrow.dataset.Expression or None
+            A PyArrow filter expression combining all individual filters with AND logic,
+            or None if no filters were provided. This expression can be passed to
+            PyArrow's to_table() method for efficient parquet-level filtering.
+
+        Examples
+        --------
+        >>> filters = [('SCORE_MS2_Q_VALUE', '<=', 0.01), ('PRECURSOR_DECOY', '==', 0)]
+        >>> expr = OSWPQResultsAccess._execute_query_helper(filters)
+        >>> # Returns: (field('SCORE_MS2_Q_VALUE') <= 0.01) & (field('PRECURSOR_DECOY') == 0)
+        """
         filter_expr = None
         if filters:
             exprs = []
