@@ -208,7 +208,8 @@ class OSWPQResultsAccess(GenericResultsAccess):
         
         This method takes a list of filter tuples and converts them into PyArrow dataset
         filter expressions that can be efficiently applied at the parquet level during
-        data loading.
+        data loading. This is an internal helper method used by _execute_precursor_query
+        and _execute_transition_query.
 
         Parameters
         ----------
@@ -228,11 +229,10 @@ class OSWPQResultsAccess(GenericResultsAccess):
             or None if no filters were provided. This expression can be passed to
             PyArrow's to_table() method for efficient parquet-level filtering.
 
-        Examples
-        --------
-        >>> filters = [('SCORE_MS2_Q_VALUE', '<=', 0.01), ('PRECURSOR_DECOY', '==', 0)]
-        >>> expr = OSWPQResultsAccess._execute_query_helper(filters)
-        >>> # expr is a PyArrow Expression that filters rows matching both conditions
+        Notes
+        -----
+        This is an internal helper method. Users should call getIdentifiedPrecursors()
+        or similar public methods instead of using this directly.
         """
         filter_expr = None
         if filters:
