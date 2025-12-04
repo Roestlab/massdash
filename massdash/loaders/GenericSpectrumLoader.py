@@ -12,7 +12,7 @@ from typing import Dict, Optional, List, Union
 # Loader
 from .GenericRawDataLoader import GenericRawDataLoader
 from .SpectralLibraryLoader import SpectralLibraryLoader
-from .access import OSWDataAccess
+from .access import OSWDataAccess, OSWPQResultsAccess
 # Structs
 from ..structs import TransitionGroup, TargetedDIAConfig, FeatureMap
 
@@ -37,8 +37,10 @@ class GenericSpectrumLoader(GenericRawDataLoader, metaclass=ABCMeta):
             self.libraryAccess = SpectralLibraryLoader(self.libraryFile)
         else: # self.libraryFile is None:
             for a in self.rsltsAccess:
-                if isinstance(a, OSWDataAccess): 
+                if isinstance(a, OSWDataAccess):
                    self.libraryAccess = SpectralLibraryLoader(a.filename)
+                elif isinstance(a, OSWPQResultsAccess):
+                    self.libraryAccess = a
         
         # If library access is not set, then throw an error
         if self.libraryAccess is None:

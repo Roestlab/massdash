@@ -126,6 +126,7 @@ Classes
    SqMassDataAccess
    MzMLDataAccess
    OSWDataAccess
+   OSWPQResultsAccess
    OpenSwathXICParquetAccess
    ResultsTSVDataAccess
    TransitionPQPDataAccess

@@ -21,7 +21,7 @@ def snapshot_pandas(snapshot):
 #f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv",
     #[f"{TEST_PATH}/test_data/example_dia/diann/report/test_diann_report_combined.tsv", f"{TEST_PATH}/test_data/example_dia/dreamdia/test_dreamdia_report.tsv"]
     # NOTE: with this PR dreamDIA is not supported
-@pytest.fixture(params=['openswath', 'diann1', 'combined'])
+@pytest.fixture(params=['openswath', 'diann1', 'combined', 'oswpq'])
 def resultsLoader(request):
     if request.param == 'openswath':
         return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", verbose=False, mode='module')
@@ -30,6 +30,9 @@ def resultsLoader(request):
     elif request.param == 'combined':
         return ResultsLoader(rsltsFile=[f"{TEST_PATH}/test_data/example_dia/diann/report/test_diann_report_combined.tsv", 
                                         f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"], verbose=False, mode='module')
+    elif request.param == 'oswpq':
+        return ResultsLoader(rsltsFile=f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.oswpq", verbose=False, mode='module')
+ 
     else:
         raise ValueError(f"Invalid parameter: {request.param}")
 
@@ -107,7 +110,8 @@ def test_computeCV(resultsLoader, snapshot_pandas):
         [f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw", OSWDataAccess],
         [f"{TEST_PATH}/test_data/example_dia/diann/report/test_1_diann_report.tsv", None],
         [[f"{TEST_PATH}/test_data/example_dia/diann/report/test_diann_report_combined.tsv", f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"], OSWDataAccess],
-        [[f"{TEST_PATH}/test_data/osw/ionMobilityTest.osw", f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"], None] # multiple osw files
+        [[f"{TEST_PATH}/test_data/osw/ionMobilityTest.osw", f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.osw"], None], # multiple osw files
+        [f"{TEST_PATH}/test_data/example_dia/openswath/osw/test.oswpq", None]
 )  )
 def test_getOSWAccessPtr(rsltsFiles, expected):
     resultsLoader = ResultsLoader(rsltsFile=rsltsFiles, verbose=False, mode='module')

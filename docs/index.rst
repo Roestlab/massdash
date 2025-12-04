@@ -65,5 +65,6 @@ Please Click below for More Information:
    GUI
    Python Interface
    API
+   OSWPQ_Parser
    Plotting Gallery
    Testing

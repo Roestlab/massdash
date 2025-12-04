@@ -1,0 +1,243 @@
+# serializer version: 1
+# name: test_getIdentifiedPeptides[None]
+  dict({
+    'test_raw_1': set({
+      'AGAANIVPNSTGAAK',
+      'DYASIDAAPEER',
+      'IEDQLGEVAQYK',
+      'KVVITAPGGNDVK',
+    }),
+    'test_raw_2': set({
+      'AGAANIVPNSTGAAK',
+      'DYASIDAAPEER',
+      'IEDQLGEVAQYK',
+      'KVVITAPGGNDVK',
+    }),
+  })
+# ---
+# name: test_getIdentifiedPeptides[test_raw_2.mzML]
+  set({
+    'AGAANIVPNSTGAAK',
+    'DYASIDAAPEER',
+    'IEDQLGEVAQYK',
+    'KVVITAPGGNDVK',
+  })
+# ---
+# name: test_getIdentifiedPrecursors
+  dict({
+    'test_raw_1': set({
+      'AGAANIVPNSTGAAK2',
+      'AGAANIVPNSTGAAK3',
+      'DYASIDAAPEER2',
+      'DYASIDAAPEER3',
+      'IEDQLGEVAQYK2',
+      'IEDQLGEVAQYK3',
+      'KVVITAPGGNDVK2',
+      'KVVITAPGGNDVK3',
+    }),
+    'test_raw_2': set({
+      'AGAANIVPNSTGAAK2',
+      'AGAANIVPNSTGAAK3',
+      'DYASIDAAPEER2',
+      'DYASIDAAPEER3',
+      'IEDQLGEVAQYK2',
+      'IEDQLGEVAQYK3',
+      'KVVITAPGGNDVK2',
+      'KVVITAPGGNDVK3',
+    }),
+  })
+# ---
+# name: test_getIdentifiedProteins[None]
+  dict({
+    'test_raw_1': set({
+      'Spyo_Exp3652_DDB_SeqID_514830',
+      'Spyo_Exp3652_DDB_SeqID_514851',
+      'Spyo_Exp3652_DDB_SeqID_515131',
+    }),
+    'test_raw_2': set({
+      'Spyo_Exp3652_DDB_SeqID_514830',
+      'Spyo_Exp3652_DDB_SeqID_514851',
+      'Spyo_Exp3652_DDB_SeqID_515131',
+    }),
+  })
+# ---
+# name: test_getIdentifiedProteins[test_raw_2.mzML]
+  set({
+    'Spyo_Exp3652_DDB_SeqID_514830',
+    'Spyo_Exp3652_DDB_SeqID_514851',
+    'Spyo_Exp3652_DDB_SeqID_515131',
+  })
+# ---
+# name: test_getRunNames
+  list([
+    'test_raw_2',
+    'test_raw_1',
+  ])
+# ---
+# name: test_getTopTransitionGroupFeature[IEDQLGEVAQYK-2-non_existent_run.mzML]
+  list([
+  ])
+# ---
+# name: test_getTopTransitionGroupFeature[IEDQLGEVAQYK-2-test_raw_2.mzML]
+  list([
+    -------- TransitionGroupFeature --------
+  leftBoundary: 2998.681884765625
+  rightBoundary: 3029.406982421875
+  areaIntensity: 46.2769
+  consensusApex: 3011.98
+  consensusApexIntensity: 25.21668794143512
+  qvalue: 0.34529816282628856
+  consensusApexIM: nan
+  precursor_mz: 696.854
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: IEDQLGEVAQYK
+  software: OpenSWATH,
+    -------- TransitionGroupFeature --------
+  leftBoundary: 3247.89501953125
+  rightBoundary: 3299.10205078125
+  areaIntensity: 54.5119
+  consensusApex: 3267.54
+  consensusApexIntensity: 13.926183351129533
+  qvalue: 0.06478770518751195
+  consensusApexIM: nan
+  precursor_mz: 696.854
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: IEDQLGEVAQYK
+  software: OpenSWATH,
+    -------- TransitionGroupFeature --------
+  leftBoundary: 3073.7880859375
+  rightBoundary: 3138.64892578125
+  areaIntensity: 16970.4
+  consensusApex: 3094.41
+  consensusApexIntensity: 1569.357235718364
+  qvalue: 6.993573006436113e-06
+  consensusApexIM: nan
+  precursor_mz: 696.854
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: IEDQLGEVAQYK
+  software: OpenSWATH,
+    -------- TransitionGroupFeature --------
+  leftBoundary: 3138.64892578125
+  rightBoundary: 3183.031005859375
+  areaIntensity: 79.0832
+  consensusApex: 3154.89
+  consensusApexIntensity: 17.276077248863164
+  qvalue: 6.993573006436113e-06
+  consensusApexIM: nan
+  precursor_mz: 696.854
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: IEDQLGEVAQYK
+  software: OpenSWATH,
+    -------- TransitionGroupFeature --------
+  leftBoundary: 3343.48291015625
+  rightBoundary: 3384.447998046875
+  areaIntensity: 30.2578
+  consensusApex: 3367.52
+  consensusApexIntensity: 8.164890959917475
+  qvalue: 0.33779088886254716
+  consensusApexIM: nan
+  precursor_mz: 696.854
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: IEDQLGEVAQYK
+  software: OpenSWATH,
+  ])
+# ---
+# name: test_getTopTransitionGroupFeature[INVALID-0-test_raw_2.mzML]
+  list([
+  ])
+# ---
+# name: test_getTransitionGroupFeatures[IEDQLGEVAQYK-2-non_existent_run.mzML]
+  list([
+  ])
+# ---
+# name: test_getTransitionGroupFeatures[IEDQLGEVAQYK-2-test_raw_2.mzML]
+  list([
+    -------- TransitionGroupFeature --------
+  leftBoundary: 2998.681884765625
+  rightBoundary: 3029.406982421875
+  areaIntensity: 46.2769
+  consensusApex: 3011.98
+  consensusApexIntensity: 25.21668794143512
+  qvalue: 0.34529816282628856
+  consensusApexIM: nan
+  precursor_mz: 696.854
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: IEDQLGEVAQYK
+  software: OpenSWATH,
+    -------- TransitionGroupFeature --------
+  leftBoundary: 3247.89501953125
+  rightBoundary: 3299.10205078125
+  areaIntensity: 54.5119
+  consensusApex: 3267.54
+  consensusApexIntensity: 13.926183351129533
+  qvalue: 0.06478770518751195
+  consensusApexIM: nan
+  precursor_mz: 696.854
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: IEDQLGEVAQYK
+  software: OpenSWATH,
+    -------- TransitionGroupFeature --------
+  leftBoundary: 3073.7880859375
+  rightBoundary: 3138.64892578125
+  areaIntensity: 16970.4
+  consensusApex: 3094.41
+  consensusApexIntensity: 1569.357235718364
+  qvalue: 6.993573006436113e-06
+  consensusApexIM: nan
+  precursor_mz: 696.854
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: IEDQLGEVAQYK
+  software: OpenSWATH,
+    -------- TransitionGroupFeature --------
+  leftBoundary: 3138.64892578125
+  rightBoundary: 3183.031005859375
+  areaIntensity: 79.0832
+  consensusApex: 3154.89
+  consensusApexIntensity: 17.276077248863164
+  qvalue: 6.993573006436113e-06
+  consensusApexIM: nan
+  precursor_mz: 696.854
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: IEDQLGEVAQYK
+  software: OpenSWATH,
+    -------- TransitionGroupFeature --------
+  leftBoundary: 3343.48291015625
+  rightBoundary: 3384.447998046875
+  areaIntensity: 30.2578
+  consensusApex: 3367.52
+  consensusApexIntensity: 8.164890959917475
+  qvalue: 0.33779088886254716
+  consensusApexIM: nan
+  precursor_mz: 696.854
+  precursor_charge: 2
+  product_annotations: None
+  product_mz: None
+  sequence: IEDQLGEVAQYK
+  software: OpenSWATH,
+  ])
+# ---
+# name: test_getTransitionGroupFeatures[INVALID-0-test_raw_2.mzML]
+  list([
+  ])
+# ---
+# name: test_has_im_property
+  True
+# ---
