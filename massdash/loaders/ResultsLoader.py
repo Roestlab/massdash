@@ -138,14 +138,14 @@ class ResultsLoader:
         if path.endswith('.oswpqd'):
             oswpq_dirs = []
             try:
-                for item in os.listdir(path):
-                    item_path = os.path.join(path, item)
-                    if os.path.isdir(item_path) and item.endswith('.oswpq'):
+                for subdir_name in os.listdir(path):
+                    subdir_path = os.path.join(path, subdir_name)
+                    if os.path.isdir(subdir_path) and subdir_name.endswith('.oswpq'):
                         # Verify it has the required parquet files
                         try:
-                            contents = os.listdir(item_path)
+                            contents = os.listdir(subdir_path)
                             if 'precursors_features.parquet' in contents and 'transition_features.parquet' in contents:
-                                oswpq_dirs.append(item_path)
+                                oswpq_dirs.append(subdir_path)
                         except (OSError, PermissionError):
                             continue
             except (OSError, PermissionError):
