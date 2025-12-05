@@ -53,7 +53,7 @@ from pathlib import Path
 # Structs
 from ...structs.Chromatogram import Chromatogram
 # Utils
-from ...util import check_sqlite_column_in_table, check_sqlite_table, get_base_stem
+from ...util import decodeCompressedArray, get_base_stem
 
 class SqMassDataAccess:
 
@@ -187,27 +187,7 @@ class SqMassDataAccess:
 
         for chr_id, compr, data_type, d in data:
             result = []
-
-            if compr == 1:
-                tmp = zlib.decompress(d)
-                result = struct.unpack("<%sd" % (len(tmp) // 8), tmp)
-
-            if compr == 5:
-                # tmp = [ord(q) for q in zlib.decompress(d)]
-                tmp = bytearray( zlib.decompress(d) )
-                if len(tmp) > 0:
-                    numpress_config.setCompression('linear')
-                    po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
-                else:
-                    result = [0]
-            if compr == 6:
-                # tmp = [ord(q) for q in zlib.decompress(d)]
-                tmp = bytearray( zlib.decompress(d) )
-                if len(tmp) > 0:
-                    numpress_config.setCompression('slof')
-                    po.MSNumpressCoder().decodeNP(base64.b64encode(tmp), result, False, numpress_config)
-                else:
-                    result = [0]
+            result = decodeCompressedArray(d, compr)
 
             if len(result) == 0:
                 result = [ 0 ]
