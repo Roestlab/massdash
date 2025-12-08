@@ -139,7 +139,7 @@ mpmath==1.3.0
     # via sympy
 msgpack==1.1.2
     # via blosc2
-narwhals==1.13.2
+narwhals==2.13.0
     # via altair
 nbclient==0.10.2
     # via nbconvert
