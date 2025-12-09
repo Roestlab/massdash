@@ -17,7 +17,7 @@ TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test' / 'test
 
 @pytest.fixture
 def parquet_data_access():
-    db_path = f"{str(TEST_PATH)}/openswath/xics/test_raw_1.parquet"
+    db_path = f"{str(TEST_PATH)}/openswath/xics/test_raw_1.xic.parquet"
     mass_data_access = OpenSwathXICParquetAccess(db_path)
     yield mass_data_access
 

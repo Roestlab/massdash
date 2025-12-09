@@ -15,7 +15,7 @@ TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test' / 'test
 
 @pytest.fixture(params=['openswath', 'combined'])
 def loader(request):
-    dataFiles = ['test_raw_1.parquet', 'test_raw_2.parquet']
+    dataFiles = ['test_raw_1.xic.parquet', 'test_raw_2.xic.parquet']
     dataFiles = [ str(TEST_PATH / 'openswath' / 'xics' / f) for f in dataFiles ]
 
     if request.param == 'openswath':
