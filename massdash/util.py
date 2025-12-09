@@ -643,6 +643,3 @@ def get_base_stem(file_path: str) -> str:
         path = Path(path.stem)
 
     return path.name
-    
-    #stripped_extensions = file_path.rstrip(''.join(Path(file_path).suffixes))
-    #return Path(stripped_extensions).name
