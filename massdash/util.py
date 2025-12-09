@@ -638,5 +638,11 @@ def get_base_stem(file_path: str) -> str:
     Returns:
         str: The base name of the file without the extension.
     """
-    stripped_extensions = file_path.rstrip(''.join(Path(file_path).suffixes))
-    return Path(stripped_extensions).stem
+    path = Path(file_path)
+    while path.suffix != '':
+        path = Path(path.stem)
+
+    return path.name
+    
+    #stripped_extensions = file_path.rstrip(''.join(Path(file_path).suffixes))
+    #return Path(stripped_extensions).name

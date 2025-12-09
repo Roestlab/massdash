@@ -15,7 +15,7 @@ TEST_PATH = find_git_directory(Path(__file__).resolve()).parent / 'test' / 'test
 
 @pytest.fixture
 def loader():
-    return XICParquetDataLoader(dataFiles=[str(TEST_PATH / 'diann_xic.parquet')], rsltsFile=str(TEST_PATH / 'diann_report_small_xic.tsv'))
+    return XICParquetDataLoader(dataFiles=[str(TEST_PATH / 'diann_xic.xic.parquet')], rsltsFile=str(TEST_PATH / 'diann_report_small_xic.tsv'))
 
 @pytest.fixture
 def snapshot_pandas(snapshot):
