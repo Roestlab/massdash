@@ -214,7 +214,7 @@ platformdirs==4.5.1
     # via
     #   blosc2
     #   jupyter-core
-plotly==5.24.1
+plotly==6.5.0
     # via massdash (pyproject.toml)
 pluggy==1.5.0
     # via pytest
