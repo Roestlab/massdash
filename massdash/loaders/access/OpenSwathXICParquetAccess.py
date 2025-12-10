@@ -16,13 +16,13 @@ import pyarrow.dataset as ds
 # Structs
 from ...structs.Chromatogram import Chromatogram
 # Utils
-from ...util import decodeCompressedArray
+from ...util import decodeCompressedArray, get_base_stem
 
 class OpenSwathXICParquetAccess:
 
     def __init__(self, filename):
         self.filename = filename
-        self.runName = str(Path(filename).stem)
+        self.runName = get_base_stem(filename)
         self.parquet = ds.dataset(filename)
 
     def getChromatogramsFromSequenceAndCharge(self, sequence: str, charge: int):

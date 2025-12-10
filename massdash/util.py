@@ -626,3 +626,20 @@ def decodeCompressedArray(data, compr):
             return [0]
     else:
         raise Exception(f"Compression type {compr} not supported")
+
+
+def get_base_stem(file_path: str) -> str:
+    """
+    Get the base name of a file without the extension.
+
+    Args:
+        file_path (str): The path to the file.
+
+    Returns:
+        str: The base name of the file without the extension.
+    """
+    path = Path(file_path)
+    while path.suffix != '':
+        path = Path(path.stem)
+
+    return path.name

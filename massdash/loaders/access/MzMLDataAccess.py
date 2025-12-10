@@ -23,7 +23,7 @@ from ...structs.TargetedDIAConfig import TargetedDIAConfig
 from ...structs.FeatureMap import FeatureMap
 from ...structs.TransitionGroupFeature import TransitionGroupFeature
 # Internal
-from ...util import LOGGER, method_timer, code_block_timer
+from ...util import LOGGER, method_timer, code_block_timer, get_base_stem
 
 class MzMLDataAccess():
     """
@@ -53,7 +53,7 @@ class MzMLDataAccess():
         """
         
         self.filename = filename
-        self.runName = str(Path(filename).stem)
+        self.runName = get_base_stem(filename) 
         self.readOptions = readOptions
         self.exp = po.OnDiscMSExperiment()
         self.meta_data = po.MSExperiment()

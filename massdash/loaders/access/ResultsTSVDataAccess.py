@@ -14,7 +14,7 @@ from .GenericResultsAccess import GenericResultsAccess
 # Structs
 from ...structs.TransitionGroupFeature import TransitionGroupFeature
 # Utils
-from ...util import LOGGER
+from ...util import LOGGER, get_base_stem
 
 def convert_spectro_modifications(modified_peptide_series):
     # Define the replacement patterns
@@ -173,7 +173,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         Returns:
             TransitionGroupFeature: TransitionGroupFeature object containing peak boundaries, intensity and confidence
         '''
-        runname_exact = self.getExactRunName(runname)
+        runname_exact = self.getExactRunName(get_base_stem(runname))
 
         if runname_exact is None:
             LOGGER.debug(f"Error: No matching runs found for {runname}")
@@ -234,7 +234,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         Returns:
             pd.DataFrame: Dataframe with the TransitionGroupFeatures
         '''
-        runname_exact = self.getExactRunName(runname)
+        runname_exact = self.getExactRunName(get_base_stem(runname))
         if runname_exact is None:
             return pd.DataFrame(columns=self.columns)
         else:
@@ -284,7 +284,7 @@ class ResultsTSVDataAccess(GenericResultsAccess):
         Returns:
             list: List of run names
         '''
-        return [ Path(r).stem for r in self.runs]
+        return [ get_base_stem(r) for r in self.runs]
     
     def getIdentifiedPrecursors(self, qvalue: float = 0.01, run:Optional[str] = None, precursorLevel = False) -> Union[set, Dict[str, set]]:
         '''

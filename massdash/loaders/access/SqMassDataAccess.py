@@ -53,7 +53,7 @@ from pathlib import Path
 # Structs
 from ...structs.Chromatogram import Chromatogram
 # Utils
-from ...util import decodeCompressedArray
+from ...util import decodeCompressedArray, get_base_stem
 
 class SqMassDataAccess:
 
@@ -61,7 +61,7 @@ class SqMassDataAccess:
         self.conn = sqlite3.connect(filename, check_same_thread=False)
         self.c = self.conn.cursor()
         self.filename = filename
-        self.runName = str(Path(filename).stem)
+        self.runName = get_base_stem(filename)
 
     def getPrecursorChromIDs(self, precursor_id):
         """
