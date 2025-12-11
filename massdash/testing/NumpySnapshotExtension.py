@@ -27,7 +27,6 @@ class NumpySnapshotExtension(SingleFileSnapshotExtension):
     def read_snapshot_data_from_location(
         self, *, snapshot_location: str, snapshot_name: str, session_id: str
     ):
-        print("reading")
         # see https://github.com/tophat/syrupy/blob/f4bc8453466af2cfa75cdda1d50d67bc8c4396c3/src/syrupy/extensions/base.py#L139
         try:
             return np.loadtxt(snapshot_location).tolist()
