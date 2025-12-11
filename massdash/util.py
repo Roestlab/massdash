@@ -392,8 +392,16 @@ def download_file(url: str, dest_folder: str):
         None
     """
     os.makedirs(dest_folder, exist_ok=True)
-    response = requests.get(url)
     filename = url.split("/")[-1]
+    headers = {"User-Agent": "Mozilla/5.0"}  # prevent GitHub 503 for automated scripts
+    response = requests.get(url, headers=headers)
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to download {url}: {e}")
+        return  # exit the function gracefully if download fails
+
     if check_streamlit():
         import streamlit as st
         with st.spinner(f"Downloading {url} to {dest_folder}"):
