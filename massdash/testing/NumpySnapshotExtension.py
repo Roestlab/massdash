@@ -18,7 +18,11 @@ class NumpySnapshotExtension(SingleFileSnapshotExtension):
 
     def matches(self, *, serialized_data, snapshot_data):
         try:
-            if np.testing.assert_allclose(np.array(snapshot_data), np.array(serialized_data), atol=1e-08, rtol=1e-05) is not None:
+            # Both are now bytes, need to deserialize for comparison
+            import io
+            snapshot_array = np.loadtxt(io.BytesIO(snapshot_data))
+            serialized_array = np.loadtxt(io.BytesIO(serialized_data))
+            if np.testing.assert_allclose(snapshot_array, serialized_array, atol=1e-08, rtol=1e-05) is not None:
                 return False
             else: return True
         except:
@@ -29,7 +33,8 @@ class NumpySnapshotExtension(SingleFileSnapshotExtension):
     ):
         # see https://github.com/tophat/syrupy/blob/f4bc8453466af2cfa75cdda1d50d67bc8c4396c3/src/syrupy/extensions/base.py#L139
         try:
-            return np.loadtxt(snapshot_location).tolist()
+            with open(snapshot_location, 'rb') as f:
+                return f.read()
         except OSError:
             return None
 
@@ -43,13 +48,21 @@ class NumpySnapshotExtension(SingleFileSnapshotExtension):
             snapshot_collection.location,
             next(iter(snapshot_collection)).data,
         )
-        np.savetxt(filepath, data)
+        # Write bytes directly to file
+        with open(filepath, 'wb') as f:
+            f.write(data)
 
-    def serialize(self, data: SerializableData, **kwargs: Any) -> str:
-        return data
+    def serialize(self, data: SerializableData, **kwargs: Any) -> bytes:
+        import io
+        buffer = io.BytesIO()
+        np.savetxt(buffer, data, fmt='%.18e')
+        return buffer.getvalue()
     
     def diff_lines(self, serialized_data, snapshot_data):
         try:
-            np.testing.assert_allclose(np.array(snapshot_data), np.array(serialized_data), atol=1e-08, rtol=1e-05)
+            import io
+            snapshot_array = np.loadtxt(io.BytesIO(snapshot_data))
+            serialized_array = np.loadtxt(io.BytesIO(serialized_data))
+            np.testing.assert_allclose(snapshot_array, serialized_array, atol=1e-08, rtol=1e-05)
         except AssertionError as e:
             return str(e).split('\n')
