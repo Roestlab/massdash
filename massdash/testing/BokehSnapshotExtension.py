@@ -35,7 +35,7 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
     """
     Handles Bokeh Snapshots. Snapshots are stored as html files and the bokeh .json output from the html files are compared.
     """
-    _file_extension = "html"
+    _file_extension = "raw"
 
     def matches(self, *, serialized_data, snapshot_data):
         """
