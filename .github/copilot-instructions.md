@@ -2,6 +2,10 @@
 
 This file provides comprehensive instructions for GitHub Copilot when working on the MassDash project. MassDash is a visualization and data exploration platform for Data-Independent Acquisition mass spectrometry data.
 
+## General
+
+**NEVER COMMIT LARGE FILES, especially from the test data directory, even if modified during your tests, and edits, do not commit them. Notify us if there are actual changes made to the test data files required for tests! However, this should not be needed.******
+
 ## ⚠️ CRITICAL NETWORK TIMEOUT WARNINGS
 
 **NEVER CANCEL builds, installs, or tests that take longer than expected!**
