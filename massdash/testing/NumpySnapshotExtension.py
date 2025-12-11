@@ -5,6 +5,7 @@ massdash/testing/NumpySnapshotExtension
 
 # Taken from https://github.com/atharva-2001/syrupy-pandas-numpy/blob/main/tests/test_np.py
 from typing import Any
+import io
 import numpy as np
 from syrupy.data import SnapshotCollection
 from syrupy.extensions.single_file import SingleFileSnapshotExtension
@@ -19,7 +20,6 @@ class NumpySnapshotExtension(SingleFileSnapshotExtension):
     def matches(self, *, serialized_data, snapshot_data):
         try:
             # Both are now bytes, need to deserialize for comparison
-            import io
             snapshot_array = np.loadtxt(io.BytesIO(snapshot_data))
             serialized_array = np.loadtxt(io.BytesIO(serialized_data))
             if np.testing.assert_allclose(snapshot_array, serialized_array, atol=1e-08, rtol=1e-05) is not None:
@@ -53,14 +53,12 @@ class NumpySnapshotExtension(SingleFileSnapshotExtension):
             f.write(data)
 
     def serialize(self, data: SerializableData, **kwargs: Any) -> bytes:
-        import io
         buffer = io.BytesIO()
         np.savetxt(buffer, data, fmt='%.18e')
         return buffer.getvalue()
     
     def diff_lines(self, serialized_data, snapshot_data):
         try:
-            import io
             snapshot_array = np.loadtxt(io.BytesIO(snapshot_data))
             serialized_array = np.loadtxt(io.BytesIO(serialized_data))
             np.testing.assert_allclose(snapshot_array, serialized_array, atol=1e-08, rtol=1e-05)

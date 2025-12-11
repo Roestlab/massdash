@@ -156,13 +156,13 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
 
     def serialize(self, data: SerializableData, **kwargs: Any) -> bytes:
         """
-        Serialize the bokeh plot as an html bytes (which is output to a file)
+        Serialize the bokeh plot as bytes containing HTML content
 
         Args:
             data (SerializableData): Data to serialize
 
         Returns:
-            bytes: html content as bytes
+            bytes: HTML content as bytes
         """
         html_str = file_html(data, CDN)
         return html_str.encode('utf-8')
