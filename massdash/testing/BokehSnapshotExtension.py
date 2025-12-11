@@ -35,19 +35,30 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
     """
     Handles Bokeh Snapshots. Snapshots are stored as html files and the bokeh .json output from the html files are compared.
     """
-    _file_extension = "html"
+    _file_extension = "raw"
 
     def matches(self, *, serialized_data, snapshot_data):
         """
         Determine if the serialized data matches the snapshot data.
 
         Args:
-            serialized_data: Data produced by the test
-            snapshot_data: Saved data from a previous test run
+            serialized_data: Data produced by the test (bytes)
+            snapshot_data: Saved data from a previous test run (bytes)
 
         """
-        json_snapshot = self.extract_bokeh_json(snapshot_data)
-        json_serialized = self.extract_bokeh_json(serialized_data)
+        # Decode bytes to string for HTML parsing
+        if isinstance(snapshot_data, bytes):
+            snapshot_html = snapshot_data.decode('utf-8')
+        else:
+            snapshot_html = snapshot_data
+            
+        if isinstance(serialized_data, bytes):
+            serialized_html = serialized_data.decode('utf-8')
+        else:
+            serialized_html = serialized_data
+        
+        json_snapshot = self.extract_bokeh_json(snapshot_html)
+        json_serialized = self.extract_bokeh_json(serialized_html)
         
         # get the keys which store the json
         # NOTE: keys are unique identifiers and are not supposed to be equal 
@@ -57,16 +68,18 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
 
         return BokehSnapshotExtension.compare_json(json_snapshot[key_json_snapshot], json_serialized[key_json_serialized])
 
-    def extract_bokeh_json(self, html: str) -> json:
+    def extract_bokeh_json(self, html) -> json:
         """
         Extract the bokeh json from the html file.
 
         Args:
-            html (str): string containing the html data
+            html: string or bytes containing the html data
 
         Returns:
             json: bokeh json found in the html
         """
+        if isinstance(html, bytes):
+            html = html.decode('utf-8')
         parser = BokehHTMLParser()
         parser.feed(html)
         return json.loads(parser.bokehJson)
@@ -123,9 +136,8 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
     ):
         # see https://github.com/tophat/syrupy/blob/f4bc8453466af2cfa75cdda1d50d67bc8c4396c3/src/syrupy/extensions/base.py#L139
         try:
-            with open(snapshot_location, 'r') as f:
-                a = f.read()
-                return a
+            with open(snapshot_location, 'rb') as f:
+                return f.read()
         except OSError:
             return None
 
@@ -139,17 +151,18 @@ class BokehSnapshotExtension(SingleFileSnapshotExtension):
             snapshot_collection.location,
             next(iter(snapshot_collection)).data,
         )
-        with open(filepath, 'w') as f:
+        with open(filepath, 'wb') as f:
             f.write(data)
 
-    def serialize(self, data: SerializableData, **kwargs: Any) -> str:
+    def serialize(self, data: SerializableData, **kwargs: Any) -> bytes:
         """
-        Serialize the bokeh plot as an html string (which is output to a file)
+        Serialize the bokeh plot as bytes containing HTML content
 
         Args:
             data (SerializableData): Data to serialize
 
         Returns:
-            str: html string
+            bytes: HTML content as bytes
         """
-        return file_html(data, CDN)
+        html_str = file_html(data, CDN)
+        return html_str.encode('utf-8')

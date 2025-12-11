@@ -4,6 +4,7 @@ massdash/testing/PandasSnapshotExtension
 """
 # Taken from https://github.com/atharva-2001/syrupy-pandas-numpy/blob/main/tests/test_pd.py
 from typing import Any
+import pickle
 from syrupy.data import SnapshotCollection
 from syrupy.extensions.single_file import SingleFileSnapshotExtension
 import pandas as pd
@@ -11,13 +12,17 @@ from syrupy.types import SerializableData
 
 class PandasSnapshotExtension(SingleFileSnapshotExtension):
     """
-    Handles Pandas Snapshots. Snapshots are stored as hdf files and the dataframes are compared using pandas testing methods
+    Handles Pandas Snapshots. Snapshots are stored as raw files (pickled) and the dataframes are compared using pandas testing methods
     """
-    _file_extension = "hdf"
+    _file_extension = "raw"
 
     def matches(self, *, serialized_data, snapshot_data):
         try:
-            if pd.testing.assert_frame_equal(serialized_data, snapshot_data) is not None:
+            # Both are now bytes, need to deserialize for comparison
+            serialized_df = pickle.loads(serialized_data)
+            snapshot_df = pickle.loads(snapshot_data)
+            
+            if pd.testing.assert_frame_equal(serialized_df, snapshot_df) is not None:
                 return False
             else: return True
 
@@ -29,7 +34,8 @@ class PandasSnapshotExtension(SingleFileSnapshotExtension):
     ):
         # see https://github.com/tophat/syrupy/blob/f4bc8453466af2cfa75cdda1d50d67bc8c4396c3/src/syrupy/extensions/base.py#L139
         try:
-            return pd.read_hdf(snapshot_location)
+            with open(snapshot_location, 'rb') as f:
+                return f.read()
         except OSError:
             return None
 
@@ -42,18 +48,22 @@ class PandasSnapshotExtension(SingleFileSnapshotExtension):
             snapshot_collection.location,
             next(iter(snapshot_collection)).data,
         )
-        data.to_hdf(filepath, key='/blah')
+        # Write bytes directly to file
+        with open(filepath, 'wb') as f:
+            f.write(data)
 
-    def serialize(self, data: SerializableData, **kwargs: Any) -> str:
-        return data
+    def serialize(self, data: SerializableData, **kwargs: Any) -> bytes:
+        return pickle.dumps(data)
     
     def diff_lines(self, serialized_data, snapshot_data):
         try:
-            pd.testing.assert_frame_equal(serialized_data, snapshot_data)
+            serialized_df = pickle.loads(serialized_data)
+            snapshot_df = pickle.loads(snapshot_data)
+            pd.testing.assert_frame_equal(serialized_df, snapshot_df)
         except AssertionError as e:
             return (["Snapshot:"] +
-                    snapshot_data.to_string().split('\n') + 
+                    snapshot_df.to_string().split('\n') + 
                     ['-------------------------------'] +
                     ["Serialized:"] +
-                    serialized_data.to_string().split('\n') +
+                    serialized_df.to_string().split('\n') +
                     str(e).split('\n'))
