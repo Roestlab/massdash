@@ -253,7 +253,7 @@ pygments==2.19.2
     #   sphinx
 pymsgbox==2.0.1
     # via pyautogui
-pyopenms==3.4.0
+pyopenms==3.5.0
     # via massdash (pyproject.toml)
 pyopenms-viz==1.0.0
     # via massdash (pyproject.toml)
