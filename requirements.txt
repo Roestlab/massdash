@@ -398,7 +398,7 @@ tzdata==2025.2
     # via pandas
 upsetplot==0.9.0
     # via massdash (pyproject.toml)
-urllib3==2.6.1
+urllib3==2.6.2
     # via requests
 watchdog==6.0.0
     # via streamlit
