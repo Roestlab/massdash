@@ -355,7 +355,7 @@ tenacity==9.1.2
     # via
     #   plotly
     #   streamlit
-tinycss2==1.4.0
+tinycss2==1.5.1
     # via bleach
 tk==0.1.0
     # via massdash (pyproject.toml)
