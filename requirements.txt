@@ -218,7 +218,7 @@ platformdirs==4.5.1
     #   jupyter-core
 plotly==6.5.0
     # via massdash (pyproject.toml)
-pluggy==1.5.0
+pluggy==1.6.0
     # via pytest
 prompt-toolkit==3.0.52
     # via ipython
