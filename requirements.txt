@@ -267,7 +267,7 @@ pyrect==0.2.0
     # via pygetwindow
 pyscreeze==1.0.1
     # via pyautogui
-pytest==8.3.3
+pytest==9.0.2
     # via
     #   massdash (pyproject.toml)
     #   syrupy
