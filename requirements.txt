@@ -394,7 +394,7 @@ typing-extensions==4.15.0
     #   referencing
     #   streamlit
     #   tables
-tzdata==2025.2
+tzdata==2025.3
     # via pandas
 upsetplot==0.9.0
     # via massdash (pyproject.toml)
