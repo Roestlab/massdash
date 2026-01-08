@@ -24,7 +24,7 @@ blinker==1.9.0
     # via streamlit
 blosc2==3.12.2
     # via tables
-bokeh==3.6.3
+bokeh==3.8.2
     # via massdash (pyproject.toml)
 cachetools==6.2.2
     # via streamlit
