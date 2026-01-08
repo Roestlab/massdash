@@ -65,7 +65,7 @@ executing==2.2.1
     # via stack-data
 fastjsonschema==2.21.2
     # via nbformat
-flatbuffers==25.9.23
+flatbuffers==25.12.19
     # via onnxruntime
 fonttools==4.61.0
     # via matplotlib
@@ -95,7 +95,7 @@ jinja2==3.1.6
     #   nbsphinx
     #   pydeck
     #   sphinx
-joblib==1.5.2
+joblib==1.5.3
     # via massdash (pyproject.toml)
 jsonschema==4.25.1
     # via
@@ -206,7 +206,7 @@ parso==0.8.5
     # via jedi
 pexpect==4.9.0
     # via ipython
-pillow==12.0.0
+pillow==12.1.0
     # via
     #   bokeh
     #   matplotlib
@@ -267,7 +267,7 @@ pyrect==0.2.0
     # via pygetwindow
 pyscreeze==1.0.1
     # via pyautogui
-pytest==8.3.3
+pytest==9.0.2
     # via
     #   massdash (pyproject.toml)
     #   syrupy
@@ -312,7 +312,7 @@ smmap==5.0.2
     # via gitdb
 snowballstemmer==3.0.1
     # via sphinx
-soupsieve==2.8
+soupsieve==2.8.1
     # via beautifulsoup4
 sphinx==8.1.3
     # via
@@ -394,7 +394,7 @@ typing-extensions==4.15.0
     #   referencing
     #   streamlit
     #   tables
-tzdata==2025.2
+tzdata==2025.3
     # via pandas
 upsetplot==0.9.0
     # via massdash (pyproject.toml)
