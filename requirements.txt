@@ -65,7 +65,7 @@ executing==2.2.1
     # via stack-data
 fastjsonschema==2.21.2
     # via nbformat
-flatbuffers==25.9.23
+flatbuffers==25.12.19
     # via onnxruntime
 fonttools==4.61.0
     # via matplotlib
