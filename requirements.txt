@@ -365,7 +365,7 @@ tomli==2.3.0
     # via
     #   pytest
     #   sphinx
-tornado==6.5.2
+tornado==6.5.4
     # via
     #   bokeh
     #   ipykernel
