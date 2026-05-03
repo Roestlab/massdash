@@ -361,7 +361,7 @@ tk==0.1.0
     # via massdash (pyproject.toml)
 toml==0.10.2
     # via streamlit
-tomli==2.3.0
+tomli==2.4.0
     # via
     #   pytest
     #   sphinx
